@@ -45,8 +45,8 @@ import { Switch } from "@/components/ui/switch";
 const formSchema = z.object({
   add_new_supplier: z.boolean().default(false),
   supplier_id: z.string().optional(),
-  supplier_name: z.string().optional(),
-  supplier_code: z.string().optional(),
+  name: z.string().optional(),
+  code: z.string().optional(),
   order_type: z.enum(["تفصيل", "بيع"], {
     required_error: "نوع الطلبية مطلوب",
   }),
@@ -67,13 +67,13 @@ const formSchema = z.object({
   path: ["remaining_amount"],
 }).refine((data) => {
   if (data.add_new_supplier) {
-    return data.supplier_name && data.supplier_name.length > 0 && data.supplier_code && data.supplier_code.length > 0;
+    return data.name && data.name.length > 0 && data.code && data.code.length > 0;
   } else {
     return data.supplier_id && data.supplier_id.length > 0;
   }
 }, {
   message: data => data.add_new_supplier ? "اسم المورد وكود المورد مطلوبان" : "المورد مطلوب",
-  path: data => data.add_new_supplier ? ["supplier_name"] : ["supplier_id"],
+  path: data => data.add_new_supplier ? ["name"] : ["supplier_id"],
 });
 
 function CreateSupplierOrderForm() {
@@ -91,8 +91,8 @@ function CreateSupplierOrderForm() {
     defaultValues: {
       add_new_supplier: false,
       supplier_id: "",
-      supplier_name: "",
-      supplier_code: "",
+      name: "",
+      code: "",
       order_type: "تفصيل",
       purchase_date: "",
       order_amount: 0,
@@ -121,8 +121,8 @@ function CreateSupplierOrderForm() {
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     const requestData: TCreateSupplierOrderRequest = {
       supplier_id: values.add_new_supplier ? undefined : Number(values.supplier_id),
-      supplier_name: values.add_new_supplier ? values.supplier_name : undefined,
-      supplier_code: values.add_new_supplier ? values.supplier_code : undefined,
+      name: values.add_new_supplier ? values.name : undefined,
+      code: values.add_new_supplier ? values.code : undefined,
       order_type: values.order_type,
       purchase_date: values.purchase_date,
       order_amount: values.order_amount,
@@ -184,8 +184,8 @@ function CreateSupplierOrderForm() {
                           if (checked) {
                             form.setValue("supplier_id", "");
                           } else {
-                            form.setValue("supplier_name", "");
-                            form.setValue("supplier_code", "");
+                            form.setValue("name", "");
+                            form.setValue("code", "");
                           }
                         }}
                         disabled={isPending}
@@ -224,7 +224,7 @@ function CreateSupplierOrderForm() {
                                 key={supplier.id}
                                 value={supplier.id.toString()}
                               >
-                                {supplier.supplier_name}
+                                {supplier.name}
                               </SelectItem>
                             ))
                           )}
@@ -470,7 +470,7 @@ function CreateSupplierOrderForm() {
                     {/* Supplier Name */}
                     <FormField
                       control={form.control}
-                      name="supplier_name"
+                      name="name"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>اسم المورد</FormLabel>
@@ -485,7 +485,7 @@ function CreateSupplierOrderForm() {
                     {/* Supplier Code */}
                     <FormField
                       control={form.control}
-                      name="supplier_code"
+                      name="code"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>كود المورد</FormLabel>

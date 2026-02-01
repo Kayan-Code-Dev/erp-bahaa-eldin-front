@@ -42,8 +42,8 @@ import {
 
 // Schema for the form
 const formSchema = z.object({
-  supplier_name: z.string().min(1, { message: "اسم المورد مطلوب" }),
-  supplier_code: z.string().min(1, { message: "كود المورد مطلوب" }),
+  name: z.string().min(1, { message: "اسم المورد مطلوب" }),
+  code: z.string().min(1, { message: "كود المورد مطلوب" }),
   order_type: z.enum(["تفصيل", "بيع"], {
     required_error: "نوع الطلبية مطلوب",
   }),
@@ -79,8 +79,8 @@ export function EditSupplierModal({ supplier, open, onOpenChange }: Props) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      supplier_name: "",
-      supplier_code: "",
+      name: "",
+      code: "",
       order_type: "تفصيل",
       purchase_date: "",
       order_amount: 0,
@@ -106,17 +106,17 @@ export function EditSupplierModal({ supplier, open, onOpenChange }: Props) {
     form.setValue("remaining_amount", Math.max(0, remaining));
   }, [orderAmount, paidAmount, form]);
 
-  // Populate form when supplier changes
+  // Populate form when supplier changes (مورد بدون طلبية ترجع الـ API حقول الطلبية غير موجودة)
   useEffect(() => {
     if (supplier) {
       form.reset({
-        supplier_name: supplier.supplier_name,
-        supplier_code: supplier.supplier_code,
-        order_type: supplier.order_type,
-        purchase_date: supplier.purchase_date,
-        order_amount: supplier.order_amount,
-        paid_amount: supplier.paid_amount,
-        remaining_amount: supplier.remaining_amount,
+        name: supplier.name,
+        code: supplier.code,
+        order_type: supplier.order_type ?? "تفصيل",
+        purchase_date: supplier.purchase_date ?? "",
+        order_amount: supplier.order_amount ?? 0,
+        paid_amount: supplier.paid_amount ?? 0,
+        remaining_amount: supplier.remaining_amount ?? 0,
         item_name: supplier.item_name || "",
         item_code: supplier.item_code || "",
         category_id: supplier.category?.id.toString() || "",
@@ -132,8 +132,8 @@ export function EditSupplierModal({ supplier, open, onOpenChange }: Props) {
     if (!supplier) return;
 
     const requestData: TUpdateSupplierRequest = {
-      supplier_name: values.supplier_name,
-      supplier_code: values.supplier_code,
+      name: values.name,
+      code: values.code,
       order_type: values.order_type,
       purchase_date: values.purchase_date,
       order_amount: values.order_amount,
@@ -184,7 +184,7 @@ export function EditSupplierModal({ supplier, open, onOpenChange }: Props) {
             {/* Supplier Name */}
             <FormField
               control={form.control}
-              name="supplier_name"
+              name="name"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>اسم المورد</FormLabel>
@@ -199,7 +199,7 @@ export function EditSupplierModal({ supplier, open, onOpenChange }: Props) {
             {/* Supplier Code */}
             <FormField
               control={form.control}
-              name="supplier_code"
+              name="code"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>كود المورد</FormLabel>

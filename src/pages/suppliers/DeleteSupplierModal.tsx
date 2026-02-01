@@ -24,7 +24,7 @@ export function DeleteSupplierModal({
       alertMessage={
         <>
           هل أنت متأكد أنك تريد حذف المورد{" "}
-          <strong>{supplier?.supplier_name}</strong>؟
+          <strong>{supplier?.name}</strong>؟
         </>
       }
       handleConfirmation={onConfirm}

@@ -144,25 +144,25 @@ function Suppliers() {
                           {supplier.id}
                         </TableCell>
                         <TableCell className="font-medium text-center">
-                          {supplier.supplier_name}
+                          {supplier.name}
                         </TableCell>
                         <TableCell className="text-center">
-                          {supplier.supplier_code}
+                          {supplier.code}
                         </TableCell>
                         <TableCell className="text-center">
-                          {supplier.order_type}
+                          {supplier.order_type ?? "—"}
                         </TableCell>
                         <TableCell className="text-center">
-                          {formatDate(supplier.purchase_date)}
+                          {supplier.purchase_date ? formatDate(supplier.purchase_date) : "—"}
                         </TableCell>
                         <TableCell className="text-center">
-                          {supplier.order_amount.toLocaleString()} ج.م
+                          {supplier.order_amount != null ? `${Number(supplier.order_amount).toLocaleString()} ج.م` : "—"}
                         </TableCell>
                         <TableCell className="text-center">
-                          {supplier.paid_amount.toLocaleString()} ج.م
+                          {supplier.paid_amount != null ? `${Number(supplier.paid_amount).toLocaleString()} ج.م` : "—"}
                         </TableCell>
                         <TableCell className="text-center">
-                          {supplier.remaining_amount.toLocaleString()} ج.م
+                          {supplier.remaining_amount != null ? `${Number(supplier.remaining_amount).toLocaleString()} ج.م` : "—"}
                         </TableCell>
                         <TableCell className="text-center">
                           <div className="text-sm">

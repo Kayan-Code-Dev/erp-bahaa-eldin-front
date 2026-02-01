@@ -11,7 +11,7 @@ import { populateError } from "@/api/api.utils";
 export const createSupplier = async (data: TCreateSupplierRequest) => {
   try {
     const { data: response } = await api.post<TSupplierResponse>(
-      "/suppliers",
+      "/suppliers/store",
       data
     );
     return response;

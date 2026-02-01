@@ -41,8 +41,8 @@ import {
 
 // Schema for the form
 const formSchema = z.object({
-  supplier_name: z.string().min(1, { message: "اسم المورد مطلوب" }),
-  supplier_code: z.string().min(1, { message: "كود المورد مطلوب" }),
+  name: z.string().min(1, { message: "اسم المورد مطلوب" }),
+  code: z.string().min(1, { message: "كود المورد مطلوب" }),
   show_details: z.boolean().default(false),
   order_type: z.enum(["تفصيل", "بيع"]).optional(),
   purchase_date: z.string().optional(),
@@ -77,8 +77,8 @@ function CreateSupplier() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      supplier_name: "",
-      supplier_code: "",
+      name: "",
+      code: "",
       show_details: false,
       order_type: "تفصيل",
       purchase_date: "",
@@ -111,8 +111,8 @@ function CreateSupplier() {
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     const requestData: TCreateSupplierRequest = {
-      supplier_name: values.supplier_name,
-      supplier_code: values.supplier_code,
+      name: values.name,
+      code: values.code,
       order_type: values.show_details ? values.order_type : undefined,
       purchase_date: values.show_details ? values.purchase_date : undefined,
       order_amount: values.show_details ? values.order_amount : undefined,
@@ -161,7 +161,7 @@ function CreateSupplier() {
               {/* Supplier Name */}
               <FormField
                 control={form.control}
-                name="supplier_name"
+                name="name"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>اسم المورد</FormLabel>
@@ -176,7 +176,7 @@ function CreateSupplier() {
               {/* Supplier Code */}
               <FormField
                 control={form.control}
-                name="supplier_code"
+                name="code"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>كود المورد</FormLabel>

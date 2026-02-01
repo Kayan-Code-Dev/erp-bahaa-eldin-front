@@ -3,8 +3,8 @@ import { TPaginationResponse } from "@/api/api-common.types";
 export type TOrderType = "تفصيل" | "بيع";
 
 export type TCreateSupplierRequest = {
-  supplier_name: string;
-  supplier_code: string;
+  name: string;
+  code: string;
   order_type?: TOrderType;
   purchase_date?: string;
   order_amount?: number;
@@ -21,8 +21,8 @@ export type TCreateSupplierRequest = {
 
 export type TCreateSupplierOrderRequest = {
   supplier_id?: number;
-  supplier_name?: string;
-  supplier_code?: string;
+  name?: string;
+  code?: string;
   order_type: TOrderType;
   purchase_date: string;
   order_amount: number;
@@ -38,13 +38,14 @@ export type TCreateSupplierOrderRequest = {
 
 export type TSupplierResponse = {
   id: number;
-  supplier_name: string;
-  supplier_code: string;
-  order_type: TOrderType;
-  purchase_date: string;
-  order_amount: number;
-  paid_amount: number;
-  remaining_amount: number;
+  name: string;
+  code: string;
+  /** عند عدم وجود طلبية للمورد لا ترجع الـ API هذه الحقول */
+  order_type?: TOrderType;
+  purchase_date?: string;
+  order_amount?: number;
+  paid_amount?: number;
+  remaining_amount?: number;
   item_name?: string;
   item_code?: string;
   category?: {
