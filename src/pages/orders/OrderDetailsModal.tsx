@@ -55,14 +55,14 @@ const getStatusLabel = (status: TOrder["status"]) => {
 
 const getDiscountTypeLabel = (type?: TOrder["discount_type"]) => {
   if (!type || type === "none") return "لا يوجد";
-  const labels: Record<
-    Exclude<TOrder["discount_type"], "none" | undefined>,
-    string
-  > = {
+  const labels: Record<"percentage" | "fixed", string> = {
     percentage: "نسبة مئوية",
     fixed: "مبلغ ثابت",
   };
-  return labels[type] || type;
+  if (type === "percentage" || type === "fixed") {
+    return labels[type];
+  }
+  return type;
 };
 
 export function OrderDetailsModal({ order, open, onOpenChange }: Props) {

@@ -16,6 +16,7 @@ type Props = {
   value: string;
   onChange: (value: string) => void;
   disabled?: boolean;
+  className?: string;
 };
 
 function BranchesSelectContent({ value, onChange, disabled }: Props) {
