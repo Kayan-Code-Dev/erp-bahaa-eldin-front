@@ -131,10 +131,7 @@ function Clients() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="text-center">#</TableHead>
-                    <TableHead className="text-center">الاسم الكامل</TableHead>
-                    <TableHead className="text-center">الاسم الأول</TableHead>
-                    <TableHead className="text-center">الاسم الأوسط</TableHead>
-                    <TableHead className="text-center">الاسم الأخير</TableHead>
+                    <TableHead className="text-center">الاسم</TableHead>
                     <TableHead className="text-center">تاريخ الميلاد</TableHead>
                     <TableHead className="text-center">الرقم القومي</TableHead>
                     <TableHead className="text-center">أرقام الهاتف</TableHead>
@@ -145,28 +142,19 @@ function Clients() {
                   {isPending ? (
                     <ClientsTableSkeleton rows={5} />
                   ) : data && data.data.length > 0 ? (
-                    data.data.map((client) => (
+                    data.data.map((client: TClientResponse) => (
                       <TableRow key={client.id}>
                         <TableCell className="text-center">
                           {client.id}
                         </TableCell>
                         <TableCell className="font-medium text-center">
-                          {client.first_name} {client.middle_name} {client.last_name}
+                          {client.name ?? ([client.first_name, client.middle_name, client.last_name].filter(Boolean).join(" ").trim() || "—")}
                         </TableCell>
                         <TableCell className="text-center">
-                          {client.first_name}
+                          {client?.date_of_birth ? client.date_of_birth : "—"}
                         </TableCell>
                         <TableCell className="text-center">
-                          {client.middle_name}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {client.last_name}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {client.date_of_birth}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {client.national_id}
+                          {client?.national_id ? client.national_id : "—"}
                         </TableCell>
                         <TableCell className="text-center">
                           {client.phones?.map((p, idx) => (
@@ -200,7 +188,7 @@ function Clients() {
                   ) : (
                     <TableRow>
                       <TableCell
-                        colSpan={9}
+                        colSpan={6}
                         className="py-10 text-center text-muted-foreground"
                       >
                         لا يوجد عملاء لعرضها.

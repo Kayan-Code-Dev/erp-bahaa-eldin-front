@@ -435,8 +435,7 @@ function DeliveriesList() {
                           </p>
                         </TableCell>
                         <TableCell className="text-center">
-                          {order.client.first_name} {order.client.middle_name}{" "}
-                          {order.client.last_name}
+                          {order.client.name}
                         </TableCell>
                         <TableCell className="text-center">
                           {order.total_price} ج.م

@@ -8,7 +8,7 @@ import { OrderInvoicePrint } from "./OrderInvoicePrint";
 import { useRef } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
-/** أنماط الفاتورة عند النسخ إلى نافذة الطباعة (شكل احترافي) */
+/** Invoice styles when copying to print window */
 const INVOICE_PRINT_STYLES = `
   @page { size: A4; margin: 10mm; }
   body { margin: 0; padding: 12px; font-family: 'Segoe UI', 'Cairo', Arial, sans-serif; direction: rtl; }
@@ -66,7 +66,7 @@ type Props = {
   order: TOrder | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  copyLabel?: string; // للعرض في عنوان المودال فقط - المحتوى نفسه
+  copyLabel?: string; // Shown in modal title only; content is the same
 };
 
 export function OrderInvoicePrintModal({

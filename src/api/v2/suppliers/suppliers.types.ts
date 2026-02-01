@@ -1,6 +1,6 @@
 import { TPaginationResponse } from "@/api/api-common.types";
 
-// —— إنشاء مورد (اسم وكود فقط) ——
+/** Create supplier (name and code only) */
 export type TCreateSupplierMinimalRequest = {
   name: string;
   code: string;
@@ -30,7 +30,7 @@ export type TCreateSupplierRequest = {
   clothes: TCreateSupplierClothItem[];
 };
 
-// —— عرض الموردين (قائمة بسيطة) ——
+/** Supplier list item */
 export type TSupplierResponse = {
   id: number;
   name: string;
@@ -45,7 +45,7 @@ export type TSuppliersListResponse = TPaginationResponse<TSupplierResponse>;
 export type TSupplierOrderResponse = {
   id: number;
   supplier_id: number;
-  supplier: { id: number; name: string; code: string };
+  supplier: { id: number; name: string; code: string } | null;
   category_id: number | null;
   category: { id: number; name: string } | null;
   subcategory_id: number | null;
@@ -53,6 +53,8 @@ export type TSupplierOrderResponse = {
   branch_id: number | null;
   branch: { id: number; name: string } | null;
   order_number: string;
+  type: string | null;
+  model_id: number | null;
   order_date: string;
   status: string;
   total_amount: string;
@@ -65,7 +67,7 @@ export type TSupplierOrderResponse = {
 
 export type TSupplierOrdersListResponse = TPaginationResponse<TSupplierOrderResponse>;
 
-// —— إنشاء طلبية مورد ——
+/** Create supplier order — cloth item */
 export type TCreateSupplierOrderClothItem = {
   code: string;
   name: string;
@@ -94,10 +96,10 @@ export type TCreateSupplierOrderRequest = {
   clothes: TCreateSupplierOrderClothItem[];
 };
 
-// —— تحديث مورد (إن وُجد endpoint) ——
+/** Update supplier payload */
 export type TUpdateSupplierRequest = Partial<Pick<TCreateSupplierRequest, "name" | "code">>;
 
-// —— تحديث طلبية مورد ——
+/** Update supplier order payload */
 export type TUpdateSupplierOrderRequest = {
   supplier_id: number;
   category_id: number;

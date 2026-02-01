@@ -23,7 +23,7 @@ export function DeleteClientModal({
     if (!client) return;
     deleteClient(client.id, {
       onSuccess: () => {
-        toast.success(`تم حذف العميل ${client.first_name} ${client.last_name} بنجاح.`);
+        toast.success(`تم حذف العميل ${client.name ?? [client.first_name, client.last_name].filter(Boolean).join(" ")} بنجاح.`);
         onClose();
       },
       onError: () => {
@@ -40,7 +40,7 @@ export function DeleteClientModal({
       alertMessage={
         <>
           هل أنت متأكد أنك تريد حذف العميل{" "}
-          <strong>{client ? `${client.first_name} ${client.last_name}` : ""}</strong>؟
+          <strong>{client ? (client.name ?? [client.first_name, client.last_name].filter(Boolean).join(" ")) : ""}</strong>؟
         </>
       }
       handleConfirmation={handleDelete}

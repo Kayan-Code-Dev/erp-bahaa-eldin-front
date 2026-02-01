@@ -241,7 +241,7 @@ function OverdueReturnsList() {
 
   // Check if order can be returned
   const canReturnOrder = (order: TOrder) => {
-    // الارجاعات المتأخرة يمكن إرجاعها غالباً
+    // Overdue returns are usually returnable
     return order.status !== "canceled";
   };
 
@@ -370,8 +370,7 @@ function OverdueReturnsList() {
                           </p>
                         </TableCell>
                         <TableCell className="text-center">
-                          {order.client.first_name} {order.client.middle_name}{" "}
-                          {order.client.last_name}
+                          {order.client.name}
                         </TableCell>
                         <TableCell className="text-center">
                           {order.total_price} ج.م

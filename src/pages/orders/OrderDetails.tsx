@@ -9,6 +9,13 @@ import { TOrder } from "@/api/v2/orders/orders.types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
   Table,
   TableBody,
   TableCell,
@@ -128,11 +135,11 @@ function OrderDetails() {
   };
 
   const showFinishButton = useMemo(() => {
-    return orderData?.items.every((item) => item.returnable === "0");
+    return orderData?.items.every((item) => item.returnable === 0);
   }, [orderData?.items]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir="rtl">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">تفاصيل الطلب</h1>
         {orderData && (
@@ -185,9 +192,13 @@ function OrderDetails() {
       ) : orderData ? (
         <>
           {/* Order Basic Info */}
-          <div className="bg-white rounded-lg p-6 shadow-sm">
-            <h2 className="text-xl font-semibold mb-4">معلومات الطلب</h2>
-            <div className="grid grid-cols-2 gap-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>معلومات الطلب</CardTitle>
+              <CardDescription>البيانات الأساسية للطلب والمدفوعات</CardDescription>
+            </CardHeader>
+            <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">
                   رقم الطلب
@@ -253,8 +264,8 @@ function OrderDetails() {
                         </p>
                         <p className="text-lg">
                           {orderData.discount_type === "percentage"
-                            ? `${orderData.discount_value}%`
-                            : `${orderData.discount_value} ج.م`}
+                            ? `${orderData.discount_value ?? ""}%`
+                            : `${orderData.discount_value ?? ""} ج.م`}
                         </p>
                       </div>
                     )}
@@ -281,20 +292,61 @@ function OrderDetails() {
                 <p className="text-lg">{formatDate(orderData.updated_at)}</p>
               </div>
             </div>
-          </div>
+            </CardContent>
+          </Card>
+
+          {/* Inventory / Branch */}
+          {orderData.inventory && (
+            <Card>
+              <CardHeader>
+                <CardTitle>المخزن / الفرع</CardTitle>
+                <CardDescription>معلومات المخزن المرتبط بالطلب</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">اسم المخزن</p>
+                    <p className="text-lg font-medium">{orderData.inventory.name}</p>
+                  </div>
+                  {orderData.inventory.inventoriable && (
+                    <>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">كود الفرع</p>
+                        <p className="text-lg">{orderData.inventory.inventoriable.branch_code ?? "-"}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">اسم الفرع</p>
+                        <p className="text-lg">{orderData.inventory.inventoriable.name}</p>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Client Info */}
           {orderData.client && (
-            <div className="bg-white rounded-lg p-6 shadow-sm border-t">
-              <h3 className="text-lg font-semibold mb-3">معلومات العميل</h3>
+            <Card>
+              <CardHeader>
+                <CardTitle>معلومات العميل</CardTitle>
+                <CardDescription>بيانات العميل والعنوان</CardDescription>
+              </CardHeader>
+              <CardContent>
               <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    الاسم
+                  </p>
+                  <p className="text-lg">{orderData.client.name}</p>
+                </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">
                     رقم العميل
                   </p>
                   <p className="text-lg">#{orderData.client.id}</p>
                 </div>
-                {orderData.client.address && (
+                {orderData.client.address != null && (
                   <>
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">
@@ -341,13 +393,18 @@ function OrderDetails() {
                   </>
                 )}
               </div>
-            </div>
+              </CardContent>
+            </Card>
           )}
 
           {/* Order Items */}
           {orderData.items && orderData.items.length > 0 && (
-            <div className="bg-white rounded-lg p-6 shadow-sm border-t">
-              <h3 className="text-lg font-semibold mb-3">عناصر الطلب</h3>
+            <Card>
+              <CardHeader>
+                <CardTitle>عناصر الطلب</CardTitle>
+                <CardDescription>المنتجات والخدمات المدرجة في الطلب</CardDescription>
+              </CardHeader>
+              <CardContent>
               <div className="overflow-hidden rounded-md border">
                 <Table>
                   <TableHeader>
@@ -355,11 +412,12 @@ function OrderDetails() {
                       <TableHead className="text-center">#</TableHead>
                       <TableHead className="text-center">الكود</TableHead>
                       <TableHead className="text-center">الاسم</TableHead>
-                      <TableHead className="text-center">الوصف</TableHead>
-                      <TableHead className="text-center">المقاسات</TableHead>
-                      <TableHead className="text-center">الخصم</TableHead>
+                      <TableHead className="text-center">النوع</TableHead>
+                      <TableHead className="text-center">الكمية</TableHead>
+                      <TableHead className="text-center">السعر</TableHead>
+                      <TableHead className="text-center">المدفوع</TableHead>
+                      <TableHead className="text-center">المتبقي</TableHead>
                       <TableHead className="text-center">الحالة</TableHead>
-                      <TableHead className="text-center">ملاحظات</TableHead>
                       <TableHead className="text-center">
                         قابل للإرجاع
                       </TableHead>
@@ -378,42 +436,28 @@ function OrderDetails() {
                           {item.name}
                         </TableCell>
                         <TableCell className="text-center">
-                          <div className="max-w-[200px] mx-auto text-wrap">
-                            {item.description || "-"}
-                          </div>
+                          {getOrderTypeLabel(item.type)}
                         </TableCell>
                         <TableCell className="text-center">
-                          {item.breast_size || "-"}, {item.waist_size || "-"},{" "}
-                          {item.sleeve_size || "-"}
+                          {item.quantity}
                         </TableCell>
                         <TableCell className="text-center">
-                          {item.discount_type && item.discount_type !== "none"
-                            ? getDiscountTypeLabel(item.discount_type)
-                            : "-"}{" "}
-                          <br />
-                          {item.discount_type &&
-                          item.discount_type !== "none" &&
-                          item.discount_value
-                            ? `${
-                                item.discount_type === "percentage"
-                                  ? `${item.discount_value}%`
-                                  : `${item.discount_value} ج.م`
-                              }`
-                            : "-"}
+                          {item.price} ج.م
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {item.item_paid} ج.م
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {item.item_remaining} ج.م
                         </TableCell>
                         <TableCell className="text-center">
                           {getStatusLabel(item.status)}
                         </TableCell>
                         <TableCell className="text-center">
-                          <div className="max-w-[200px] mx-auto text-wrap">
-                            {item.notes || "-"}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-center">
                           <Button
                             variant="outline"
                             title="إرجاع الملابس"
-                            disabled={item.returnable === "0"}
+                            disabled={item.returnable === 0}
                             onClick={() =>
                               setReturnItemModal({
                                 open: true,
@@ -429,15 +473,20 @@ function OrderDetails() {
                   </TableBody>
                 </Table>
               </div>
-            </div>
+              </CardContent>
+            </Card>
           )}
 
           {/* Order Notes */}
           {orderData.order_notes && (
-            <div className="bg-white rounded-lg p-6 shadow-sm border-t">
-              <h3 className="text-lg font-semibold mb-3">ملاحظات الطلب</h3>
-              <p className="text-muted-foreground">{orderData.order_notes}</p>
-            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>ملاحظات الطلب</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">{orderData.order_notes}</p>
+              </CardContent>
+            </Card>
           )}
 
           {/* Custodies Table */}
@@ -450,11 +499,13 @@ function OrderDetails() {
           <OrderPaymentsTable orderId={orderData.id} />
         </>
       ) : (
-        <div className="bg-white rounded-lg p-6 shadow-sm">
-          <p className="text-center text-muted-foreground">
-            لا توجد بيانات لعرضها.
-          </p>
-        </div>
+        <Card>
+          <CardContent className="py-10">
+            <p className="text-center text-muted-foreground">
+              لا توجد بيانات لعرضها.
+            </p>
+          </CardContent>
+        </Card>
       )}
 
       {/* Create Custody Modal */}

@@ -11,14 +11,14 @@ import {
   returnOrderItem,
   updateOrder,
   updateOrderStatus,
-  deleteOrder, // أضف هذه
-  addOrderPayment, // أضف هذه
+  deleteOrder,
+  addOrderPayment,
 } from "./orders.service";
 import {
   TCreateOrderRequest,
   TReturnOrderItemRequest,
   TUpdateOrderRequest,
-  TAddPaymentRequest, // أضف هذا النوع
+  TAddPaymentRequest,
 } from "./orders.types";
 
 export const ORDERS_KEY = "orders";
@@ -123,8 +123,6 @@ export const useExportOrdersToCSVMutationOptions = () => {
     mutationFn: () => exportOrdersToCSV(),
   });
 };
-
-// ===== دوال جديدة مطلوبة للتسليمات =====
 
 export const useDeleteOrderMutationOptions = () => {
   const queryClient = useQueryClient();

@@ -174,7 +174,6 @@ function OrdersList() {
                   <TableHead className="text-center">المدفوع</TableHead>
                   <TableHead className="text-center">المتبقي</TableHead>
                   <TableHead className="text-center">الحالة</TableHead>
-                  <TableHead className="text-center">تاريخ الزيارة</TableHead>
                   <TableHead className="text-center">نوع الطلب</TableHead>
                   <TableHead className="text-center">تاريخ الإنشاء</TableHead>
                   <TableHead className="text-center">إجراءات</TableHead>
@@ -193,8 +192,7 @@ function OrdersList() {
                         <p className="underline">#{order.id}</p>
                       </TableCell>
                       <TableCell className="text-center">
-                        {order.client.first_name} {order.client.middle_name}{" "}
-                        {order.client.last_name}
+                        {order.client.name}
                       </TableCell>
                       <TableCell className="text-center">
                         {order.total_price} ج.م
@@ -212,9 +210,6 @@ function OrdersList() {
                         >
                           {getStatusLabel(order.status)}
                         </Badge>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {formatDate(order.visit_datetime)}
                       </TableCell>
                       <TableCell className="text-center">
                         {getOrderTypeLabel(order.order_type)}

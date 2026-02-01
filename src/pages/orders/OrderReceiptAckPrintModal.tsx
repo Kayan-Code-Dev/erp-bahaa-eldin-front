@@ -8,7 +8,7 @@ import { OrderReceiptAckPrint } from "./OrderReceiptAckPrint";
 import { useRef } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
-/** أنماط الإقرار عند النسخ إلى نافذة الطباعة (نفس تنسيق الفاتورة) */
+/** Receipt acknowledgment styles when copying to print window (same layout as invoice) */
 const ACK_PRINT_STYLES = `
   @page { size: A4; margin: 10mm; }
   body { margin: 0; padding: 12px; font-family: 'Segoe UI', 'Cairo', Arial, sans-serif; direction: rtl; }

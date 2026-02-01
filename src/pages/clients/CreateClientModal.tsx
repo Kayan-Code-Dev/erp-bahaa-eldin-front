@@ -76,25 +76,23 @@ export function CreateClientModal({ open, onOpenChange, onClientCreated }: Props
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    const phones = [{ phone: values.phone }];
-    if (values.phone2) {
-      phones.push({ phone: values.phone2 });
+    const phones: { phone: string; type: string }[] = [
+      { phone: values.phone.trim(), type: "mobile" },
+    ];
+    if (values.phone2?.trim()) {
+      phones.push({ phone: values.phone2.trim(), type: "whatsapp" });
     }
 
     const requestData: TCreateClientRequest = {
-      first_name: values.name.trim(),
-      middle_name: "",
-      last_name: "",
-      date_of_birth: values.date_of_birth || "",
-      national_id: values.national_id,
+      name: values.name.trim(),
+      date_of_birth: values.date_of_birth || undefined,
+      national_id: values.national_id || undefined,
       source: values.source,
       address: {
-        street: values.address,
-        building: "",
         city_id: Number(values.city_id),
-        notes: values.notes || "",
+        address: values.address.trim(),
       },
-      phones: phones,
+      phones,
     };
 
     createClient(requestData, {
