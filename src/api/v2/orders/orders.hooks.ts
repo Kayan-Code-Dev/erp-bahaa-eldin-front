@@ -16,6 +16,7 @@ import {
 } from "./orders.service";
 import {
   TCreateOrderRequest,
+  TCreateOrderWithNewClientRequest,
   TReturnOrderItemRequest,
   TUpdateOrderRequest,
   TAddPaymentRequest,
@@ -26,7 +27,7 @@ export const ORDERS_KEY = "orders";
 export const useCreateOrderMutationOptions = () => {
   const queryClient = useQueryClient();
   return mutationOptions({
-    mutationFn: (data: TCreateOrderRequest) => createOrder(data),
+    mutationFn: (data: TCreateOrderRequest | TCreateOrderWithNewClientRequest) => createOrder(data),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: [ORDERS_KEY] });
     },

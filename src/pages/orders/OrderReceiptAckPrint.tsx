@@ -26,9 +26,7 @@ export function OrderReceiptAckPrint({
   employeeName = "-----------------------",
 }: Props) {
   const c = order.client;
-  const clientName = c
-    ? `${c.first_name ?? ""} ${(c as { middle_name?: string }).middle_name ?? ""} ${c.last_name ?? ""}`.trim() || "-"
-    : "-";
+  const clientName = c?.name?.trim() || "-";
   const nationalId = (c as { national_id?: string })?.national_id ?? "-";
   const addressStr = c?.address
     ? [c.address.street, c.address.building].filter(Boolean).join(" - ") || "-"
@@ -87,7 +85,7 @@ export function OrderReceiptAckPrint({
               <p className="font-medium text-gray-600 text-sm mb-2">الأصناف المستلمة:</p>
               {items.length > 0 ? (
                 <ul className="list-decimal list-inside space-y-1 text-sm text-gray-700">
-                  {items.map((item, i) => (
+                  {items.map((item) => (
                     <li key={item.id}>{item.name || "-"}</li>
                   ))}
                 </ul>

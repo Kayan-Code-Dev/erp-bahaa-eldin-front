@@ -499,7 +499,7 @@ function OverdueReturnsList() {
                     <div>
                       <p className="font-medium">{item.name}</p>
                       <p className="text-sm text-muted-foreground">كود: {item.code}</p>
-                      {item.returnable === "0" && (
+                      {item.returnable === 0 && (
                         <p className="mt-1 text-xs text-destructive">غير قابل للإرجاع</p>
                       )}
                     </div>
@@ -507,7 +507,7 @@ function OverdueReturnsList() {
                       size="sm"
                       variant="outline"
                       onClick={() => {
-                        if (item.returnable === "1") {
+                        if (item.returnable === 1) {
                           handleReturnItem(item.id, {
                             entity_type: orderToReturn.entity_type,
                             entity_id: orderToReturn.entity_id,
@@ -518,9 +518,9 @@ function OverdueReturnsList() {
                           toast.warning("هذا المنتج غير قابل للإرجاع");
                         }
                       }}
-                      disabled={isReturning || item.returnable === "0"}
+                      disabled={isReturning || item.returnable === 0}
                     >
-                      {item.returnable === "1" ? "إرجاع" : "غير قابل"}
+                      {item.returnable === 1 ? "إرجاع" : "غير قابل"}
                     </Button>
                   </div>
                 ))}
