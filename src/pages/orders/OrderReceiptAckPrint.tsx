@@ -74,7 +74,7 @@ export function OrderReceiptAckPrint({
           <span className="invoice-print-title-line mt-3 block h-0.5 w-24 rounded-full bg-gray-300" aria-hidden />
         </div>
 
-        {/* بيانات المستلم */}
+        {/* Recipient info */}
         <div className="invoice-print-block mb-6 overflow-hidden rounded-xl border border-gray-200 bg-gray-50/30">
           <h2 className="invoice-print-block-title text-sm font-semibold text-gray-600 uppercase tracking-wider py-3 px-4 border-b border-gray-200 bg-gray-50/80">
             بيانات المستلم
