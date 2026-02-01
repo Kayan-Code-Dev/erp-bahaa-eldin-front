@@ -12,25 +12,27 @@ import CollapsibleSubItem from "./CollapsibleSubItem";
 // Define the prop types
 type SidebarNavProps = {
   items: SidebarLabel[];
+  keyPrefix?: string;
 };
 
-export function SidebarNav({ items }: SidebarNavProps) {
+export function SidebarNav({ items, keyPrefix = "nav" }: SidebarNavProps) {
   const { pathname } = useLocation();
 
   return (
     <SidebarMenu>
-      {items.map((item) => {
+      {items.map((item, index) => {
         const active = includeRoute(pathname, item.path, item.level);
+        const uniqueKey = `${keyPrefix}-${index}-${item.label}`;
         // --- 1. RENDER ITEM WITH SUB-MENU ---
         if (item.subItems) {
           return (
-            <CollapsibleSubItem item={item} />
+            <CollapsibleSubItem key={uniqueKey} item={item} keyPrefix={uniqueKey} />
           );
         }
 
         // --- 2. RENDER SIMPLE ITEM (NO SUB-MENU) ---
         return (
-          <SidebarMenuItem key={item.label} className="py-0.5 px-1">
+          <SidebarMenuItem key={uniqueKey} className="py-0.5 px-1">
             <SidebarMenuButton
               asChild
               className={cn(

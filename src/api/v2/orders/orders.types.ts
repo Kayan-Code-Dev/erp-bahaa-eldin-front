@@ -88,26 +88,41 @@ export type TPayment = {
   updated_at: string;
 };
 
+/** عنصر طلب واحد — يتوافق مع /api/v1/orders */
+export type TCreateOrderItemRequest = {
+  cloth_id: number;
+  price: number;
+  quantity: number;
+  paid?: number;
+  type: TOrderType;
+  notes?: string;
+  discount_type?: TDiscountType;
+  discount_value?: number;
+  /** للإيجار */
+  days_of_rent?: number;
+  occasion_datetime?: string;
+  delivery_date?: string;
+  /** للتفصيل — كل المقاسات اختيارية */
+  sleeve_length?: string;
+  forearm?: string;
+  shoulder_width?: string;
+  cuffs?: string;
+  waist?: string;
+  chest_length?: string;
+  total_length?: string;
+  hinch?: string;
+  dress_size?: string;
+};
+
 export type TCreateOrderRequest = {
   client_id: number;
   entity_type: TEntity;
   entity_id: number;
-  paid: number;
   visit_datetime: string;
+  order_notes?: string;
   discount_type?: TDiscountType;
   discount_value?: number;
-  order_notes?: string;
-  items: {
-    cloth_id: number;
-    discount_type?: TDiscountType;
-    discount_value?: number;
-    price: number;
-    type: TOrderType;
-    days_of_rent: number;
-    occasion_datetime: string;
-    delivery_date: string;
-    notes?: string;
-  }[];
+  items: TCreateOrderItemRequest[];
 };
 
 export type TReturnOrderItemsRequest = {

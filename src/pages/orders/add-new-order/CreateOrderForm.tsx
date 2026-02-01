@@ -327,38 +327,50 @@ function CreateOrderForm() {
 
   const onSubmit = async (values: FormValues) => {
     try {
-      // Convert form values to API request format
       const requestData: TCreateOrderRequest = {
         client_id,
         entity_type,
         entity_id,
-        paid: values.paid,
         visit_datetime: format(values.visit_datetime, "yyyy-MM-dd HH:mm:ss"),
-        ...(values.has_order_discount
+        ...(values.has_order_discount &&
+          values.order_discount_type &&
+          values.order_discount_type !== "none"
           ? {
-            discount_type: values.order_discount_type,
-              discount_value: values.order_discount_value,
+              discount_type: values.order_discount_type,
+              discount_value: values.order_discount_value ?? 0,
             }
-          : {}),
+          : { discount_type: "none" as const, discount_value: 0 }),
         ...(values.order_notes ? { order_notes: values.order_notes } : {}),
-        items: values.items.map((item) => ({
-          cloth_id: item.cloth_id,
-          price: item.price,
-          type: item.type,
-          days_of_rent: item.type === "rent" ? item.days_of_rent || 1 : 0,
-          occasion_datetime: format(
-            item.occasion_datetime,
-            "yyyy-MM-dd HH:mm:ss"
-          ),
-          delivery_date: format(item.delivery_date, "yyyy-MM-dd"),
-          ...(item.has_discount
-            ? {
-                discount_type: item.discount_type,
-                discount_value: item.discount_value,
-              }
-            : {}),
-          ...(item.notes ? { notes: item.notes } : {}),
-        })),
+        items: values.items.map((item) => {
+          const base = {
+            cloth_id: item.cloth_id,
+            price: item.price,
+            quantity: 1,
+            paid: 0,
+            type: item.type,
+            ...(item.has_discount &&
+            item.discount_type &&
+            item.discount_type !== "none"
+              ? {
+                  discount_type: item.discount_type,
+                  discount_value: item.discount_value ?? 0,
+                }
+              : {}),
+            ...(item.notes ? { notes: item.notes } : {}),
+          };
+          if (item.type === "rent") {
+            return {
+              ...base,
+              days_of_rent: item.days_of_rent ?? 1,
+              occasion_datetime: format(
+                item.occasion_datetime,
+                "yyyy-MM-dd HH:mm:ss"
+              ),
+              delivery_date: format(item.delivery_date, "yyyy-MM-dd"),
+            };
+          }
+          return base;
+        }),
       };
 
       createOrder(requestData, {

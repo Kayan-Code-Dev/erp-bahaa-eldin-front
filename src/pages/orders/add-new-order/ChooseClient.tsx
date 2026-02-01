@@ -70,6 +70,9 @@ import {
   Filter,
   RotateCcw,
   ChevronRight,
+  Phone,
+  MapPin,
+  UserCircle,
 } from "lucide-react";
 import { CategoriesSelect } from "@/components/custom/CategoriesSelect";
 import { ClothModelsSelect } from "@/components/custom/ClothModelsSelect";
@@ -145,7 +148,7 @@ function ChooseClient() {
     weddingDate: undefined as Date | undefined,
     notes: "",
     days_of_rent: "1",
-    type: "rent" as "rent" | "buy",
+    type: "rent" as "rent" | "buy" | "tailoring",
     discount_type: "none" as "none" | "percentage" | "fixed",
     discount_value: "0",
   });
@@ -317,7 +320,7 @@ function ChooseClient() {
       toast.error("هذا المنتج مضاف مسبقاً");
       return;
     }
-    const newProduct = {
+    const newProduct: any = {
       id: selectedProduct.id,
       cloth_id: selectedProduct.id,
       name: selectedProduct.name,
@@ -338,6 +341,9 @@ function ChooseClient() {
       cloth_type: selectedProduct.cloth_type,
       subtotal: parseFloat(productDetails.price) * parseInt(productDetails.quantity),
     };
+    if (productDetails.type === "tailoring") {
+      newProduct.measurements = { ...measurements };
+    }
     setSelectedProducts([...selectedProducts, newProduct]);
     setSelectedProduct(null);
     setProductDetails({
@@ -352,6 +358,19 @@ function ChooseClient() {
       discount_type: "none",
       discount_value: "0",
     });
+    if (productDetails.type === "tailoring") {
+      setMeasurements({
+        sleeveLength: "",
+        forearm: "",
+        shoulderWidth: "",
+        cuffs: "",
+        waist: "",
+        chestLength: "",
+        totalLength: "",
+        hinch: "",
+        dressSize: "",
+      });
+    }
     toast.success("تم إضافة المنتج إلى الطلب");
   };
 
@@ -406,22 +425,52 @@ function ChooseClient() {
     client_id: clientId,
     entity_type: entityType!,
     entity_id: Number(entityId),
-    paid: totalPaid,
     visit_datetime: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
-    order_notes: selectedProducts.map((p) => p.notes).filter(Boolean).join(" - "),
-    items: selectedProducts.map((product) => ({
-      cloth_id: product.cloth_id,
-      price: product.price,
-      type: product.type,
-      days_of_rent: product.days_of_rent,
-      occasion_datetime: product.weddingDate
-        ? format(product.weddingDate, "yyyy-MM-dd HH:mm:ss")
-        : format(new Date(), "yyyy-MM-dd HH:mm:ss"),
-      delivery_date: format(deliveryDate!, "yyyy-MM-dd"),
-      discount_type: product.discount_type !== "none" ? product.discount_type : undefined,
-      discount_value: product.discount_value > 0 ? product.discount_value : undefined,
-      notes: product.notes || "",
-    })),
+    order_notes: selectedProducts.map((p) => p.notes).filter(Boolean).join(" - ") || undefined,
+    discount_type: "none",
+    discount_value: 0,
+    items: selectedProducts.map((product) => {
+      const base = {
+        cloth_id: product.cloth_id,
+        price: product.price,
+        quantity: product.quantity ?? 1,
+        paid: product.paid ?? 0,
+        type: product.type,
+        notes: product.notes || undefined,
+        discount_type: product.discount_type !== "none" ? product.discount_type : undefined,
+        discount_value: (product.discount_value ?? 0) > 0 ? product.discount_value : undefined,
+      };
+      if (product.type === "rent") {
+        return {
+          ...base,
+          days_of_rent: product.days_of_rent ?? 1,
+          occasion_datetime: product.weddingDate
+            ? format(product.weddingDate, "yyyy-MM-dd HH:mm:ss")
+            : format(new Date(), "yyyy-MM-dd HH:mm:ss"),
+          delivery_date: product.deliveryDate
+            ? format(product.deliveryDate, "yyyy-MM-dd")
+            : deliveryDate
+              ? format(deliveryDate, "yyyy-MM-dd")
+              : format(new Date(), "yyyy-MM-dd"),
+        };
+      }
+      if (product.type === "tailoring" && product.measurements) {
+        const m = product.measurements;
+        return {
+          ...base,
+          ...(m.sleeveLength?.trim() && { sleeve_length: m.sleeveLength.trim() }),
+          ...(m.forearm?.trim() && { forearm: m.forearm.trim() }),
+          ...(m.shoulderWidth?.trim() && { shoulder_width: m.shoulderWidth.trim() }),
+          ...(m.cuffs?.trim() && { cuffs: m.cuffs.trim() }),
+          ...(m.waist?.trim() && { waist: m.waist.trim() }),
+          ...(m.chestLength?.trim() && { chest_length: m.chestLength.trim() }),
+          ...(m.totalLength?.trim() && { total_length: m.totalLength.trim() }),
+          ...(m.hinch?.trim() && { hinch: m.hinch.trim() }),
+          ...(m.dressSize?.trim() && { dress_size: m.dressSize.trim() }),
+        };
+      }
+      return base;
+    }),
   });
 
   const submitOrder = (clientId: number) => {
@@ -613,7 +662,7 @@ function ChooseClient() {
               </CardContent>
             </Card>
 
-            <Card className="shadow-lg border-gray-200">
+            <Card className="shadow-lg border-gray-200" dir="rtl">
               <CardHeader className="bg-gradient-to-l from-blue-50 to-white border-b">
                 <CardTitle className="flex items-center gap-3 text-xl text-blue-800">
                   <div className="p-2 bg-blue-100 rounded-lg">
@@ -627,7 +676,7 @@ function ChooseClient() {
                   </div>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-6">
+              <CardContent className="p-6" dir="rtl">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                   <TabsList className="grid w-full grid-cols-2 bg-gray-100 p-1 rounded-lg">
                     <TabsTrigger
@@ -688,92 +737,114 @@ function ChooseClient() {
                     </div>
                   </TabsContent>
 
-                  <TabsContent value="new" className="mt-6">
+                  <TabsContent value="new" className="mt-6" dir="rtl">
                     <Form {...newClientForm}>
                       <form
                         onSubmit={newClientForm.handleSubmit(handleNewClientSubmitAndCreateOrder)}
-                        className="space-y-4"
+                        className="space-y-6 text-right"
+                        dir="rtl"
                       >
-                        <FormField
-                          control={newClientForm.control}
-                          name="name"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-right block w-full">الاسم</FormLabel>
-                              <FormControl>
-                                <Input placeholder="الاسم الكامل للعميل" className="h-12 rounded-lg" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <FormField
-                            control={newClientForm.control}
-                            name="date_of_birth"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="text-right block w-full">تاريخ الميلاد (اختياري)</FormLabel>
-                                <FormControl>
-                                  <Input type="date" className="h-12 rounded-lg" {...field} value={field.value ?? ""} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={newClientForm.control}
-                            name="national_id"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="text-right block w-full">الرقم القومي</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="14 رقم" maxLength={14} className="h-12 rounded-lg" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={newClientForm.control}
-                            name="source"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="text-right block w-full">المصدر</FormLabel>
-                                <Select onValueChange={field.onChange} value={field.value}>
-                                  <FormControl>
-                                    <SelectTrigger className="h-12 rounded-lg">
-                                      <SelectValue placeholder="اختر المصدر" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    {CLIENT_SOURCES.map((source) => (
-                                      <SelectItem key={source} value={source}>
-                                        {CLIENT_SOURCE_LABELS[source]}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                        <p className="text-sm text-muted-foreground text-right">
+                          أدخل بيانات العميل الجديد وسيتم إنشاء الطلب باسمه بعد الحفظ.
+                        </p>
+
+                        {/* البيانات الأساسية — الاسم والرقم القومي من جهة اليمين */}
+                        <div className="rounded-xl border bg-muted/30 p-4 space-y-4">
+                          <div className="flex items-center gap-2 text-right">
+                            <UserCircle className="h-5 w-5 text-primary" />
+                            <h3 className="text-sm font-semibold">البيانات الأساسية</h3>
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-4">
+                              <FormField
+                                control={newClientForm.control}
+                                name="name"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-right">الاسم</FormLabel>
+                                    <FormControl>
+                                      <Input placeholder="الاسم الكامل للعميل" className="h-11 rounded-lg text-right" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={newClientForm.control}
+                                name="national_id"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-right">الرقم القومي</FormLabel>
+                                    <FormControl>
+                                      <Input placeholder="14 رقم" maxLength={14} className="h-11 rounded-lg font-mono text-right" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                            <div className="space-y-4">
+                              <FormField
+                                control={newClientForm.control}
+                                name="date_of_birth"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-right">تاريخ الميلاد (اختياري)</FormLabel>
+                                    <FormControl>
+                                      <Input type="date" className="h-11 rounded-lg" {...field} value={field.value ?? ""} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={newClientForm.control}
+                                name="source"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-right">المصدر</FormLabel>
+                                    <Select onValueChange={field.onChange} value={field.value}>
+                                      <FormControl>
+                                        <SelectTrigger className="h-11 rounded-lg">
+                                          <SelectValue placeholder="اختر المصدر" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        {CLIENT_SOURCES.map((source) => (
+                                          <SelectItem key={source} value={source}>
+                                            {CLIENT_SOURCE_LABELS[source]}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          </div>
                         </div>
-                        <div className="space-y-4 border-t pt-4">
-                          <h3 className="text-sm font-medium text-right">أرقام الهاتف</h3>
+
+                        {/* أرقام الهاتف */}
+                        <div className="rounded-xl border bg-muted/30 p-4 space-y-4">
+                          <div className="flex items-center gap-2 text-right">
+                            <Phone className="h-5 w-5 text-primary" />
+                            <h3 className="text-sm font-semibold">أرقام الهاتف</h3>
+                          </div>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <FormField
                               control={newClientForm.control}
                               name="phone"
                               render={({ field }) => (
                                 <FormItem dir="ltr">
-                                  <FormLabel className="text-right block w-full">رقم الهاتف (مطلوب)</FormLabel>
+                                  <FormLabel className="text-right">رقم الهاتف (مطلوب)</FormLabel>
                                   <FormControl>
                                     <PhoneInput
                                       placeholder="أدخل رقم الهاتف"
                                       value={field.value}
                                       onChange={field.onChange}
                                       disabled={isCreatingClient}
+                                      className="h-11 rounded-lg"
                                     />
                                   </FormControl>
                                   <FormMessage />
@@ -785,10 +856,51 @@ function ChooseClient() {
                               name="phone2"
                               render={({ field }) => (
                                 <FormItem dir="ltr">
-                                  <FormLabel className="text-right block w-full">رقم الواتس (اختياري)</FormLabel>
+                                  <FormLabel className="text-right">رقم الواتس (اختياري)</FormLabel>
                                   <FormControl>
                                     <PhoneInput
                                       placeholder="أدخل رقم الواتس"
+                                      value={field.value}
+                                      onChange={field.onChange}
+                                      disabled={isCreatingClient}
+                                      className="h-11 rounded-lg"
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        </div>
+
+                        {/* العنوان */}
+                        <div className="rounded-xl border bg-muted/30 p-4 space-y-4">
+                          <div className="flex items-center gap-2 text-right">
+                            <MapPin className="h-5 w-5 text-primary" />
+                            <h3 className="text-sm font-semibold">العنوان</h3>
+                          </div>
+                          <FormField
+                            control={newClientForm.control}
+                            name="address"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-right">العنوان</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="الشارع، الحي، رقم المبنى" className="h-11 rounded-lg" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField
+                              control={newClientForm.control}
+                              name="city_id"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-right">المدينة</FormLabel>
+                                  <FormControl>
+                                    <CitiesSelect
                                       value={field.value}
                                       onChange={field.onChange}
                                       disabled={isCreatingClient}
@@ -798,53 +910,20 @@ function ChooseClient() {
                                 </FormItem>
                               )}
                             />
+                            <FormField
+                              control={newClientForm.control}
+                              name="notes"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-right">ملاحظات (اختياري)</FormLabel>
+                                  <FormControl>
+                                    <Textarea placeholder="ملاحظات إضافية..." className="min-h-[44px] rounded-lg resize-none" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
                           </div>
-                        </div>
-                        <div className="space-y-4 border-t pt-4">
-                          <h3 className="text-sm font-medium text-right">العنوان</h3>
-                          <FormField
-                            control={newClientForm.control}
-                            name="address"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="text-right block w-full">العنوان</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="أدخل العنوان الكامل" className="h-12 rounded-lg" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={newClientForm.control}
-                            name="city_id"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="text-right block w-full">المدينة</FormLabel>
-                                <FormControl>
-                                  <CitiesSelect
-                                    value={field.value}
-                                    onChange={field.onChange}
-                                    disabled={isCreatingClient}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={newClientForm.control}
-                            name="notes"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="text-right block w-full">ملاحظات (اختياري)</FormLabel>
-                                <FormControl>
-                                  <Textarea placeholder="ملاحظات إضافية..." {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
                         </div>
                       </form>
                     </Form>
@@ -870,42 +949,69 @@ function ChooseClient() {
                 </CardHeader>
                 <CardContent className="p-6">
                   <div className="space-y-3 max-h-64 overflow-y-auto">
-                    {selectedProducts.map((cloth) => (
-                      <div
-                        key={cloth.id}
-                        className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                      >
-                        <div>
-                          <p className="font-medium text-gray-900">{cloth.name}</p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Badge variant="outline" className="text-xs">
-                              {cloth.code}
-                            </Badge>
-                            <Badge
-                              variant="outline"
-                              className={`text-xs ${
-                                cloth.type === "rent"
-                                  ? "bg-blue-50 text-blue-700"
-                                  : "bg-amber-50 text-amber-700"
-                              }`}
-                            >
-                              {cloth.type === "rent" ? "إيجار" : "شراء"}
-                            </Badge>
-                            <Badge variant="outline" className="text-xs bg-green-50 text-green-700">
-                              {cloth.quantity} × {cloth.price} ج.م
-                            </Badge>
-                          </div>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          onClick={() => handleRemoveProduct(cloth.id)}
+                    {selectedProducts.map((cloth) => {
+                      const measurementLabels: Record<string, string> = {
+                        sleeveLength: "طول الكم",
+                        forearm: "الزند",
+                        shoulderWidth: "عرض الكتف",
+                        cuffs: "الإسوار",
+                        waist: "الوسط",
+                        chestLength: "طول الصدر",
+                        totalLength: "الطول الكلي",
+                        hinch: "الهش",
+                        dressSize: "مقاس الفستان",
+                      };
+                      const measurementsSummary =
+                        cloth.type === "tailoring" && cloth.measurements
+                          ? Object.entries(cloth.measurements)
+                              .filter(([, v]) => v != null && String(v).trim() !== "")
+                              .map(([k, v]) => `${measurementLabels[k] ?? k}: ${v}`)
+                              .join("، ")
+                          : null;
+                      return (
+                        <div
+                          key={cloth.id}
+                          className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
                         >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
+                          <div className="min-w-0 flex-1">
+                            <p className="font-medium text-gray-900">{cloth.name}</p>
+                            <div className="flex items-center gap-2 mt-1 flex-wrap">
+                              <Badge variant="outline" className="text-xs">
+                                {cloth.code}
+                              </Badge>
+                              <Badge
+                                variant="outline"
+                                className={`text-xs ${
+                                  cloth.type === "rent"
+                                    ? "bg-blue-50 text-blue-700"
+                                    : cloth.type === "tailoring"
+                                      ? "bg-purple-50 text-purple-700"
+                                      : "bg-amber-50 text-amber-700"
+                                }`}
+                              >
+                                {cloth.type === "rent" ? "إيجار" : cloth.type === "tailoring" ? "تفصيل" : "شراء"}
+                              </Badge>
+                              <Badge variant="outline" className="text-xs bg-green-50 text-green-700">
+                                {cloth.quantity} × {cloth.price} ج.م
+                              </Badge>
+                            </div>
+                            {measurementsSummary && (
+                              <p className="text-xs text-muted-foreground mt-2 truncate" title={measurementsSummary}>
+                                مقاسات هذه القطعة: {measurementsSummary}
+                              </p>
+                            )}
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50 shrink-0"
+                            onClick={() => handleRemoveProduct(cloth.id)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      );
+                    })}
                   </div>
                   <Separator className="my-4" />
                   <div className="space-y-2">
@@ -1165,7 +1271,7 @@ function ChooseClient() {
                         </Label>
                         <Select
                           value={productDetails.type}
-                          onValueChange={(value: "rent" | "buy") =>
+                          onValueChange={(value: "rent" | "buy" | "tailoring") =>
                             setProductDetails({ ...productDetails, type: value })
                           }
                         >
@@ -1175,6 +1281,7 @@ function ChooseClient() {
                           <SelectContent>
                             <SelectItem value="rent">إيجار</SelectItem>
                             <SelectItem value="buy">شراء</SelectItem>
+                            <SelectItem value="tailoring">تفصيل</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -1298,15 +1405,6 @@ function ChooseClient() {
                         />
                       </div>
                     </div>
-                    <div className="flex justify-center">
-                      <Button
-                        onClick={handleAddProduct}
-                        className="h-12 px-8 rounded-lg bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800"
-                      >
-                        <Plus className="ml-2 h-5 w-5" />
-                        إضافة المنتج إلى الطلب
-                      </Button>
-                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -1321,41 +1419,71 @@ function ChooseClient() {
                   <div>
                     المقاسات (اختياري)
                     <CardDescription className="text-gray-600 mt-1">
-                      أدخل مقاسات العميل
+                      تظهر مقاسات المنتج عند اختيار منتج ونوع الطلب «تفصيل»
                     </CardDescription>
                   </div>
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {[
-                    { key: "sleeveLength", label: "طول الكم", placeholder: "سم" },
-                    { key: "forearm", label: "الزند", placeholder: "سم" },
-                    { key: "shoulderWidth", label: "عرض الكتف", placeholder: "سم" },
-                    { key: "cuffs", label: "الإسوار", placeholder: "سم" },
-                    { key: "waist", label: "الوسط", placeholder: "سم" },
-                    { key: "chestLength", label: "طول الصدر", placeholder: "سم" },
-                    { key: "totalLength", label: "الطول الكلي", placeholder: "سم" },
-                    { key: "hinch", label: "الهش", placeholder: "سم" },
-                    {
-                      key: "dressSize",
-                      label: "مقاس الفستان",
-                      placeholder: "S, M, L, XL",
-                    },
-                  ].map(({ key, label, placeholder }) => (
-                    <div key={key} className="space-y-2">
-                      <Label className="text-gray-700 font-medium">{label}</Label>
-                      <Input
-                        value={(measurements as any)[key]}
-                        onChange={(e) =>
-                          setMeasurements({ ...measurements, [key]: e.target.value })
-                        }
-                        className="h-11 rounded-lg"
-                        placeholder={placeholder}
-                      />
+                {!selectedProduct ? (
+                  <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+                    <div className="rounded-full bg-muted p-4 mb-4">
+                      <Ruler className="h-10 w-10 text-muted-foreground" />
                     </div>
-                  ))}
-                </div>
+                    <p className="text-base font-medium text-foreground mb-1">قم باختيار المنتج</p>
+                    <p className="text-sm text-muted-foreground max-w-sm">
+                      اختر قطعة من جدول الملابس المتاحة أدناه، ثم أدخل المقاسات (اختياري) واضغط إضافة المنتج.
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                  {productDetails.type !== "tailoring" && (
+                    <p className="text-sm text-muted-foreground mb-4 pb-2 border-b">
+                      تُحفظ المقاسات مع المنتج عند اختيار نوع الطلب «تفصيل» فقط. يمكنك إدخالها مسبقاً هنا.
+                    </p>
+                  )}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {[
+                      { key: "sleeveLength", label: "طول الكم", placeholder: "سم" },
+                      { key: "forearm", label: "الزند", placeholder: "سم" },
+                      { key: "shoulderWidth", label: "عرض الكتف", placeholder: "سم" },
+                      { key: "cuffs", label: "الإسوار", placeholder: "سم" },
+                      { key: "waist", label: "الوسط", placeholder: "سم" },
+                      { key: "chestLength", label: "طول الصدر", placeholder: "سم" },
+                      { key: "totalLength", label: "الطول الكلي", placeholder: "سم" },
+                      { key: "hinch", label: "الهش", placeholder: "سم" },
+                      {
+                        key: "dressSize",
+                        label: "مقاس الفستان",
+                        placeholder: "S, M, L, XL",
+                      },
+                    ].map(({ key, label, placeholder }) => (
+                      <div key={key} className="space-y-2">
+                        <Label className="text-gray-700 font-medium">{label}</Label>
+                        <Input
+                          value={(measurements as any)[key]}
+                          onChange={(e) =>
+                            setMeasurements({ ...measurements, [key]: e.target.value })
+                          }
+                          className="h-11 rounded-lg"
+                          placeholder={placeholder}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  </>
+                )}
+                {selectedProduct && (
+                  <div className="flex justify-center pt-6 mt-6 border-t">
+                    <Button
+                      onClick={handleAddProduct}
+                      className="h-12 px-8 rounded-lg bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800"
+                    >
+                      <Plus className="ml-2 h-5 w-5" />
+                      إضافة المنتج إلى الطلب
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

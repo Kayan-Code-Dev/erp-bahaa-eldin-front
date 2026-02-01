@@ -17,7 +17,7 @@ import { ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SidebarNav } from "./SideBarNav";
 
-const CollapsibleSubItem = ({ item }: { item: SidebarLabel }) => {
+const CollapsibleSubItem = ({ item, keyPrefix }: { item: SidebarLabel; keyPrefix?: string }) => {
     const { pathname } = useLocation();
     const active = includeRoute(pathname, item.path, item.level);
     const hasActiveDescendant = hasActiveChild(pathname, item);
@@ -69,7 +69,7 @@ const CollapsibleSubItem = ({ item }: { item: SidebarLabel }) => {
                 {/* The Sub-menu Content */}
                 <CollapsibleContent>
                     <SidebarGroupContent className="ps-4 pt-2 w-[95%]">
-                        <SidebarNav items={item.subItems!} />
+                        <SidebarNav items={item.subItems!} keyPrefix={keyPrefix} />
                     </SidebarGroupContent>
                 </CollapsibleContent>
             </SidebarGroup>
