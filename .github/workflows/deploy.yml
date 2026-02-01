@@ -23,7 +23,7 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Build project
+      - name: Build project 
         run: yarn build
 
       - name: Deploy to VPS via SSH
