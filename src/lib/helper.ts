@@ -19,7 +19,7 @@ export const includeRoute = (
   
   // Check if pathname starts with the path (parent-child relationship)
   if (pathname.startsWith(path + "/")) {
-    // Sub-items (level >= 2) must match exactly: e.g. "عرض الموردين" (/suppliers) must not
+    // Sub-items (level >= 2) must match exactly: e.g. suppliers list (/suppliers) must not
     // be active when we're on /suppliers/orders — only the exact route should be bold.
     if (level >= 2) {
       return false;

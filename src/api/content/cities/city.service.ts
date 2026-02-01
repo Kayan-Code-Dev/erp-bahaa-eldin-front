@@ -16,9 +16,7 @@ export const getCities = async (page: number) => {
   }
 };
 
-//      "name": "غزة",
-//      "code": "Gazza",
-//      "country_id": 2
+// Example payload: name, code, country_id
 export const createCity = async (data: FormData) => {
   try {
     await api.post(`/admins/cities`, data);
@@ -27,11 +25,7 @@ export const createCity = async (data: FormData) => {
   }
 };
 
-//      "name": "غزة",
-//      "code": "Gazza",
-//      "country_id": 2
-//      "active" : 0 | 1
-
+// Example payload: name, code, country_id, active (0|1)
 export const updateCity = async (id: number, data: FormData) => {
   try {
     await api.post(`/admins/cities/${id}`, data);

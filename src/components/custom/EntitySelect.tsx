@@ -35,7 +35,7 @@ type StandaloneProps = {
   entityTypeLabel?: string;
   entityIdLabel?: string;
   required?: boolean;
-  className?: string; // أضفنا className هنا
+  className?: string; // Custom className
 };
 
 // Form props (for react-hook-form)
@@ -46,7 +46,7 @@ type FormProps<TFieldValues extends FieldValues = FieldValues> = {
   entityTypeLabel?: string;
   entityIdLabel?: string;
   disabled?: boolean;
-  className?: string; // أضفنا className هنا
+  className?: string; // Custom className
 };
 
 type EntitySelectProps<TFieldValues extends FieldValues = FieldValues> =

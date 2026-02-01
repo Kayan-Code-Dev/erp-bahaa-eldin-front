@@ -40,7 +40,6 @@ import { OrderDetailsModal } from "@/pages/orders/OrderDetailsModal";
 import { getOrderTypeLabel, getStatusVariant, getStatusLabel } from "@/api/v2/orders/order.utils";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import {
   Form,
   FormControl,
@@ -50,6 +49,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { CustomCalendar } from "@/components/custom/CustomCalendar";
+import { ClientsSelect } from "@/components/custom/ClientsSelect";
 import {
   Dialog,
   DialogContent,
@@ -58,26 +58,24 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import useDebounce from "@/hooks/useDebounce";
-
-const filterSchema = z.object({
-  date_from: z.string().optional(),
-  date_to: z.string().optional(),
-});
-
-type FilterFormValues = z.infer<typeof filterSchema>;
+import { DEFAULT_PER_PAGE, FILTER_DEBOUNCE_MS, RETURNS_FILTER } from "./constants";
+import {
+  returnsFilterSchema,
+  type ReturnsFilterFormValues,
+} from "./returnsFilter.schema";
 
 function ReturnsList() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const page = Number(searchParams.get("page")) || 1;
-  const per_page = 10;
+  const per_page = Number(searchParams.get("per_page")) || DEFAULT_PER_PAGE;
 
-  // Form for filters
-  const form = useForm<FilterFormValues>({
-    resolver: zodResolver(filterSchema),
+  const form = useForm<ReturnsFilterFormValues>({
+    resolver: zodResolver(returnsFilterSchema),
     defaultValues: {
       date_from: searchParams.get("date_from") || undefined,
       date_to: searchParams.get("date_to") || undefined,
+      client_id: searchParams.get("client_id") || undefined,
     },
   });
 
@@ -94,11 +92,12 @@ function ReturnsList() {
   // Watch form values
   const formValues = form.watch();
 
-  // Debounce form values
-  const debouncedFormValues = useDebounce({ value: formValues, delay: 500 });
+  const debouncedFormValues = useDebounce({
+    value: formValues,
+    delay: FILTER_DEBOUNCE_MS,
+  });
 
-  // Reset page to 1 when filters change
-  const prevFormValuesRef = useRef<FilterFormValues | null>(null);
+  const prevFormValuesRef = useRef<ReturnsFilterFormValues | null>(null);
   const isInitialMount = useRef(true);
 
   useEffect(() => {
@@ -112,8 +111,8 @@ function ReturnsList() {
     if (prevValues !== null) {
       const hasChanged = Object.keys(formValues).some(
         (key) =>
-          formValues[key as keyof FilterFormValues] !==
-          prevValues[key as keyof FilterFormValues]
+          formValues[key as keyof ReturnsFilterFormValues] !==
+          prevValues[key as keyof ReturnsFilterFormValues]
       );
       if (hasChanged && page !== 1) {
         setSearchParams((prev) => {
@@ -126,37 +125,48 @@ function ReturnsList() {
     prevFormValuesRef.current = formValues;
   }, [formValues, page, setSearchParams]);
 
-  // Build filters object
   const filters = useMemo(() => {
     const values = debouncedFormValues;
     return {
-      returned: true,
+      ...RETURNS_FILTER,
       date_from: values.date_from || undefined,
       date_to: values.date_to || undefined,
+      client_id:
+        values.client_id && values.client_id.trim() !== ""
+          ? values.client_id
+          : undefined,
     };
   }, [debouncedFormValues]);
 
   // Update URL params when filters change
   useEffect(() => {
     const params = new URLSearchParams(searchParams);
-    if (filters.date_from) {
-      params.set("date_from", filters.date_from);
-    } else {
-      params.delete("date_from");
-    }
-    if (filters.date_to) {
-      params.set("date_to", filters.date_to);
-    } else {
-      params.delete("date_to");
-    }
+    if (filters.date_from) params.set("date_from", filters.date_from);
+    else params.delete("date_from");
+    if (filters.date_to) params.set("date_to", filters.date_to);
+    else params.delete("date_to");
+    if (filters.client_id) params.set("client_id", String(filters.client_id));
+    else params.delete("client_id");
     params.set("page", page.toString());
+    params.set("per_page", per_page.toString());
     setSearchParams(params, { replace: true });
-  }, [filters, page, searchParams, setSearchParams]);
+  }, [filters, page, per_page, searchParams, setSearchParams]);
 
   // Data fetching
   const { data, isPending, isError, error, refetch } = useQuery(
     useGetOrdersQueryOptions(page, per_page, filters)
   );
+
+  // Client-side filter: show only returned orders (fallback if API returns all)
+  const displayedOrders = useMemo(() => {
+    if (!data?.data) return [];
+    const list = data.data;
+    return list.filter((order) => {
+      if (order.is_returned === true) return true;
+      const statusStr = (order as unknown as { status?: string }).status;
+      return statusStr === "returned";
+    });
+  }, [data?.data]);
 
   // Export Mutation
   const { mutate: exportOrdersToCSV, isPending: isExporting } = useMutation(
@@ -235,8 +245,9 @@ function ReturnsList() {
     form.reset({
       date_from: undefined,
       date_to: undefined,
+      client_id: undefined,
     });
-    setSearchParams({ page: "1" });
+    setSearchParams({ page: "1", per_page: per_page.toString() });
   };
 
   // Check if order can be returned
@@ -279,7 +290,7 @@ function ReturnsList() {
               <h3 className="mb-3 text-sm font-semibold text-foreground">الفلاتر</h3>
               <Form {...form}>
                 <form className="space-y-4">
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <FormField
                       control={form.control}
                       name="date_from"
@@ -309,6 +320,23 @@ function ReturnsList() {
                               value={field.value}
                               onChange={field.onChange}
                               placeholder="اختر التاريخ إلى"
+                              disabled={isPending}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="client_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>العميل</FormLabel>
+                          <FormControl>
+                            <ClientsSelect
+                              value={field.value ?? ""}
+                              onChange={field.onChange}
                               disabled={isPending}
                             />
                           </FormControl>
@@ -357,8 +385,8 @@ function ReturnsList() {
                 <TableBody>
                   {isPending ? (
                     <OrdersTableSkeleton rows={5} />
-                  ) : data && data.data.length > 0 ? (
-                    data.data.map((order) => (
+                  ) : displayedOrders.length > 0 ? (
+                    displayedOrders.map((order) => (
                       <TableRow key={order.id}>
                         <TableCell
                           className="font-medium text-center cursor-pointer"
@@ -419,7 +447,7 @@ function ReturnsList() {
                               </Tooltip>
                             </TooltipProvider>
 
-                            {/* Return Button - فقط للطلبات القابلة للإرجاع */}
+                            {/* Return Button - only for returnable orders */}
                             {canReturnOrder(order) && (
                               <TooltipProvider>
                                 <Tooltip>
@@ -452,7 +480,7 @@ function ReturnsList() {
                         colSpan={10}
                         className="py-10 text-center text-muted-foreground"
                       >
-                        لا توجد ارجاعات لعرضها.
+                        لا توجد أوردرات مرجعة لعرضها.
                       </TableCell>
                     </TableRow>
                   )}
@@ -465,7 +493,7 @@ function ReturnsList() {
         <CardFooter className="flex items-center justify-between">
           <CustomPagination
             totalElementsLabel="إجمالي الارجاعات"
-            totalElements={data?.total || 0}
+            totalElements={data?.total ?? 0}
             totalPages={data?.total_pages || 1}
             isLoading={isPending}
           />

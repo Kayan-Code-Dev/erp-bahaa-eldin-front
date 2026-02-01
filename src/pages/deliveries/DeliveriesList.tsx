@@ -64,7 +64,6 @@ import { OrderDetailsModal } from "@/pages/orders/OrderDetailsModal";
 import { getOrderTypeLabel, getStatusVariant, getStatusLabel } from "@/api/v2/orders/order.utils";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import {
   Form,
   FormControl,
@@ -74,6 +73,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { CustomCalendar } from "@/components/custom/CustomCalendar";
+import { ClientsSelect } from "@/components/custom/ClientsSelect";
 import useDebounce from "@/hooks/useDebounce";
 import {
   Tooltip,
@@ -81,25 +81,28 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-
-const filterSchema = z.object({
-  date_from: z.string().optional(),
-  date_to: z.string().optional(),
-});
-
-type FilterFormValues = z.infer<typeof filterSchema>;
+import {
+  DEFAULT_PER_PAGE,
+  FILTER_DEBOUNCE_MS,
+  DELIVERIES_STATUS,
+} from "./constants";
+import {
+  deliveriesFilterSchema,
+  type DeliveriesFilterFormValues,
+} from "./deliveriesFilter.schema";
 
 function DeliveriesList() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const page = Number(searchParams.get("page")) || 1;
-  const per_page = 10;
+  const per_page = Number(searchParams.get("per_page")) || DEFAULT_PER_PAGE;
 
-  const form = useForm<FilterFormValues>({
-    resolver: zodResolver(filterSchema),
+  const form = useForm<DeliveriesFilterFormValues>({
+    resolver: zodResolver(deliveriesFilterSchema),
     defaultValues: {
       date_from: searchParams.get("date_from") || undefined,
       date_to: searchParams.get("date_to") || undefined,
+      client_id: searchParams.get("client_id") || undefined,
     },
   });
 
@@ -113,9 +116,12 @@ function DeliveriesList() {
   const [orderToAction, setOrderToAction] = useState<TOrder | null>(null);
 
   const formValues = form.watch();
-  const debouncedFormValues = useDebounce({ value: formValues, delay: 500 });
+  const debouncedFormValues = useDebounce({
+    value: formValues,
+    delay: FILTER_DEBOUNCE_MS,
+  });
 
-  const prevFormValuesRef = useRef<FilterFormValues | null>(null);
+  const prevFormValuesRef = useRef<DeliveriesFilterFormValues | null>(null);
   const isInitialMount = useRef(true);
 
   useEffect(() => {
@@ -129,8 +135,8 @@ function DeliveriesList() {
     if (prevValues !== null) {
       const hasChanged = Object.keys(formValues).some(
         (key) =>
-          formValues[key as keyof FilterFormValues] !==
-          prevValues[key as keyof FilterFormValues]
+          formValues[key as keyof DeliveriesFilterFormValues] !==
+          prevValues[key as keyof DeliveriesFilterFormValues]
       );
       if (hasChanged && page !== 1) {
         setSearchParams((prev) => {
@@ -146,27 +152,28 @@ function DeliveriesList() {
   const filters = useMemo(() => {
     const values = debouncedFormValues;
     return {
-      status: "delivered",
+      status: DELIVERIES_STATUS,
       date_from: values.date_from || undefined,
       date_to: values.date_to || undefined,
+      client_id:
+        values.client_id && values.client_id.trim() !== ""
+          ? values.client_id
+          : undefined,
     };
   }, [debouncedFormValues]);
 
   useEffect(() => {
     const params = new URLSearchParams(searchParams);
-    if (filters.date_from) {
-      params.set("date_from", filters.date_from);
-    } else {
-      params.delete("date_from");
-    }
-    if (filters.date_to) {
-      params.set("date_to", filters.date_to);
-    } else {
-      params.delete("date_to");
-    }
+    if (filters.date_from) params.set("date_from", filters.date_from);
+    else params.delete("date_from");
+    if (filters.date_to) params.set("date_to", filters.date_to);
+    else params.delete("date_to");
+    if (filters.client_id) params.set("client_id", String(filters.client_id));
+    else params.delete("client_id");
     params.set("page", page.toString());
+    params.set("per_page", per_page.toString());
     setSearchParams(params, { replace: true });
-  }, [filters, page, searchParams, setSearchParams]);
+  }, [filters, page, per_page, searchParams, setSearchParams]);
 
   // Data fetching
   const { data, isPending, isError, error, refetch } = useQuery(
@@ -296,8 +303,9 @@ function DeliveriesList() {
     form.reset({
       date_from: undefined,
       date_to: undefined,
+      client_id: undefined,
     });
-    setSearchParams({ page: "1" });
+    setSearchParams({ page: "1", per_page: per_page.toString() });
   };
 
   // Check if order can be marked as delivered
@@ -345,7 +353,7 @@ function DeliveriesList() {
               <h3 className="mb-3 text-sm font-semibold text-foreground">الفلاتر</h3>
               <Form {...form}>
                 <form className="space-y-4">
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <FormField
                       control={form.control}
                       name="date_from"
@@ -375,6 +383,23 @@ function DeliveriesList() {
                               value={field.value}
                               onChange={field.onChange}
                               placeholder="اختر التاريخ إلى"
+                              disabled={isPending}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="client_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>العميل</FormLabel>
+                          <FormControl>
+                            <ClientsSelect
+                              value={field.value ?? ""}
+                              onChange={field.onChange}
                               disabled={isPending}
                             />
                           </FormControl>

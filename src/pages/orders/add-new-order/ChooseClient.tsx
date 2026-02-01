@@ -661,7 +661,7 @@ function ChooseClient() {
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6">
-          {/* القائمة اليسارية */}
+          {/* Left column */}
           <div className="lg:w-1/3 space-y-6">
             <Card className="shadow-lg border-gray-200">
               <CardHeader className="bg-gradient-to-l from-purple-50 to-white border-b">
@@ -795,7 +795,7 @@ function ChooseClient() {
                           أدخل بيانات العميل الجديد وسيتم إنشاء الطلب باسمه بعد الحفظ.
                         </p>
 
-                        {/* البيانات الأساسية — الاسم والرقم القومي من جهة اليمين */}
+                        {/* Basic data — name and national ID on the right */}
                         <div className="rounded-xl border bg-muted/30 p-4 space-y-4">
                           <div className="flex items-center gap-2 text-right">
                             <UserCircle className="h-5 w-5 text-primary" />
@@ -872,7 +872,7 @@ function ChooseClient() {
                           </div>
                         </div>
 
-                        {/* أرقام الهاتف */}
+                        {/* Phone numbers */}
                         <div className="rounded-xl border bg-muted/30 p-4 space-y-4">
                           <div className="flex items-center gap-2 text-right">
                             <Phone className="h-5 w-5 text-primary" />
@@ -920,7 +920,7 @@ function ChooseClient() {
                           </div>
                         </div>
 
-                        {/* العنوان */}
+                        {/* Address */}
                         <div className="rounded-xl border bg-muted/30 p-4 space-y-4">
                           <div className="flex items-center gap-2 text-right">
                             <MapPin className="h-5 w-5 text-primary" />
@@ -1127,7 +1127,7 @@ function ChooseClient() {
             )}
           </div>
 
-          {/* القائمة اليمينية */}
+          {/* Right column */}
           <div className="lg:w-2/3 space-y-6">
             <Card className="shadow-lg border-gray-200">
               <CardHeader className="bg-gradient-to-l from-amber-50 to-white border-b">

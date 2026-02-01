@@ -40,7 +40,6 @@ import { OrderDetailsModal } from "@/pages/orders/OrderDetailsModal";
 import { getOrderTypeLabel, getStatusVariant, getStatusLabel } from "@/api/v2/orders/order.utils";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import {
   Form,
   FormControl,
@@ -50,6 +49,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { CustomCalendar } from "@/components/custom/CustomCalendar";
+import { ClientsSelect } from "@/components/custom/ClientsSelect";
 import {
   Dialog,
   DialogContent,
@@ -58,26 +58,28 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import useDebounce from "@/hooks/useDebounce";
-
-const filterSchema = z.object({
-  date_from: z.string().optional(),
-  date_to: z.string().optional(),
-});
-
-type FilterFormValues = z.infer<typeof filterSchema>;
+import {
+  DEFAULT_PER_PAGE,
+  FILTER_DEBOUNCE_MS,
+  OVERDUE_RETURNS_FILTER,
+} from "./constants";
+import {
+  overduereturnsFilterSchema,
+  type OverduereturnsFilterFormValues,
+} from "./overduereturnsFilter.schema";
 
 function OverdueReturnsList() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const page = Number(searchParams.get("page")) || 1;
-  const per_page = 10;
+  const per_page = Number(searchParams.get("per_page")) || DEFAULT_PER_PAGE;
 
-  // Form for filters
-  const form = useForm<FilterFormValues>({
-    resolver: zodResolver(filterSchema),
+  const form = useForm<OverduereturnsFilterFormValues>({
+    resolver: zodResolver(overduereturnsFilterSchema),
     defaultValues: {
       date_from: searchParams.get("date_from") || undefined,
       date_to: searchParams.get("date_to") || undefined,
+      client_id: searchParams.get("client_id") || undefined,
     },
   });
 
@@ -94,11 +96,12 @@ function OverdueReturnsList() {
   // Watch form values
   const formValues = form.watch();
 
-  // Debounce form values
-  const debouncedFormValues = useDebounce({ value: formValues, delay: 500 });
+  const debouncedFormValues = useDebounce({
+    value: formValues,
+    delay: FILTER_DEBOUNCE_MS,
+  });
 
-  // Reset page to 1 when filters change
-  const prevFormValuesRef = useRef<FilterFormValues | null>(null);
+  const prevFormValuesRef = useRef<OverduereturnsFilterFormValues | null>(null);
   const isInitialMount = useRef(true);
 
   useEffect(() => {
@@ -112,8 +115,8 @@ function OverdueReturnsList() {
     if (prevValues !== null) {
       const hasChanged = Object.keys(formValues).some(
         (key) =>
-          formValues[key as keyof FilterFormValues] !==
-          prevValues[key as keyof FilterFormValues]
+          formValues[key as keyof OverduereturnsFilterFormValues] !==
+          prevValues[key as keyof OverduereturnsFilterFormValues]
       );
       if (hasChanged && page !== 1) {
         setSearchParams((prev) => {
@@ -126,37 +129,48 @@ function OverdueReturnsList() {
     prevFormValuesRef.current = formValues;
   }, [formValues, page, setSearchParams]);
 
-  // Build filters object
   const filters = useMemo(() => {
     const values = debouncedFormValues;
     return {
-      overdue: true,
+      ...OVERDUE_RETURNS_FILTER,
       date_from: values.date_from || undefined,
       date_to: values.date_to || undefined,
+      client_id:
+        values.client_id && values.client_id.trim() !== ""
+          ? values.client_id
+          : undefined,
     };
   }, [debouncedFormValues]);
 
   // Update URL params when filters change
   useEffect(() => {
     const params = new URLSearchParams(searchParams);
-    if (filters.date_from) {
-      params.set("date_from", filters.date_from);
-    } else {
-      params.delete("date_from");
-    }
-    if (filters.date_to) {
-      params.set("date_to", filters.date_to);
-    } else {
-      params.delete("date_to");
-    }
+    if (filters.date_from) params.set("date_from", filters.date_from);
+    else params.delete("date_from");
+    if (filters.date_to) params.set("date_to", filters.date_to);
+    else params.delete("date_to");
+    if (filters.client_id) params.set("client_id", String(filters.client_id));
+    else params.delete("client_id");
     params.set("page", page.toString());
+    params.set("per_page", per_page.toString());
     setSearchParams(params, { replace: true });
-  }, [filters, page, searchParams, setSearchParams]);
+  }, [filters, page, per_page, searchParams, setSearchParams]);
 
   // Data fetching
   const { data, isPending, isError, error, refetch } = useQuery(
     useGetOrdersQueryOptions(page, per_page, filters)
   );
+
+  // Client-side filter: show only overdue orders (fallback if API returns all)
+  const displayedOrders = useMemo(() => {
+    if (!data?.data) return [];
+    const list = data.data;
+    return list.filter((order) => {
+      if (order.is_overdue === true) return true;
+      const statusStr = (order as unknown as { status?: string }).status;
+      return statusStr === "overdue";
+    });
+  }, [data?.data]);
 
   // Export Mutation
   const { mutate: exportOrdersToCSV, isPending: isExporting } = useMutation(
@@ -235,8 +249,9 @@ function OverdueReturnsList() {
     form.reset({
       date_from: undefined,
       date_to: undefined,
+      client_id: undefined,
     });
-    setSearchParams({ page: "1" });
+    setSearchParams({ page: "1", per_page: per_page.toString() });
   };
 
   // Check if order can be returned
@@ -280,7 +295,7 @@ function OverdueReturnsList() {
               <h3 className="mb-3 text-sm font-semibold text-foreground">الفلاتر</h3>
               <Form {...form}>
                 <form className="space-y-4">
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <FormField
                       control={form.control}
                       name="date_from"
@@ -310,6 +325,23 @@ function OverdueReturnsList() {
                               value={field.value}
                               onChange={field.onChange}
                               placeholder="اختر التاريخ إلى"
+                              disabled={isPending}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="client_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>العميل</FormLabel>
+                          <FormControl>
+                            <ClientsSelect
+                              value={field.value ?? ""}
+                              onChange={field.onChange}
                               disabled={isPending}
                             />
                           </FormControl>
@@ -358,8 +390,8 @@ function OverdueReturnsList() {
                 <TableBody>
                   {isPending ? (
                     <OrdersTableSkeleton rows={5} />
-                  ) : data && data.data.length > 0 ? (
-                    data.data.map((order) => (
+                  ) : displayedOrders.length > 0 ? (
+                    displayedOrders.map((order) => (
                       <TableRow key={order.id}>
                         <TableCell
                           className="font-medium text-center cursor-pointer"
@@ -450,7 +482,7 @@ function OverdueReturnsList() {
                         colSpan={10}
                         className="py-10 text-center text-muted-foreground"
                       >
-                        لا توجد ارجاعات متأخرة لعرضها.
+                        لا توجد أوردرات متأخرة لعرضها.
                       </TableCell>
                     </TableRow>
                   )}
@@ -499,7 +531,7 @@ function OverdueReturnsList() {
                     <div>
                       <p className="font-medium">{item.name}</p>
                       <p className="text-sm text-muted-foreground">كود: {item.code}</p>
-                      {item.returnable === "0" && (
+                      {item.returnable === 0 && (
                         <p className="mt-1 text-xs text-destructive">غير قابل للإرجاع</p>
                       )}
                     </div>
@@ -507,7 +539,7 @@ function OverdueReturnsList() {
                       size="sm"
                       variant="outline"
                       onClick={() => {
-                        if (item.returnable === "1") {
+                        if (item.returnable === 1) {
                           handleReturnItem(item.id, {
                             entity_type: orderToReturn.entity_type,
                             entity_id: orderToReturn.entity_id,
@@ -518,9 +550,9 @@ function OverdueReturnsList() {
                           toast.warning("هذا المنتج غير قابل للإرجاع");
                         }
                       }}
-                      disabled={isReturning || item.returnable === "0"}
+                      disabled={isReturning || item.returnable === 0}
                     >
-                      {item.returnable === "1" ? "إرجاع" : "غير قابل"}
+                      {item.returnable === 1 ? "إرجاع" : "غير قابل"}
                     </Button>
                   </div>
                 ))}

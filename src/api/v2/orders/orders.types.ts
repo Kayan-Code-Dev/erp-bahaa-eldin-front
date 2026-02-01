@@ -132,6 +132,9 @@ export type TOrder = {
   client: TOrderClient;
   inventory?: TOrderInventory | null;
   items: TOrderItem[];
+  /** Set by API when filtering returned/overdue orders */
+  is_returned?: boolean;
+  is_overdue?: boolean;
 };
 
 export type TOrderPaymentStatus =

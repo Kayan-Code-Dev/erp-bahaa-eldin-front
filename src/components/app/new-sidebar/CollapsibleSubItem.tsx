@@ -38,7 +38,7 @@ const CollapsibleSubItem = ({ item, keyPrefix }: { item: SidebarLabel; keyPrefix
 
                     {/* The dropdown trigger button (chevron) */}
                     <CollapsibleTrigger asChild>
-                        {/* The main link (e.g., "إدارة الفروع") */}
+                        {/* The main link (e.g. branch management) */}
                         <SidebarMenuButton
                             asChild
                             className={cn(

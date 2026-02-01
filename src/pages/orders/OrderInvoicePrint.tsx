@@ -115,7 +115,7 @@ export function OrderInvoicePrint({
       className="invoice-print-root w-full min-h-screen flex flex-col bg-white text-gray-800 text-[15px] leading-relaxed"
       style={{ fontFamily: "'Segoe UI', 'Cairo', Arial, sans-serif" }}
     >
-      {/* الهيدر بعرض كامل الشاشة */}
+      {/* Full-width header */}
       <header
         className="invoice-print-header w-full py-6 mb-8 text-white rounded-b-2xl shadow-md"
         style={{ backgroundColor: HEADER_BG }}
@@ -249,7 +249,7 @@ export function OrderInvoicePrint({
         </div>
       </div>
 
-      {/* الشريط السفلي ثابت في أسفل الصفحة */}
+      {/* Fixed bottom bar at page bottom */}
       <div
         className="invoice-print-footer w-full mt-auto py-4 px-6 text-center text-white rounded-t-2xl text-sm font-medium shadow-md shrink-0"
         style={{ backgroundColor: HEADER_BG }}

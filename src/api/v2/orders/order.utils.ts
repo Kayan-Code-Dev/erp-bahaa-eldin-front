@@ -8,7 +8,7 @@ export const getOrderTypeLabel = (order_type: TOrder["order_type"]) => {
   return order_type;
 };
 
-export const getStatusVariant = (status: TOrder["status"]) => {
+export const getStatusVariant = (status: TOrder["status"] | string) => {
   switch (status) {
     case "paid":
       return "bg-green-600 text-white hover:bg-green-600/80";
@@ -16,6 +16,10 @@ export const getStatusVariant = (status: TOrder["status"]) => {
       return "bg-yellow-500 text-white hover:bg-yellow-500/80";
     case "canceled":
       return "bg-destructive text-destructive-foreground hover:bg-destructive/90";
+    case "returned":
+      return "bg-purple-600 text-white hover:bg-purple-600/80";
+    case "overdue":
+      return "bg-amber-600 text-white hover:bg-amber-600/80";
     case "created":
     case "delivered":
     default:
@@ -23,13 +27,15 @@ export const getStatusVariant = (status: TOrder["status"]) => {
   }
 };
 
-export const getStatusLabel = (status: TOrder["status"]) => {
-  const labels: Record<TOrder["status"], string> = {
+export const getStatusLabel = (status: TOrder["status"] | string) => {
+  const labels: Record<string, string> = {
     created: "تم إنشاء الطلب",
     paid: "مدفوع",
     partially_paid: "مدفوع جزئياً",
     canceled: "ملغي",
     delivered: "تم تسليم الطلب",
+    returned: "مرتجع",
+    overdue: "متأخر",
   };
-  return labels[status] || status;
+  return labels[status] ?? status;
 };

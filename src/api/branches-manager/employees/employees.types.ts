@@ -1,7 +1,7 @@
 import z from "zod";
 
 export type TBranchEmployee = {
-  // ********************* البيانات العامة ***************************
+  // ********************* General data ***************************
   uuid: string;
   full_name: string;
   branch_name: string;
@@ -11,7 +11,7 @@ export type TBranchEmployee = {
   employment_history: string;
   blocked: boolean;
 
-  // ********************* الحقول الاختيارية ***************************
+  // ********************* Optional fields ***************************
   phone?: string;
   mobile?: string;
   location?: string;
@@ -19,7 +19,7 @@ export type TBranchEmployee = {
   longitude?: string;
   status?: "active" | "inactive" | string;
 
-  // ********************* البيانات الأساسية ***************************
+  // ********************* Basic data ***************************
   branch_id?: string;
   department_id?: string;
   country_id?: string;
@@ -27,11 +27,11 @@ export type TBranchEmployee = {
   national_id?: string;
   branch_job_id?: string;
 
-  // ********************* بيانات تسجيل الدخول ***************************
+  // ********************* Login data ***************************
   role_id?: string;
   username?: string;
 
-  // ********************* بيانات التوظيف ***************************
+  // ********************* Employment data ***************************
   salary?: string;
   hire_date?: string;
   commission?: string;
@@ -47,7 +47,7 @@ export type TListItem = {
 }
 
 export const employeeSchema = z.object({
-  // ********************* البيانات الأساسية ***************************
+  // ********************* Basic data ***************************
   full_name: z.string().min(2, { message: "الاسم الكامل مطلوب" }),
   branch_id: z.string().min(1, { message: "رقم الفرع مطلوب" }),
   phone: z.string().min(8, { message: "رقم الهاتف مطلوب" }),
@@ -57,12 +57,12 @@ export const employeeSchema = z.object({
   national_id: z.string().min(2, { message: "الرقم القومي مطلوب" }),
   branch_job_id: z.string().min(1, { message: "الوظيفة مطلوبة" }),
 
-  // ********************* بيانات تسجيل الدخول ***************************
+  // ********************* Login data ***************************
   role_id: z.string().min(1, { message: "الدور مطلوب" }),
   username: z.string().min(2, { message: "اسم المستخدم مطلوب" }),
   email: z.string().email({ message: "البريد الإلكتروني غير صالح" }),
 
-  // ********************* بيانات التوظيف ***************************
+  // ********************* Employment data ***************************
   salary: z.string().min(1, { message: "الراتب مطلوب" }),
   hire_date: z.string().min(1, { message: "تاريخ التعيين مطلوب" }),
   commission: z.string().optional(),

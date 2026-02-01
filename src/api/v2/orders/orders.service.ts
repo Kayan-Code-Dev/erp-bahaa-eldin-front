@@ -31,15 +31,19 @@ export const getOrders = async (
     date_to?: string;
     returned?: boolean;
     overdue?: boolean;
+    client_id?: string | number;
   },
 ) => {
   try {
-    const params: any = { page, per_page };
+    const params: Record<string, string | number | boolean> = { page, per_page };
     if (filters?.status) params.status = filters.status;
     if (filters?.date_from) params.date_from = filters.date_from;
     if (filters?.date_to) params.date_to = filters.date_to;
-    if (filters?.returned !== undefined) params.returned = filters.returned;
-    if (filters?.overdue !== undefined) params.overdue = filters.overdue;
+    if (filters?.returned === true) params.returned = 1;
+    if (filters?.overdue === true) params.overdue = 1;
+    if (filters?.client_id !== undefined && filters.client_id !== "" && filters.client_id != null) {
+      params.client_id = typeof filters.client_id === "string" ? Number(filters.client_id) : filters.client_id;
+    }
 
     const { data: responseData } = await api.get<TPaginationResponse<TOrder>>(
       `/orders`,

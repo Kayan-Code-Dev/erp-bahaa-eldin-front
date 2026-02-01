@@ -54,7 +54,7 @@ export type SidebarLabel = {
 };
 
 export const sidebarLabels: SidebarLabel[] = [
-  // 1. لوحة التحكم
+  // 1. Dashboard
   {
     icon: null,
     label: "لوحة التحكم",
@@ -62,7 +62,7 @@ export const sidebarLabels: SidebarLabel[] = [
     level: 1,
     iconComponent: createIcon(LayoutDashboard),
   },
-  // 2. الخزنة و المحاسبة
+  // 2. Cashbox and accounting
   {
     icon: null,
     label: "الخزنة و المحاسبة",
@@ -86,7 +86,7 @@ export const sidebarLabels: SidebarLabel[] = [
       },
     ],
   },
-  // 3. الفواتير
+  // 3. Invoices
   {
     icon: null,
     label: "الفواتير",
@@ -110,7 +110,7 @@ export const sidebarLabels: SidebarLabel[] = [
       },
     ],
   },
-  // 4. التسليم والارجاع
+  // 4. Deliveries and returns
   {
     icon: null,
     label: "التسليم والارجاع",
@@ -141,7 +141,7 @@ export const sidebarLabels: SidebarLabel[] = [
       },
     ],
   },
-  // 5. الخزنة
+  // 5. Cashbox
   {
     icon: null,
     label: "الخزنة",
@@ -149,7 +149,7 @@ export const sidebarLabels: SidebarLabel[] = [
     level: 1,
     iconComponent: createIcon(Banknote),
   },
-  // 6. العملاء
+  // 6. Clients
   {
     icon: null,
     label: "العملاء",
@@ -157,7 +157,7 @@ export const sidebarLabels: SidebarLabel[] = [
     level: 1,
     iconComponent: createIcon(Users),
   },
-  // 7. الموظفين
+  // 7. Employees
   {
     icon: null,
     label: "الموظفين",
@@ -202,7 +202,7 @@ export const sidebarLabels: SidebarLabel[] = [
       },
     ],
   },
-  // 8. الصلاحيات
+  // 8. Permissions
   {
     icon: null,
     label: "الصلاحيات",
@@ -219,7 +219,7 @@ export const sidebarLabels: SidebarLabel[] = [
       },
     ],
   },
-  // 9. الفروع
+  // 9. Branches
   {
     icon: null,
     label: "الفروع",
@@ -227,7 +227,7 @@ export const sidebarLabels: SidebarLabel[] = [
     level: 1,
     iconComponent: createIcon(Building2),
   },
-  // 10. إدارة الموردين
+  // 10. Supplier management
   {
     icon: null,
     label: "إدارة الموردين",
@@ -266,7 +266,7 @@ export const sidebarLabels: SidebarLabel[] = [
       },
     ],
   },
-  // 11. التقارير
+  // 11. Reports
   {
     icon: null,
     label: "التقارير",
@@ -469,7 +469,7 @@ export const sidebarLabels: SidebarLabel[] = [
   //     },
   //   ],
   // },
-  // إدارة المنتجات
+  // Product management
   {
     icon: null,
     label: "إدارة المنتجات",

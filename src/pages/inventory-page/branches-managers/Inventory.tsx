@@ -25,7 +25,7 @@ import CustomPagination from "@/components/custom/CustomPagination";
 import { format, parse } from "date-fns";
 
 const getStatusVariant = (status: TInventoryItem["status"]) => {
-  const normalizedStatus = status.trim(); // Handles "قيد الانتظار "
+  const normalizedStatus = status.trim(); // Handles trimmed status (e.g. pending)
   switch (normalizedStatus) {
     case "كافية":
       return "bg-green-600 text-white hover:bg-green-600/80";

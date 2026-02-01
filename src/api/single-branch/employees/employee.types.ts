@@ -1,7 +1,7 @@
 import z from "zod";
 
 export const branchEmployeeSchema = z.object({
-    // ********************* البيانات الأساسية ***************************
+    // ********************* Basic data ***************************
     full_name: z.string().min(2, { message: "الاسم الكامل مطلوب" }),
     phone: z.string().min(8, { message: "رقم الهاتف مطلوب" }),
     department_id: z.string().min(1, { message: "رقم القسم مطلوب" }),
@@ -10,12 +10,12 @@ export const branchEmployeeSchema = z.object({
     national_id: z.string().min(2, { message: "الرقم القومي مطلوب" }),
     branch_job_id: z.string().min(1, { message: "الوظيفة مطلوبة" }),
 
-    // ********************* بيانات تسجيل الدخول ***************************
+    // ********************* Login data ***************************
     role_id: z.string().min(1, { message: "الدور مطلوب" }),
     username: z.string().min(2, { message: "اسم المستخدم مطلوب" }),
     email: z.string().email({ message: "البريد الإلكتروني غير صالح" }),
 
-    // ********************* بيانات التوظيف ***************************
+    // ********************* Employment data ***************************
     salary: z.string().min(1, { message: "الراتب مطلوب" }),
     hire_date: z.string().min(1, { message: "تاريخ التعيين مطلوب" }),
     commission: z.string().optional(),

@@ -6,7 +6,7 @@ export type TCreateSupplierMinimalRequest = {
   code: string;
 };
 
-// —— إنشاء مورد (مع الطلبية الأولى) ——
+/** Create supplier (with first order) */
 export type TCreateSupplierClothItem = {
   code: string;
   name: string;
@@ -41,7 +41,7 @@ export type TSupplierResponse = {
 
 export type TSuppliersListResponse = TPaginationResponse<TSupplierResponse>;
 
-// —— عرض طلبيات الموردين ——
+/** Supplier orders list */
 export type TSupplierOrderResponse = {
   id: number;
   supplier_id: number;

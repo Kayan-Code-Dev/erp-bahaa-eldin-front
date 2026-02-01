@@ -27,7 +27,7 @@ export type TOrder = {
   address: string;
   visit_date: string; // e.g. "02-11-2025 15:00"
   source: string | null;
-  order_type: TOrderType; // e.g. "تفصيل"
+  order_type: TOrderType; // e.g. tailoring
   order_number: string;
   model_name: string;
   measurements: TMeasurement;
@@ -109,7 +109,7 @@ export type TOrderSchemaType = TOrderSchema["order_type"];
 export const getOrderTypeDisplay = (type: TOrderType) => {
   if (type === "rent") return "إيجار";
   if (type === "purchase") return "شراء";
-  if (type === "tailoring") return "تفصيل"; // Or "بناء"
+  if (type === "tailoring") return "تفصيل"; // Or tailoring/build
   return type;
 };
 
