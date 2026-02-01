@@ -1,0 +1,289 @@
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { useForm, useWatch } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Loader2 } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  useCreateBranchesInventory,
+  useGetBranchesInventoryCategories,
+  useGetBranchesInventorySubCategoriesByCategory,
+} from "@/api/inventory/branches/inventory.hooks";
+import { TCreateBranchesInventoryRequest } from "@/api/inventory/branches/inventory.service";
+import { toast } from "sonner";
+import { TInventoryItemType } from "@/api/inventory/inventory.types";
+
+// Example types. Update this as needed.
+const ITEM_TYPES : TInventoryItemType[] = ["product", "raw"];
+
+// Schema for the form
+const formSchema = z.object({
+  name: z.string().min(2, { message: "الاسم مطلوب" }),
+  category_id: z.coerce.number({ required_error: "الفئة مطلوبة" }),
+  subCategories_id: z.coerce.number({ required_error: "الفئة الفرعية مطلوبة" }),
+  price: z.coerce.number().min(1, { message: "السعر مطلوب" }),
+  quantity: z.coerce.number().min(1, { message: "الكمية مطلوبة" }),
+  type: z.string({ required_error: "النوع مطلوب" }),
+  notes: z.string().optional(),
+});
+
+type Props = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+};
+
+export function CreateBranchesInventoryModal({ open, onOpenChange }: Props) {
+  const { mutate: createItem, isPending } = useCreateBranchesInventory();
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      price: 0,
+      quantity: 1,
+      notes: "",
+    },
+  });
+
+  // --- Dependent Dropdown Logic ---
+  const categoryId = useWatch({ control: form.control, name: "category_id" });
+  const { data: categories, isLoading: isLoadingCategories } =
+    useGetBranchesInventoryCategories();
+  const { data: subCategories, isLoading: isLoadingSubCategories } =
+    useGetBranchesInventorySubCategoriesByCategory(categoryId);
+  // ---
+
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
+    createItem(values as TCreateBranchesInventoryRequest, {
+      onSuccess: () => {
+        toast.success("تم إنشاء الصنف بنجاح");
+        form.reset();
+        onOpenChange(false);
+      },
+      onError: (error) => {
+        toast.error("حدث خطأ أثناء إنشاء الصنف", {
+          description: error.message,
+        });
+      },
+    });
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-center">
+            إضافة صنف جديد للمخزن
+          </DialogTitle>
+          <DialogDescription className="text-center">
+            املأ البيانات لإضافة صنف جديد.
+          </DialogDescription>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <ScrollArea className="h-[65vh] p-4">
+              <div className="space-y-4" dir="rtl">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>اسم الصنف</FormLabel>
+                      <FormControl>
+                        <Input placeholder="اسم الصنف..." {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Category */}
+                <FormField
+                  control={form.control}
+                  name="category_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>الفئة</FormLabel>
+                      <Select
+                        onValueChange={(value) => {
+                          field.onChange(Number(value));
+                          form.resetField("subCategories_id");
+                        }}
+                        defaultValue={String(field.value)}
+                        disabled={isLoadingCategories}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="اختر الفئة..." />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {categories?.map((cat) => (
+                            <SelectItem key={cat.id} value={String(cat.id)}>
+                              {cat.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* SubCategory */}
+                <FormField
+                  control={form.control}
+                  name="subCategories_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>الفئة الفرعية (الصنف)</FormLabel>
+                      <Select
+                        onValueChange={(value) => field.onChange(Number(value))}
+                        value={String(field.value)}
+                        disabled={!categoryId || isLoadingSubCategories}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="اختر الصنف..." />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {isLoadingSubCategories && (
+                            <div className="flex items-center justify-center p-2">
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            </div>
+                          )}
+                          {subCategories?.map((subCat) => (
+                            <SelectItem
+                              key={subCat.id}
+                              value={String(subCat.id)}
+                            >
+                              {subCat.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="flex gap-4">
+                  {/* Price */}
+                  <FormField
+                    control={form.control}
+                    name="price"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormLabel>السعر</FormLabel>
+                        <FormControl>
+                          <Input type="number" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  {/* Quantity */}
+                  <FormField
+                    control={form.control}
+                    name="quantity"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormLabel>الكمية</FormLabel>
+                        <FormControl>
+                          <Input type="number" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Type */}
+                <FormField
+                  control={form.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>نوع الصنف</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="اختر نوع الصنف..." />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {ITEM_TYPES.map((type) => (
+                            <SelectItem key={type} value={type}>
+                              {type}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Notes */}
+                <FormField
+                  control={form.control}
+                  name="notes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>ملاحظات (اختياري)</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="ملاحظات..." {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </ScrollArea>
+            <DialogFooter className="mt-4 gap-2 border-t pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+              >
+                إلغاء
+              </Button>
+              <Button type="submit" disabled={isPending}>
+                {isPending ? "جاري الإنشاء..." : "إنشاء الصنف"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}

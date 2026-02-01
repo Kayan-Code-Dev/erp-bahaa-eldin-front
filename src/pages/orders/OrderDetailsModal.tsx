@@ -1,0 +1,344 @@
+import { useQuery } from "@tanstack/react-query";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
+import { TOrder } from "@/api/v2/orders/orders.types";
+import { useGetOrderDetailsQueryOptions } from "@/api/v2/orders/orders.hooks";
+import { formatDate } from "@/utils/formatDate";
+import { getOrderTypeLabel } from "@/api/v2/orders/order.utils";
+
+type Props = {
+  order: TOrder | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+};
+
+const getStatusVariant = (status: TOrder["status"]) => {
+  switch (status) {
+    case "paid":
+      return "bg-green-600 text-white hover:bg-green-600/80";
+    case "partially_paid":
+      return "bg-yellow-500 text-white hover:bg-yellow-500/80";
+    case "canceled":
+      return "bg-destructive text-destructive-foreground hover:bg-destructive/90";
+    case "created":
+    case "delivered":
+    default:
+      return "bg-gray-500 text-white hover:bg-gray-500/80";
+  }
+};
+
+const getStatusLabel = (status: TOrder["status"]) => {
+  const labels: Record<TOrder["status"], string> = {
+    created: "تم إنشاء الطلب",
+    paid: "مدفوع",
+    partially_paid: "مدفوع جزئياً",
+    canceled: "ملغي",
+    delivered: "تم تسليم الطلب",
+  };
+  return labels[status] || status;
+};
+
+const getDiscountTypeLabel = (type?: TOrder["discount_type"]) => {
+  if (!type || type === "none") return "لا يوجد";
+  const labels: Record<
+    Exclude<TOrder["discount_type"], "none" | undefined>,
+    string
+  > = {
+    percentage: "نسبة مئوية",
+    fixed: "مبلغ ثابت",
+  };
+  return labels[type] || type;
+};
+
+export function OrderDetailsModal({ order, open, onOpenChange }: Props) {
+  const { data, isPending } = useQuery({
+    ...useGetOrderDetailsQueryOptions(order?.id || 0),
+    enabled: open && !!order?.id,
+  });
+
+  const orderData = data || order;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-4xl max-h-[95vh] overflow-y-auto scrollbar-hide">
+        <DialogHeader>
+          <DialogTitle className="text-center">تفاصيل الطلب</DialogTitle>
+          <DialogDescription className="text-center">
+            عرض جميع المعلومات المتعلقة بالطلب
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-6 mt-4">
+          {isPending ? (
+            <div className="space-y-4">
+              <Skeleton className="h-6 w-full" />
+              <Skeleton className="h-6 w-full" />
+              <Skeleton className="h-6 w-full" />
+            </div>
+          ) : orderData ? (
+            <>
+              {/* Order Basic Info */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    رقم الطلب
+                  </p>
+                  <p className="text-lg font-semibold">#{orderData.id}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    نوع الطلب
+                  </p>
+                  <p className="text-lg font-semibold">
+                    {getOrderTypeLabel(orderData.order_type)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    الحالة
+                  </p>
+                  <Badge
+                    variant="secondary"
+                    className={getStatusVariant(orderData.status)}
+                  >
+                    {getStatusLabel(orderData.status)}
+                  </Badge>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    السعر الإجمالي
+                  </p>
+                  <p className="text-lg font-semibold">
+                    {orderData.total_price} ج.م
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    المدفوع
+                  </p>
+                  <p className="text-lg font-semibold">{orderData.paid} ج.م</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    المتبقي
+                  </p>
+                  <p className="text-lg font-semibold">
+                    {orderData.remaining} ج.م
+                  </p>
+                </div>
+                {orderData.discount_type &&
+                  orderData.discount_type !== "none" && (
+                    <>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">
+                          نوع الخصم (على الطلب)
+                        </p>
+                        <p className="text-lg">
+                          {getDiscountTypeLabel(orderData.discount_type)}
+                        </p>
+                      </div>
+                      {orderData.discount_value && (
+                        <div>
+                          <p className="text-sm font-medium text-muted-foreground">
+                            قيمة الخصم (على الطلب)
+                          </p>
+                          <p className="text-lg">
+                            {orderData.discount_type === "percentage"
+                              ? `${orderData.discount_value}%`
+                              : `${orderData.discount_value} ج.م`}
+                          </p>
+                        </div>
+                      )}
+                    </>
+                  )}
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    تاريخ الزيارة
+                  </p>
+                  <p className="text-lg">
+                    {formatDate(orderData.visit_datetime)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    تاريخ الإنشاء
+                  </p>
+                  <p className="text-lg">{formatDate(orderData.created_at)}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    آخر تحديث
+                  </p>
+                  <p className="text-lg">{formatDate(orderData.updated_at)}</p>
+                </div>
+              </div>
+
+              {/* Client Info */}
+              {orderData.client && (
+                <div className="border-t pt-4">
+                  <h3 className="text-lg font-semibold mb-3">معلومات العميل</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        رقم العميل
+                      </p>
+                      <p className="text-lg">#{orderData.client.id}</p>
+                    </div>
+                    {orderData.client.address && (
+                      <>
+                        <div>
+                          <p className="text-sm font-medium text-muted-foreground">
+                            الشارع
+                          </p>
+                          <p className="text-lg">
+                            {orderData.client.address.street}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-muted-foreground">
+                            المبنى
+                          </p>
+                          <p className="text-lg">
+                            {orderData.client.address.building}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-muted-foreground">
+                            المدينة
+                          </p>
+                          <p className="text-lg">
+                            {orderData.client.address.city_name}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-muted-foreground">
+                            الدولة
+                          </p>
+                          <p className="text-lg">
+                            {orderData.client.address.country_name}
+                          </p>
+                        </div>
+                        {orderData.client.address.notes && (
+                          <div className="col-span-2">
+                            <p className="text-sm font-medium text-muted-foreground">
+                              ملاحظات العنوان
+                            </p>
+                            <p className="text-lg">
+                              {orderData.client.address.notes}
+                            </p>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Order Items */}
+              {orderData.items && orderData.items.length > 0 && (
+                <div className="border-t pt-4">
+                  <h3 className="text-lg font-semibold mb-3">عناصر الطلب</h3>
+                  <div className="overflow-hidden rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="text-center">#</TableHead>
+                          <TableHead className="text-center">الكود</TableHead>
+                          <TableHead className="text-center">الاسم</TableHead>
+                          <TableHead className="text-center">الوصف</TableHead>
+                          <TableHead className="text-center">
+                            المقاسات
+                          </TableHead>
+                          <TableHead className="text-center">الخصم</TableHead>
+                          <TableHead className="text-center">الحالة</TableHead>
+                          <TableHead className="text-center">ملاحظات</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {orderData.items.map((item, index) => (
+                          <TableRow key={item.id}>
+                            <TableCell className="text-center font-medium">
+                              {index + 1}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {item.code}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {item.name}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <div className="max-w-[200px] mx-auto text-wrap">
+                                {item.description || "-"}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {item.breast_size || "-"},{" "}
+                              {item.waist_size || "-"},{" "}
+                              {item.sleeve_size || "-"}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {item.discount_type &&
+                              item.discount_type !== "none"
+                                ? getDiscountTypeLabel(item.discount_type)
+                                : "-"} <br />
+                              {item.discount_type &&
+                              item.discount_type !== "none" &&
+                              item.discount_value
+                                ? `${
+                                    item.discount_type === "percentage"
+                                      ? `${item.discount_value}%`
+                                      : `${item.discount_value} ج.م`
+                                  }`
+                                : "-"}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {getStatusLabel(item.status)}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <div className="max-w-[200px] mx-auto text-wrap">
+                                {item.notes || "-"}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+              )}
+
+              {/* Order Notes */}
+              {orderData.order_notes && (
+                <div className="border-t pt-4">
+                  <h3 className="text-lg font-semibold mb-3">ملاحظات الطلب</h3>
+                  <p className="text-muted-foreground">
+                    {orderData.order_notes}
+                  </p>
+                </div>
+              )}
+            </>
+          ) : (
+            <p className="text-center text-muted-foreground">
+              لا توجد بيانات لعرضها.
+            </p>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
