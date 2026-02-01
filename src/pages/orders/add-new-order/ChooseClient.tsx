@@ -1602,11 +1602,7 @@ function ChooseClient() {
             </Button>
             <Button
               onClick={handleCreateOrder}
-              disabled={
-                selectedProducts.length === 0 ||
-                isCreatingOrder ||
-                (activeTab === "new" && isCreatingClient)
-              }
+              disabled={selectedProducts.length === 0 || isCreatingOrder}
               className="h-12 px-8 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isCreatingOrder ? (
