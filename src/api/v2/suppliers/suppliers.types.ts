@@ -1,74 +1,98 @@
 import { TPaginationResponse } from "@/api/api-common.types";
 
-export type TOrderType = "تفصيل" | "بيع";
+// —— إنشاء مورد (اسم وكود فقط) ——
+export type TCreateSupplierMinimalRequest = {
+  name: string;
+  code: string;
+};
+
+// —— إنشاء مورد (مع الطلبية الأولى) ——
+export type TCreateSupplierClothItem = {
+  code: string;
+  name: string;
+  cloth_type_id: number;
+  entity_type: "branch" | "factory" | "workshop";
+  entity_id: number;
+  price: number;
+};
 
 export type TCreateSupplierRequest = {
   name: string;
   code: string;
-  order_type?: TOrderType;
-  purchase_date?: string;
-  order_amount?: number;
-  paid_amount?: number;
-  remaining_amount?: number;
-  item_name?: string;
-  item_code?: string;
-  category_id?: number;
-  subcategory_id?: number;
-  model_id?: number;
-  branch_id?: number;
-  add_model?: boolean;
-};
-
-export type TCreateSupplierOrderRequest = {
-  supplier_id?: number;
-  name?: string;
-  code?: string;
-  order_type: TOrderType;
-  purchase_date: string;
-  order_amount: number;
-  paid_amount: number;
-  remaining_amount: number;
-  item_name: string;
-  item_code: string;
   category_id: number;
   subcategory_id: number;
-  model_id?: number;
   branch_id: number;
+  order_date: string;
+  total_amount: number;
+  payment_amount: number;
+  remaining_payment: number;
+  notes?: string;
+  clothes: TCreateSupplierClothItem[];
 };
 
+// —— عرض الموردين (قائمة بسيطة) ——
 export type TSupplierResponse = {
   id: number;
   name: string;
   code: string;
-  /** عند عدم وجود طلبية للمورد لا ترجع الـ API هذه الحقول */
-  order_type?: TOrderType;
-  purchase_date?: string;
-  order_amount?: number;
-  paid_amount?: number;
-  remaining_amount?: number;
-  item_name?: string;
-  item_code?: string;
-  category?: {
-    id: number;
-    name: string;
-  };
-  subcategory?: {
-    id: number;
-    name: string;
-  };
-  model?: {
-    id: number;
-    name: string;
-  };
-  branch?: {
-    id: number;
-    name: string;
-  };
   created_at: string;
   updated_at: string;
 };
 
-export type TUpdateSupplierRequest = Partial<TCreateSupplierRequest>;
-
 export type TSuppliersListResponse = TPaginationResponse<TSupplierResponse>;
 
+// —— عرض طلبيات الموردين ——
+export type TSupplierOrderResponse = {
+  id: number;
+  supplier_id: number;
+  supplier: { id: number; name: string; code: string };
+  category_id: number | null;
+  category: { id: number; name: string } | null;
+  subcategory_id: number | null;
+  subcategory: { id: number; name: string } | null;
+  branch_id: number | null;
+  branch: { id: number; name: string } | null;
+  order_number: string;
+  order_date: string;
+  status: string;
+  total_amount: string;
+  payment_amount: string;
+  remaining_payment: string;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type TSupplierOrdersListResponse = TPaginationResponse<TSupplierOrderResponse>;
+
+// —— إنشاء طلبية مورد ——
+export type TCreateSupplierOrderClothItem = {
+  code: string;
+  name: string;
+  description?: string;
+  cloth_type_id: number;
+  breast_size: string;
+  waist_size: string;
+  sleeve_size: string;
+  notes?: string | null;
+  status: string;
+  entity_type: "branch" | "factory" | "workshop";
+  entity_id: number;
+  price: number;
+};
+
+export type TCreateSupplierOrderRequest = {
+  supplier_id: number;
+  category_id: number;
+  subcategory_id: number;
+  branch_id: number;
+  order_date: string;
+  payment_amount: number;
+  total_amount: number;
+  remaining_payment: number;
+  notes?: string | null;
+  clothes: TCreateSupplierOrderClothItem[];
+};
+
+// —— تحديث مورد (إن وُجد endpoint) ——
+export type TUpdateSupplierRequest = Partial<Pick<TCreateSupplierRequest, "name" | "code">>;

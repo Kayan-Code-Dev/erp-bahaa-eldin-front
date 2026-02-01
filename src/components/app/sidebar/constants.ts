@@ -245,6 +245,13 @@ export const sidebarLabels: SidebarLabel[] = [
       },
       {
         icon: null,
+        label: "عرض الطلبيات",
+        path: "/suppliers/orders",
+        level: 2,
+        iconComponent: createIcon(Receipt),
+      },
+      {
+        icon: null,
         label: "إضافة موردين",
         path: "/suppliers/add",
         level: 2,

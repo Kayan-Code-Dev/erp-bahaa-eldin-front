@@ -94,6 +94,9 @@ function Suppliers() {
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={() => navigate("/suppliers/orders")}>
+              طلبيات الموردين
+            </Button>
             <Button onClick={() => navigate("/suppliers/orders/add")}>
               <Plus className="ml-2 h-4 w-4" />
               إضافة طلبية
@@ -125,12 +128,7 @@ function Suppliers() {
                     <TableHead className="text-center">#</TableHead>
                     <TableHead className="text-center">اسم المورد</TableHead>
                     <TableHead className="text-center">كود المورد</TableHead>
-                    <TableHead className="text-center">نوع الطلبية</TableHead>
-                    <TableHead className="text-center">تاريخ الشراء</TableHead>
-                    <TableHead className="text-center">مبلغ الطلبية</TableHead>
-                    <TableHead className="text-center">المدفوع</TableHead>
-                    <TableHead className="text-center">المتبقي</TableHead>
-                    <TableHead className="text-center">معلومات الصنف</TableHead>
+                    <TableHead className="text-center">تاريخ الإنشاء</TableHead>
                     <TableHead className="text-center">إجراءات</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -150,41 +148,7 @@ function Suppliers() {
                           {supplier.code}
                         </TableCell>
                         <TableCell className="text-center">
-                          {supplier.order_type ?? "—"}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {supplier.purchase_date ? formatDate(supplier.purchase_date) : "—"}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {supplier.order_amount != null ? `${Number(supplier.order_amount).toLocaleString()} ج.م` : "—"}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {supplier.paid_amount != null ? `${Number(supplier.paid_amount).toLocaleString()} ج.م` : "—"}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {supplier.remaining_amount != null ? `${Number(supplier.remaining_amount).toLocaleString()} ج.م` : "—"}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <div className="text-sm">
-                            {supplier.item_name && (
-                              <div>الاسم: {supplier.item_name}</div>
-                            )}
-                            {supplier.item_code && (
-                              <div>الكود: {supplier.item_code}</div>
-                            )}
-                            {supplier.category && (
-                              <div>الفئة: {supplier.category.name}</div>
-                            )}
-                            {supplier.subcategory && (
-                              <div>الفئة الفرعية: {supplier.subcategory.name}</div>
-                            )}
-                            {supplier.model && (
-                              <div>الموديل: {supplier.model.name}</div>
-                            )}
-                            {supplier.branch && (
-                              <div>الفرع: {supplier.branch.name}</div>
-                            )}
-                          </div>
+                          {formatDate(supplier.created_at)}
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2 justify-center">
@@ -212,7 +176,7 @@ function Suppliers() {
                   ) : (
                     <TableRow>
                       <TableCell
-                        colSpan={10}
+                        colSpan={5}
                         className="py-10 text-center text-muted-foreground"
                       >
                         لا توجد موردين لعرضها.

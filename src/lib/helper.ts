@@ -18,15 +18,15 @@ export const includeRoute = (
   }
   
   // Check if pathname starts with the path (parent-child relationship)
-  // e.g., pathname "/clothes/transfer-clothes/requests" starts with path "/clothes/transfer-clothes"
-  // We need to ensure we don't match siblings - e.g., "/clothes/transfer-clothes/requests" 
-  // should NOT match "/clothes/transfer-clothes/actions"
   if (pathname.startsWith(path + "/")) {
-    // Verify that segments match up to the specified level
+    // Sub-items (level >= 2) must match exactly: e.g. "عرض الموردين" (/suppliers) must not
+    // be active when we're on /suppliers/orders — only the exact route should be bold.
+    if (level >= 2) {
+      return false;
+    }
+    // Parent/section (level 1): active when on any child route
     const pathnameArr = pathname.split("/");
     const pathArr = path.split("/");
-    
-    // Check all segments up to and including the level match
     for (let i = 0; i <= level && i < pathArr.length && i < pathnameArr.length; i++) {
       if (pathArr[i] !== pathnameArr[i]) {
         return false;

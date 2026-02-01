@@ -5,16 +5,30 @@ import {
 } from "@tanstack/react-query";
 import {
   createSupplier,
+  createSupplierMinimal,
   getSuppliers,
   getSupplier,
   updateSupplier,
   deleteSupplier,
   createSupplierOrder,
   getSuppliersList,
+  getSupplierOrders,
 } from "./suppliers.service";
 import { TUpdateSupplierRequest } from "./suppliers.types";
 
 export const SUPPLIERS_KEY = "suppliers";
+export const SUPPLIER_ORDERS_KEY = "supplier-orders";
+
+export const useCreateSupplierMinimalMutationOptions = () => {
+  const queryClient = useQueryClient();
+  return mutationOptions({
+    mutationFn: createSupplierMinimal,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [SUPPLIERS_KEY] });
+      queryClient.invalidateQueries({ queryKey: [SUPPLIERS_KEY, "list"] });
+    },
+  });
+};
 
 export const useCreateSupplierMutationOptions = () => {
   const queryClient = useQueryClient();
@@ -69,7 +83,16 @@ export const useCreateSupplierOrderMutationOptions = () => {
     mutationFn: createSupplierOrder,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [SUPPLIERS_KEY] });
+      queryClient.invalidateQueries({ queryKey: [SUPPLIER_ORDERS_KEY] });
     },
+  });
+};
+
+export const useGetSupplierOrdersQueryOptions = (page: number, per_page: number) => {
+  return queryOptions({
+    queryKey: [SUPPLIER_ORDERS_KEY, page, per_page],
+    queryFn: () => getSupplierOrders(page, per_page),
+    staleTime: 1000 * 60 * 5,
   });
 };
 

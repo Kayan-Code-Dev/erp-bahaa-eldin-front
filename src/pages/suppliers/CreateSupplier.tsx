@@ -16,129 +16,205 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch";
-import { useForm } from "react-hook-form";
+import * as React from "react";
+import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useMutation } from "@tanstack/react-query";
-import { useCreateSupplierMutationOptions } from "@/api/v2/suppliers/suppliers.hooks";
-import { TCreateSupplierRequest } from "@/api/v2/suppliers/suppliers.types";
+import { useNavigate } from "react-router";
 import { toast } from "sonner";
+
+import {
+  useCreateSupplierMinimalMutationOptions,
+  useCreateSupplierMutationOptions,
+} from "@/api/v2/suppliers/suppliers.hooks";
+import {
+  TCreateSupplierRequest,
+  TCreateSupplierClothItem,
+} from "@/api/v2/suppliers/suppliers.types";
 import { CustomCalendar } from "@/components/custom/CustomCalendar";
 import { CategoriesSelect } from "@/components/custom/CategoriesSelect";
 import { SubcategoriesSelect } from "@/components/custom/SubcategoriesSelect";
 import { ClothModelsSelect } from "@/components/custom/ClothModelsSelect";
 import { BranchesSelect } from "@/components/custom/BranchesSelect";
-import { useWatch } from "react-hook-form";
-import * as React from "react";
-import { useNavigate } from "react-router";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { EntitySelect } from "@/components/custom/EntitySelect";
 
-// Schema for the form
-const formSchema = z.object({
-  name: z.string().min(1, { message: "اسم المورد مطلوب" }),
-  code: z.string().min(1, { message: "كود المورد مطلوب" }),
-  show_details: z.boolean().default(false),
-  order_type: z.enum(["تفصيل", "بيع"]).optional(),
-  purchase_date: z.string().optional(),
-  order_amount: z.number().min(0).optional(),
-  paid_amount: z.number().min(0).optional(),
-  remaining_amount: z.number().min(0).optional(),
-  item_name: z.string().optional(),
-  item_code: z.string().optional(),
-  category_id: z.string().optional(),
-  subcategory_id: z.string().optional(),
-  model_id: z.string().optional(),
-  branch_id: z.string().optional(),
-  add_model: z.boolean().default(false),
-}).refine((data) => {
-  if (!data.show_details) return true;
-  // Validate that remaining_amount = order_amount - paid_amount when show_details is true
-  if (data.order_amount !== undefined && data.paid_amount !== undefined && data.remaining_amount !== undefined) {
-    return data.remaining_amount === data.order_amount - data.paid_amount;
-  }
-  return true;
-}, {
-  message: "المتبقي يجب أن يساوي (مبلغ الطلبية - المدفوع)",
-  path: ["remaining_amount"],
+const clothItemSchema = z.object({
+  code: z.string().min(1, "كود الصنف مطلوب"),
+  name: z.string().min(1, "اسم الصنف مطلوب"),
+  cloth_type_id: z.string().min(1, "الموديل مطلوب"),
+  entity_type: z.enum(["branch", "factory", "workshop"], { required_error: "نوع المكان مطلوب" }),
+  entity_id: z.string().min(1, "المكان مطلوب"),
+  price: z.number().min(0, "السعر يجب أن يكون ≥ 0"),
 });
+
+const formSchema = z
+  .object({
+    name: z.string().min(1, { message: "اسم المورد مطلوب" }),
+    code: z.string().min(1, { message: "كود المورد مطلوب" }),
+    add_order: z.boolean().default(false),
+    category_id: z.string().optional(),
+    subcategory_id: z.string().optional(),
+    branch_id: z.string().optional(),
+    order_date: z.string().optional(),
+    total_amount: z.number().optional(),
+    payment_amount: z.number().optional(),
+    remaining_payment: z.number().optional(),
+    notes: z.string().optional(),
+    clothes: z.array(clothItemSchema).optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (!data.add_order) return;
+    if (!data.category_id?.length) ctx.addIssue({ code: "custom", message: "الفئة مطلوبة", path: ["category_id"] });
+    if (!data.subcategory_id?.length) ctx.addIssue({ code: "custom", message: "الفئة الفرعية مطلوبة", path: ["subcategory_id"] });
+    if (!data.branch_id?.length) ctx.addIssue({ code: "custom", message: "الفرع مطلوب", path: ["branch_id"] });
+    if (!data.order_date?.length) ctx.addIssue({ code: "custom", message: "تاريخ الطلبية مطلوب", path: ["order_date"] });
+    if (data.total_amount == null || data.total_amount < 0) ctx.addIssue({ code: "custom", message: "الإجمالي ≥ 0", path: ["total_amount"] });
+    if (data.payment_amount == null || data.payment_amount < 0) ctx.addIssue({ code: "custom", message: "المدفوع ≥ 0", path: ["payment_amount"] });
+    if (data.remaining_payment == null || data.remaining_payment < 0) ctx.addIssue({ code: "custom", message: "المتبقي ≥ 0", path: ["remaining_payment"] });
+    if (!data.clothes?.length) ctx.addIssue({ code: "custom", message: "يجب إضافة صنف واحد على الأقل", path: ["clothes"] });
+    if (
+      data.total_amount != null &&
+      data.payment_amount != null &&
+      data.remaining_payment != null &&
+      data.remaining_payment !== data.total_amount - data.payment_amount
+    ) {
+      ctx.addIssue({ code: "custom", message: "المتبقي يجب أن يساوي (الإجمالي - المدفوع)", path: ["remaining_payment"] });
+    }
+  });
+
+type FormValues = z.infer<typeof formSchema>;
+
+const defaultClothItem = {
+  code: "",
+  name: "",
+  cloth_type_id: "",
+  entity_type: "branch" as const,
+  entity_id: "",
+  price: 0,
+};
 
 function CreateSupplier() {
   const navigate = useNavigate();
-  const { mutate: createSupplier, isPending } = useMutation(
-    useCreateSupplierMutationOptions()
-  );
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  // Mutations
+  const mutateMinimal = useMutation(useCreateSupplierMinimalMutationOptions());
+  const mutateWithOrder = useMutation(useCreateSupplierMutationOptions());
+
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       code: "",
-      show_details: false,
-      order_type: "تفصيل",
-      purchase_date: "",
-      order_amount: 0,
-      paid_amount: 0,
-      remaining_amount: 0,
-      item_name: "",
-      item_code: "",
+      add_order: false,
       category_id: "",
       subcategory_id: "",
-      model_id: "",
       branch_id: "",
-      add_model: false,
+      order_date: "",
+      total_amount: 0,
+      payment_amount: 0,
+      remaining_payment: 0,
+      notes: "",
+      clothes: [],
     },
   });
 
-  const showDetails = useWatch({ control: form.control, name: "show_details" });
-
+  const addOrder = useWatch({ control: form.control, name: "add_order" });
   const categoryId = useWatch({ control: form.control, name: "category_id" });
-  const orderAmount = useWatch({ control: form.control, name: "order_amount" });
-  const paidAmount = useWatch({ control: form.control, name: "paid_amount" });
+  const totalAmount = useWatch({ control: form.control, name: "total_amount" });
+  const paymentAmount = useWatch({ control: form.control, name: "payment_amount" });
 
-  // Calculate remaining amount when order_amount or paid_amount changes
+  const { fields, append, remove } = useFieldArray({ control: form.control, name: "clothes" });
+
   React.useEffect(() => {
-    if (showDetails && orderAmount !== undefined && paidAmount !== undefined) {
-      const remaining = orderAmount - paidAmount;
-      form.setValue("remaining_amount", Math.max(0, remaining));
+    if (addOrder && totalAmount != null && paymentAmount != null) {
+      form.setValue("remaining_payment", Math.max(0, totalAmount - paymentAmount));
     }
-  }, [orderAmount, paidAmount, form, showDetails]);
+  }, [addOrder, totalAmount, paymentAmount, form]);
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
+  React.useEffect(() => {
+    if (addOrder && fields.length === 0) {
+      append(defaultClothItem);
+    }
+  }, [addOrder, fields.length, append]);
+
+  const isPending = mutateMinimal.isPending || mutateWithOrder.isPending;
+
+  const onSubmit = (values: FormValues) => {
+    if (!values.add_order) {
+      mutateMinimal.mutate(
+        { name: values.name, code: values.code },
+        {
+          onSuccess: () => {
+            toast.success("تم إنشاء المورد بنجاح");
+            form.reset({
+              name: "",
+              code: "",
+              add_order: false,
+              category_id: "",
+              subcategory_id: "",
+              branch_id: "",
+              order_date: "",
+              total_amount: 0,
+              payment_amount: 0,
+              remaining_payment: 0,
+              notes: "",
+              clothes: [],
+            });
+            navigate("/suppliers");
+          },
+          onError: (error: { message?: string }) => {
+            toast.error("حدث خطأ أثناء إنشاء المورد", { description: error?.message });
+          },
+        }
+      );
+      return;
+    }
+
+    const clothes: TCreateSupplierClothItem[] = (values.clothes ?? []).map((c) => ({
+      code: c.code,
+      name: c.name,
+      cloth_type_id: Number(c.cloth_type_id),
+      entity_type: c.entity_type as "branch" | "factory" | "workshop",
+      entity_id: Number(c.entity_id),
+      price: Number(c.price),
+    }));
+
     const requestData: TCreateSupplierRequest = {
       name: values.name,
       code: values.code,
-      order_type: values.show_details ? values.order_type : undefined,
-      purchase_date: values.show_details ? values.purchase_date : undefined,
-      order_amount: values.show_details ? values.order_amount : undefined,
-      paid_amount: values.show_details ? values.paid_amount : undefined,
-      remaining_amount: values.show_details ? values.remaining_amount : undefined,
-      item_name: values.show_details ? values.item_name : undefined,
-      item_code: values.show_details ? values.item_code : undefined,
-      category_id: values.show_details && values.category_id ? Number(values.category_id) : undefined,
-      subcategory_id: values.show_details && values.subcategory_id ? Number(values.subcategory_id) : undefined,
-      model_id: values.show_details && values.model_id ? Number(values.model_id) : undefined,
-      branch_id: values.show_details && values.branch_id ? Number(values.branch_id) : undefined,
-      add_model: values.show_details ? values.add_model : undefined,
+      category_id: Number(values.category_id),
+      subcategory_id: Number(values.subcategory_id),
+      branch_id: Number(values.branch_id),
+      order_date: values.order_date!,
+      total_amount: Number(values.total_amount),
+      payment_amount: Number(values.payment_amount),
+      remaining_payment: Number(values.remaining_payment),
+      notes: values.notes || undefined,
+      clothes,
     };
 
-    createSupplier(requestData, {
+    mutateWithOrder.mutate(requestData, {
       onSuccess: () => {
-        toast.success("تم إنشاء المورد بنجاح", {
-          description: "تمت إضافة المورد بنجاح للنظام.",
+        toast.success("تم إنشاء المورد والطلبية بنجاح");
+        form.reset({
+          name: "",
+          code: "",
+          add_order: false,
+          category_id: "",
+          subcategory_id: "",
+          branch_id: "",
+          order_date: "",
+          total_amount: 0,
+          payment_amount: 0,
+          remaining_payment: 0,
+          notes: "",
+          clothes: [],
         });
-        form.reset();
         navigate("/suppliers");
       },
-      onError: (error) => {
-        toast.error("حدث خطأ أثناء إنشاء المورد", {
-          description: error.message,
-        });
+      onError: (error: { message?: string }) => {
+        toast.error("حدث خطأ أثناء إنشاء المورد", { description: error?.message });
       },
     });
   };
@@ -149,335 +225,331 @@ function CreateSupplier() {
         <CardHeader>
           <CardTitle>إضافة مورد جديد</CardTitle>
           <CardDescription>
-            املأ البيانات لإضافة مورد جديد للنظام.
+            أدخل اسم المورد وكوده. يمكنك تفعيل «إنشاء طلبية لهذا المورد» لإدخال بيانات الطلبية والأصناف.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-4"
-            >
-              {/* Supplier Name */}
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>اسم المورد</FormLabel>
-                    <FormControl>
-                      <Input placeholder="اسم المورد" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>اسم المورد</FormLabel>
+                      <FormControl>
+                        <Input placeholder="اسم المورد" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="code"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>كود المورد</FormLabel>
+                      <FormControl>
+                        <Input placeholder="كود المورد" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-              {/* Supplier Code */}
               <FormField
                 control={form.control}
-                name="code"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>كود المورد</FormLabel>
-                    <FormControl>
-                      <Input placeholder="كود المورد" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Show Details Switch */}
-              <FormField
-                control={form.control}
-                name="show_details"
+                name="add_order"
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                     <div className="space-y-0.5">
-                      <FormLabel className="text-base"> إضافة طلبية </FormLabel>
+                      <FormLabel className="text-base">إنشاء طلبية لهذا المورد</FormLabel>
+                      <p className="text-sm text-muted-foreground">
+                        عند التفعيل تظهر حقول الطلبية والأصناف
+                      </p>
                     </div>
                     <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        disabled={isPending}
-                      />
+                      <Switch checked={field.value} onCheckedChange={field.onChange} disabled={isPending} />
                     </FormControl>
                   </FormItem>
                 )}
               />
 
-              {showDetails && (
+              {addOrder && (
                 <>
-            <div className="grid grid-cols-2 gap-4">
-              {/* Order Type */}
-              <FormField
-                control={form.control}
-                name="order_type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>نوع الطلبية</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="اختر نوع الطلبية" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="تفصيل">تفصيل</SelectItem>
-                        <SelectItem value="بيع">بيع</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  <div className="grid grid-cols-2 gap-4 border-t pt-4">
+                    <FormField
+                      control={form.control}
+                      name="category_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>الفئة</FormLabel>
+                          <FormControl>
+                            <CategoriesSelect
+                              value={field.value ?? ""}
+                              onChange={(id) => {
+                                field.onChange(id);
+                                form.setValue("subcategory_id", "");
+                              }}
+                              disabled={isPending}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="subcategory_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>الفئة الفرعية</FormLabel>
+                          <FormControl>
+                            <SubcategoriesSelect
+                              value={field.value ?? ""}
+                              onChange={field.onChange}
+                              category_id={categoryId ? Number(categoryId) : undefined}
+                              disabled={isPending || !categoryId}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
-              {/* Purchase Date */}
-              <FormField
-                control={form.control}
-                name="purchase_date"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>تاريخ الشراء</FormLabel>
-                    <FormControl>
-                      <CustomCalendar
-                        value={field.value}
-                        onChange={field.onChange}
-                        placeholder="اختر تاريخ الشراء"
+                  <FormField
+                    control={form.control}
+                    name="branch_id"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>الفرع</FormLabel>
+                        <FormControl>
+                          <BranchesSelect
+                            value={field.value ?? ""}
+                            onChange={field.onChange}
+                            disabled={isPending}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="order_date"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>تاريخ الطلبية</FormLabel>
+                        <FormControl>
+                          <CustomCalendar
+                            value={field.value ?? ""}
+                            onChange={field.onChange}
+                            placeholder="اختر التاريخ"
+                            disabled={isPending}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="grid grid-cols-3 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="total_amount"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>الإجمالي</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              min={0}
+                              {...field}
+                              onChange={(e) => field.onChange(Number(e.target.value))}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="payment_amount"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>المدفوع</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              min={0}
+                              {...field}
+                              onChange={(e) => field.onChange(Number(e.target.value))}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="remaining_payment"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>المتبقي</FormLabel>
+                          <FormControl>
+                            <Input type="number" min={0} readOnly {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="notes"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>ملاحظات (اختياري)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="ملاحظات..." {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="border-t pt-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-sm font-medium">أصناف الطلبية</h3>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => append(defaultClothItem)}
                         disabled={isPending}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
-              {/* Order Amount */}
-              <FormField
-                control={form.control}
-                name="order_amount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>مبلغ الطلبية</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="0"
-                        {...field}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Paid Amount */}
-              <FormField
-                control={form.control}
-                name="paid_amount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>المدفوع</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="0"
-                        {...field}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Remaining Amount */}
-              <FormField
-                control={form.control}
-                name="remaining_amount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>المتبقي</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="0"
-                        {...field}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
-                        readOnly
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="border-t pt-4">
-              <h3 className="text-sm font-medium mb-4">معلومات الصنف</h3>
-              
-              <div className="grid grid-cols-2 gap-4">
-                {/* Item Name */}
-                <FormField
-                  control={form.control}
-                  name="item_name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>اسم الصنف</FormLabel>
-                      <FormControl>
-                        <Input placeholder="اسم الصنف" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Item Code */}
-                <FormField
-                  control={form.control}
-                  name="item_code"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>كود الصنف</FormLabel>
-                      <FormControl>
-                        <Input placeholder="كود الصنف" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 mt-4">
-                {/* Category */}
-                <FormField
-                  control={form.control}
-                  name="category_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>الفئة</FormLabel>
-                      <FormControl>
-                      <CategoriesSelect
-                        value={field.value || ""}
-                        onChange={(id) => {
-                          field.onChange(id);
-                          form.setValue("subcategory_id", "");
-                          form.setValue("model_id", "");
-                        }}
-                        disabled={isPending}
-                      />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Subcategory */}
-                <FormField
-                  control={form.control}
-                  name="subcategory_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>الفئة الفرعية</FormLabel>
-                      <FormControl>
-                        <SubcategoriesSelect
-                          value={field.value || ""}
-                          onChange={field.onChange}
-                          category_id={categoryId ? Number(categoryId) : undefined}
-                          disabled={isPending || !categoryId}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* Model */}
-              <FormField
-                control={form.control}
-                name="model_id"
-                render={({ field }) => (
-                  <FormItem className="mt-4">
-                    <FormLabel>الموديل</FormLabel>
-                    <FormControl>
-                      <ClothModelsSelect
-                        value={field.value || ""}
-                        onChange={field.onChange}
-                        disabled={isPending}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Branch */}
-              <FormField
-                control={form.control}
-                name="branch_id"
-                render={({ field }) => (
-                  <FormItem className="mt-4">
-                    <FormLabel>الفرع المراد الشراء له</FormLabel>
-                    <FormControl>
-                      <BranchesSelect
-                        value={field.value || ""}
-                        onChange={field.onChange}
-                        disabled={isPending}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Add Model Switch */}
-              <FormField
-                control={form.control}
-                name="add_model"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 mt-4">
-                    <div className="space-y-0.5">
-                      <FormLabel className="text-base">إضافة موديل على هذا المورد</FormLabel>
+                      >
+                        إضافة صنف
+                      </Button>
                     </div>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        disabled={isPending}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            </div>
-            </>
-            )}
+                    {fields.map((field, index) => (
+                      <div
+                        key={field.id}
+                        className="grid grid-cols-2 gap-4 p-4 rounded-lg border bg-muted/30 mb-4"
+                      >
+                        <FormField
+                          control={form.control}
+                          name={`clothes.${index}.code`}
+                          render={({ field: f }) => (
+                            <FormItem>
+                              <FormLabel>كود الصنف</FormLabel>
+                              <FormControl>
+                                <Input placeholder="CLT-001" {...f} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`clothes.${index}.name`}
+                          render={({ field: f }) => (
+                            <FormItem>
+                              <FormLabel>اسم الصنف</FormLabel>
+                              <FormControl>
+                                <Input placeholder="اسم الصنف" {...f} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`clothes.${index}.cloth_type_id`}
+                          render={({ field: f }) => (
+                            <FormItem>
+                              <FormLabel>الموديل</FormLabel>
+                              <FormControl>
+                                <ClothModelsSelect
+                                  value={f.value ?? ""}
+                                  onChange={f.onChange}
+                                  disabled={isPending}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`clothes.${index}.price`}
+                          render={({ field: f }) => (
+                            <FormItem>
+                              <FormLabel>السعر</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  min={0}
+                                  {...f}
+                                  onChange={(e) => f.onChange(Number(e.target.value))}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <div className="col-span-2">
+                          <EntitySelect
+                            mode="form"
+                            control={form.control}
+                            entityTypeName={`clothes.${index}.entity_type` as const}
+                            entityIdName={`clothes.${index}.entity_id` as const}
+                            entityTypeLabel="نوع المكان"
+                            entityIdLabel="المكان"
+                            disabled={isPending}
+                          />
+                        </div>
+                        {fields.length > 1 && (
+                          <div className="col-span-2">
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => remove(index)}
+                              disabled={isPending}
+                            >
+                              حذف الصنف
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    {form.formState.errors.clothes?.message && (
+                      <p className="text-sm text-destructive">{form.formState.errors.clothes.message}</p>
+                    )}
+                  </div>
+                </>
+              )}
 
-            <div className="flex items-center gap-4 pt-4 border-t">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate("/suppliers")}
-              >
-                إلغاء
-              </Button>
-              <Button type="submit" disabled={isPending}>
-                {isPending ? "جاري الإنشاء..." : "إنشاء"}
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+              <div className="flex items-center gap-4 pt-4 border-t">
+                <Button type="button" variant="outline" onClick={() => navigate("/suppliers")}>
+                  إلغاء
+                </Button>
+                <Button type="submit" disabled={isPending}>
+                  {isPending ? "جاري الإنشاء..." : addOrder ? "إنشاء المورد والطلبية" : "إنشاء المورد"}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
     </div>
   );
 }
 
 export default CreateSupplier;
-
