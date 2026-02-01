@@ -83,7 +83,7 @@ export function OrderDetailsModal({ order, open, onOpenChange }: Props) {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 mt-4">
+        <div className="space-y-6 mt-4" dir="rtl">
           {isPending ? (
             <div className="space-y-4">
               <Skeleton className="h-6 w-full" />
@@ -152,15 +152,15 @@ export function OrderDetailsModal({ order, open, onOpenChange }: Props) {
                           {getDiscountTypeLabel(orderData.discount_type)}
                         </p>
                       </div>
-                      {orderData.discount_value && (
+                      {(orderData.discount_value ?? "") !== "" && (
                         <div>
                           <p className="text-sm font-medium text-muted-foreground">
                             قيمة الخصم (على الطلب)
                           </p>
                           <p className="text-lg">
                             {orderData.discount_type === "percentage"
-                              ? `${orderData.discount_value}%`
-                              : `${orderData.discount_value} ج.م`}
+                              ? `${orderData.discount_value ?? ""}%`
+                              : `${orderData.discount_value ?? ""} ج.م`}
                           </p>
                         </div>
                       )}
@@ -195,11 +195,17 @@ export function OrderDetailsModal({ order, open, onOpenChange }: Props) {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">
+                        الاسم
+                      </p>
+                      <p className="text-lg">{orderData.client.name}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">
                         رقم العميل
                       </p>
                       <p className="text-lg">#{orderData.client.id}</p>
                     </div>
-                    {orderData.client.address && (
+                    {orderData.client.address != null && (
                       <>
                         <div>
                           <p className="text-sm font-medium text-muted-foreground">
@@ -249,6 +255,19 @@ export function OrderDetailsModal({ order, open, onOpenChange }: Props) {
                 </div>
               )}
 
+              {/* Inventory */}
+              {orderData.inventory && (
+                <div className="border-t pt-4">
+                  <h3 className="text-lg font-semibold mb-3">المخزن / الفرع</h3>
+                  <p className="text-muted-foreground">
+                    {orderData.inventory.name}
+                    {orderData.inventory.inventoriable && (
+                      <> — {orderData.inventory.inventoriable.name}</>
+                    )}
+                  </p>
+                </div>
+              )}
+
               {/* Order Items */}
               {orderData.items && orderData.items.length > 0 && (
                 <div className="border-t pt-4">
@@ -260,13 +279,12 @@ export function OrderDetailsModal({ order, open, onOpenChange }: Props) {
                           <TableHead className="text-center">#</TableHead>
                           <TableHead className="text-center">الكود</TableHead>
                           <TableHead className="text-center">الاسم</TableHead>
-                          <TableHead className="text-center">الوصف</TableHead>
-                          <TableHead className="text-center">
-                            المقاسات
-                          </TableHead>
-                          <TableHead className="text-center">الخصم</TableHead>
+                          <TableHead className="text-center">النوع</TableHead>
+                          <TableHead className="text-center">الكمية</TableHead>
+                          <TableHead className="text-center">السعر</TableHead>
+                          <TableHead className="text-center">المدفوع</TableHead>
+                          <TableHead className="text-center">المتبقي</TableHead>
                           <TableHead className="text-center">الحالة</TableHead>
-                          <TableHead className="text-center">ملاحظات</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -282,37 +300,22 @@ export function OrderDetailsModal({ order, open, onOpenChange }: Props) {
                               {item.name}
                             </TableCell>
                             <TableCell className="text-center">
-                              <div className="max-w-[200px] mx-auto text-wrap">
-                                {item.description || "-"}
-                              </div>
+                              {getOrderTypeLabel(item.type)}
                             </TableCell>
                             <TableCell className="text-center">
-                              {item.breast_size || "-"},{" "}
-                              {item.waist_size || "-"},{" "}
-                              {item.sleeve_size || "-"}
+                              {item.quantity}
                             </TableCell>
                             <TableCell className="text-center">
-                              {item.discount_type &&
-                              item.discount_type !== "none"
-                                ? getDiscountTypeLabel(item.discount_type)
-                                : "-"} <br />
-                              {item.discount_type &&
-                              item.discount_type !== "none" &&
-                              item.discount_value
-                                ? `${
-                                    item.discount_type === "percentage"
-                                      ? `${item.discount_value}%`
-                                      : `${item.discount_value} ج.م`
-                                  }`
-                                : "-"}
+                              {item.price} ج.م
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {item.item_paid} ج.م
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {item.item_remaining} ج.م
                             </TableCell>
                             <TableCell className="text-center">
                               {getStatusLabel(item.status)}
-                            </TableCell>
-                            <TableCell className="text-center">
-                              <div className="max-w-[200px] mx-auto text-wrap">
-                                {item.notes || "-"}
-                              </div>
                             </TableCell>
                           </TableRow>
                         ))}

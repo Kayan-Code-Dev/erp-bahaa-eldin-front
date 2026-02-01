@@ -5,17 +5,17 @@ const HEADER_DARK = "#7a6349";
 
 type Props = {
   order: TOrder;
-  /** مسار اللوغو (افتراضي: /app-logo.svg) */
+  /** Logo path (default: /app-logo.svg) */
   logoUrl?: string;
-  /** اسم الموظف للعرض في الهيدر */
+  /** Employee name shown in header */
   employeeName?: string;
-  /** عند true (نسخة الفاتورة): يعرض اسم الصنف والكود فقط، وباقي الأسعار فارغة. عند false (نسخة العميل): يعرض كل البيانات */
+  /** When true (invoice copy): show item name and code only, prices empty. When false (client copy): show all data */
   hideItemPrices?: boolean;
 };
 
 const RULES_TEXT = `إقرار من المستفيد: أقر بأنني استلمت الفاتورة من 1 إلى 7 أسماء ظاهرة وأوضح أنني مسؤول عن التأخير. 2000 جنيه لإيجار السروال و 500 للجلب. لا يجوز استبدال أو إرجاع الفواتير إلا بعد 3 أشهر. لا يسمح بإخراج الملابس من المحل في حالة غير مكتملة البيع. يلزم إحضار الفواتير الشخصية مع الفاتورة عند الاستبدال أو الإرجاع.`;
 
-// بيانات الصفوف الأولى: اسم الحقل + صنف (أول، ثاني، ...)
+/* First table rows: label + placeholder key */
 const INFO_ROWS: { label: string; key: string }[] = [
   { label: "اسم العروسة", key: "صنف أول" },
   { label: "هاتف العروسة", key: "صنف ثاني" },
@@ -26,20 +26,46 @@ const INFO_ROWS: { label: string; key: string }[] = [
   { label: "ميعاد الاسترجاع", key: "صنف سابع" },
 ];
 
+/** Build order info values for print, supporting different API shapes */
 function getInfoValues(order: TOrder): string[] {
   const c = order.client;
-  const addressStr = c?.address
-    ? [c.address.street, c.address.building].filter(Boolean).join(" - ") || "-"
-    : "-";
-  const phones = (c as { phones?: { phone: string }[] })?.phones ?? [];
-  const phone1 = phones[0]?.phone ?? "-";
-  const phone2 = phones[1]?.phone ?? "-";
-  const name = c ? `${c.first_name ?? ""} ${(c as { middle_name?: string }).middle_name ?? ""} ${c.last_name ?? ""}`.trim() || "-" : "-";
+  if (!c) {
+    return ["-", "-", "-", "-", "-", "-", "-"];
+  }
+  const name =
+    (typeof (c as { name?: string }).name === "string" && (c as { name?: string }).name?.trim()) ||
+    "-";
+  const addressStr =
+    c.address != null && typeof c.address === "object"
+      ? [c.address.street, c.address.building].filter(Boolean).join(" - ") || "-"
+      : "-";
+  const rawPhones = (c as { phones?: { phone: string }[] }).phones;
+  const phone1 =
+    Array.isArray(rawPhones) && rawPhones[0]?.phone
+      ? String(rawPhones[0].phone).trim()
+      : (c as { phone_primary?: string }).phone_primary?.trim() || "-";
+  const phone2 =
+    Array.isArray(rawPhones) && rawPhones[1]?.phone
+      ? String(rawPhones[1].phone).trim()
+      : (c as { phone_secondary?: string }).phone_secondary?.trim() || "-";
   const items = order.items ?? [];
-  const firstItem = items[0] as { delivery_date?: string; occasion_datetime?: string } | undefined;
-  const visitDate = order.visit_datetime ? formatDate(order.visit_datetime) : "-";
-  const occasionDate = firstItem?.occasion_datetime ? formatDate(firstItem.occasion_datetime) : "-";
-  const deliveryDate = firstItem?.delivery_date ? formatDate(firstItem.delivery_date) : "-";
+  const firstItem = items[0];
+  const visitDate =
+    order.visit_datetime && String(order.visit_datetime).trim()
+      ? formatDate(String(order.visit_datetime))
+      : "-";
+  const occasionDate =
+    firstItem &&
+    (firstItem as { occasion_datetime?: string | null }).occasion_datetime &&
+    String((firstItem as { occasion_datetime?: string }).occasion_datetime).trim()
+      ? formatDate(String((firstItem as { occasion_datetime: string }).occasion_datetime))
+      : "-";
+  const deliveryDate =
+    firstItem &&
+    (firstItem as { delivery_date?: string | null }).delivery_date &&
+    String((firstItem as { delivery_date?: string }).delivery_date).trim()
+      ? formatDate(String((firstItem as { delivery_date: string }).delivery_date))
+      : "-";
   return [name, phone1, phone2, addressStr, visitDate, occasionDate, deliveryDate];
 }
 
@@ -67,12 +93,21 @@ export function OrderInvoicePrint({
   employeeName = "-----------------------",
   hideItemPrices = false,
 }: Props) {
-  const totalPrice = order.total_price ?? 0;
-  const paid = parseFloat(String(order.paid ?? 0)) || 0;
-  const remaining = parseFloat(String(order.remaining ?? 0)) ?? 0;
+  const totalPriceRaw =
+    order.total_price != null && order.total_price !== ""
+      ? parseFloat(String(order.total_price))
+      : NaN;
+  const totalPrice = Number.isFinite(totalPriceRaw) ? totalPriceRaw : 0;
+  const paidRaw = parseFloat(String(order.paid ?? ""));
+  const paid = Number.isFinite(paidRaw) ? paidRaw : 0;
+  const remainingRaw = parseFloat(String(order.remaining ?? ""));
+  const remaining = Number.isFinite(remainingRaw) ? remainingRaw : 0;
   const infoValues = getInfoValues(order);
   const items = order.items ?? [];
-  const invoiceDate = order.created_at ? formatDate(order.created_at) : formatDate(new Date().toISOString());
+  const invoiceDate =
+    order.created_at && String(order.created_at).trim()
+      ? formatDate(String(order.created_at))
+      : formatDate(new Date().toISOString());
 
   return (
     <div
@@ -134,16 +169,29 @@ export function OrderInvoicePrint({
             <tbody>
               {items.length > 0 ? (
                 items.map((item, index) => {
-                  const ext = item as { price?: number };
                   const showPrices = !hideItemPrices;
+                  const price =
+                    item.price != null && String(item.price).trim() !== ""
+                      ? formatNumber(item.price)
+                      : EMPTY_PRICE;
+                  const itemPaidVal =
+                    (item as { item_paid?: string }).item_paid != null &&
+                    String((item as { item_paid?: string }).item_paid).trim() !== ""
+                      ? formatNumber(String((item as { item_paid: string }).item_paid))
+                      : EMPTY_PRICE;
+                  const itemRemainingVal =
+                    (item as { item_remaining?: string }).item_remaining != null &&
+                    String((item as { item_remaining?: string }).item_remaining).trim() !== ""
+                      ? formatNumber(String((item as { item_remaining: string }).item_remaining))
+                      : EMPTY_PRICE;
                   return (
                     <tr key={item.id} className={index % 2 === 0 ? "invoice-print-row-even bg-gray-50/50" : "bg-white"}>
                       <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-3 px-4 text-center text-sm">{index + 1}</td>
                       <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-3 px-4 text-center text-sm">{item.name || "-"}</td>
                       <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-3 px-4 text-center text-sm">{item.code || "-"}</td>
-                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-3 px-4 text-center text-sm">{showPrices && ext.price != null ? formatNumber(ext.price) : EMPTY_PRICE}</td>
-                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-3 px-4 text-center text-sm">{EMPTY_PRICE}</td>
-                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-3 px-4 text-center text-sm">{EMPTY_PRICE}</td>
+                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-3 px-4 text-center text-sm">{showPrices ? price : EMPTY_PRICE}</td>
+                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-3 px-4 text-center text-sm">{showPrices ? itemPaidVal : EMPTY_PRICE}</td>
+                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-3 px-4 text-center text-sm">{showPrices ? itemRemainingVal : EMPTY_PRICE}</td>
                     </tr>
                   );
                 })

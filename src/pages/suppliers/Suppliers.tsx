@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { ClipboardList, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { SuppliersTableSkeleton } from "./SuppliersTableSkeleton";
@@ -67,6 +67,10 @@ function Suppliers() {
   const handleOpenDelete = (supplier: TSupplierResponse) => {
     setSelectedSupplier(supplier);
     setIsDeleteModalOpen(true);
+  };
+
+  const handleViewSupplierOrders = (supplier: TSupplierResponse) => {
+    navigate(`/suppliers/orders?supplier_id=${supplier.id}`);
   };
 
   const handleDelete = () => {
@@ -154,6 +158,14 @@ function Suppliers() {
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2 justify-center">
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              title="عرض طلبات المورد"
+                              onClick={() => handleViewSupplierOrders(supplier)}
+                            >
+                              <ClipboardList className="h-4 w-4" />
+                            </Button>
                             <Button
                               variant="ghost"
                               size="icon"

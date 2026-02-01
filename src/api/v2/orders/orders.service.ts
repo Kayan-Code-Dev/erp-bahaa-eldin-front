@@ -82,7 +82,7 @@ export const updateOrderStatus = async (id: number, status: TOrderStatus) => {
   }
 };
 
-// دالة جديدة لتحديث حالة الطلب بواسطة PATCH (أكثر مرونة)
+/** Update order status via PATCH (more flexible) */
 export const updateOrderStatusV2 = async (id: number, status: string) => {
   try {
     const { data: responseData } = await api.patch<TOrder>(
@@ -95,7 +95,7 @@ export const updateOrderStatusV2 = async (id: number, status: string) => {
   }
 };
 
-// دالة جديدة لإضافة دفعة
+/** Add order payment */
 export const addOrderPayment = async (id: number, data: TAddPaymentRequest) => {
   try {
     const { data: responseData } = await api.post<TOrder>(
@@ -108,7 +108,7 @@ export const addOrderPayment = async (id: number, data: TAddPaymentRequest) => {
   }
 };
 
-// دالة جديدة لتحديث طلب بالكامل
+/** Update order (full payload) */
 export const updateOrder = async (id: number, data: TUpdateOrderRequest) => {
   try {
     const { data: responseData } = await api.put<TOrder>(`/orders/${id}`, data);
@@ -118,7 +118,7 @@ export const updateOrder = async (id: number, data: TUpdateOrderRequest) => {
   }
 };
 
-// دالة جديدة للحصول على إيصالات الدفع
+/** Get order payment receipts */
 export const getOrderPayments = async (id: number) => {
   try {
     const { data: responseData } = await api.get<any[]>(
@@ -130,7 +130,7 @@ export const getOrderPayments = async (id: number) => {
   }
 };
 
-// دالة جديدة لتحديث مبلغ مدفوع
+/** Update paid amount for order */
 export const updateOrderPayment = async (id: number, amount: number) => {
   try {
     const { data: responseData } = await api.patch<TOrder>(
@@ -192,7 +192,7 @@ export const exportOrdersToCSV = async () => {
   }
 };
 
-// دالة جديدة لتصدير التسليمات فقط
+/** Export deliveries to CSV */
 export const exportDeliveriesToCSV = async (filters?: {
   date_from?: string;
   date_to?: string;
@@ -212,7 +212,7 @@ export const exportDeliveriesToCSV = async (filters?: {
   }
 };
 
-// دالة جديدة لترحيل الطلب إلى تم التسليم
+/** Mark order as delivered */
 export const markAsDelivered = async (id: number) => {
   try {
     const { data: responseData } = await api.patch<TOrder>(
@@ -224,7 +224,7 @@ export const markAsDelivered = async (id: number) => {
   }
 };
 
-// دالة جديدة لترحيل الطلب إلى تم الإلغاء
+/** Mark order as cancelled */
 export const markAsCancelled = async (id: number) => {
   try {
     const { data: responseData } = await api.patch<TOrder>(

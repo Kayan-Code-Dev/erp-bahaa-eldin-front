@@ -16,12 +16,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Plus } from "lucide-react";
+import { Pencil, Plus, X } from "lucide-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearchParams } from "react-router";
 
-import { useGetSupplierOrdersQueryOptions } from "@/api/v2/suppliers/suppliers.hooks";
+import {
+  useGetSupplierOrdersQueryOptions,
+  useGetSupplierOrdersBySupplierIdQueryOptions,
+  useGetSupplierQueryOptions,
+} from "@/api/v2/suppliers/suppliers.hooks";
 import { TSupplierOrderResponse } from "@/api/v2/suppliers/suppliers.types";
 import CustomPagination from "@/components/custom/CustomPagination";
 import { formatDate } from "@/utils/formatDate";
@@ -59,17 +63,35 @@ function SupplierOrders() {
   const [searchParams] = useSearchParams();
   const page = Number(searchParams.get("page")) || 1;
   const per_page = 10;
+  const supplierIdParam = searchParams.get("supplier_id");
+  const supplierId = supplierIdParam ? Number(supplierIdParam) : 0;
 
   const [selectedOrder, setSelectedOrder] = useState<TSupplierOrderResponse | null>(null);
   const [isEditOrderModalOpen, setIsEditOrderModalOpen] = useState(false);
 
-  const { data, isPending, isError, error } = useQuery(
+  const allOrdersQuery = useQuery(
     useGetSupplierOrdersQueryOptions(page, per_page)
   );
+  const ordersBySupplierQuery = useQuery(
+    useGetSupplierOrdersBySupplierIdQueryOptions(supplierId, page, per_page)
+  );
+
+  const { data, isPending, isError, error } = supplierId > 0
+    ? ordersBySupplierQuery
+    : allOrdersQuery;
+
+  const { data: supplierData } = useQuery({
+    ...useGetSupplierQueryOptions(supplierId),
+    enabled: supplierId > 0,
+  });
 
   const handleOpenEditOrder = (order: TSupplierOrderResponse) => {
     setSelectedOrder(order);
     setIsEditOrderModalOpen(true);
+  };
+
+  const clearSupplierFilter = () => {
+    navigate("/suppliers/orders", { replace: true });
   };
 
   return (
@@ -77,15 +99,29 @@ function SupplierOrders() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle>طلبيات الموردين</CardTitle>
+            <CardTitle>
+              {supplierId > 0 && supplierData
+                ? `طلبيات المورد: ${supplierData.name}`
+                : "طلبيات الموردين"}
+            </CardTitle>
             <CardDescription>
-              عرض وإدارة جميع طلبيات الموردين في النظام.
+              {supplierId > 0
+                ? `عرض طلبيات المورد المحدد فقط.`
+                : "عرض وإدارة جميع طلبيات الموردين في النظام."}
             </CardDescription>
           </div>
-          <Button onClick={() => navigate("/suppliers/orders/add")}>
-            <Plus className="ml-2 h-4 w-4" />
-            إضافة طلبية
-          </Button>
+          <div className="flex items-center gap-2">
+            {supplierId > 0 && (
+              <Button variant="outline" onClick={clearSupplierFilter}>
+                <X className="ml-2 h-4 w-4" />
+                عرض كل الطلبيات
+              </Button>
+            )}
+            <Button onClick={() => navigate("/suppliers/orders/add")}>
+              <Plus className="ml-2 h-4 w-4" />
+              إضافة طلبية
+            </Button>
+          </div>
         </CardHeader>
 
         {isError && (

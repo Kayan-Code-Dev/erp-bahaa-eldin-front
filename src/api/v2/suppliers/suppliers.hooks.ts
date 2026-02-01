@@ -14,6 +14,7 @@ import {
   updateSupplierOrder,
   getSuppliersList,
   getSupplierOrders,
+  getSupplierOrdersBySupplierId,
 } from "./suppliers.service";
 import { TUpdateSupplierRequest, TUpdateSupplierOrderRequest } from "./suppliers.types";
 
@@ -93,6 +94,20 @@ export const useGetSupplierOrdersQueryOptions = (page: number, per_page: number)
   return queryOptions({
     queryKey: [SUPPLIER_ORDERS_KEY, page, per_page],
     queryFn: () => getSupplierOrders(page, per_page),
+    staleTime: 1000 * 60 * 5,
+  });
+};
+
+/** Supplier orders by supplier_id - GET /supplier-orders?supplier_id= */
+export const useGetSupplierOrdersBySupplierIdQueryOptions = (
+  supplierId: number,
+  page: number,
+  per_page: number
+) => {
+  return queryOptions({
+    queryKey: [SUPPLIER_ORDERS_KEY, "by-supplier", supplierId, page, per_page],
+    queryFn: () => getSupplierOrdersBySupplierId(supplierId, page, per_page),
+    enabled: supplierId > 0,
     staleTime: 1000 * 60 * 5,
   });
 };
