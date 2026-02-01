@@ -26,7 +26,7 @@ jobs:
       - name: Build project 
         run: yarn build
         env:
-          VITE_BACKEND_URL: https://api.dressnmore.it.com/api
+          VITE_BACKEND_URL: https://api.dressnmore.it.com/api/v1
 
       - name: Copy built files to VPS
         uses: appleboy/scp-action@v0.1.7
