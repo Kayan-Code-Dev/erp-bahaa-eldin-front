@@ -96,3 +96,15 @@ export type TCreateSupplierOrderRequest = {
 
 // —— تحديث مورد (إن وُجد endpoint) ——
 export type TUpdateSupplierRequest = Partial<Pick<TCreateSupplierRequest, "name" | "code">>;
+
+// —— تحديث طلبية مورد ——
+export type TUpdateSupplierOrderRequest = {
+  supplier_id: number;
+  category_id: number;
+  subcategory_id: number;
+  branch_id: number;
+  order_number: string;
+  order_date: string;
+  payment_amount: number;
+  notes?: string | null;
+};

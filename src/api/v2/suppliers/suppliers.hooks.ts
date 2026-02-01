@@ -11,10 +11,11 @@ import {
   updateSupplier,
   deleteSupplier,
   createSupplierOrder,
+  updateSupplierOrder,
   getSuppliersList,
   getSupplierOrders,
 } from "./suppliers.service";
-import { TUpdateSupplierRequest } from "./suppliers.types";
+import { TUpdateSupplierRequest, TUpdateSupplierOrderRequest } from "./suppliers.types";
 
 export const SUPPLIERS_KEY = "suppliers";
 export const SUPPLIER_ORDERS_KEY = "supplier-orders";
@@ -93,6 +94,17 @@ export const useGetSupplierOrdersQueryOptions = (page: number, per_page: number)
     queryKey: [SUPPLIER_ORDERS_KEY, page, per_page],
     queryFn: () => getSupplierOrders(page, per_page),
     staleTime: 1000 * 60 * 5,
+  });
+};
+
+export const useUpdateSupplierOrderMutationOptions = () => {
+  const queryClient = useQueryClient();
+  return mutationOptions({
+    mutationFn: (payload: { id: number; data: TUpdateSupplierOrderRequest }) =>
+      updateSupplierOrder(payload.id, payload.data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [SUPPLIER_ORDERS_KEY] });
+    },
   });
 };
 

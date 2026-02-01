@@ -35,9 +35,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 // Schema for the form
 const formSchema = z.object({
-  first_name: z.string().min(1, { message: "الاسم الأول مطلوب" }),
-  last_name: z.string().min(1, { message: "الاسم الأخير مطلوب" }),
-  date_of_birth: z.string().min(1, { message: "تاريخ الميلاد مطلوب" }),
+  name: z.string().min(1, { message: "الاسم مطلوب" }),
+  date_of_birth: z.string().optional(),
   national_id: z
     .string()
     .length(14, { message: "الرقم القومي يجب أن يكون 14 رقمًا" })
@@ -64,8 +63,7 @@ export function CreateClientModal({ open, onOpenChange, onClientCreated }: Props
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      first_name: "",
-      last_name: "",
+      name: "",
       date_of_birth: "",
       national_id: "",
       source: "other",
@@ -84,10 +82,10 @@ export function CreateClientModal({ open, onOpenChange, onClientCreated }: Props
     }
 
     const requestData: TCreateClientRequest = {
-      first_name: values.first_name,
+      first_name: values.name.trim(),
       middle_name: "",
-      last_name: values.last_name,
-      date_of_birth: values.date_of_birth,
+      last_name: "",
+      date_of_birth: values.date_of_birth || "",
       national_id: values.national_id,
       source: values.source,
       address: {
@@ -131,35 +129,20 @@ export function CreateClientModal({ open, onOpenChange, onClientCreated }: Props
             className="space-y-4"
             dir="rtl"
           >
-            {/* Name Fields */}
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="first_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>الاسم الأول</FormLabel>
-                    <FormControl>
-                      <Input placeholder="محمد" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="last_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>الاسم الأخير</FormLabel>
-                    <FormControl>
-                      <Input placeholder="علي" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            {/* Name */}
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>الاسم</FormLabel>
+                  <FormControl>
+                    <Input placeholder="الاسم الكامل للعميل" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             {/* Personal Information */}
             <div className="grid grid-cols-3 gap-4">
@@ -168,9 +151,9 @@ export function CreateClientModal({ open, onOpenChange, onClientCreated }: Props
                 name="date_of_birth"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>تاريخ الميلاد</FormLabel>
+                    <FormLabel>تاريخ الميلاد (اختياري)</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Input type="date" {...field} value={field.value ?? ""} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -243,10 +226,10 @@ export function CreateClientModal({ open, onOpenChange, onClientCreated }: Props
                   name="phone2"
                   render={({ field }) => (
                     <FormItem dir="ltr">
-                      <FormLabel>رقم الهاتف الثاني (اختياري)</FormLabel>
+                      <FormLabel>رقم الواتس (اختياري)</FormLabel>
                       <FormControl>
                         <PhoneInput
-                          placeholder="أدخل رقم الهاتف الثاني"
+                          placeholder="أدخل رقم الواتس"
                           value={field.value}
                           onChange={field.onChange}
                           disabled={isPending}

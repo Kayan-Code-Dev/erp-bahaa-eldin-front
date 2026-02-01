@@ -20,6 +20,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { SuppliersTableSkeleton } from "./SuppliersTableSkeleton";
 import { CreateSupplierModal } from "./CreateSupplierModal";
+import { CreateSupplierOrderModal } from "./CreateSupplierOrderModal";
 import { EditSupplierModal } from "./EditSupplierModal";
 import { DeleteSupplierModal } from "./DeleteSupplierModal";
 
@@ -40,6 +41,7 @@ function Suppliers() {
 
   // Modal State
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isCreateOrderModalOpen, setIsCreateOrderModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedSupplier, setSelectedSupplier] = useState<TSupplierResponse | null>(
@@ -97,7 +99,7 @@ function Suppliers() {
             <Button variant="outline" onClick={() => navigate("/suppliers/orders")}>
               طلبيات الموردين
             </Button>
-            <Button onClick={() => navigate("/suppliers/orders/add")}>
+            <Button onClick={() => setIsCreateOrderModalOpen(true)}>
               <Plus className="ml-2 h-4 w-4" />
               إضافة طلبية
             </Button>
@@ -203,6 +205,10 @@ function Suppliers() {
       <CreateSupplierModal
         open={isCreateModalOpen}
         onOpenChange={setIsCreateModalOpen}
+      />
+      <CreateSupplierOrderModal
+        open={isCreateOrderModalOpen}
+        onOpenChange={setIsCreateOrderModalOpen}
       />
       <EditSupplierModal
         supplier={selectedSupplier}

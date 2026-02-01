@@ -16,7 +16,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearchParams } from "react-router";
 
@@ -26,6 +27,7 @@ import CustomPagination from "@/components/custom/CustomPagination";
 import { formatDate } from "@/utils/formatDate";
 
 import { SupplierOrdersTableSkeleton } from "./SupplierOrdersTableSkeleton";
+import { EditSupplierOrderModal } from "./EditSupplierOrderModal";
 
 function getStatusBadgeVariant(status: string): "default" | "secondary" | "success" | "warning" | "destructive" | "outline" {
   const s = (status || "").toLowerCase();
@@ -58,10 +60,17 @@ function SupplierOrders() {
   const page = Number(searchParams.get("page")) || 1;
   const per_page = 10;
 
-  // Data Fetching
+  const [selectedOrder, setSelectedOrder] = useState<TSupplierOrderResponse | null>(null);
+  const [isEditOrderModalOpen, setIsEditOrderModalOpen] = useState(false);
+
   const { data, isPending, isError, error } = useQuery(
     useGetSupplierOrdersQueryOptions(page, per_page)
   );
+
+  const handleOpenEditOrder = (order: TSupplierOrderResponse) => {
+    setSelectedOrder(order);
+    setIsEditOrderModalOpen(true);
+  };
 
   return (
     <div dir="rtl">
@@ -104,6 +113,7 @@ function SupplierOrders() {
                     <TableHead className="text-center whitespace-nowrap">المدفوع</TableHead>
                     <TableHead className="text-center whitespace-nowrap">المتبقي</TableHead>
                     <TableHead className="text-center whitespace-nowrap">الفرع</TableHead>
+                    <TableHead className="text-center whitespace-nowrap w-24">إجراءات</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -148,12 +158,24 @@ function SupplierOrders() {
                         <TableCell className="text-center text-muted-foreground">
                           {order.branch?.name ?? "—"}
                         </TableCell>
+                        <TableCell>
+                          <div className="flex items-center justify-center gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              title="تحديث الطلبية"
+                              onClick={() => handleOpenEditOrder(order)}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
                       </TableRow>
                     ))
                   ) : (
                     <TableRow>
                       <TableCell
-                        colSpan={9}
+                        colSpan={10}
                         className="h-32 text-center text-muted-foreground"
                       >
                         لا توجد طلبيات لعرضها.
@@ -176,6 +198,12 @@ function SupplierOrders() {
             />
           </CardFooter>
         )}
+
+        <EditSupplierOrderModal
+          order={selectedOrder}
+          open={isEditOrderModalOpen}
+          onOpenChange={setIsEditOrderModalOpen}
+        />
       </Card>
     </div>
   );

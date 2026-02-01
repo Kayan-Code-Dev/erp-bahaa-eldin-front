@@ -4,6 +4,7 @@ import {
   TCreateSupplierOrderRequest,
   TSupplierResponse,
   TUpdateSupplierRequest,
+  TUpdateSupplierOrderRequest,
   TSuppliersListResponse,
   TSupplierOrdersListResponse,
 } from "./suppliers.types";
@@ -117,6 +118,22 @@ export const createSupplierOrder = async (data: TCreateSupplierOrderRequest) => 
     return response;
   } catch (error) {
     populateError(error, "خطأ فى إنشاء طلبية المورد");
+  }
+};
+
+/** تحديث طلبية مورد - PUT /api/v1/supplier-orders/update/{id} */
+export const updateSupplierOrder = async (
+  id: number,
+  data: TUpdateSupplierOrderRequest
+) => {
+  try {
+    const { data: response } = await api.put(
+      `/supplier-orders/update/${id}`,
+      data
+    );
+    return response;
+  } catch (error) {
+    populateError(error, "خطأ فى تحديث طلبية المورد");
   }
 };
 

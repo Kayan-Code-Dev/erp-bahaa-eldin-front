@@ -77,9 +77,8 @@ import { SubcategoriesSelect } from "@/components/custom/SubcategoriesSelect";
 import useDebounce from "@/hooks/useDebounce";
 
 const newClientFormSchema = z.object({
-  first_name: z.string().min(1, { message: "الاسم الأول مطلوب" }),
-  last_name: z.string().min(1, { message: "الاسم الأخير مطلوب" }),
-  date_of_birth: z.string().min(1, { message: "تاريخ الميلاد مطلوب" }),
+  name: z.string().min(1, { message: "الاسم مطلوب" }),
+  date_of_birth: z.string().optional(),
   national_id: z
     .string()
     .length(14, { message: "الرقم القومي يجب أن يكون 14 رقمًا" })
@@ -95,8 +94,7 @@ const newClientFormSchema = z.object({
 type NewClientFormValues = z.infer<typeof newClientFormSchema>;
 
 const defaultNewClientValues: NewClientFormValues = {
-  first_name: "",
-  last_name: "",
+  name: "",
   date_of_birth: "",
   national_id: "",
   source: "other",
@@ -228,10 +226,13 @@ function ChooseClient() {
 
   useEffect(() => {
     if (selectedClient) {
+      const fullName = [selectedClient.first_name, selectedClient.middle_name, selectedClient.last_name]
+        .filter(Boolean)
+        .join(" ")
+        .trim();
       newClientForm.reset({
         ...defaultNewClientValues,
-        first_name: selectedClient.first_name || "",
-        last_name: selectedClient.last_name || "",
+        name: fullName || "",
         phone: selectedClient.phones?.[0]?.phone || "",
         national_id: selectedClient.national_id || "",
       });
@@ -519,10 +520,10 @@ function ChooseClient() {
     const phones = [{ phone: values.phone }];
     if (values.phone2) phones.push({ phone: values.phone2 });
     const requestData: TCreateClientRequest = {
-      first_name: values.first_name,
+      first_name: values.name.trim(),
       middle_name: "",
-      last_name: values.last_name,
-      date_of_birth: values.date_of_birth,
+      last_name: "",
+      date_of_birth: values.date_of_birth || "",
       national_id: values.national_id,
       source: values.source,
       address: {
@@ -693,43 +694,28 @@ function ChooseClient() {
                         onSubmit={newClientForm.handleSubmit(handleNewClientSubmitAndCreateOrder)}
                         className="space-y-4"
                       >
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <FormField
-                            control={newClientForm.control}
-                            name="first_name"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="text-right block w-full">الاسم الأول</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="محمد" className="h-12 rounded-lg" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={newClientForm.control}
-                            name="last_name"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="text-right block w-full">اسم العائلة</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="علي" className="h-12 rounded-lg" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
+                        <FormField
+                          control={newClientForm.control}
+                          name="name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-right block w-full">الاسم</FormLabel>
+                              <FormControl>
+                                <Input placeholder="الاسم الكامل للعميل" className="h-12 rounded-lg" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <FormField
                             control={newClientForm.control}
                             name="date_of_birth"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel className="text-right block w-full">تاريخ الميلاد</FormLabel>
+                                <FormLabel className="text-right block w-full">تاريخ الميلاد (اختياري)</FormLabel>
                                 <FormControl>
-                                  <Input type="date" className="h-12 rounded-lg" {...field} />
+                                  <Input type="date" className="h-12 rounded-lg" {...field} value={field.value ?? ""} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -799,10 +785,10 @@ function ChooseClient() {
                               name="phone2"
                               render={({ field }) => (
                                 <FormItem dir="ltr">
-                                  <FormLabel className="text-right block w-full">رقم الهاتف الثاني (اختياري)</FormLabel>
+                                  <FormLabel className="text-right block w-full">رقم الواتس (اختياري)</FormLabel>
                                   <FormControl>
                                     <PhoneInput
-                                      placeholder="أدخل رقم الهاتف الثاني"
+                                      placeholder="أدخل رقم الواتس"
                                       value={field.value}
                                       onChange={field.onChange}
                                       disabled={isCreatingClient}
