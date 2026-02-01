@@ -21,6 +21,7 @@ function SubSidebarItem({
   level,
   subItems,
   icon,
+  iconComponent,
 }: Props) {
   const [active, setActive] = useState(false);
   const { pathname } = useLocation();
@@ -29,12 +30,15 @@ function SubSidebarItem({
     setActive(isParentActive && includeRoute(pathname, path, level));
   }, [pathname, path, isParentActive]);
 
+  const iconEl = iconComponent ?? (icon ? <img src={icon} alt="" className="w-4 h-4 shrink-0" /> : null);
+
   return !subItems ? (
     <div key={label} className={`flex flex-col h-6 rounded-lg px-${level + 4}`}>
       <Link
         to={path}
-        className={`flex h-6 gap-4 `}
+        className={`flex h-6 items-center gap-2 `}
       >
+        {iconEl}
         <div
           className={`relative w-fit mr-[${level + 8}px] ${
             active ? "text-[#8f7456] font-bold" : "text-[#5d6679]"

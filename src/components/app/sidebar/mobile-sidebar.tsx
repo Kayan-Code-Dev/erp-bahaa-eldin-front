@@ -26,6 +26,7 @@ function MobileSidebar() {
           <SidebarItem
             key={item.label}
             icon={item.icon}
+            iconComponent={item.iconComponent}
             label={item.label}
             path={item.path}
             level={item.level}

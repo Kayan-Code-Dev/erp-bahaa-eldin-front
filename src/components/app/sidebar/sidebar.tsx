@@ -14,6 +14,7 @@ function Sidebar() {
             <SidebarItem
               key={item.label}
               icon={item.icon}
+              iconComponent={item.iconComponent}
               label={item.label}
               path={item.path}
               subItems={item.subItems}

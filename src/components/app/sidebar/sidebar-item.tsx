@@ -12,16 +12,19 @@ import { SidebarLabel } from "./constants";
 
 export type Props = SidebarLabel;
 
-function SidebarItem({ icon, label, path, subItems, level }: Props) {
+function SidebarItem({ icon, iconComponent, label, path, subItems, level }: Props) {
   const [active, setActive] = useState(false);
   const { pathname } = useLocation();
   useEffect(() => {
     setActive(includeRoute(pathname, path, level));
   }, [pathname, path]);
 
+  const iconEl = iconComponent ?? (icon ? <img src={icon} alt="" className="w-5 h-5" /> : null);
+
   return subItems ? (
     <AccordionSidebarItem
       icon={icon}
+      iconComponent={iconComponent}
       label={label}
       path={path}
       subItems={subItems}
@@ -36,7 +39,7 @@ function SidebarItem({ icon, label, path, subItems, level }: Props) {
           active ? "bg-[#f2f2f2]" : ""
         }`}
       >
-        {icon && <img src={icon} className="w-5 h-5" />}
+        {iconEl}
         <span className={`text-sm ${active ? "font-medium" : ""}`}>
           {label}
         </span>
@@ -47,11 +50,14 @@ function SidebarItem({ icon, label, path, subItems, level }: Props) {
 
 const AccordionSidebarItem = ({
   icon,
+  iconComponent,
   label,
   path,
   subItems,
   active,
-}: Props & { active: boolean }) => (
+}: Props & { active: boolean }) => {
+  const iconEl = iconComponent ?? (icon ? <img src={icon} alt="" className="w-5 h-5" /> : null);
+  return (
   <Accordion type="single" collapsible defaultValue="orders" className="w-full">
     <AccordionItem value={label}>
       <AccordionTrigger
@@ -60,7 +66,7 @@ const AccordionSidebarItem = ({
         } hover:text-[#8b7055] hover:no-underline font-medium} px-2`}
       >
         <Link to={path} className={`flex items-center gap-2 rounded-md `}>
-          {icon && <img src={icon} className="w-5 h-5" />}
+          {iconEl}
           <span className={`text-sm ${active ? "font-medium" : ""}`}>
             {label}
           </span>
@@ -81,6 +87,7 @@ const AccordionSidebarItem = ({
       </AccordionContent>
     </AccordionItem>
   </Accordion>
-);
+  );
+};
 
 export default SidebarItem;

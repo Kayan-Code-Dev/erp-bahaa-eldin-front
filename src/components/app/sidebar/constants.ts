@@ -1,14 +1,3 @@
-import branch from "@/assets/entrepreneur.svg";
-import factory from "@/assets/factory.png";
-import home from "@/assets/Home.svg";
-import clothes from "@/assets/reports.svg";
-import clients from "@/assets/relationship 1.svg";
-import settings from "@/assets/settings.svg";
-import workshop from "@/assets/workshop.svg";
-import ordersAndSales from "@/assets/ordersAndSales.svg";
-import employees from "@/assets/hr.svg";
-import cashbox from "@/assets/reports.svg";
-
 import {
   FACTORY_MANAGEMENT,
   READ_CATEGORIES,
@@ -17,7 +6,42 @@ import {
   READ_SUBCATEGORIES,
 } from "@/lib/permissions.helper";
 import React from "react";
-import { FileText, Minus, ShieldEllipsis, Wallet2, Receipt, FileBarChart } from "lucide-react";
+import {
+  LayoutDashboard,
+  Wallet,
+  Receipt,
+  Wallet2,
+  FileText,
+  List,
+  PlusCircle,
+  Truck,
+  RotateCcw,
+  Clock,
+  Banknote,
+  Users,
+  UserCircle,
+  Shield,
+  Building2,
+  Factory,
+  Package,
+  Wrench,
+  Settings,
+  ShieldEllipsis,
+  Minus,
+  FileBarChart,
+  ArrowRightLeft,
+  Layers,
+  Globe,
+  MapPin,
+  Tags,
+  FolderTree,
+  Building,
+  Briefcase,
+} from "lucide-react";
+
+const iconSize = 20;
+const createIcon = (Icon: React.ComponentType<{ size?: number }>, size = iconSize) =>
+  React.createElement(Icon, { size });
 
 export type SidebarLabel = {
   icon: string | null;
@@ -32,196 +56,216 @@ export type SidebarLabel = {
 export const sidebarLabels: SidebarLabel[] = [
   // 1. لوحة التحكم
   {
-    icon: home,
+    icon: null,
     label: "لوحة التحكم",
     path: "/",
     level: 1,
+    iconComponent: createIcon(LayoutDashboard),
   },
   // 2. الخزنة و المحاسبة
   {
-    icon: cashbox,
+    icon: null,
     label: "الخزنة و المحاسبة",
     path: "/cashboxes",
     level: 1,
+    iconComponent: createIcon(Wallet),
     subItems: [
-     
       {
         icon: null,
         label: "إدارة المدفوعات",
         path: "/payments",
         level: 2,
-        iconComponent: React.createElement(Receipt, { size: 20 }),
+        iconComponent: createIcon(Receipt),
       },
       {
         icon: null,
         label: "إدارة المصروفات",
         path: "/expenses",
         level: 2,
-        iconComponent: React.createElement(Wallet2, { size: 20 }),
+        iconComponent: createIcon(Wallet2),
       },
     ],
   },
   // 3. الفواتير
   {
-    icon: ordersAndSales,
+    icon: null,
     label: "الفواتير",
     path: "/orders",
     level: 1,
+    iconComponent: createIcon(FileText),
     subItems: [
       {
         icon: null,
         label: "قائمة الفواتير ",
         path: "/orders/list",
         level: 2,
+        iconComponent: createIcon(List),
       },
       {
         icon: null,
         label: "اضافة فاتورة جديدة",
         path: "/orders/choose-client",
         level: 2,
+        iconComponent: createIcon(PlusCircle),
       },
     ],
   },
   // 4. التسليم والارجاع
   {
-    icon: ordersAndSales,
+    icon: null,
     label: "التسليم والارجاع",
     path: "/deliveries",
     level: 1,
+    iconComponent: createIcon(Truck),
     subItems: [
       {
         icon: null,
         label: "إدارة التسليمات",
         path: "/deliveries",
         level: 2,
+        iconComponent: createIcon(Truck),
       },
       {
         icon: null,
         label: "إدارة الارجاعات",
         path: "/returns",
         level: 2,
+        iconComponent: createIcon(RotateCcw),
       },
       {
         icon: null,
         label: "الارجاعات المتأخرة",
         path: "/overdue-returns",
         level: 2,
+        iconComponent: createIcon(Clock),
       },
     ],
   },
   // 5. الخزنة
   {
-    icon: cashbox,
+    icon: null,
     label: "الخزنة",
     path: "/cashboxes",
     level: 1,
+    iconComponent: createIcon(Banknote),
   },
   // 6. العملاء
   {
-    icon: clients,
+    icon: null,
     label: "العملاء",
     path: "/clients",
     level: 1,
+    iconComponent: createIcon(Users),
   },
   // 7. الموظفين
   {
-    icon: employees,
+    icon: null,
     label: "الموظفين",
     path: "/employees",
     level: 1,
+    iconComponent: createIcon(UserCircle),
     subItems: [
       {
         icon: null,
         label: "اضافة موظف جديد",
         path: "/employees/add",
         level: 2,
+        iconComponent: createIcon(PlusCircle),
       },
       {
         icon: null,
         label: "قائمة الموظفين",
         path: "/employees/list",
         level: 2,
+        iconComponent: createIcon(List),
       },
       {
         icon: null,
         label: "ضمانات الموظفين",
         path: "/employees/custodies",
         level: 2,
-        iconComponent: React.createElement(ShieldEllipsis, { size: 20 }),
+        iconComponent: createIcon(ShieldEllipsis),
       },
       {
         icon: null,
         label: "الوثائق الشخصية للموظفين",
         path: "/employees/employee-documents",
         level: 2,
-        iconComponent: React.createElement(FileText, { size: 20 }),
+        iconComponent: createIcon(FileText),
       },
       {
         icon: null,
         label: "الخصمات المرتبطة بالموظفين",
         path: "/employees/employee-deductions",
         level: 2,
-        iconComponent: React.createElement(Minus, { size: 20 }),
+        iconComponent: createIcon(Minus),
       },
     ],
   },
   // 8. الصلاحيات
   {
-    icon: settings,
+    icon: null,
     label: "الصلاحيات",
     path: "/content/roles",
     level: 1,
+    iconComponent: createIcon(Shield),
     subItems: [
       {
         icon: null,
         label: "الصلاحيات",
         path: "/content/roles",
         level: 2,
+        iconComponent: createIcon(Shield),
       },
     ],
   },
   // 9. الفروع
   {
-    icon: branch,
+    icon: null,
     label: "الفروع",
     path: "/branch",
     level: 1,
+    iconComponent: createIcon(Building2),
   },
   // 10. إدارة الموردين
   {
-    icon: factory,
+    icon: null,
     label: "إدارة الموردين",
     path: "/suppliers",
     level: 1,
     permission: FACTORY_MANAGEMENT,
+    iconComponent: createIcon(Factory),
     subItems: [
       {
         icon: null,
         label: "عرض الموردين",
         path: "/suppliers",
         level: 2,
+        iconComponent: createIcon(List),
       },
       {
         icon: null,
         label: "إضافة موردين",
         path: "/suppliers/add",
         level: 2,
+        iconComponent: createIcon(PlusCircle),
       },
       {
         icon: null,
         label: "إضافة طلبية",
         path: "/suppliers/orders/add",
         level: 2,
+        iconComponent: createIcon(FileText),
       },
     ],
   },
   // 11. التقارير
   {
-    icon: clothes,
+    icon: null,
     label: "التقارير",
     path: "/clothes",
     level: 1,
-    iconComponent: React.createElement(FileBarChart, { size: 20 }),
+    iconComponent: createIcon(FileBarChart),
   },
   // {
   //   icon: orders,
@@ -418,36 +462,41 @@ export const sidebarLabels: SidebarLabel[] = [
   //     },
   //   ],
   // },
-  // باقي الصفحات (غير المذكورة في القائمة)
+  // إدارة المنتجات
   {
-    icon: clothes,
+    icon: null,
     label: "إدارة المنتجات",
     path: "/clothes",
     level: 1,
+    iconComponent: createIcon(Package),
     subItems: [
       {
         icon: null,
         label: "قائمة المنتجات",
         path: "/clothes/list",
         level: 2,
+        iconComponent: createIcon(List),
       },
       {
         icon: null,
         label: "ادارة نقل المنتجات",
         path: "/clothes/transfer-clothes",
         level: 2,
+        iconComponent: createIcon(ArrowRightLeft),
         subItems: [
           {
             icon: null,
             label: " نقل المنتجات",
             path: "/clothes/transfer-clothes/actions",
             level: 2,
+            iconComponent: createIcon(ArrowRightLeft),
           },
           {
             icon: null,
             label: "قائمة طلبات نقل المنتجات",
             path: "/clothes/transfer-clothes/requests",
             level: 3,
+            iconComponent: createIcon(List),
           },
         ],
       },
@@ -456,14 +505,16 @@ export const sidebarLabels: SidebarLabel[] = [
         label: "ادارة الموديلات",
         path: "/clothes/models",
         level: 2,
+        iconComponent: createIcon(Layers),
       },
     ],
   },
   {
-    icon: workshop,
+    icon: null,
     label: "إدارة الورشة",
     path: "/workshop",
     level: 1,
+    iconComponent: createIcon(Wrench),
   },
   // {
   //   icon: permissions,
@@ -525,10 +576,11 @@ export const sidebarLabels: SidebarLabel[] = [
   //   ],
   // },
   {
-    icon: settings,
+    icon: null,
     label: "ادارة المحتوى",
     path: "/content",
     level: 1,
+    iconComponent: createIcon(Settings),
     subItems: [
       {
         icon: null,
@@ -536,6 +588,7 @@ export const sidebarLabels: SidebarLabel[] = [
         path: "/content/countries",
         level: 2,
         permission: READ_COUNTRIES,
+        iconComponent: createIcon(Globe),
       },
       {
         icon: null,
@@ -543,6 +596,7 @@ export const sidebarLabels: SidebarLabel[] = [
         path: "/content/cities",
         level: 2,
         permission: READ_CITIES,
+        iconComponent: createIcon(MapPin),
       },
       {
         icon: null,
@@ -550,6 +604,7 @@ export const sidebarLabels: SidebarLabel[] = [
         path: "/content/categories",
         level: 2,
         permission: READ_CATEGORIES,
+        iconComponent: createIcon(Tags),
       },
       {
         icon: null,
@@ -557,24 +612,28 @@ export const sidebarLabels: SidebarLabel[] = [
         path: "/content/sub-categories",
         level: 2,
         permission: READ_SUBCATEGORIES,
+        iconComponent: createIcon(FolderTree),
       },
       {
         icon: null,
         label: "الصلاحيات",
         path: "/content/roles",
         level: 2,
+        iconComponent: createIcon(Shield),
       },
       {
         icon: null,
         label: "الاقسام",
         path: "/content/departments",
         level: 2,
+        iconComponent: createIcon(Building),
       },
       {
         icon: null,
         label: "المسميات الوظيفية",
         path: "/content/jobs-titles",
         level: 2,
+        iconComponent: createIcon(Briefcase),
       },
     ],
   },
