@@ -334,12 +334,13 @@ function CreateOrderForm() {
         visit_datetime: format(values.visit_datetime, "yyyy-MM-dd HH:mm:ss"),
         ...(values.has_order_discount &&
           values.order_discount_type &&
-          values.order_discount_type !== "none"
+          values.order_discount_type !== "none" &&
+          (values.order_discount_value ?? 0) > 0
           ? {
               discount_type: values.order_discount_type,
               discount_value: values.order_discount_value ?? 0,
             }
-          : { discount_type: "none" as const, discount_value: 0 }),
+          : {}),
         ...(values.order_notes ? { order_notes: values.order_notes } : {}),
         items: values.items.map((item) => {
           const base = {

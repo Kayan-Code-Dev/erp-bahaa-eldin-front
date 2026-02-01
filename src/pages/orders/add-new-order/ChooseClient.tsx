@@ -167,6 +167,10 @@ function ChooseClient() {
 
   const [selectedProducts, setSelectedProducts] = useState<any[]>([]);
   const [showFilters, setShowFilters] = useState(false);
+  const [orderDiscount, setOrderDiscount] = useState<{
+    type: "none" | "percentage" | "fixed";
+    value: number;
+  }>({ type: "none", value: 0 });
 
   const debouncedNameFilter = useDebounce({ value: nameFilter, delay: 500 });
   const debouncedCategoryId = useDebounce({ value: categoryId, delay: 300 });
@@ -421,25 +425,42 @@ function ChooseClient() {
     return labels[status] || status;
   };
 
-  const buildOrderPayload = (clientId: number): TCreateOrderRequest => ({
-    client_id: clientId,
-    entity_type: entityType!,
-    entity_id: Number(entityId),
-    visit_datetime: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
-    order_notes: selectedProducts.map((p) => p.notes).filter(Boolean).join(" - ") || undefined,
-    discount_type: "none",
-    discount_value: 0,
-    items: selectedProducts.map((product) => {
-      const base = {
-        cloth_id: product.cloth_id,
-        price: product.price,
-        quantity: product.quantity ?? 1,
-        paid: product.paid ?? 0,
-        type: product.type,
-        notes: product.notes || undefined,
-        discount_type: product.discount_type !== "none" ? product.discount_type : undefined,
-        discount_value: (product.discount_value ?? 0) > 0 ? product.discount_value : undefined,
-      };
+  const buildOrderPayload = (clientId: number): TCreateOrderRequest => {
+    const hasOrderDiscount =
+      orderDiscount.type &&
+      orderDiscount.type !== "none" &&
+      orderDiscount.value > 0;
+    const payload: TCreateOrderRequest = {
+      client_id: clientId,
+      entity_type: entityType!,
+      entity_id: Number(entityId),
+      visit_datetime: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
+      order_notes: selectedProducts.map((p) => p.notes).filter(Boolean).join(" - ") || undefined,
+      ...(hasOrderDiscount
+        ? {
+            discount_type: orderDiscount.type as "percentage" | "fixed",
+            discount_value: orderDiscount.value,
+          }
+        : {}),
+      items: selectedProducts.map((product) => {
+        const hasItemDiscount =
+          product.discount_type &&
+          product.discount_type !== "none" &&
+          (product.discount_value ?? 0) > 0;
+        const base = {
+          cloth_id: product.cloth_id,
+          price: product.price,
+          quantity: product.quantity ?? 1,
+          paid: product.paid ?? 0,
+          type: product.type,
+          notes: product.notes || undefined,
+          ...(hasItemDiscount
+            ? {
+                discount_type: product.discount_type as "percentage" | "fixed",
+                discount_value: Number(product.discount_value),
+              }
+            : {}),
+        };
       if (product.type === "rent") {
         return {
           ...base,
@@ -471,7 +492,9 @@ function ChooseClient() {
       }
       return base;
     }),
-  });
+    };
+    return payload;
+  };
 
   const submitOrder = (clientId: number) => {
     createOrder(buildOrderPayload(clientId), {
@@ -929,6 +952,53 @@ function ChooseClient() {
                     </Form>
                   </TabsContent>
                 </Tabs>
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-lg border-gray-200">
+              <CardHeader className="py-3">
+                <CardTitle className="text-base">خصم على الطلب كاملاً (اختياري)</CardTitle>
+                <CardDescription className="text-sm">يمكنك أيضاً إضافة خصم على كل قطعة من تفاصيل المنتج.</CardDescription>
+              </CardHeader>
+              <CardContent className="pb-4 pt-0">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-gray-700 font-medium">نوع الخصم</Label>
+                    <Select
+                      value={orderDiscount.type}
+                      onValueChange={(v: "none" | "percentage" | "fixed") =>
+                        setOrderDiscount({ ...orderDiscount, type: v })
+                      }
+                    >
+                      <SelectTrigger className="h-11 rounded-lg">
+                        <SelectValue placeholder="نوع الخصم" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">لا يوجد</SelectItem>
+                        <SelectItem value="percentage">نسبة مئوية</SelectItem>
+                        <SelectItem value="fixed">مبلغ ثابت</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {orderDiscount.type !== "none" && (
+                    <div className="space-y-2">
+                      <Label className="text-gray-700 font-medium">قيمة الخصم</Label>
+                      <Input
+                        type="number"
+                        min={0}
+                        value={orderDiscount.value || ""}
+                        onChange={(e) =>
+                          setOrderDiscount({
+                            ...orderDiscount,
+                            value: Number(e.target.value) || 0,
+                          })
+                        }
+                        className="h-11 rounded-lg"
+                        placeholder={orderDiscount.type === "percentage" ? "مثال: 10" : "مثال: 50"}
+                      />
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
 
