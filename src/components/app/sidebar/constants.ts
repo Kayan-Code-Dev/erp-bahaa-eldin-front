@@ -421,31 +421,31 @@ export const sidebarLabels: SidebarLabel[] = [
   // باقي الصفحات (غير المذكورة في القائمة)
   {
     icon: clothes,
-    label: "إدارة الملابس",
+    label: "إدارة المنتجات",
     path: "/clothes",
     level: 1,
     subItems: [
       {
         icon: null,
-        label: "قائمة الملابس",
+        label: "قائمة المنتجات",
         path: "/clothes/list",
         level: 2,
       },
       {
         icon: null,
-        label: "ادارة نقل الملابس",
+        label: "ادارة نقل المنتجات",
         path: "/clothes/transfer-clothes",
         level: 2,
         subItems: [
           {
             icon: null,
-            label: " نقل الملابس",
+            label: " نقل المنتجات",
             path: "/clothes/transfer-clothes/actions",
             level: 2,
           },
           {
             icon: null,
-            label: "قائمة طلبات نقل الملابس",
+            label: "قائمة طلبات نقل المنتجات",
             path: "/clothes/transfer-clothes/requests",
             level: 3,
           },
