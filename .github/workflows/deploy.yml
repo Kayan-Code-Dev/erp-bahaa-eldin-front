@@ -23,7 +23,7 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Build project
+      - name: Build project 
         run: yarn build
         env:
           VITE_BACKEND_URL: https://api.dressnmore.it.com/api
