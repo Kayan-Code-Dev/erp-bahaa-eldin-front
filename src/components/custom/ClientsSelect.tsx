@@ -60,7 +60,7 @@ export function ClientsSelect({ value, onChange, disabled }: Props) {
             <Fragment key={i}>
               {page?.data.map((client) => (
                 <SelectItem key={client.id} value={client.id.toString()}>
-                  {client.first_name} {client.middle_name} {client.last_name}
+                  {client.name ?? ([client.first_name, client.middle_name, client.last_name].filter(Boolean).join(" ").trim() || "—")}
                 </SelectItem>
               ))}
             </Fragment>

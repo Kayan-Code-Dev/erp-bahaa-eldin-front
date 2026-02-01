@@ -1,5 +1,6 @@
 import { TEntity } from "@/lib/types/entity.types";
 import { TClothesStatus } from "../clothes/clothes.types";
+import type { TCreateClientRequest } from "../clients/clients.types";
 
 /** Client address as returned by the orders API */
 export type TOrderAddress = {
@@ -190,8 +191,22 @@ export type TCreateOrderItemRequest = {
   dress_size?: string;
 };
 
+/** Create order with existing client (client_id) */
 export type TCreateOrderRequest = {
   client_id: number;
+  entity_type: TEntity;
+  entity_id: number;
+  visit_datetime: string;
+  order_notes?: string;
+  discount_type?: TDiscountType;
+  discount_value?: number;
+  items: TCreateOrderItemRequest[];
+};
+
+/** Create order with new client in one request (existing_client: false, client object) */
+export type TCreateOrderWithNewClientRequest = {
+  existing_client: false;
+  client: TCreateClientRequest;
   entity_type: TEntity;
   entity_id: number;
   visit_datetime: string;

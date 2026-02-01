@@ -41,19 +41,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Schema
+// Schema (aligned with create: name, single address, phones with type)
 const formSchema = z.object({
-  first_name: z.string().min(1, { message: "الاسم الأول مطلوب" }),
-  middle_name: z.string().min(1, { message: "الاسم الأوسط مطلوب" }),
-  last_name: z.string().min(1, { message: "الاسم الأخير مطلوب" }),
-  date_of_birth: z.string().min(1, { message: "تاريخ الميلاد مطلوب" }),
+  name: z.string().min(1, { message: "الاسم مطلوب" }),
+  date_of_birth: z.string().optional(),
   national_id: z
     .string()
     .length(14, { message: "الرقم القومي يجب أن يكون 14 رقمًا" })
     .regex(/^\d{14}$/, { message: "الرقم القومي يجب أن يتكون من 14 رقمًا" }),
   source: z.enum(CLIENT_SOURCES),
-  street: z.string().min(1, { message: "الشارع مطلوب" }),
-  building: z.string().min(1, { message: "المبنى مطلوب" }),
+  address: z.string().min(1, { message: "العنوان مطلوب" }),
   city_id: z.string({ required_error: "المدينة مطلوبة" }),
   notes: z.string().optional(),
   phone: z.string().min(1, { message: "رقم الهاتف مطلوب" }),
@@ -74,14 +71,11 @@ export function EditClientModal({ client, open, onOpenChange }: Props) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      first_name: "",
-      middle_name: "",
-      last_name: "",
+      name: "",
       date_of_birth: "",
       national_id: "",
       source: "other",
-      street: "",
-      building: "",
+      address: "",
       city_id: "",
       notes: "",
       phone: "",
@@ -89,18 +83,18 @@ export function EditClientModal({ client, open, onOpenChange }: Props) {
     },
   });
 
-  // Load client data into form when modal opens
+  const displayName = client?.name ?? ([client?.first_name, client?.middle_name, client?.last_name].filter(Boolean).join(" ").trim() || "");
+
   useEffect(() => {
     if (client && open) {
+      const fullName = client.name?.trim() ?? [client.first_name, client.middle_name, client.last_name].filter(Boolean).join(" ").trim();
+      const addressStr = client.address ? [client.address.street, client.address.building].filter(Boolean).join("، ") || "" : "";
       form.reset({
-        first_name: client.first_name,
-        middle_name: client.middle_name,
-        last_name: client.last_name,
-        date_of_birth: client.date_of_birth,
-        national_id: client.national_id,
+        name: fullName || "",
+        date_of_birth: client.date_of_birth || "",
+        national_id: client.national_id || "",
         source: (client.source as TClientSource) || "other",
-        street: client.address?.street || "",
-        building: client.address?.building || "",
+        address: addressStr,
         city_id: client.address ? String(client.address.city_id) : "",
         notes: client.address?.notes || "",
         phone: client.phones?.[0]?.phone || "",
@@ -112,25 +106,23 @@ export function EditClientModal({ client, open, onOpenChange }: Props) {
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     if (!client) return;
 
-    const phones = [{ phone: values.phone }];
-    if (values.phone2) {
-      phones.push({ phone: values.phone2 });
+    const phones: { phone: string; type: string }[] = [
+      { phone: values.phone.trim(), type: "mobile" },
+    ];
+    if (values.phone2?.trim()) {
+      phones.push({ phone: values.phone2.trim(), type: "whatsapp" });
     }
 
     const requestData: TUpdateClientRequest = {
-      first_name: values.first_name,
-      middle_name: values.middle_name,
-      last_name: values.last_name,
-      date_of_birth: values.date_of_birth,
-      national_id: values.national_id,
+      name: values.name.trim(),
+      date_of_birth: values.date_of_birth || undefined,
+      national_id: values.national_id || undefined,
       source: values.source as TClientSource,
       address: {
-        street: values.street,
-        building: values.building,
         city_id: Number(values.city_id),
-        notes: values.notes || "",
+        address: values.address.trim(),
       },
-      phones: phones,
+      phones,
     };
 
     updateClient(
@@ -138,7 +130,7 @@ export function EditClientModal({ client, open, onOpenChange }: Props) {
       {
         onSuccess: () => {
           toast.success("تم تحديث العميل بنجاح", {
-            description: `تم تحديث العميل "${client.first_name} ${client.last_name}" بنجاح.`,
+            description: `تم تحديث العميل "${values.name.trim()}" بنجاح.`,
           });
           form.reset();
           onOpenChange(false);
@@ -157,7 +149,7 @@ export function EditClientModal({ client, open, onOpenChange }: Props) {
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto scrollbar-hide">
         <DialogHeader>
           <DialogTitle className="text-center">
-            تعديل العميل: {client ? `${client.first_name} ${client.last_name}` : ""}
+            تعديل العميل: {displayName || "—"}
           </DialogTitle>
           <DialogDescription className="text-center">
             قم بتعديل البيانات وانقر "حفظ" لحفظ التغييرات.
@@ -169,50 +161,20 @@ export function EditClientModal({ client, open, onOpenChange }: Props) {
             className="space-y-4"
             dir="rtl"
           >
-            {/* Name Fields */}
-            <div className="grid grid-cols-3 gap-4">
-              <FormField
-                control={form.control}
-                name="first_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>الاسم الأول</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="middle_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>الاسم الأوسط</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="last_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>الاسم الأخير</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            {/* Name */}
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>الاسم</FormLabel>
+                  <FormControl>
+                    <Input placeholder="الاسم الكامل للعميل" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             {/* Personal Information */}
             <div className="grid grid-cols-3 gap-4">
@@ -293,12 +255,12 @@ export function EditClientModal({ client, open, onOpenChange }: Props) {
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="phone2"
-                  render={({ field }) => (
-                    <FormItem dir="ltr">
-                      <FormLabel>رقم الهاتف الثاني (اختياري)</FormLabel>
+              <FormField
+                control={form.control}
+                name="phone2"
+                render={({ field }) => (
+                  <FormItem dir="ltr">
+                    <FormLabel>رقم الواتس (اختياري)</FormLabel>
                       <FormControl>
                         <PhoneInput
                           placeholder="أدخل رقم الهاتف الثاني"
@@ -317,36 +279,19 @@ export function EditClientModal({ client, open, onOpenChange }: Props) {
             {/* Address Section */}
             <div className="space-y-4 border-t pt-4">
               <h3 className="text-sm font-medium">العنوان</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="street"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>الشارع</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="building"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>المبنى</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>العنوان</FormLabel>
+                    <FormControl>
+                      <Input placeholder="أدخل العنوان الكامل" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="city_id"

@@ -39,14 +39,14 @@ import {
   CLIENT_SOURCES,
   CLIENT_SOURCE_LABELS,
 } from "@/api/v2/clients/clients.types";
-import {
-  useGetClientQueryOptions,
-  useCreateClientMutationOptions,
-} from "@/api/v2/clients/clients.hooks";
+import { useGetClientQueryOptions } from "@/api/v2/clients/clients.hooks";
 import { useGetClothesQueryOptions } from "@/api/v2/clothes/clothes.hooks";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useCreateOrderMutationOptions } from "@/api/v2/orders/orders.hooks";
-import { TCreateOrderRequest } from "@/api/v2/orders/orders.types";
+import {
+  TCreateOrderRequest,
+  TCreateOrderWithNewClientRequest,
+} from "@/api/v2/orders/orders.types";
 import { format } from "date-fns";
 import {
   Table,
@@ -228,15 +228,14 @@ function ChooseClient() {
   const createOrderMutation = useMutation(useCreateOrderMutationOptions());
   const { mutate: createOrder, isPending: isCreatingOrder } = createOrderMutation;
 
-  const createClientMutation = useMutation(useCreateClientMutationOptions());
-  const { mutate: createClient, isPending: isCreatingClient } = createClientMutation;
-
   useEffect(() => {
     if (selectedClient) {
-      const fullName = [selectedClient.first_name, selectedClient.middle_name, selectedClient.last_name]
-        .filter(Boolean)
-        .join(" ")
-        .trim();
+      const fullName =
+        selectedClient.name?.trim() ||
+        [selectedClient.first_name, selectedClient.middle_name, selectedClient.last_name]
+          .filter(Boolean)
+          .join(" ")
+          .trim();
       newClientForm.reset({
         ...defaultNewClientValues,
         name: fullName || "",
@@ -425,42 +424,26 @@ function ChooseClient() {
     return labels[status] || status;
   };
 
-  const buildOrderPayload = (clientId: number): TCreateOrderRequest => {
-    const hasOrderDiscount =
-      orderDiscount.type &&
-      orderDiscount.type !== "none" &&
-      orderDiscount.value > 0;
-    const payload: TCreateOrderRequest = {
-      client_id: clientId,
-      entity_type: entityType!,
-      entity_id: Number(entityId),
-      visit_datetime: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
-      order_notes: selectedProducts.map((p) => p.notes).filter(Boolean).join(" - ") || undefined,
-      ...(hasOrderDiscount
-        ? {
-            discount_type: orderDiscount.type as "percentage" | "fixed",
-            discount_value: orderDiscount.value,
-          }
-        : {}),
-      items: selectedProducts.map((product) => {
-        const hasItemDiscount =
-          product.discount_type &&
-          product.discount_type !== "none" &&
-          (product.discount_value ?? 0) > 0;
-        const base = {
-          cloth_id: product.cloth_id,
-          price: product.price,
-          quantity: product.quantity ?? 1,
-          paid: product.paid ?? 0,
-          type: product.type,
-          notes: product.notes || undefined,
-          ...(hasItemDiscount
-            ? {
-                discount_type: product.discount_type as "percentage" | "fixed",
-                discount_value: Number(product.discount_value),
-              }
-            : {}),
-        };
+  const buildOrderItems = () =>
+    selectedProducts.map((product) => {
+      const hasItemDiscount =
+        product.discount_type &&
+        product.discount_type !== "none" &&
+        (product.discount_value ?? 0) > 0;
+      const base = {
+        cloth_id: product.cloth_id,
+        price: product.price,
+        quantity: product.quantity ?? 1,
+        paid: product.paid ?? 0,
+        type: product.type,
+        notes: product.notes || undefined,
+        ...(hasItemDiscount
+          ? {
+              discount_type: product.discount_type as "percentage" | "fixed",
+              discount_value: Number(product.discount_value),
+            }
+          : {}),
+      };
       if (product.type === "rent") {
         return {
           ...base,
@@ -491,9 +474,66 @@ function ChooseClient() {
         };
       }
       return base;
-    }),
+    });
+
+  const buildOrderPayload = (clientId: number): TCreateOrderRequest => {
+    const hasOrderDiscount =
+      orderDiscount.type &&
+      orderDiscount.type !== "none" &&
+      orderDiscount.value > 0;
+    return {
+      client_id: clientId,
+      entity_type: entityType!,
+      entity_id: Number(entityId),
+      visit_datetime: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
+      order_notes: selectedProducts.map((p) => p.notes).filter(Boolean).join(" - ") || undefined,
+      ...(hasOrderDiscount
+        ? {
+            discount_type: orderDiscount.type as "percentage" | "fixed",
+            discount_value: orderDiscount.value,
+          }
+        : {}),
+      items: buildOrderItems(),
     };
-    return payload;
+  };
+
+  const buildOrderWithNewClientPayload = (
+    values: NewClientFormValues
+  ): TCreateOrderWithNewClientRequest => {
+    const hasOrderDiscount =
+      orderDiscount.type &&
+      orderDiscount.type !== "none" &&
+      orderDiscount.value > 0;
+    const phones: { phone: string; type: string }[] = [
+      { phone: values.phone.trim(), type: "mobile" },
+    ];
+    if (values.phone2?.trim()) phones.push({ phone: values.phone2.trim(), type: "whatsapp" });
+    const client: TCreateClientRequest = {
+      name: values.name.trim(),
+      date_of_birth: values.date_of_birth || undefined,
+      national_id: values.national_id || undefined,
+      source: values.source,
+      address: {
+        city_id: Number(values.city_id),
+        address: values.address.trim(),
+      },
+      phones,
+    };
+    return {
+      existing_client: false,
+      client,
+      entity_type: entityType!,
+      entity_id: Number(entityId),
+      visit_datetime: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
+      order_notes: selectedProducts.map((p) => p.notes).filter(Boolean).join(" - ") || undefined,
+      ...(hasOrderDiscount
+        ? {
+            discount_type: orderDiscount.type as "percentage" | "fixed",
+            discount_value: orderDiscount.value,
+          }
+        : {}),
+      items: buildOrderItems(),
+    };
   };
 
   const submitOrder = (clientId: number) => {
@@ -589,32 +629,15 @@ function ChooseClient() {
       toast.error("يجب إضافة منتجات على الأقل");
       return;
     }
-    const phones = [{ phone: values.phone }];
-    if (values.phone2) phones.push({ phone: values.phone2 });
-    const requestData: TCreateClientRequest = {
-      first_name: values.name.trim(),
-      middle_name: "",
-      last_name: "",
-      date_of_birth: values.date_of_birth || "",
-      national_id: values.national_id,
-      source: values.source,
-      address: {
-        street: values.address,
-        building: "",
-        city_id: Number(values.city_id),
-        notes: values.notes || "",
+    const payload = buildOrderWithNewClientPayload(values);
+    createOrder(payload, {
+      onSuccess: () => {
+        toast.success("تم إنشاء الطلب والعميل بنجاح!");
+        navigate("/orders/list");
       },
-      phones,
-    };
-    createClient(requestData, {
-      onSuccess: (data) => {
-        if (!data) return;
-        toast.success("تم إنشاء العميل بنجاح");
-        submitOrder(data.id);
-      },
-      onError: (error) => {
-        toast.error("حدث خطأ أثناء إنشاء العميل", {
-          description: error.message,
+      onError: (error: any) => {
+        toast.error("حدث خطأ أثناء إنشاء الطلب", {
+          description: error?.message || "حدث خطأ غير متوقع",
         });
       },
     });
@@ -723,9 +746,10 @@ function ChooseClient() {
                           <div>
                             <p className="font-bold text-green-800">العميل المختار:</p>
                             <p className="font-medium text-gray-900">
-                              {selectedClientFromList?.first_name || selectedClient?.first_name}{" "}
-                              {selectedClientFromList?.middle_name || selectedClient?.middle_name}{" "}
-                              {selectedClientFromList?.last_name || selectedClient?.last_name}
+                              {(() => {
+                                const c = selectedClientFromList ?? selectedClient;
+                                return c?.name ?? ([c?.first_name, c?.middle_name, c?.last_name].filter(Boolean).join(" ").trim() || "—");
+                              })()}
                             </p>
                             <div className="mt-2 space-y-1">
                               <p className="text-sm text-gray-600">
@@ -866,7 +890,7 @@ function ChooseClient() {
                                       placeholder="أدخل رقم الهاتف"
                                       value={field.value}
                                       onChange={field.onChange}
-                                      disabled={isCreatingClient}
+                                      disabled={isCreatingOrder}
                                       className="h-11 rounded-lg"
                                     />
                                   </FormControl>
@@ -885,7 +909,7 @@ function ChooseClient() {
                                       placeholder="أدخل رقم الواتس"
                                       value={field.value}
                                       onChange={field.onChange}
-                                      disabled={isCreatingClient}
+                                      disabled={isCreatingOrder}
                                       className="h-11 rounded-lg"
                                     />
                                   </FormControl>
@@ -926,7 +950,7 @@ function ChooseClient() {
                                     <CitiesSelect
                                       value={field.value}
                                       onChange={field.onChange}
-                                      disabled={isCreatingClient}
+                                      disabled={isCreatingOrder}
                                     />
                                   </FormControl>
                                   <FormMessage />
@@ -1585,10 +1609,10 @@ function ChooseClient() {
               }
               className="h-12 px-8 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isCreatingOrder || (activeTab === "new" && isCreatingClient) ? (
+              {isCreatingOrder ? (
                 <>
                   <Loader2 className="ml-3 h-5 w-5 animate-spin" />
-                  {isCreatingClient ? "جاري إنشاء العميل..." : "جاري إنشاء الطلب..."}
+                  جاري إنشاء الطلب...
                 </>
               ) : (
                 <>

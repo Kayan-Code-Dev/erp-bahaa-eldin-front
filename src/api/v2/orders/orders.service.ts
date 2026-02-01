@@ -3,6 +3,7 @@ import { api } from "@/api/api-contants";
 import { populateError } from "@/api/api.utils";
 import {
   TCreateOrderRequest,
+  TCreateOrderWithNewClientRequest,
   TOrder,
   TReturnOrderItemRequest,
   TReturnOrderItemsRequest,
@@ -10,7 +11,9 @@ import {
   TAddPaymentRequest,
 } from "./orders.types";
 
-export const createOrder = async (data: TCreateOrderRequest) => {
+export const createOrder = async (
+  data: TCreateOrderRequest | TCreateOrderWithNewClientRequest
+) => {
   try {
     const { data: responseData } = await api.post<TOrder>(`/orders`, data);
     return responseData;

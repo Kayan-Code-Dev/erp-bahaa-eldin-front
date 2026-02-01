@@ -20,37 +20,44 @@ export const CLIENT_SOURCE_LABELS = {
 
 export type TClientSource = (typeof CLIENT_SOURCES)[number];
 
+/** Phone entry with type (e.g. mobile, whatsapp) */
+export type TClientPhone = {
+  phone: string;
+  type: string;
+};
+
 export type TCreateClientRequest = {
-  first_name: string;
-  middle_name: string;
-  last_name: string;
-  date_of_birth: string;
-  national_id: string;
-  source: TClientSource;
+  name: string;
+  date_of_birth?: string;
+  national_id?: string;
+  source?: TClientSource;
   address: {
     city_id: number;
-    street: string;
-    building: string;
-    notes: string;
+    address: string;
   };
-  phones: {
-    phone: string;
-  }[];
+  phones: TClientPhone[];
+  breast_size?: string;
+  waist_size?: string;
+  sleeve_size?: string;
+  hip_size?: string;
+  shoulder_size?: string;
+  length_size?: string;
+  measurement_notes?: string;
 };
 
 export type TClientResponse = {
-  first_name: string;
-  middle_name: string;
-  last_name: string;
-  date_of_birth: string;
-  national_id: string;
+  id: number;
+  name?: string;
+  first_name?: string;
+  middle_name?: string;
+  last_name?: string;
+  date_of_birth?: string;
+  national_id?: string;
   source: string;
   address_id: number;
   updated_at: string;
   created_at: string;
-  id: number;
-  phones: { phone: string }[];
-
+  phones: { phone: string; type?: string }[];
   address: TAddressResponse;
 };
 
