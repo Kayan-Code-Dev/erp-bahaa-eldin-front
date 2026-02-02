@@ -203,7 +203,7 @@ function UpdateOrder() {
     if (!locationState) {
       toast.error("يجب عليك اختيار الطلب والملابس أولاً");
       setTimeout(() => {
-        navigate("/orders");
+        navigate("/orders/list");
       }, 0);
       return;
     }
@@ -214,7 +214,7 @@ function UpdateOrder() {
     if (!order || typeof order !== "object" || !order.id) {
       toast.error("الطلب غير صحيح");
       setTimeout(() => {
-        navigate("/orders");
+        navigate("/orders/list");
       }, 0);
       return;
     }
@@ -472,7 +472,7 @@ function UpdateOrder() {
         {
           onSuccess: () => {
             toast.success("تم تحديث الطلب بنجاح");
-            navigate("/orders");
+            navigate(`/orders/${fullOrder.id}`);
           },
           onError: (error: any) => {
             toast.error("خطأ في تحديث الطلب", {

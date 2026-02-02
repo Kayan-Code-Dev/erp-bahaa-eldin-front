@@ -202,7 +202,7 @@ export type TCreateOrderRequest = {
   client_id: number;
   entity_type: TEntity;
   entity_id: number;
-  visit_datetime: string;
+  delivery_date: string;
   order_notes?: string;
   discount_type?: TDiscountType;
   discount_value?: number;
@@ -215,7 +215,7 @@ export type TCreateOrderWithNewClientRequest = {
   client: TCreateClientRequest;
   entity_type: TEntity;
   entity_id: number;
-  visit_datetime: string;
+  delivery_date: string;
   order_notes?: string;
   discount_type?: TDiscountType;
   discount_value?: number;

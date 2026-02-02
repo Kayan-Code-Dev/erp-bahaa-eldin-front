@@ -114,8 +114,8 @@ const orderItemSchema = z
 const formSchema = z
   .object({
     paid: z.number().min(0, "المبلغ المدفوع يجب أن يكون أكبر من أو يساوي صفر"),
-    visit_datetime: z.date({
-      required_error: "يجب اختيار تاريخ ووقت الزيارة",
+    delivery_date: z.date({
+      required_error: "يجب اختيار تاريخ التسليم",
     }),
     has_order_discount: z.boolean().default(false),
     order_discount_type: z.enum(["none", "percentage", "fixed"]).optional(),
@@ -166,7 +166,7 @@ function CreateOrderForm() {
     if (!locationState) {
       return {
         paid: 0,
-        visit_datetime: new Date(),
+        delivery_date: new Date(),
         has_order_discount: false,
         order_discount_type: "none",
         order_discount_value: 0,
@@ -179,7 +179,7 @@ function CreateOrderForm() {
 
     return {
       paid: 0,
-      visit_datetime: new Date(),
+      delivery_date: deliveryDate,
       has_order_discount: false,
       order_discount_type: "none",
       order_discount_value: 0,
@@ -212,6 +212,11 @@ function CreateOrderForm() {
   const hasOrderDiscount = useWatch({
     control: form.control,
     name: "has_order_discount",
+  });
+
+  const watchedItems = useWatch({
+    control: form.control,
+    name: "items",
   });
 
   const createOrderMutation = useMutation(useCreateOrderMutationOptions());
@@ -332,7 +337,7 @@ function CreateOrderForm() {
         client_id,
         entity_type,
         entity_id,
-        visit_datetime: format(values.visit_datetime, "yyyy-MM-dd HH:mm:ss"),
+        delivery_date: format(values.delivery_date, "yyyy-MM-dd HH:mm:ss"),
         ...(values.has_order_discount &&
           values.order_discount_type &&
           values.order_discount_type !== "none" &&
@@ -479,15 +484,15 @@ function CreateOrderForm() {
 
                 <FormField
                   control={form.control}
-                  name="visit_datetime"
+                  name="delivery_date"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>تاريخ ووقت الزيارة</FormLabel>
+                      <FormLabel>تاريخ التسليم</FormLabel>
                       <FormControl>
-                        <SimpleDateTimePicker
+                        <DatePicker
                           value={field.value}
                           onChange={field.onChange}
-                          placeholder="اختر تاريخ ووقت الزيارة"
+                          placeholder="اختر تاريخ التسليم"
                         />
                       </FormControl>
                       <FormMessage />
@@ -613,14 +618,8 @@ function CreateOrderForm() {
                   const cloth = selected_clothes.find(
                     (c) => c.id === field.cloth_id
                   );
-                  const itemHasDiscount = useWatch({
-                    control: form.control,
-                    name: `items.${index}.has_discount`,
-                  });
-                  const itemType = useWatch({
-                    control: form.control,
-                    name: `items.${index}.type`,
-                  });
+                  const itemHasDiscount = watchedItems?.[index]?.has_discount;
+                  const itemType = watchedItems?.[index]?.type;
 
                   return (
                     <Card key={field.id} className="border-2">

@@ -486,7 +486,7 @@ function ChooseClient() {
       client_id: clientId,
       entity_type: entityType!,
       entity_id: Number(entityId),
-      visit_datetime: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
+      delivery_date: deliveryDate ? format(deliveryDate, "yyyy-MM-dd HH:mm:ss") : format(new Date(), "yyyy-MM-dd HH:mm:ss"),
       order_notes: selectedProducts.map((p) => p.notes).filter(Boolean).join(" - ") || undefined,
       ...(hasOrderDiscount
         ? {
@@ -525,7 +525,7 @@ function ChooseClient() {
       client,
       entity_type: entityType!,
       entity_id: Number(entityId),
-      visit_datetime: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
+      delivery_date: deliveryDate ? format(deliveryDate, "yyyy-MM-dd HH:mm:ss") : format(new Date(), "yyyy-MM-dd HH:mm:ss"),
       order_notes: selectedProducts.map((p) => p.notes).filter(Boolean).join(" - ") || undefined,
       ...(hasOrderDiscount
         ? {

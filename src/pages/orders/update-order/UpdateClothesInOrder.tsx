@@ -98,7 +98,7 @@ function UpdateClothesInOrder() {
   useEffect(() => {
     if (!order) {
       setTimeout(() => {
-        navigate("/orders");
+        navigate("/orders/list");
         toast.error("يجب عليك اختيار طلب");
       }, 0);
     }
@@ -345,7 +345,7 @@ function UpdateClothesInOrder() {
     <div dir="rtl" className="space-y-6">
       {/* Breadcrumbs */}
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Link to="/orders" className="hover:text-foreground transition-colors">
+        <Link to="/orders/list" className="hover:text-foreground transition-colors">
           قائمة الطلبات
         </Link>
         <ChevronRight className="h-4 w-4" />
