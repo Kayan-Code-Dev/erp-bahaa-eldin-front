@@ -25,20 +25,8 @@ jobs:
 
       - name: Build project 
         run: yarn build
-
-      - name: Deploy to VPS via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USERNAME }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          port: 22
-          script: |
-            cd /var/www/erp-bahaa-eldin-front
-            git pull origin main
-            yarn install --frozen-lockfile
-            yarn build
-            systemctl reload nginx
+        env:
+          VITE_BACKEND_URL: https://api.dressnmore.it.com/api/v1
 
       - name: Copy built files to VPS
         uses: appleboy/scp-action@v0.1.7
@@ -52,3 +40,11 @@ jobs:
           strip_components: 1
           rm: true
 
+      - name: Reload Nginx
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script: systemctl reload nginx
