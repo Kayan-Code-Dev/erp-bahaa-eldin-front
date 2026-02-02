@@ -328,6 +328,7 @@ function CreateOrderForm() {
   const onSubmit = async (values: FormValues) => {
     try {
       const requestData: TCreateOrderRequest = {
+        existing_client: true,
         client_id,
         entity_type,
         entity_id,

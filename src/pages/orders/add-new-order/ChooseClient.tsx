@@ -482,6 +482,7 @@ function ChooseClient() {
       orderDiscount.type !== "none" &&
       orderDiscount.value > 0;
     return {
+      existing_client: true,
       client_id: clientId,
       entity_type: entityType!,
       entity_id: Number(entityId),

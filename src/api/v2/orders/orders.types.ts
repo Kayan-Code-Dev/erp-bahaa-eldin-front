@@ -194,8 +194,9 @@ export type TCreateOrderItemRequest = {
   dress_size?: string;
 };
 
-/** Create order with existing client (client_id) */
+/** Create order with existing client (existing_client: true, client_id) */
 export type TCreateOrderRequest = {
+  existing_client: true;
   client_id: number;
   entity_type: TEntity;
   entity_id: number;
