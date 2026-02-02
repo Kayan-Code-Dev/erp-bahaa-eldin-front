@@ -119,7 +119,7 @@ export function OrderInvoicePrint({
         className="invoice-print-header w-full py-3 mb-3 text-white rounded-b-lg shadow-md"
         style={{ backgroundColor: HEADER_BG }}
       >
-        <div className="invoice-print-header-inner flex items-center justify-between gap-4 w-full px-4">
+        <div className="invoice-print-header-inner flex items-center justify-between gap-4 w-full px-4 min-h-[4.5rem]">
           <div className="invoice-print-header-right text-right shrink-0 space-y-1">
             <div className="flex items-baseline justify-end gap-2 flex-wrap">
               <span className="invoice-header-label text-sm font-semibold text-white/95">رقم الفاتورة: </span>
@@ -128,8 +128,8 @@ export function OrderInvoicePrint({
             <div className="invoice-header-line text-xs font-medium text-white/95">اسم الموظف: {employeeName}</div>
             <div className="invoice-header-line text-xs font-medium text-white/95">التاريخ: {invoiceDate}</div>
           </div>
-          <div className="invoice-print-header-logo shrink-0 bg-white/10 rounded-lg p-2 flex items-center justify-center">
-            <img src={logoUrl} alt="الشعار" className="invoice-logo-img max-h-12 w-auto object-contain" />
+          <div className="invoice-print-header-logo shrink-0 h-[4.5rem] flex items-center justify-center bg-white/10 rounded-lg p-1.5">
+            <img src={logoUrl} alt="الشعار" className="invoice-logo-img max-h-full max-w-[140px] w-auto object-contain" />
           </div>
         </div>
       </header>
@@ -259,12 +259,12 @@ export function OrderInvoicePrint({
             position: absolute; left: 0; top: 0; width: 100%; max-width: 100%; padding: 0; box-sizing: border-box;
             page-break-inside: avoid; page-break-after: avoid;
           }
-          /* تصغير الهيدر عند الطباعة فقط */
-          .invoice-print-header { padding-top: 0.35rem !important; padding-bottom: 0.35rem !important; margin-bottom: 0.35rem !important; }
-          .invoice-print-header-inner { padding-left: 0.5rem !important; padding-right: 0.5rem !important; gap: 0.5rem !important; }
+          /* الهيدر عند الطباعة: اللوغو بنفس ارتفاع الهيدر وبحجم أوضح */
+          .invoice-print-header { padding-top: 0.4rem !important; padding-bottom: 0.4rem !important; margin-bottom: 0.35rem !important; }
+          .invoice-print-header-inner { padding-left: 0.5rem !important; padding-right: 0.5rem !important; gap: 0.5rem !important; min-height: 4rem !important; }
           .invoice-print-header .invoice-header-label, .invoice-print-header .invoice-header-line { font-size: 9px !important; }
-          .invoice-print-header-logo { padding: 0.25rem !important; }
-          .invoice-logo-img { max-height: 24px !important; }
+          .invoice-print-header-logo { padding: 0.25rem !important; height: 4rem !important; min-height: 4rem !important; max-height: 4rem !important; }
+          .invoice-logo-img { max-height: 100% !important; height: 100% !important; width: auto !important; max-width: 160px !important; object-fit: contain !important; object-position: center !important; }
           /* تصغير جدول بيانات الطلب عند الطباعة فقط */
           .invoice-print-info-block { margin-bottom: 0.5rem !important; }
           .invoice-print-info-block h2 { font-size: 9px !important; margin-bottom: 0.25rem !important; padding-bottom: 0.25rem !important; }
