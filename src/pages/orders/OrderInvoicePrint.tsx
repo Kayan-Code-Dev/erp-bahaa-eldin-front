@@ -15,15 +15,15 @@ type Props = {
 
 const RULES_TEXT = `إقرار من المستفيد: أقر بأنني استلمت الفاتورة من 1 إلى 7 أسماء ظاهرة وأوضح أنني مسؤول عن التأخير. 2000 جنيه لإيجار السروال و 500 للجلب. لا يجوز استبدال أو إرجاع الفواتير إلا بعد 3 أشهر. لا يسمح بإخراج الملابس من المحل في حالة غير مكتملة البيع. يلزم إحضار الفواتير الشخصية مع الفاتورة عند الاستبدال أو الإرجاع.`;
 
-/* First table rows: label + placeholder key */
-const INFO_ROWS: { label: string; key: string }[] = [
-  { label: "اسم العروسة", key: "صنف أول" },
-  { label: "هاتف العروسة", key: "صنف ثاني" },
-  { label: "هاتف اضافي", key: "صنف ثالث" },
-  { label: "العنوان", key: "صنف رابع" },
-  { label: "ميعاد الاستلام", key: "صنف خامس" },
-  { label: "ميعاد الفرح", key: "صنف سادس" },
-  { label: "ميعاد الاسترجاع", key: "صنف سابع" },
+/* First table: label only (no عمود الصنف) */
+const INFO_ROWS: { label: string }[] = [
+  { label: "اسم العروسة" },
+  { label: "هاتف العروسة" },
+  { label: "هاتف اضافي" },
+  { label: "العنوان" },
+  { label: "ميعاد الاستلام" },
+  { label: "ميعاد الفرح" },
+  { label: "ميعاد الاسترجاع" },
 ];
 
 /** Build order info values for print, supporting different API shapes */
@@ -112,58 +112,54 @@ export function OrderInvoicePrint({
   return (
     <div
       dir="rtl"
-      className="invoice-print-root w-full min-h-screen flex flex-col bg-white text-gray-800 text-[15px] leading-relaxed"
+      className="invoice-print-root w-full min-h-screen flex flex-col bg-white text-gray-800 text-[13px] leading-snug"
       style={{ fontFamily: "'Segoe UI', 'Cairo', Arial, sans-serif" }}
     >
-      {/* Full-width header */}
       <header
-        className="invoice-print-header w-full py-6 mb-8 text-white rounded-b-2xl shadow-md"
+        className="invoice-print-header w-full py-3 mb-3 text-white rounded-b-lg shadow-md"
         style={{ backgroundColor: HEADER_BG }}
       >
-        <div className="invoice-print-header-inner flex items-center justify-between gap-8 max-w-[210mm] mx-auto px-8">
-          <div className="invoice-print-header-right text-right shrink-0 space-y-3">
+        <div className="invoice-print-header-inner flex items-center justify-between gap-4 w-full px-4">
+          <div className="invoice-print-header-right text-right shrink-0 space-y-1">
             <div className="flex items-baseline justify-end gap-2 flex-wrap">
-              <span className="invoice-header-label text-lg font-semibold text-white/95">رقم الفاتورة: </span>
-              <span className="invoice-header-label text-lg font-semibold text-white/95">{order.id}</span>
+              <span className="invoice-header-label text-sm font-semibold text-white/95">رقم الفاتورة: </span>
+              <span className="invoice-header-label text-sm font-semibold text-white/95">{order.id}</span>
             </div>
-            <div className="invoice-header-line text-base font-medium text-white/95">اسم الموظف: {employeeName}</div>
-            <div className="invoice-header-line text-base font-medium text-white/95">التاريخ: {invoiceDate}</div>
+            <div className="invoice-header-line text-xs font-medium text-white/95">اسم الموظف: {employeeName}</div>
+            <div className="invoice-header-line text-xs font-medium text-white/95">التاريخ: {invoiceDate}</div>
           </div>
-          <div className="invoice-print-header-logo shrink-0 bg-white/10 rounded-xl p-3 flex items-center justify-center">
-            <img src={logoUrl} alt="الشعار" className="invoice-logo-img max-h-24 w-auto object-contain" />
+          <div className="invoice-print-header-logo shrink-0 bg-white/10 rounded-lg p-2 flex items-center justify-center">
+            <img src={logoUrl} alt="الشعار" className="invoice-logo-img max-h-12 w-auto object-contain" />
           </div>
         </div>
       </header>
 
-      <div className="invoice-print-content flex-1 flex flex-col max-w-[210mm] mx-auto px-8 pb-4 w-full">
+      <div className="invoice-print-content flex-1 flex flex-col w-full px-4 pb-4">
 
-
-        <div className="mb-6">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 pb-2 border-b border-gray-200">بيانات الطلب</h2>
-          <table className="invoice-print-table invoice-print-table-info w-full border-collapse overflow-hidden rounded-xl border border-gray-200" style={{ tableLayout: "fixed" }}>
+        <div className="invoice-print-info-block mb-3">
+          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 pb-1 border-b border-gray-200">بيانات الطلب</h2>
+          <table className="invoice-print-table invoice-print-table-info w-full border-collapse overflow-hidden rounded-lg border border-gray-200" style={{ tableLayout: "fixed" }}>
             <tbody>
-              {INFO_ROWS.map(({ label, key }, i) => (
+              {INFO_ROWS.map(({ label }, i) => (
                 <tr key={i} className={i % 2 === 0 ? "invoice-print-row-even bg-gray-50/80" : "bg-white"}>
-                  <td className="invoice-print-td border-b border-gray-100 py-3.5 px-4 text-gray-600 font-medium" style={{ width: "35%" }}>{label}</td>
-                  <td className="invoice-print-td border-b border-gray-100 py-3.5 px-4 text-gray-500 text-sm" style={{ width: "25%" }}>{key}</td>
-                  <td className="invoice-print-td border-b border-gray-100 py-3.5 px-4" style={{ width: "40%" }}>{infoValues[i] ?? "-"}</td>
+                  <td className="invoice-print-td border-b border-gray-100 py-2 px-3 text-gray-600 font-medium text-sm" style={{ width: "32%" }}>{label}</td>
+                  <td className="invoice-print-td border-b border-gray-100 py-2 px-3 text-gray-500 text-sm" style={{ width: "68%" }}>{infoValues[i] ?? "-"}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
 
-        <div className="mb-6">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 pb-2 border-b border-gray-200">تفاصيل الأصناف</h2>
-          <table className="invoice-print-table invoice-print-table-items w-full border-collapse overflow-hidden rounded-xl border border-gray-200" style={{ tableLayout: "fixed" }}>
+        <div className="mb-3">
+          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 pb-1 border-b border-gray-200">تفاصيل الأصناف</h2>
+          <table className="invoice-print-table invoice-print-table-items w-full border-collapse overflow-hidden rounded-lg border border-gray-200" style={{ tableLayout: "fixed" }}>
             <thead>
               <tr className="invoice-print-thead-row" style={{ backgroundColor: HEADER_DARK }}>
-                <th className="invoice-print-th py-3.5 px-4 text-center font-semibold text-white text-sm" style={{ width: "8%" }}>رقم</th>
-                <th className="invoice-print-th py-3.5 px-4 text-center font-semibold text-white text-sm">اسم الصنف</th>
-                <th className="invoice-print-th py-3.5 px-4 text-center font-semibold text-white text-sm" style={{ width: "14%" }}>الكود</th>
-                <th className="invoice-print-th py-3.5 px-4 text-center font-semibold text-white text-sm" style={{ width: "14%" }}>سعر القطعة</th>
-                <th className="invoice-print-th py-3.5 px-4 text-center font-semibold text-white text-sm" style={{ width: "14%" }}>العربون</th>
-                <th className="invoice-print-th py-3.5 px-4 text-center font-semibold text-white text-sm" style={{ width: "14%" }}>الباقي</th>
+                <th className="invoice-print-th py-2 px-3 text-center font-semibold text-white text-sm" style={{ width: "10%" }}>رقم</th>
+                <th className="invoice-print-th py-2 px-3 text-center font-semibold text-white text-sm">الكود</th>
+                <th className="invoice-print-th py-2 px-3 text-center font-semibold text-white text-sm" style={{ width: "18%" }}>سعر القطعة</th>
+                <th className="invoice-print-th py-2 px-3 text-center font-semibold text-white text-sm" style={{ width: "18%" }}>العربون</th>
+                <th className="invoice-print-th py-2 px-3 text-center font-semibold text-white text-sm" style={{ width: "18%" }}>الباقي</th>
               </tr>
             </thead>
             <tbody>
@@ -186,18 +182,17 @@ export function OrderInvoicePrint({
                       : EMPTY_PRICE;
                   return (
                     <tr key={item.id} className={index % 2 === 0 ? "invoice-print-row-even bg-gray-50/50" : "bg-white"}>
-                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-3 px-4 text-center text-sm">{index + 1}</td>
-                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-3 px-4 text-center text-sm">{item.name || "-"}</td>
-                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-3 px-4 text-center text-sm">{item.code || "-"}</td>
-                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-3 px-4 text-center text-sm">{showPrices ? price : EMPTY_PRICE}</td>
-                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-3 px-4 text-center text-sm">{showPrices ? itemPaidVal : EMPTY_PRICE}</td>
-                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-3 px-4 text-center text-sm">{showPrices ? itemRemainingVal : EMPTY_PRICE}</td>
+                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-2 px-3 text-center text-sm">{index + 1}</td>
+                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-2 px-3 text-center text-sm">{item.code || "-"}</td>
+                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-2 px-3 text-center text-sm">{showPrices ? price : EMPTY_PRICE}</td>
+                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-2 px-3 text-center text-sm">{showPrices ? itemPaidVal : EMPTY_PRICE}</td>
+                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-2 px-3 text-center text-sm">{showPrices ? itemRemainingVal : EMPTY_PRICE}</td>
                     </tr>
                   );
                 })
               ) : (
                 <tr>
-                  <td colSpan={6} className="invoice-print-td invoice-print-td-center py-6 px-4 text-center text-gray-400 text-sm">
+                  <td colSpan={5} className="invoice-print-td invoice-print-td-center py-4 px-3 text-center text-gray-400 text-sm">
                     لا توجد عناصر
                   </td>
                 </tr>
@@ -206,52 +201,51 @@ export function OrderInvoicePrint({
           </table>
         </div>
 
-        <div className="invoice-print-block mb-6">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2 pb-2 border-b border-gray-200">ملاحظات العميل</h2>
-          <div className="invoice-print-notes-box rounded-lg border border-gray-200 bg-gray-50/50 py-3 px-4 min-h-[52px] text-gray-700 text-sm">
+        <div className="invoice-print-block mb-3">
+          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 pb-1 border-b border-gray-200">ملاحظات العميل</h2>
+          <div className="invoice-print-notes-box rounded-lg border border-gray-200 bg-gray-50/50 py-2 px-3 min-h-[40px] text-gray-700 text-sm">
             {order.order_notes?.trim() || "—"}
           </div>
         </div>
 
-        <div className="invoice-print-rules-row flex gap-6 mb-6 flex-wrap">
-          <div className="invoice-print-rules-text flex-1 min-w-[240px]">
-            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2 pb-2 border-b border-gray-200">القواعد والتعليمات</h2>
-            <p className="invoice-print-rules-p text-gray-600 text-sm leading-relaxed">{RULES_TEXT}</p>
+        <div className="invoice-print-rules-row flex gap-4 mb-3 flex-wrap">
+          <div className="invoice-print-rules-text flex-1 min-w-[200px]">
+            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 pb-1 border-b border-gray-200">القواعد والتعليمات</h2>
+            <p className="invoice-print-rules-p text-gray-600 text-xs leading-relaxed">{RULES_TEXT}</p>
           </div>
-          <div className="invoice-print-totals-wrap shrink-0 w-56 rounded-xl overflow-hidden shadow-md border border-gray-200">
-            <div className="invoice-print-totals-title py-2.5 px-4 text-center text-white text-sm font-bold uppercase tracking-wider" style={{ backgroundColor: HEADER_BG }}>
+          <div className="invoice-print-totals-wrap shrink-0 w-44 rounded-lg overflow-hidden shadow-md border border-gray-200">
+            <div className="invoice-print-totals-title py-2 px-3 text-center text-white text-sm font-bold uppercase tracking-wider" style={{ backgroundColor: HEADER_BG }}>
               ملخص المبالغ
             </div>
             <table className="invoice-print-totals-table w-full border-collapse">
               <tbody>
                 <tr className="invoice-print-totals-row border-b border-gray-100">
-                  <td className="invoice-print-totals-label py-3 px-4 text-sm font-semibold text-gray-600 bg-gray-50/80">المجموع</td>
-                  <td className="invoice-print-totals-value py-3 px-4 text-right text-base font-bold tabular-nums text-gray-900">{hideItemPrices ? EMPTY_PRICE : formatNumber(totalPrice)}</td>
+                  <td className="invoice-print-totals-label py-2 px-3 text-sm font-semibold text-gray-600 bg-gray-50/80">المجموع</td>
+                  <td className="invoice-print-totals-value py-2 px-3 text-right text-sm font-bold tabular-nums text-gray-900">{hideItemPrices ? EMPTY_PRICE : formatNumber(totalPrice)}</td>
                 </tr>
                 <tr className="invoice-print-totals-row border-b border-gray-100">
-                  <td className="invoice-print-totals-label py-3 px-4 text-sm font-semibold text-gray-600 bg-gray-50/80">العربون</td>
-                  <td className="invoice-print-totals-value py-3 px-4 text-right text-sm font-semibold tabular-nums text-gray-800">{hideItemPrices ? EMPTY_PRICE : formatNumber(paid)}</td>
+                  <td className="invoice-print-totals-label py-2 px-3 text-sm font-semibold text-gray-600 bg-gray-50/80">العربون</td>
+                  <td className="invoice-print-totals-value py-2 px-3 text-right text-sm font-semibold tabular-nums text-gray-800">{hideItemPrices ? EMPTY_PRICE : formatNumber(paid)}</td>
                 </tr>
                 <tr className="invoice-print-totals-row">
-                  <td className="invoice-print-totals-label py-3 px-4 text-sm font-semibold text-gray-600 bg-gray-50/80">المتبقي</td>
-                  <td className="invoice-print-totals-value py-3 px-4 text-right text-sm font-semibold tabular-nums text-gray-800">{hideItemPrices ? EMPTY_PRICE : formatNumber(remaining)}</td>
+                  <td className="invoice-print-totals-label py-2 px-3 text-sm font-semibold text-gray-600 bg-gray-50/80">المتبقي</td>
+                  <td className="invoice-print-totals-value py-2 px-3 text-right text-sm font-semibold tabular-nums text-gray-800">{hideItemPrices ? EMPTY_PRICE : formatNumber(remaining)}</td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        <div className="invoice-print-signature flex justify-end mt-10 pt-6 border-t border-gray-200">
-          <div className="invoice-print-signature-box text-left min-w-[200px]">
-            <span className="font-semibold text-gray-700 block mb-2 text-sm">التوقيع</span>
-            <div className="invoice-print-signature-line border-b-2 border-gray-400 h-8 mt-1" />
+        <div className="invoice-print-signature flex justify-end mt-4 pt-4 border-t border-gray-200">
+          <div className="invoice-print-signature-box text-left min-w-[160px]">
+            <span className="font-semibold text-gray-700 block mb-1 text-sm">التوقيع</span>
+            <div className="invoice-print-signature-line border-b-2 border-gray-400 h-6 mt-0" />
           </div>
         </div>
       </div>
 
-      {/* Fixed bottom bar at page bottom */}
       <div
-        className="invoice-print-footer w-full mt-auto py-4 px-6 text-center text-white rounded-t-2xl text-sm font-medium shadow-md shrink-0"
+        className="invoice-print-footer w-full mt-auto py-3 px-4 text-center text-white rounded-t-lg text-sm font-medium shadow-md shrink-0"
         style={{ backgroundColor: HEADER_BG }}
       >
         لا يرد العربون في حالة الغاء الحجز
@@ -261,7 +255,20 @@ export function OrderInvoicePrint({
         @media print {
           body * { visibility: hidden; }
           .invoice-print-root, .invoice-print-root * { visibility: visible; }
-          .invoice-print-root { position: absolute; left: 0; top: 0; width: 100%; padding: 0; box-sizing: border-box; page-break-inside: avoid; }
+          .invoice-print-root {
+            position: absolute; left: 0; top: 0; width: 100%; max-width: 100%; padding: 0; box-sizing: border-box;
+            page-break-inside: avoid; page-break-after: avoid;
+          }
+          /* تصغير الهيدر عند الطباعة فقط */
+          .invoice-print-header { padding-top: 0.35rem !important; padding-bottom: 0.35rem !important; margin-bottom: 0.35rem !important; }
+          .invoice-print-header-inner { padding-left: 0.5rem !important; padding-right: 0.5rem !important; gap: 0.5rem !important; }
+          .invoice-print-header .invoice-header-label, .invoice-print-header .invoice-header-line { font-size: 9px !important; }
+          .invoice-print-header-logo { padding: 0.25rem !important; }
+          .invoice-logo-img { max-height: 24px !important; }
+          /* تصغير جدول بيانات الطلب عند الطباعة فقط */
+          .invoice-print-info-block { margin-bottom: 0.5rem !important; }
+          .invoice-print-info-block h2 { font-size: 9px !important; margin-bottom: 0.25rem !important; padding-bottom: 0.25rem !important; }
+          .invoice-print-table-info .invoice-print-td { padding: 0.2rem 0.4rem !important; font-size: 9px !important; }
         }
       `}</style>
     </div>

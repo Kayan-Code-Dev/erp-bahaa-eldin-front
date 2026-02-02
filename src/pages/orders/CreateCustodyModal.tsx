@@ -97,9 +97,11 @@ type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   orderId: number;
+  /** Called after successful create (e.g. to refetch parent list) */
+  onSuccess?: () => void;
 };
 
-export function CreateCustodyModal({ open, onOpenChange, orderId }: Props) {
+export function CreateCustodyModal({ open, onOpenChange, orderId, onSuccess }: Props) {
   const { mutate: createCustody, isPending } = useMutation(
     useCreateCustodyMutationOptions()
   );
@@ -148,6 +150,7 @@ export function CreateCustodyModal({ open, onOpenChange, orderId }: Props) {
           });
           form.reset();
           onOpenChange(false);
+          onSuccess?.();
         },
         onError: (error) => {
           toast.error("حدث خطأ أثناء إنشاء الضمان", {

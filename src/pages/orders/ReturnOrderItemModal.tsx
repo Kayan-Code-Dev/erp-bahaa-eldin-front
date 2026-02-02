@@ -49,6 +49,8 @@ type Props = {
   orderId: number;
   itemId: number;
   itemName?: string;
+  /** Called after successful return (e.g. to close parent modal and refetch) */
+  onSuccess?: () => void;
 };
 
 export function ReturnOrderItemModal({
@@ -57,6 +59,7 @@ export function ReturnOrderItemModal({
   orderId,
   itemId,
   itemName,
+  onSuccess,
 }: Props) {
   const { mutate: returnOrderItem, isPending } = useMutation(
     useReturnOrderItemMutationOptions()
@@ -93,6 +96,7 @@ export function ReturnOrderItemModal({
           });
           form.reset();
           onOpenChange(false);
+          onSuccess?.();
         },
         onError: (error) => {
           toast.error("حدث خطأ أثناء إرجاع العنصر", {

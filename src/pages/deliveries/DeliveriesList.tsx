@@ -12,7 +12,8 @@ import {
   Ban,
   MoreVertical,
   CheckCircle,
-  Edit
+  Edit,
+  ShieldPlus
 } from "lucide-react";
 import {
   Table,
@@ -61,6 +62,7 @@ import { TOrder } from "@/api/v2/orders/orders.types";
 import { formatDate } from "@/utils/formatDate";
 import { OrdersTableSkeleton } from "@/pages/orders/OrdersTableSkeleton";
 import { OrderDetailsModal } from "@/pages/orders/OrderDetailsModal";
+import { CreateCustodyModal } from "@/pages/orders/CreateCustodyModal";
 import { getOrderTypeLabel, getStatusVariant, getStatusLabel } from "@/api/v2/orders/order.utils";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -114,6 +116,7 @@ function DeliveriesList() {
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [orderToAction, setOrderToAction] = useState<TOrder | null>(null);
+  const [custodyModalOrder, setCustodyModalOrder] = useState<TOrder | null>(null);
 
   const formValues = form.watch();
   const debouncedFormValues = useDebounce({
@@ -577,7 +580,16 @@ function DeliveriesList() {
                                   <Edit className="ml-2 h-4 w-4" />
                                   تعديل الطلب
                                 </DropdownMenuItem>
-                                
+                                {order.order_type === "rent" && (() => {
+                                  const count = (order as TOrder & { custodies_count?: number }).custodies_count;
+                                  if (count !== undefined && count > 0) return null;
+                                  return (
+                                    <DropdownMenuItem onClick={() => setCustodyModalOrder(order)}>
+                                      <ShieldPlus className="ml-2 h-4 w-4" />
+                                      إضافة ضمان
+                                    </DropdownMenuItem>
+                                  );
+                                })()}
                                 {canCancelOrder(order) && (
                                   <>
                                     <DropdownMenuSeparator />
@@ -693,6 +705,19 @@ function DeliveriesList() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Add Custody Modal (when order has no warranty) */}
+      {custodyModalOrder && (
+        <CreateCustodyModal
+          open={!!custodyModalOrder}
+          onOpenChange={(open) => !open && setCustodyModalOrder(null)}
+          orderId={custodyModalOrder.id}
+          onSuccess={() => {
+            refetch();
+            setCustodyModalOrder(null);
+          }}
+        />
+      )}
     </div>
   );
 }

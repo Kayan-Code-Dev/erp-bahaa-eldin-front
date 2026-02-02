@@ -31,7 +31,6 @@ import CustomPagination from "@/components/custom/CustomPagination";
 import {
   useExportOrdersToCSVMutationOptions,
   useGetOrdersQueryOptions,
-  useReturnOrderItemMutationOptions,
 } from "@/api/v2/orders/orders.hooks";
 import { TOrder } from "@/api/v2/orders/orders.types";
 import { formatDate } from "@/utils/formatDate";
@@ -58,6 +57,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import useDebounce from "@/hooks/useDebounce";
+import { ReturnOrderItemModal } from "@/pages/orders/ReturnOrderItemModal";
 import {
   DEFAULT_PER_PAGE,
   FILTER_DEBOUNCE_MS,
@@ -92,6 +92,8 @@ function OverdueReturnsList() {
   // Return Modal State
   const [showReturnModal, setShowReturnModal] = useState(false);
   const [orderToReturn, setOrderToReturn] = useState<TOrder | null>(null);
+  const [showReturnItemModal, setShowReturnItemModal] = useState(false);
+  const [itemToReturn, setItemToReturn] = useState<{ id: number; name?: string } | null>(null);
 
   // Watch form values
   const formValues = form.watch();
@@ -177,11 +179,6 @@ function OverdueReturnsList() {
     useExportOrdersToCSVMutationOptions()
   );
 
-  // Return Order Item Mutation
-  const { mutate: returnOrderItem, isPending: isReturning } = useMutation(
-    useReturnOrderItemMutationOptions()
-  );
-
   // Modal handlers
   const handleOpenView = (order: TOrder) => {
     setSelectedOrder(order);
@@ -198,26 +195,10 @@ function OverdueReturnsList() {
     setShowReturnModal(true);
   };
 
-  const handleReturnItem = (itemId: number, returnData: any) => {
-    if (!orderToReturn) return;
-
-    returnOrderItem({
-      order_id: orderToReturn.id,
-      item_id: itemId,
-      data: returnData
-    }, {
-      onSuccess: () => {
-        toast.success("تم إرجاع العنصر بنجاح");
-        setShowReturnModal(false);
-        setOrderToReturn(null);
-        refetch();
-      },
-      onError: (error: any) => {
-        toast.error("خطأ أثناء إرجاع العنصر", {
-          description: error.message,
-        });
-      },
-    });
+  const handleOpenReturnItem = (item: { id: number; name?: string }) => {
+    setItemToReturn(item);
+    setShowReturnModal(false);
+    setShowReturnItemModal(true);
   };
 
   // --- Export Handler ---
@@ -461,7 +442,6 @@ function OverdueReturnsList() {
                                       size="icon"
                                       className="h-8 w-8 hover:bg-purple-50 hover:text-purple-600"
                                       onClick={() => handleOpenReturn(order)}
-                                      disabled={isReturning}
                                     >
                                       <RotateCcw className="h-4 w-4" />
                                     </Button>
@@ -509,7 +489,7 @@ function OverdueReturnsList() {
         onOpenChange={setIsViewModalOpen}
       />
 
-      {/* Return Modal */}
+      {/* Return Modal: list of items */}
       <Dialog open={showReturnModal} onOpenChange={setShowReturnModal}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -520,7 +500,7 @@ function OverdueReturnsList() {
           {orderToReturn && (
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                اختر العناصر التي تريد إرجاعها:
+                اختر العنصر الذي تريد إرجاعه (يُطلب إرفاق صور في الخطوة التالية):
               </p>
               <div className="space-y-2 max-h-64 overflow-y-auto">
                 {orderToReturn.items.map((item) => (
@@ -540,17 +520,12 @@ function OverdueReturnsList() {
                       variant="outline"
                       onClick={() => {
                         if (item.returnable === 1) {
-                          handleReturnItem(item.id, {
-                            entity_type: orderToReturn.entity_type,
-                            entity_id: orderToReturn.entity_id,
-                            note: `إرجاع طلب متأخر #${orderToReturn.id}`,
-                            photos: [],
-                          });
+                          handleOpenReturnItem({ id: item.id, name: item.name });
                         } else {
                           toast.warning("هذا المنتج غير قابل للإرجاع");
                         }
                       }}
-                      disabled={isReturning || item.returnable === 0}
+                      disabled={item.returnable === 0}
                     >
                       {item.returnable === 1 ? "إرجاع" : "غير قابل"}
                     </Button>
@@ -561,19 +536,30 @@ function OverdueReturnsList() {
                 <Button variant="outline" onClick={() => setShowReturnModal(false)}>
                   إلغاء
                 </Button>
-                <Button
-                  onClick={() => {
-                    toast.info("سيتم تنفيذ الإرجاع قريباً");
-                    setShowReturnModal(false);
-                  }}
-                >
-                  تأكيد الإرجاع
-                </Button>
               </DialogFooter>
             </div>
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Return item modal: form with photos (required by API) */}
+      {orderToReturn && itemToReturn && (
+        <ReturnOrderItemModal
+          open={showReturnItemModal}
+          onOpenChange={(open) => {
+            setShowReturnItemModal(open);
+            if (!open) setItemToReturn(null);
+          }}
+          orderId={orderToReturn.id}
+          itemId={itemToReturn.id}
+          itemName={itemToReturn.name}
+          onSuccess={() => {
+            refetch();
+            setOrderToReturn(null);
+            setItemToReturn(null);
+          }}
+        />
+      )}
     </div>
   );
 }

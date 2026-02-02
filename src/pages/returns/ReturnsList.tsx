@@ -31,7 +31,6 @@ import CustomPagination from "@/components/custom/CustomPagination";
 import {
   useExportOrdersToCSVMutationOptions,
   useGetOrdersQueryOptions,
-  useReturnOrderItemMutationOptions,
 } from "@/api/v2/orders/orders.hooks";
 import { TOrder } from "@/api/v2/orders/orders.types";
 import { formatDate } from "@/utils/formatDate";
@@ -58,6 +57,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import useDebounce from "@/hooks/useDebounce";
+import { ReturnOrderItemModal } from "@/pages/orders/ReturnOrderItemModal";
 import { DEFAULT_PER_PAGE, FILTER_DEBOUNCE_MS, RETURNS_FILTER } from "./constants";
 import {
   returnsFilterSchema,
@@ -85,9 +85,12 @@ function ReturnsList() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<TOrder | null>(null);
   
-  // Return Modal State
+  // Return Modal State: list of items to choose from
   const [showReturnModal, setShowReturnModal] = useState(false);
   const [orderToReturn, setOrderToReturn] = useState<TOrder | null>(null);
+  // Return item modal (with photos required)
+  const [showReturnItemModal, setShowReturnItemModal] = useState(false);
+  const [itemToReturn, setItemToReturn] = useState<{ id: number; name?: string } | null>(null);
 
   // Watch form values
   const formValues = form.watch();
@@ -157,16 +160,8 @@ function ReturnsList() {
     useGetOrdersQueryOptions(page, per_page, filters)
   );
 
-  // Client-side filter: show only returned orders (fallback if API returns all)
-  const displayedOrders = useMemo(() => {
-    if (!data?.data) return [];
-    const list = data.data;
-    return list.filter((order) => {
-      if (order.is_returned === true) return true;
-      const statusStr = (order as unknown as { status?: string }).status;
-      return statusStr === "returned";
-    });
-  }, [data?.data]);
+  // API returns delivered orders (تم التسليم); show all
+  const displayedOrders = useMemo(() => data?.data ?? [], [data?.data]);
 
   // Export Mutation
   const { mutate: exportOrdersToCSV, isPending: isExporting } = useMutation(
@@ -174,10 +169,6 @@ function ReturnsList() {
   );
 
   // Return Order Item Mutation
-  const { mutate: returnOrderItem, isPending: isReturning } = useMutation(
-    useReturnOrderItemMutationOptions()
-  );
-
   // Modal handlers
   const handleOpenView = (order: TOrder) => {
     setSelectedOrder(order);
@@ -194,26 +185,10 @@ function ReturnsList() {
     setShowReturnModal(true);
   };
 
-  const handleReturnItem = (itemId: number, returnData: any) => {
-    if (!orderToReturn) return;
-
-    returnOrderItem({
-      order_id: orderToReturn.id,
-      item_id: itemId,
-      data: returnData
-    }, {
-      onSuccess: () => {
-        toast.success("تم إرجاع العنصر بنجاح");
-        setShowReturnModal(false);
-        setOrderToReturn(null);
-        refetch();
-      },
-      onError: (error: any) => {
-        toast.error("خطأ أثناء إرجاع العنصر", {
-          description: error.message,
-        });
-      },
-    });
+  const handleOpenReturnItem = (item: { id: number; name?: string }) => {
+    setItemToReturn(item);
+    setShowReturnModal(false);
+    setShowReturnItemModal(true);
   };
 
   // --- Export Handler ---
@@ -458,7 +433,6 @@ function ReturnsList() {
                                       className="h-8 w-8 hover:bg-purple-50 hover:text-purple-600"
                                       title="إرجاع الطلب"
                                       onClick={() => handleOpenReturn(order)}
-                                      disabled={isReturning}
                                     >
                                       <RotateCcw className="h-4 w-4" />
                                     </Button>
@@ -507,7 +481,7 @@ function ReturnsList() {
         onOpenChange={setIsViewModalOpen}
       />
 
-      {/* Return Modal */}
+      {/* Return Modal: list of items */}
       <Dialog open={showReturnModal} onOpenChange={setShowReturnModal}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -518,7 +492,7 @@ function ReturnsList() {
           {orderToReturn && (
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                اختر العناصر التي تريد إرجاعها:
+                اختر العنصر الذي تريد إرجاعه (يُطلب إرفاق صور في الخطوة التالية):
               </p>
               <div className="space-y-2 max-h-64 overflow-y-auto">
                 {orderToReturn.items.map((item) => (
@@ -533,15 +507,7 @@ function ReturnsList() {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => {
-                        handleReturnItem(item.id, {
-                          entity_type: orderToReturn.entity_type,
-                          entity_id: orderToReturn.entity_id,
-                          note: "إرجاع عنصر",
-                          photos: [],
-                        });
-                      }}
-                      disabled={isReturning}
+                      onClick={() => handleOpenReturnItem({ id: item.id, name: item.name })}
                     >
                       إرجاع
                     </Button>
@@ -552,19 +518,30 @@ function ReturnsList() {
                 <Button variant="outline" onClick={() => setShowReturnModal(false)}>
                   إلغاء
                 </Button>
-                <Button
-                  onClick={() => {
-                    toast.info("سيتم تنفيذ الإرجاع قريباً");
-                    setShowReturnModal(false);
-                  }}
-                >
-                  تأكيد الإرجاع
-                </Button>
               </DialogFooter>
             </div>
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Return item modal: form with photos (required by API) */}
+      {orderToReturn && itemToReturn && (
+        <ReturnOrderItemModal
+          open={showReturnItemModal}
+          onOpenChange={(open) => {
+            setShowReturnItemModal(open);
+            if (!open) setItemToReturn(null);
+          }}
+          orderId={orderToReturn.id}
+          itemId={itemToReturn.id}
+          itemName={itemToReturn.name}
+          onSuccess={() => {
+            refetch();
+            setOrderToReturn(null);
+            setItemToReturn(null);
+          }}
+        />
+      )}
     </div>
   );
 }
