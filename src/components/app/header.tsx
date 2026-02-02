@@ -46,7 +46,7 @@ function Header() {
       <div className="flex items-center gap-4 md:order-1">
         <div className="h-9 w-9 rounded-full bg-[#d9d9d9] overflow-hidden">
           <img
-            src={`https://picsum.photos/200/300?random=${Math.random()}`}
+            src="https://picsum.photos/200/300?random=1"
             alt="User"
             className="h-full w-full object-cover"
           />
