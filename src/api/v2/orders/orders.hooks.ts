@@ -9,6 +9,7 @@ import {
   getOrderDetails,
   getOrders,
   returnOrderItem,
+  returnOrderFull,
   updateOrder,
   updateOrderStatus,
   deleteOrder,
@@ -18,6 +19,7 @@ import {
   TCreateOrderRequest,
   TCreateOrderWithNewClientRequest,
   TReturnOrderItemRequest,
+  TReturnOrderFullRequest,
   TUpdateOrderRequest,
   TAddPaymentRequest,
 } from "./orders.types";
@@ -116,6 +118,24 @@ export const useReturnOrderItemMutationOptions = () => {
     }) => returnOrderItem(order_id, item_id, data),
     onSettled: (_, __, { order_id }) => {
       qClient.invalidateQueries({ queryKey: [ORDERS_KEY, order_id] });
+    },
+  });
+};
+
+/** إرجاع الطلب بالكامل: POST /orders/:id/return */
+export const useReturnOrderFullMutationOptions = () => {
+  const qClient = useQueryClient();
+  return mutationOptions({
+    mutationFn: ({
+      orderId,
+      data,
+    }: {
+      orderId: number;
+      data: TReturnOrderFullRequest;
+    }) => returnOrderFull(orderId, data),
+    onSettled: (_, __, { orderId }) => {
+      qClient.invalidateQueries({ queryKey: [ORDERS_KEY] });
+      qClient.invalidateQueries({ queryKey: [ORDERS_KEY, orderId] });
     },
   });
 };

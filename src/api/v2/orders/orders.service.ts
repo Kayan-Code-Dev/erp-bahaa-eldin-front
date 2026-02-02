@@ -6,7 +6,7 @@ import {
   TCreateOrderWithNewClientRequest,
   TOrder,
   TReturnOrderItemRequest,
-  TReturnOrderItemsRequest,
+  TReturnOrderFullRequest,
   TUpdateOrderRequest,
   TAddPaymentRequest,
 } from "./orders.types";
@@ -152,22 +152,66 @@ export const updateOrderPayment = async (id: number, amount: number) => {
   }
 };
 
-export const retrunOrderItems = async (
+/**
+ * إرجاع الطلب بالكامل: POST /orders/:id/return
+ * Body: { items: [ { cloth_id, status, notes?, photo? } ] }
+ */
+export const returnOrderFull = async (
   id: number,
-  data: TReturnOrderItemsRequest[],
+  data: TReturnOrderFullRequest,
 ) => {
   try {
+    const normalizedItems = data.items
+      .map((item) => ({
+        cloth_id: Number(item.cloth_id),
+        status: item.status ?? "ready_for_rent",
+        notes: item.notes != null && item.notes !== "" ? item.notes : undefined,
+        photo: item.photo,
+      }))
+      .filter((item) => Number.isFinite(item.cloth_id) && item.status);
+
+    const hasPhotos = normalizedItems.some(
+      (item) => item.photo && item.photo.length > 0
+    );
+
+    if (!hasPhotos) {
+      const body = {
+        items: normalizedItems.map(({ cloth_id, status, notes }) => ({
+          cloth_id,
+          status,
+          ...(notes != null && { notes }),
+        })),
+      };
+      const { data: responseData } = await api.post<TOrder>(
+        `/orders/${id}/return`,
+        body
+      );
+      return responseData;
+    }
+
     const formData = new FormData();
-    Object.entries(data).forEach(([key, value]) => {
-      if (value instanceof File) {
-        formData.append(key, value);
-      } else {
-        formData.append(key, JSON.stringify(value));
+    normalizedItems.forEach((item, i) => {
+      formData.append(`items[${i}][cloth_id]`, String(item.cloth_id));
+      formData.append(`items[${i}][status]`, item.status);
+      if (item.notes != null) {
+        formData.append(`items[${i}][notes]`, item.notes);
       }
     });
-    await api.post(`/orders/${id}/return`, formData);
+    normalizedItems.forEach((item, i) => {
+      if (item.photo?.length) {
+        item.photo.forEach((file) => {
+          formData.append(`items[${i}][photo][]`, file);
+        });
+      }
+    });
+
+    const { data: responseData } = await api.post<TOrder>(
+      `/orders/${id}/return`,
+      formData
+    );
+    return responseData;
   } catch (error: any) {
-    populateError(error, "خطأ فى إرجاع الملابس");
+    populateError(error, "خطأ فى إرجاع الطلب");
   }
 };
 

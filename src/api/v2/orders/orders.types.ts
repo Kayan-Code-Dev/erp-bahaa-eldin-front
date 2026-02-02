@@ -62,6 +62,8 @@ export type TOrderInventory = {
 /** Order line item as returned by orders list/details API */
 export type TOrderItem = {
   id: number;
+  /** Cloth/inventory id — required for return API; may equal id on some backends */
+  cloth_id?: number;
   code: string;
   name: string;
   description: string | null;
@@ -220,12 +222,13 @@ export type TCreateOrderWithNewClientRequest = {
   items: TCreateOrderItemRequest[];
 };
 
-export type TReturnOrderItemsRequest = {
+/** إرجاع الطلب بالكامل: POST /orders/:id/return */
+export type TReturnOrderFullRequest = {
   items: {
     cloth_id: number;
     status: TClothesStatus;
-    photos: File[];
-    notes: string;
+    notes?: string;
+    photo?: File[];
   }[];
 };
 

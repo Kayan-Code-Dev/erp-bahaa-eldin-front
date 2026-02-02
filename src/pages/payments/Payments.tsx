@@ -83,10 +83,12 @@ const filterSchema = z.object({
 
 type FilterFormValues = z.infer<typeof filterSchema>;
 
+const DEFAULT_PER_PAGE = 10;
+
 function Payments() {
   const [searchParams, setSearchParams] = useSearchParams();
   const page = Number(searchParams.get("page")) || 1;
-  const per_page = 10;
+  const per_page = Number(searchParams.get("per_page")) || DEFAULT_PER_PAGE;
 
   // Form for filters
   const form = useForm<FilterFormValues>({
@@ -151,26 +153,50 @@ function Payments() {
     prevFormValuesRef.current = formValues;
   }, [formValues, page, setSearchParams]);
 
-  // Build params object with debounced values
+  // Build params object with debounced values (safe numbers: no NaN sent to API)
   const params: TGetPaymentsParams = useMemo(() => {
     const values = debouncedFormValues;
+    const orderIdNum = values.order_id?.trim() ? Number(values.order_id) : NaN;
+    const clientIdNum = values.client_id?.trim() ? Number(values.client_id) : NaN;
+    const amountMinNum = values.amount_min?.trim() ? Number(values.amount_min) : NaN;
+    const amountMaxNum = values.amount_max?.trim() ? Number(values.amount_max) : NaN;
     return {
       page,
       per_page,
       status: (values.status && values.status !== "all" ? values.status : undefined) as TPaymentStatus | undefined,
       payment_type: (values.payment_type && values.payment_type !== "all" ? values.payment_type : undefined) as TPaymentType | undefined,
-      order_id: values.order_id ? Number(values.order_id) : undefined,
-      client_id: values.client_id ? Number(values.client_id) : undefined,
-      date_from: values.date_from || undefined,
-      date_to: values.date_to || undefined,
-      amount_min: values.amount_min ? Number(values.amount_min) : undefined,
-      amount_max: values.amount_max ? Number(values.amount_max) : undefined,
-      payment_date_from: values.payment_date_from || undefined,
-      payment_date_to: values.payment_date_to || undefined,
-      notes: values.notes || undefined,
-      search: values.search || undefined,
+      order_id: Number.isFinite(orderIdNum) ? orderIdNum : undefined,
+      client_id: Number.isFinite(clientIdNum) ? clientIdNum : undefined,
+      date_from: values.date_from?.trim() || undefined,
+      date_to: values.date_to?.trim() || undefined,
+      amount_min: Number.isFinite(amountMinNum) ? amountMinNum : undefined,
+      amount_max: Number.isFinite(amountMaxNum) ? amountMaxNum : undefined,
+      payment_date_from: values.payment_date_from?.trim() || undefined,
+      payment_date_to: values.payment_date_to?.trim() || undefined,
+      notes: values.notes?.trim() || undefined,
+      search: values.search?.trim() || undefined,
     };
   }, [page, per_page, debouncedFormValues]);
+
+  // مزامنة البارامترات مع الـ URL
+  useEffect(() => {
+    const next = new URLSearchParams();
+    next.set("page", String(page));
+    next.set("per_page", String(per_page));
+    if (params.status) next.set("status", params.status);
+    if (params.payment_type) next.set("payment_type", params.payment_type);
+    if (params.client_id != null) next.set("client_id", String(params.client_id));
+    if (params.order_id != null) next.set("order_id", String(params.order_id));
+    if (params.date_from) next.set("date_from", params.date_from);
+    if (params.date_to) next.set("date_to", params.date_to);
+    if (params.amount_min != null) next.set("amount_min", String(params.amount_min));
+    if (params.amount_max != null) next.set("amount_max", String(params.amount_max));
+    if (params.payment_date_from) next.set("payment_date_from", params.payment_date_from);
+    if (params.payment_date_to) next.set("payment_date_to", params.payment_date_to);
+    if (params.notes) next.set("notes", params.notes);
+    if (params.search) next.set("search", params.search);
+    setSearchParams(next, { replace: true });
+  }, [params, page, per_page, setSearchParams]);
 
   // Data fetching
   const { data, isPending, isError, error } = useQuery(
@@ -227,7 +253,7 @@ function Payments() {
       notes: undefined,
       search: undefined,
     });
-    setSearchParams({ page: "1" });
+    setSearchParams({ page: "1", per_page: String(per_page) });
   };
 
   // --- Export Handler ---
@@ -253,11 +279,15 @@ function Payments() {
   };
 
   const getClientName = (client: {
-    first_name: string;
-    middle_name: string;
-    last_name: string;
-  }) => {
-    return `${client.first_name} ${client.middle_name} ${client.last_name}`.trim();
+    name?: string;
+    first_name?: string;
+    middle_name?: string;
+    last_name?: string;
+  } | null | undefined) => {
+    if (!client) return "—";
+    if (typeof client.name === "string" && client.name.trim()) return client.name.trim();
+    const parts = [client.first_name, client.middle_name, client.last_name].filter(Boolean) as string[];
+    return parts.length ? parts.join(" ").trim() : "—";
   };
 
   const getStatusLabel = (status: TPaymentStatus) => {

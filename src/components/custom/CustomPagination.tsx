@@ -5,7 +5,6 @@ import {
     PaginationPrevious,
     PaginationNext,
 } from "@/components/ui/pagination";
-import { useState } from "react";
 import { useSearchParams } from "react-router";
 
 type Props = {
@@ -17,20 +16,23 @@ type Props = {
 
 const CustomPagination = ({ totalElements, totalPages, totalElementsLabel, isLoading }: Props) => {
     const [searchParams, setSearchParams] = useSearchParams();
-    const [currentPage, setCurrentPage] = useState(Number(searchParams.get("page")) || 1);    // --- Pagination Handlers ---
+    const currentPage = Number(searchParams.get("page")) || 1;
+    // --- Pagination Handlers ---
     const handlePreviousPage = () => {
-        setCurrentPage((prev) => Math.max(1, prev - 1));
-        setSearchParams({
-            ...Object.fromEntries(searchParams),
-            page: String(Math.max(1, currentPage - 1)),
-        });
+        const nextPage = Math.max(1, currentPage - 1);
+        setSearchParams((prev) => {
+            const next = new URLSearchParams(prev);
+            next.set("page", String(nextPage));
+            return next;
+        }, { replace: true });
     };
     const handleNextPage = () => {
-        setCurrentPage((prev) => Math.min(prev + 1, totalPages || 1));
-        setSearchParams({
-            ...Object.fromEntries(searchParams),
-            page: String(Math.min(currentPage + 1, totalPages || 1)),
-        });
+        const nextPage = Math.min(currentPage + 1, totalPages || 1);
+        setSearchParams((prev) => {
+            const next = new URLSearchParams(prev);
+            next.set("page", String(nextPage));
+            return next;
+        }, { replace: true });
     };
 
     return (

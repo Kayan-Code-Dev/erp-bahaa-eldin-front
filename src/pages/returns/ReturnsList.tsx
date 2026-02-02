@@ -57,7 +57,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import useDebounce from "@/hooks/useDebounce";
-import { ReturnOrderItemModal } from "@/pages/orders/ReturnOrderItemModal";
+import { ReturnOrderFullModal } from "@/pages/orders/ReturnOrderFullModal";
 import { DEFAULT_PER_PAGE, FILTER_DEBOUNCE_MS, RETURNS_FILTER } from "./constants";
 import {
   returnsFilterSchema,
@@ -85,12 +85,8 @@ function ReturnsList() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<TOrder | null>(null);
   
-  // Return Modal State: list of items to choose from
-  const [showReturnModal, setShowReturnModal] = useState(false);
+  // إرجاع الطلب بالكامل
   const [orderToReturn, setOrderToReturn] = useState<TOrder | null>(null);
-  // Return item modal (with photos required)
-  const [showReturnItemModal, setShowReturnItemModal] = useState(false);
-  const [itemToReturn, setItemToReturn] = useState<{ id: number; name?: string } | null>(null);
 
   // Watch form values
   const formValues = form.watch();
@@ -179,16 +175,8 @@ function ReturnsList() {
     navigate(`/orders/${order.id}`);
   };
 
-  // Handle Return
   const handleOpenReturn = (order: TOrder) => {
     setOrderToReturn(order);
-    setShowReturnModal(true);
-  };
-
-  const handleOpenReturnItem = (item: { id: number; name?: string }) => {
-    setItemToReturn(item);
-    setShowReturnModal(false);
-    setShowReturnItemModal(true);
   };
 
   // --- Export Handler ---
@@ -481,67 +469,16 @@ function ReturnsList() {
         onOpenChange={setIsViewModalOpen}
       />
 
-      {/* Return Modal: list of items */}
-      <Dialog open={showReturnModal} onOpenChange={setShowReturnModal}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>
-              إرجاع الطلب {orderToReturn ? `#${orderToReturn.id}` : ""}
-            </DialogTitle>
-          </DialogHeader>
-          {orderToReturn && (
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                اختر العنصر الذي تريد إرجاعه (يُطلب إرفاق صور في الخطوة التالية):
-              </p>
-              <div className="space-y-2 max-h-64 overflow-y-auto">
-                {orderToReturn.items.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex items-center justify-between rounded-lg border p-3"
-                  >
-                    <div>
-                      <p className="font-medium">{item.name}</p>
-                      <p className="text-sm text-muted-foreground">كود: {item.code}</p>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleOpenReturnItem({ id: item.id, name: item.name })}
-                    >
-                      إرجاع
-                    </Button>
-                  </div>
-                ))}
-              </div>
-              <DialogFooter className="gap-2 sm:gap-0">
-                <Button variant="outline" onClick={() => setShowReturnModal(false)}>
-                  إلغاء
-                </Button>
-              </DialogFooter>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Return item modal: form with photos (required by API) */}
-      {orderToReturn && itemToReturn && (
-        <ReturnOrderItemModal
-          open={showReturnItemModal}
-          onOpenChange={(open) => {
-            setShowReturnItemModal(open);
-            if (!open) setItemToReturn(null);
-          }}
-          orderId={orderToReturn.id}
-          itemId={itemToReturn.id}
-          itemName={itemToReturn.name}
-          onSuccess={() => {
-            refetch();
-            setOrderToReturn(null);
-            setItemToReturn(null);
-          }}
-        />
-      )}
+      {/* إرجاع الطلب بالكامل */}
+      <ReturnOrderFullModal
+        open={!!orderToReturn}
+        onOpenChange={(open) => !open && setOrderToReturn(null)}
+        order={orderToReturn}
+        onSuccess={() => {
+          refetch();
+          setOrderToReturn(null);
+        }}
+      />
     </div>
   );
 }
