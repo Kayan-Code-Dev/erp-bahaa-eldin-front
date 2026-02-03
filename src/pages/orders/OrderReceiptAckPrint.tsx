@@ -2,12 +2,11 @@ import { TOrder } from "@/api/v2/orders/orders.types";
 
 const HEADER_BG = "#907457";
 
-/** قواعد وتعليمات الإقرار — مقسمة كنقاط للوضوح عند الطباعة */
+/** قواعد وتعليمات الإقرار — في آخر الصفحة */
 const RULES_ITEMS = [
-  "أقر بأنني استلمت الفاتورة والأصناف الظاهرة أدناه وأوضح أنني مسؤول عن التأخير.",
-  "لا يجوز استبدال أو إرجاع الفواتير إلا بعد 3 أشهر.",
-  "لا يسمح بإخراج الملابس من المحل في حالة غير مكتملة البيع.",
-  "يلزم إحضار الفواتير الشخصية مع الفاتورة عند الاستبدال أو الإرجاع.",
+  "ميعاد استلام المنتج من 1 ظهراً حتى 7 مساءً وإحضار التأمينات اللازمة.",
+  "لا يمكن استرجاع أو استبدال المنتج بعد مرور 3 أيام من تاريخ الشراء إلا في حالة وجود عيب مصنعي.",
+  "يجب إحضار الفاتورة الأصلية مع البطاقة الشخصية عند الاسترجاع أو الاستبدال أو الاستلام.",
 ];
 
 type Props = {
@@ -50,125 +49,107 @@ export function OrderReceiptAckPrint({
   return (
     <div
       dir="rtl"
-      className="invoice-print-root w-full min-h-screen flex flex-col bg-white text-gray-800 text-[15px] leading-relaxed"
-      style={{ fontFamily: "'Segoe UI', 'Cairo', Arial, sans-serif" }}
+      className="invoice-print-root w-full min-h-screen flex flex-col bg-white text-gray-900 font-semibold text-[14px] leading-snug"
+      style={{ fontFamily: "'Cairo', 'Segoe UI', Arial, sans-serif" }}
     >
-      {/* Header */}
+      {/* Header — مصغّر */}
       <header
-        className="invoice-print-header w-full py-6 mb-6 text-white rounded-b-2xl shadow-md"
+        className="invoice-print-header w-full py-3 mb-3 text-white rounded-b-xl shadow-sm font-semibold"
         style={{ backgroundColor: HEADER_BG }}
       >
-        <div className="invoice-print-header-inner flex items-center justify-between gap-8 max-w-[210mm] mx-auto px-8">
-          <div className="invoice-print-header-right text-right shrink-0 space-y-2">
+        <div className="invoice-print-header-inner flex items-center justify-between gap-6 max-w-[210mm] mx-auto px-6">
+          <div className="invoice-print-header-right text-right shrink-0 space-y-0.5 text-[14px] font-semibold">
             <div className="flex items-baseline justify-end gap-2 flex-wrap">
-              <span className="text-white/90 text-base">رقم الفاتورة:</span>
-              <span className="text-lg font-bold text-white">{order.id}</span>
+              <span className="text-white/95 font-bold">رقم الفاتورة:</span>
+              <span className="font-bold text-white">{order.id}</span>
             </div>
-            <div className="text-base font-medium text-white/95">اسم الموظف: {employeeName}</div>
-            <div className="text-base font-medium text-white/95">التاريخ: {invoiceDate}</div>
+            <div className="font-bold text-white/95">اسم الموظف: {employeeName}</div>
+            <div className="font-bold text-white/95">التاريخ: {invoiceDate}</div>
           </div>
-          <div className="invoice-print-header-logo shrink-0 bg-white/10 rounded-xl p-3 flex items-center justify-center">
-            <img src={logoUrl} alt="الشعار" className="invoice-logo-img max-h-24 w-auto object-contain" />
+          <div className="invoice-print-header-logo shrink-0 bg-white/10 rounded-lg p-2 flex items-center justify-center">
+            <img src={logoUrl} alt="الشعار" className="invoice-logo-img max-h-14 w-auto object-contain" />
           </div>
         </div>
       </header>
 
-      <div className="invoice-print-content flex-1 flex flex-col max-w-[210mm] mx-auto px-8 pb-6 w-full">
-        {/* عنوان الإقرار */}
-        <div className="invoice-print-title-wrap flex flex-col items-center justify-center text-center mb-4">
-          <h1 className="invoice-print-title text-3xl font-bold text-gray-900 tracking-tight">
+      <div className="invoice-print-content flex-1 flex flex-col min-h-0 max-w-[210mm] mx-auto px-6 pb-3 w-full">
+        {/* المحتوى من العنوان حتى التوقيع */}
+        <div className="invoice-print-body shrink-0">
+        {/* 1. عنوان الإقرار — في الأعلى */}
+        <div className="invoice-print-title-wrap flex flex-col items-center justify-center text-center mb-3">
+          <h1 className="invoice-print-title text-[22px] font-bold text-gray-900 tracking-tight">
             إقرار استلام
           </h1>
-          <span className="invoice-print-title-line mt-2 block h-1 w-28 rounded-full bg-gray-300" aria-hidden />
+          <span className="invoice-print-title-line mt-1 block h-0.5 w-24 rounded-full bg-gray-400" aria-hidden />
         </div>
 
-        {/* بيانات المستلم — بطاقة منظمة */}
-        <div className="invoice-print-block mb-6 overflow-hidden rounded-2xl border-2 border-gray-200 bg-white shadow-sm">
-          <h2 className="invoice-print-block-title text-sm font-bold text-gray-700 uppercase tracking-wider py-4 px-5 border-b-2 border-gray-200 bg-gray-50">
-            بيانات المستلم
-          </h2>
-          <div className="p-5 space-y-4">
-            <p className="text-base font-semibold text-gray-900 leading-relaxed">
-              أقر أنا الموضح بياناتي أدناه بأنني استلمت الأصناف المذكورة في هذه الفاتورة، وأتعهد بالالتزام بشروط الإيجار والتعليمات المبينة في هذا الإقرار.
+        {/* 2. استلمت أنا / الرقم القومي / المقيم في — من اليمين */}
+        <div className="invoice-print-recipient text-right mb-3 space-y-1 text-[14px] font-semibold">
+          <p className="text-gray-900">
+            <span className="font-bold text-gray-700">استلمت أنا :</span>{" "}
+            <span className="font-bold text-gray-900">{clientName}</span>
+          </p>
+          <p className="text-gray-900">
+            <span className="font-bold text-gray-700">الرقم القومي :</span>{" "}
+            <span className="font-bold text-gray-900">{nationalId}</span>
+          </p>
+          <p className="text-gray-900">
+            <span className="font-bold text-gray-700">المقيم في :</span>{" "}
+            <span className="font-bold text-gray-900">{addressStr}</span>
+          </p>
+        </div>
+
+        {/* 3. قائمة المنتجات مرقمة */}
+        <div className="invoice-print-items-list mb-3 text-[14px] font-semibold text-gray-900">
+          {items.length > 0 ? (
+            <ol className="list-decimal list-inside space-y-0.5">
+              {items.map((item) => (
+                <li key={item.id} className="font-bold">{item.name || "-"}</li>
+              ))}
+            </ol>
+          ) : (
+            <p className="text-gray-600">—</p>
+          )}
+        </div>
+
+        {/* 4. فترة التأجير */}
+        <p className="invoice-print-rental text-[14px] font-semibold text-gray-900 mb-2">
+          وذلك بتأجيره من تاريخ{" "}
+          <span className="font-bold">{startDate}</span> حتى تاريخ{" "}
+          <span className="font-bold">{endDate}</span>
+        </p>
+
+        {/* 5. إقرار الاستلام ودفع العربون */}
+        <p className="invoice-print-deposit text-[14px] font-semibold text-gray-900 mb-4">
+          وذلك إقرار مني بالاستلام ودفع عربون وقدره :{" "}
+          <span className="font-bold">{paid} ج.م</span>
+        </p>
+
+        {/* 6. المستلم والتوقيع */}
+        <div className="invoice-print-signature flex justify-end mt-2 pt-3 border-t-2 border-gray-300 space-y-3">
+          <div className="invoice-print-signature-box text-right min-w-[220px] space-y-2 text-[14px] font-semibold text-gray-900">
+            <p>
+              <span className="font-bold">المستلم :</span>{" "}
+              <span className="inline-block border-b-2 border-gray-500 min-w-[120px] align-bottom">&nbsp;</span>
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
-              <div className="flex flex-col">
-                <span className="text-gray-500 font-medium mb-0.5">الاسم الكامل</span>
-                <span className="font-semibold text-gray-800">{clientName}</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-gray-500 font-medium mb-0.5">الرقم القومي</span>
-                <span className="font-semibold text-gray-800">{nationalId}</span>
-              </div>
-              <div className="flex flex-col sm:col-span-2">
-                <span className="text-gray-500 font-medium mb-0.5">العنوان</span>
-                <span className="font-semibold text-gray-800">{addressStr}</span>
-              </div>
-            </div>
-
-            {/* الأصناف المستلمة — جدول مصغّر */}
-            <div className="pt-3 border-t border-gray-100">
-              <p className="text-gray-600 font-semibold text-sm mb-2">الأصناف المستلمة:</p>
-              {items.length > 0 ? (
-                <div className="rounded-lg border border-gray-200 overflow-hidden">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="bg-gray-50">
-                        <th className="text-right py-2 px-3 font-semibold text-gray-600 w-8">#</th>
-                        <th className="text-right py-2 px-3 font-semibold text-gray-600">اسم الصنف</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {items.map((item, i) => (
-                        <tr key={item.id} className="border-t border-gray-100">
-                          <td className="py-2 px-3 text-gray-600">{i + 1}</td>
-                          <td className="py-2 px-3 font-medium text-gray-800">{item.name || "-"}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <p className="text-sm text-gray-500">—</p>
-              )}
-            </div>
-
-            {/* الفترة والمبلغ */}
-            <div className="pt-3 border-t border-gray-100 space-y-1 text-sm">
-              <p className="text-gray-700">
-                <span className="font-medium text-gray-600">فترة الإيجار:</span> من تاريخ{" "}
-                <span className="font-semibold text-gray-900">{startDate}</span> حتى تاريخ{" "}
-                <span className="font-semibold text-gray-900">{endDate}</span>
-              </p>
-              <p className="text-gray-700">
-                <span className="font-medium text-gray-600">العربون المدفوع:</span>{" "}
-                <span className="font-bold text-gray-900">{paid} ج.م</span>
-              </p>
-            </div>
+            <p>
+              <span className="font-bold">التوقيع :</span>{" "}
+              <span className="inline-block border-b-2 border-gray-500 min-w-[120px] align-bottom">&nbsp;</span>
+            </p>
           </div>
         </div>
-
-        {/* التوقيع */}
-        <div className="invoice-print-signature flex justify-end mt-8 pt-6 border-t-2 border-gray-200">
-          <div className="invoice-print-signature-box text-left min-w-[220px]">
-            <span className="font-bold text-gray-700 block mb-3 text-sm uppercase tracking-wider">
-              توقيع المستلم
-            </span>
-            <div className="invoice-print-signature-line border-b-2 border-gray-500 h-10 mt-1" />
-            <span className="text-xs text-gray-400 mt-1 block">(التوقيع بخط اليد)</span>
-          </div>
         </div>
 
-        {/* القواعد والتعليمات */}
-        <div className="invoice-print-block mt-8">
-          <h2 className="text-sm font-bold text-gray-600 uppercase tracking-wider mb-3 pb-2 border-b-2 border-gray-200">
+        {/* 7. القواعد والتعليمات — ثابتة في آخر الصفحة مع مسافة فوق الفوتر */}
+        <div className="invoice-print-rules mt-auto pt-3 pb-8 border-t-2 border-gray-200 shrink-0">
+          <h2 className="invoice-print-rules-title text-[13px] font-bold text-gray-800 mb-1.5 pb-1">
             القواعد والتعليمات
           </h2>
-          <div className="invoice-print-notes-box rounded-xl border-2 border-gray-200 bg-gray-50/80 py-4 px-5">
-            <ul className="list-none space-y-2 text-gray-700 text-sm leading-relaxed">
+          <div className="invoice-print-notes-box rounded-lg border-2 border-gray-200 bg-gray-50 py-2 px-3">
+            <ul className="list-none space-y-0.5 text-[12px] font-semibold text-gray-800 leading-snug">
               {RULES_ITEMS.map((text, i) => (
-                <li key={i} className="flex gap-2">
-                  <span className="font-bold text-gray-500 shrink-0">{i + 1}.</span>
+                <li key={i} className="flex gap-1.5">
+                  <span className="font-bold text-gray-600 shrink-0">{i + 1}.</span>
                   <span>{text}</span>
                 </li>
               ))}
@@ -177,9 +158,9 @@ export function OrderReceiptAckPrint({
         </div>
       </div>
 
-      {/* Footer */}
+      {/* Footer — مصغّر */}
       <div
-        className="invoice-print-footer w-full mt-auto py-4 px-6 text-center text-white rounded-t-2xl text-sm font-semibold shadow-md shrink-0"
+        className="invoice-print-footer w-full mt-auto py-2 px-4 text-center text-white rounded-t-xl text-[13px] font-bold shadow-sm shrink-0"
         style={{ backgroundColor: HEADER_BG }}
       >
         لا يرد العربون في حالة إلغاء الحجز
