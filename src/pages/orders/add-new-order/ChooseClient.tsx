@@ -73,6 +73,10 @@ import {
   Phone,
   MapPin,
   UserCircle,
+  Banknote,
+  Tag,
+  Percent,
+  StickyNote,
 } from "lucide-react";
 import { CategoriesSelect } from "@/components/custom/CategoriesSelect";
 import { ClothModelsSelect } from "@/components/custom/ClothModelsSelect";
@@ -344,7 +348,11 @@ function ChooseClient() {
       cloth_type: selectedProduct.cloth_type,
       subtotal: parseFloat(productDetails.price) * parseInt(productDetails.quantity),
     };
-    if (productDetails.type === "tailoring") {
+    // إرفاق المقاسات (إن وُجدت) مع كل منتج، وجميع الحقول اختيارية
+    const hasMeasurements = Object.values(measurements).some(
+      (value) => value != null && String(value).trim() !== ""
+    );
+    if (hasMeasurements) {
       newProduct.measurements = { ...measurements };
     }
     setSelectedProducts([...selectedProducts, newProduct]);
@@ -361,19 +369,18 @@ function ChooseClient() {
       discount_type: "none",
       discount_value: "0",
     });
-    if (productDetails.type === "tailoring") {
-      setMeasurements({
-        sleeveLength: "",
-        forearm: "",
-        shoulderWidth: "",
-        cuffs: "",
-        waist: "",
-        chestLength: "",
-        totalLength: "",
-        hinch: "",
-        dressSize: "",
-      });
-    }
+    // إعادة تعيين المقاسات بعد إضافة المنتج لتفادي تكرارها عن طريق الخطأ مع منتج آخر
+    setMeasurements({
+      sleeveLength: "",
+      forearm: "",
+      shoulderWidth: "",
+      cuffs: "",
+      waist: "",
+      chestLength: "",
+      totalLength: "",
+      hinch: "",
+      dressSize: "",
+    });
     toast.success("تم إضافة المنتج إلى الطلب");
   };
 
@@ -444,21 +451,7 @@ function ChooseClient() {
             }
           : {}),
       };
-      if (product.type === "rent") {
-        return {
-          ...base,
-          days_of_rent: product.days_of_rent ?? 1,
-          occasion_datetime: product.weddingDate
-            ? format(product.weddingDate, "yyyy-MM-dd HH:mm:ss")
-            : format(new Date(), "yyyy-MM-dd HH:mm:ss"),
-          delivery_date: product.deliveryDate
-            ? format(product.deliveryDate, "yyyy-MM-dd")
-            : deliveryDate
-              ? format(deliveryDate, "yyyy-MM-dd")
-              : format(new Date(), "yyyy-MM-dd"),
-        };
-      }
-      if (product.type === "tailoring" && product.measurements) {
+      if (product.measurements) {
         const m = product.measurements;
         return {
           ...base,
@@ -476,6 +469,12 @@ function ChooseClient() {
       return base;
     });
 
+  const firstRentProduct = selectedProducts.find((p) => p.type === "rent");
+  const orderLevelOccasionDatetime = firstRentProduct?.weddingDate
+    ? format(firstRentProduct.weddingDate, "yyyy-MM-dd HH:mm:ss")
+    : undefined;
+  const orderLevelDaysOfRent = firstRentProduct?.days_of_rent ?? (firstRentProduct ? 1 : undefined);
+
   const buildOrderPayload = (clientId: number): TCreateOrderRequest => {
     const hasOrderDiscount =
       orderDiscount.type &&
@@ -487,6 +486,8 @@ function ChooseClient() {
       entity_type: entityType!,
       entity_id: Number(entityId),
       delivery_date: deliveryDate ? format(deliveryDate, "yyyy-MM-dd HH:mm:ss") : format(new Date(), "yyyy-MM-dd HH:mm:ss"),
+      ...(orderLevelOccasionDatetime && { occasion_datetime: orderLevelOccasionDatetime }),
+      ...(orderLevelDaysOfRent != null && { days_of_rent: orderLevelDaysOfRent }),
       order_notes: selectedProducts.map((p) => p.notes).filter(Boolean).join(" - ") || undefined,
       ...(hasOrderDiscount
         ? {
@@ -526,6 +527,8 @@ function ChooseClient() {
       entity_type: entityType!,
       entity_id: Number(entityId),
       delivery_date: deliveryDate ? format(deliveryDate, "yyyy-MM-dd HH:mm:ss") : format(new Date(), "yyyy-MM-dd HH:mm:ss"),
+      ...(orderLevelOccasionDatetime && { occasion_datetime: orderLevelOccasionDatetime }),
+      ...(orderLevelDaysOfRent != null && { days_of_rent: orderLevelDaysOfRent }),
       order_notes: selectedProducts.map((p) => p.notes).filter(Boolean).join(" - ") || undefined,
       ...(hasOrderDiscount
         ? {
@@ -1057,7 +1060,7 @@ function ChooseClient() {
                         dressSize: "مقاس الفستان",
                       };
                       const measurementsSummary =
-                        cloth.type === "tailoring" && cloth.measurements
+                        cloth.measurements
                           ? Object.entries(cloth.measurements)
                               .filter(([, v]) => v != null && String(v).trim() !== "")
                               .map(([k, v]) => `${measurementLabels[k] ?? k}: ${v}`)
@@ -1312,22 +1315,32 @@ function ChooseClient() {
             </Card>
 
             {selectedProduct && (
-              <Card className="shadow-lg border-gray-200">
-                <CardHeader className="bg-gradient-to-l from-green-50 to-white border-b">
-                  <CardTitle className="flex items-center gap-3 text-xl text-green-800">
-                    <div>
-                      تفاصيل المنتج المختار
-                      <CardDescription className="text-gray-600 mt-1">
-                        {selectedProduct.code} - {selectedProduct.name}
+              <Card className="overflow-hidden border-2 border-primary/20 shadow-lg">
+                <CardHeader className="border-b bg-primary/5 pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/15">
+                      <ShoppingBag className="h-6 w-6 text-primary" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <CardTitle className="text-xl text-foreground">
+                        تفاصيل المنتج المختار
+                      </CardTitle>
+                      <CardDescription className="mt-1">
+                        {selectedProduct.code} — {selectedProduct.name}
                       </CardDescription>
                     </div>
-                  </CardTitle>
+                  </div>
                 </CardHeader>
-                <CardContent className="p-6">
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <Label htmlFor="quantity" className="text-gray-700 font-medium">
+                <CardContent className="space-y-5 p-6 pt-5">
+                  {/* السعر والكمية ونوع الطلب */}
+                  <div className="rounded-xl border bg-muted/5 p-4">
+                    <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      <Banknote className="h-4 w-4" />
+                      السعر والكمية ونوع الطلب
+                    </p>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                      <div className="space-y-2">
+                        <Label htmlFor="quantity" className="font-medium">
                           الكمية
                         </Label>
                         <Input
@@ -1338,11 +1351,11 @@ function ChooseClient() {
                           onChange={(e) =>
                             setProductDetails({ ...productDetails, quantity: e.target.value })
                           }
-                          className="h-12 rounded-lg"
+                          className="h-10 rounded-lg"
                         />
                       </div>
-                      <div>
-                        <Label htmlFor="price" className="text-gray-700 font-medium">
+                      <div className="space-y-2">
+                        <Label htmlFor="price" className="font-medium">
                           السعر (ج.م)
                         </Label>
                         <div className="relative">
@@ -1353,15 +1366,16 @@ function ChooseClient() {
                             onChange={(e) =>
                               setProductDetails({ ...productDetails, price: e.target.value })
                             }
-                            className="h-12 rounded-lg pr-12"
+                            className="h-10 rounded-lg pr-10"
                           />
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
                             ج.م
                           </span>
                         </div>
                       </div>
-                      <div>
-                        <Label htmlFor="type" className="text-gray-700 font-medium">
+                      <div className="space-y-2">
+                        <Label htmlFor="type" className="flex items-center gap-1.5 font-medium">
+                          <Tag className="h-4 w-4" />
                           نوع الطلب
                         </Label>
                         <Select
@@ -1370,7 +1384,7 @@ function ChooseClient() {
                             setProductDetails({ ...productDetails, type: value })
                           }
                         >
-                          <SelectTrigger className="h-12 rounded-lg">
+                          <SelectTrigger className="h-10 rounded-lg" id="type">
                             <SelectValue placeholder="اختر نوع الطلب" />
                           </SelectTrigger>
                           <SelectContent>
@@ -1381,66 +1395,44 @@ function ChooseClient() {
                         </Select>
                       </div>
                     </div>
-                    {productDetails.type === "rent" && (
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                          <Label htmlFor="days_of_rent" className="text-gray-700 font-medium">
-                            أيام الإيجار
-                          </Label>
-                          <Input
-                            id="days_of_rent"
-                            type="number"
-                            min="1"
-                            value={productDetails.days_of_rent}
-                            onChange={(e) =>
-                              setProductDetails({
-                                ...productDetails,
-                                days_of_rent: e.target.value,
-                              })
-                            }
-                            className="h-12 rounded-lg"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="paid" className="text-gray-700 font-medium">
-                            المدفوع (ج.م)
-                          </Label>
-                          <div className="relative">
-                            <Input
-                              id="paid"
-                              type="number"
-                              value={productDetails.paid}
-                              onChange={(e) =>
-                                setProductDetails({ ...productDetails, paid: e.target.value })
-                              }
-                              className="h-12 rounded-lg pr-12"
-                            />
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-                              ج.م
-                            </span>
-                          </div>
-                        </div>
-                        <div>
-                          <Label htmlFor="wedding-date" className="text-gray-700 font-medium">
-                            ميعاد الفرح
-                          </Label>
-                          <DatePicker
-                            value={productDetails.weddingDate}
-                            onChange={(date) =>
-                              setProductDetails({
-                                ...productDetails,
-                                weddingDate: date,
-                              })
-                            }
-                            minDate={new Date()}
-                            className="h-12 rounded-lg w-full"
-                          />
-                        </div>
+                  </div>
+
+                  {/* المدفوع */}
+                  <div className="rounded-xl border bg-muted/5 p-4">
+                    <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      <Banknote className="h-4 w-4" />
+                      المدفوع
+                    </p>
+                    <div className="max-w-xs">
+                      <Label htmlFor="paid" className="font-medium">
+                        المدفوع (ج.م)
+                      </Label>
+                      <div className="relative mt-2">
+                        <Input
+                          id="paid"
+                          type="number"
+                          value={productDetails.paid}
+                          onChange={(e) =>
+                            setProductDetails({ ...productDetails, paid: e.target.value })
+                          }
+                          className="h-10 rounded-lg pr-10"
+                        />
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                          ج.م
+                        </span>
                       </div>
-                    )}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <Label htmlFor="discount_type" className="text-gray-700 font-medium">
+                    </div>
+                  </div>
+
+                  {/* الخصم */}
+                  <div className="rounded-xl border bg-muted/5 p-4">
+                    <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      <Percent className="h-4 w-4" />
+                      الخصم
+                    </p>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="discount_type" className="font-medium">
                           نوع الخصم
                         </Label>
                         <Select
@@ -1452,7 +1444,7 @@ function ChooseClient() {
                             })
                           }
                         >
-                          <SelectTrigger className="h-12 rounded-lg">
+                          <SelectTrigger className="h-10 rounded-lg" id="discount_type">
                             <SelectValue placeholder="اختر نوع الخصم" />
                           </SelectTrigger>
                           <SelectContent>
@@ -1463,8 +1455,8 @@ function ChooseClient() {
                         </Select>
                       </div>
                       {productDetails.discount_type !== "none" && (
-                        <div>
-                          <Label htmlFor="discount_value" className="text-gray-700 font-medium">
+                        <div className="space-y-2">
+                          <Label htmlFor="discount_value" className="font-medium">
                             قيمة الخصم
                           </Label>
                           <Input
@@ -1478,27 +1470,35 @@ function ChooseClient() {
                                 discount_value: e.target.value,
                               })
                             }
-                            className="h-12 rounded-lg"
+                            className="h-10 rounded-lg"
                           />
                         </div>
                       )}
-                      <div>
-                        <Label htmlFor="notes" className="text-gray-700 font-medium">
-                          ملاحظات
-                        </Label>
-                        <Input
-                          id="notes"
-                          placeholder="ملاحظات حول المنتج..."
-                          value={productDetails.notes}
-                          onChange={(e) =>
-                            setProductDetails({
-                              ...productDetails,
-                              notes: e.target.value,
-                            })
-                          }
-                          className="h-12 rounded-lg"
-                        />
-                      </div>
+                    </div>
+                  </div>
+
+                  {/* ملاحظات */}
+                  <div className="rounded-xl border bg-muted/5 p-4">
+                    <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      <StickyNote className="h-4 w-4" />
+                      ملاحظات
+                    </p>
+                    <div className="space-y-2">
+                      <Label htmlFor="notes" className="font-medium">
+                        ملاحظات حول المنتج
+                      </Label>
+                      <Input
+                        id="notes"
+                        placeholder="ملاحظات اختيارية..."
+                        value={productDetails.notes}
+                        onChange={(e) =>
+                          setProductDetails({
+                            ...productDetails,
+                            notes: e.target.value,
+                          })
+                        }
+                        className="h-10 rounded-lg"
+                      />
                     </div>
                   </div>
                 </CardContent>
@@ -1514,7 +1514,7 @@ function ChooseClient() {
                   <div>
                     المقاسات (اختياري)
                     <CardDescription className="text-gray-600 mt-1">
-                      تظهر مقاسات المنتج عند اختيار منتج ونوع الطلب «تفصيل»
+                      يمكنك إدخال مقاسات هذا المنتج وسيتم إرسالها مع الطلب. جميع الحقول اختيارية ويمكن ترك ما لا تحتاجه فارغاً.
                     </CardDescription>
                   </div>
                 </CardTitle>
@@ -1532,40 +1532,38 @@ function ChooseClient() {
                   </div>
                 ) : (
                   <>
-                  {productDetails.type !== "tailoring" && (
                     <p className="text-sm text-muted-foreground mb-4 pb-2 border-b">
-                      تُحفظ المقاسات مع المنتج عند اختيار نوع الطلب «تفصيل» فقط. يمكنك إدخالها مسبقاً هنا.
+                      تُربط هذه المقاسات بالمنتج عند إضافته للطلب، بغض النظر عن نوع الطلب. جميع الحقول اختيارية.
                     </p>
-                  )}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {[
-                      { key: "sleeveLength", label: "طول الكم", placeholder: "سم" },
-                      { key: "forearm", label: "الزند", placeholder: "سم" },
-                      { key: "shoulderWidth", label: "عرض الكتف", placeholder: "سم" },
-                      { key: "cuffs", label: "الإسوار", placeholder: "سم" },
-                      { key: "waist", label: "الوسط", placeholder: "سم" },
-                      { key: "chestLength", label: "طول الصدر", placeholder: "سم" },
-                      { key: "totalLength", label: "الطول الكلي", placeholder: "سم" },
-                      { key: "hinch", label: "الهش", placeholder: "سم" },
-                      {
-                        key: "dressSize",
-                        label: "مقاس الفستان",
-                        placeholder: "S, M, L, XL",
-                      },
-                    ].map(({ key, label, placeholder }) => (
-                      <div key={key} className="space-y-2">
-                        <Label className="text-gray-700 font-medium">{label}</Label>
-                        <Input
-                          value={(measurements as any)[key]}
-                          onChange={(e) =>
-                            setMeasurements({ ...measurements, [key]: e.target.value })
-                          }
-                          className="h-11 rounded-lg"
-                          placeholder={placeholder}
-                        />
-                      </div>
-                    ))}
-                  </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {[
+                        { key: "sleeveLength", label: "طول الكم", placeholder: "سم" },
+                        { key: "forearm", label: "الزند", placeholder: "سم" },
+                        { key: "shoulderWidth", label: "عرض الكتف", placeholder: "سم" },
+                        { key: "cuffs", label: "الإسوار", placeholder: "سم" },
+                        { key: "waist", label: "الوسط", placeholder: "سم" },
+                        { key: "chestLength", label: "طول الصدر", placeholder: "سم" },
+                        { key: "totalLength", label: "الطول الكلي", placeholder: "سم" },
+                        { key: "hinch", label: "الهش", placeholder: "سم" },
+                        {
+                          key: "dressSize",
+                          label: "مقاس الفستان",
+                          placeholder: "S, M, L, XL",
+                        },
+                      ].map(({ key, label, placeholder }) => (
+                        <div key={key} className="space-y-2">
+                          <Label className="text-gray-700 font-medium">{label}</Label>
+                          <Input
+                            value={(measurements as any)[key]}
+                            onChange={(e) =>
+                              setMeasurements({ ...measurements, [key]: e.target.value })
+                            }
+                            className="h-11 rounded-lg"
+                            placeholder={placeholder}
+                          />
+                        </div>
+                      ))}
+                    </div>
                   </>
                 )}
                 {selectedProduct && (

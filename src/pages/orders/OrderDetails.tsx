@@ -26,7 +26,7 @@ import {
 import { formatDate } from "@/utils/formatDate";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { useParams } from "react-router";
+import { Link, useParams } from "react-router";
 import { toast } from "sonner";
 import { CreateCustodyModal } from "./CreateCustodyModal";
 import { OrderCustodiesTable } from "./OrderCustodiesTable";
@@ -281,15 +281,27 @@ function OrderDetails() {
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">
-                  تاريخ الإنشاء
+                  تاريخ التسليم
                 </p>
-                <p className="text-lg">{formatDate(orderData.created_at)}</p>
+                <p className="text-lg">
+                  {orderData.delivery_date ? formatDate(orderData.delivery_date) : "-"}
+                </p>
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">
-                  آخر تحديث
+                  تاريخ المناسبة
                 </p>
-                <p className="text-lg">{formatDate(orderData.updated_at)}</p>
+                <p className="text-lg">
+                  {orderData.occasion_datetime ? formatDate(orderData.occasion_datetime) : "-"}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  عدد أيام الإيجار
+                </p>
+                <p className="text-lg">
+                  {orderData.days_of_rent != null ? orderData.days_of_rent : "-"}
+                </p>
               </div>
             </div>
             </CardContent>
@@ -418,6 +430,7 @@ function OrderDetails() {
                       <TableHead className="text-center">المدفوع</TableHead>
                       <TableHead className="text-center">المتبقي</TableHead>
                       <TableHead className="text-center">الحالة</TableHead>
+                      <TableHead className="text-center">تفاصيل المنتج</TableHead>
                       <TableHead className="text-center">
                         قابل للإرجاع
                       </TableHead>
@@ -452,6 +465,16 @@ function OrderDetails() {
                         </TableCell>
                         <TableCell className="text-center">
                           {getStatusLabel(item.status)}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Button variant="outline" size="sm" asChild>
+                            <Link
+                              to={`/orders/${orderData.id}/items/${item.id}`}
+                              title="عرض كل تفاصيل المنتج والقياسات"
+                            >
+                              عرض التفاصيل
+                            </Link>
+                          </Button>
                         </TableCell>
                         <TableCell className="text-center">
                           <Button

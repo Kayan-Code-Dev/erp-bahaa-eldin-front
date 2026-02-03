@@ -113,6 +113,12 @@ export type TOrder = {
   paid: string;
   remaining: string;
   visit_datetime: string;
+  /** تاريخ التسليم (Y-m-d H:i:s) */
+  delivery_date?: string | null;
+  /** تاريخ ووقت المناسبة لطلبات الإيجار */
+  occasion_datetime?: string | null;
+  /** عدد أيام الإيجار */
+  days_of_rent?: number | null;
   order_notes: string | null;
   discount_type: TDiscountType | null;
   discount_value: string | null;
@@ -203,6 +209,10 @@ export type TCreateOrderRequest = {
   entity_type: TEntity;
   entity_id: number;
   delivery_date: string;
+  /** على مستوى الطلب لطلبات الإيجار (Y-m-d H:i:s) */
+  occasion_datetime?: string;
+  /** على مستوى الطلب لطلبات الإيجار */
+  days_of_rent?: number;
   order_notes?: string;
   discount_type?: TDiscountType;
   discount_value?: number;
@@ -216,6 +226,10 @@ export type TCreateOrderWithNewClientRequest = {
   entity_type: TEntity;
   entity_id: number;
   delivery_date: string;
+  /** على مستوى الطلب لطلبات الإيجار (Y-m-d H:i:s) */
+  occasion_datetime?: string;
+  /** على مستوى الطلب لطلبات الإيجار */
+  days_of_rent?: number;
   order_notes?: string;
   discount_type?: TDiscountType;
   discount_value?: number;

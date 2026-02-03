@@ -176,15 +176,27 @@ export function OrderDetailsModal({ order, open, onOpenChange }: Props) {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">
-                    تاريخ الإنشاء
+                    تاريخ التسليم
                   </p>
-                  <p className="text-lg">{formatDate(orderData.created_at)}</p>
+                  <p className="text-lg">
+                    {orderData.delivery_date ? formatDate(orderData.delivery_date) : "-"}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">
-                    آخر تحديث
+                    تاريخ المناسبة
                   </p>
-                  <p className="text-lg">{formatDate(orderData.updated_at)}</p>
+                  <p className="text-lg">
+                    {orderData.occasion_datetime ? formatDate(orderData.occasion_datetime) : "-"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    عدد أيام الإيجار
+                  </p>
+                  <p className="text-lg">
+                    {orderData.days_of_rent != null ? orderData.days_of_rent : "-"}
+                  </p>
                 </div>
               </div>
 

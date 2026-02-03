@@ -86,7 +86,6 @@ import {
 import {
   DEFAULT_PER_PAGE,
   FILTER_DEBOUNCE_MS,
-  DELIVERIES_STATUS,
 } from "./constants";
 import {
   deliveriesFilterSchema,
@@ -155,7 +154,6 @@ function DeliveriesList() {
   const filters = useMemo(() => {
     const values = debouncedFormValues;
     return {
-      status: DELIVERIES_STATUS,
       date_from: values.date_from || undefined,
       date_to: values.date_to || undefined,
       client_id:
@@ -452,7 +450,14 @@ function DeliveriesList() {
                   {isPending ? (
                     <OrdersTableSkeleton rows={5} />
                   ) : data && data.data.length > 0 ? (
-                    data.data.map((order) => (
+                    data.data
+                      .filter(
+                        (order) =>
+                          order.status === "created" ||
+                          order.status === "paid" ||
+                          order.status === "partially_paid"
+                      )
+                      .map((order) => (
                       <TableRow key={order.id}>
                         <TableCell
                           className="font-medium text-center cursor-pointer"

@@ -3,7 +3,18 @@ import { useLocation, useNavigate, Link } from "react-router";
 import { toast } from "sonner";
 import { TClientResponse } from "@/api/v2/clients/clients.types";
 import { TEntity } from "@/lib/types/entity.types";
-import { ChevronRight, Loader2, Loader2Icon } from "lucide-react";
+import {
+  ChevronRight,
+  Loader2,
+  User,
+  FileText,
+  CalendarClock,
+  Percent,
+  Shirt,
+  Banknote,
+  StickyNote,
+  Tag,
+} from "lucide-react";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -34,13 +45,13 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { DatePicker } from "@/components/custom/DatePicker";
 import { SimpleDateTimePicker } from "@/components/custom/SimpleDateTimePicker";
 import { useCreateOrderMutationOptions } from "@/api/v2/orders/orders.hooks";
 import { TCreateOrderRequest } from "@/api/v2/orders/orders.types";
-import { useGetClothesUnavailableDaysRangesbyIdsQueryOptions } from "@/api/v2/clothes/clothes.hooks";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 
 type SelectedCloth = {
   id: number;
@@ -58,7 +69,7 @@ type LocationState = {
   client?: TClientResponse;
 };
 
-// Zod schema for order form
+// Zod schema for order form (تواريخ الإيجار على مستوى الطلب وليس القطعة)
 const orderItemSchema = z
   .object({
     cloth_id: z.number(),
@@ -66,33 +77,14 @@ const orderItemSchema = z
     type: z.enum(["rent", "buy"], {
       required_error: "يجب اختيار نوع الطلب",
     }),
-    days_of_rent: z
-      .number()
-      .min(1, "عدد أيام الإيجار يجب أن يكون على الأقل يوم واحد")
-      .optional(),
-    occasion_datetime: z.date({
-      required_error: "يجب اختيار تاريخ المناسبة",
-    }),
-    delivery_date: z.date({
-      required_error: "يجب اختيار تاريخ التسليم",
-    }),
+    days_of_rent: z.number().min(1).optional(),
+    occasion_datetime: z.date().optional(),
+    delivery_date: z.date().optional(),
     has_discount: z.boolean().default(false),
     discount_type: z.enum(["none", "percentage", "fixed"]).optional(),
     discount_value: z.number().min(0).optional(),
     notes: z.string().optional(),
   })
-  .refine(
-    (data) => {
-      if (data.type === "rent" && !data.days_of_rent) {
-        return false;
-      }
-      return true;
-    },
-    {
-      message: "عدد أيام الإيجار مطلوب لنوع الإيجار",
-      path: ["days_of_rent"],
-    }
-  )
   .refine(
     (data) => {
       if (data.has_discount) {
@@ -117,12 +109,22 @@ const formSchema = z
     delivery_date: z.date({
       required_error: "يجب اختيار تاريخ التسليم",
     }),
+    occasion_datetime: z.date().optional(),
+    days_of_rent: z.number().min(1, "عدد أيام الإيجار على الأقل يوم واحد").optional(),
     has_order_discount: z.boolean().default(false),
     order_discount_type: z.enum(["none", "percentage", "fixed"]).optional(),
     order_discount_value: z.number().min(0).optional(),
     order_notes: z.string().optional(),
     items: z.array(orderItemSchema).min(1, "يجب اختيار ملابس على الأقل"),
   })
+  .refine(
+    (data) => {
+      const hasRent = data.items.some((i) => i.type === "rent");
+      if (hasRent && (!data.days_of_rent || data.days_of_rent < 1)) return false;
+      return true;
+    },
+    { message: "عدد أيام الإيجار مطلوب عند وجود قطع إيجار", path: ["days_of_rent"] }
+  )
   .refine(
     (data) => {
       if (data.has_order_discount) {
@@ -167,6 +169,8 @@ function CreateOrderForm() {
       return {
         paid: 0,
         delivery_date: new Date(),
+        occasion_datetime: undefined,
+        days_of_rent: undefined,
         has_order_discount: false,
         order_discount_type: "none",
         order_discount_value: 0,
@@ -176,10 +180,13 @@ function CreateOrderForm() {
     }
 
     const deliveryDate = new Date(locationState.delivery_date);
+    const hasRent = locationState.selected_clothes.length > 0;
 
     return {
       paid: 0,
       delivery_date: deliveryDate,
+      occasion_datetime: hasRent ? new Date() : undefined,
+      days_of_rent: hasRent ? 1 : undefined,
       has_order_discount: false,
       order_discount_type: "none",
       order_discount_value: 0,
@@ -188,9 +195,6 @@ function CreateOrderForm() {
         cloth_id: cloth.id,
         price: cloth.price,
         type: "rent" as const,
-        days_of_rent: 1,
-        occasion_datetime: new Date(),
-        delivery_date: deliveryDate,
         has_discount: false,
         discount_type: "none" as const,
         discount_value: 0,
@@ -214,10 +218,8 @@ function CreateOrderForm() {
     name: "has_order_discount",
   });
 
-  const watchedItems = useWatch({
-    control: form.control,
-    name: "items",
-  });
+  const items = useWatch({ control: form.control, name: "items" });
+  const hasRentItem = (items ?? []).some((i) => i?.type === "rent");
 
   const createOrderMutation = useMutation(useCreateOrderMutationOptions());
   const { mutate: createOrder, isPending: isCreatingOrder } =
@@ -286,24 +288,6 @@ function CreateOrderForm() {
     }
   }, [locationState, navigate]);
 
-  const {
-    data: clothesUnavailableDaysRanges,
-    isPending: isLoadingUnavailableDaysRanges,
-  } = useQuery(
-    useGetClothesUnavailableDaysRangesbyIdsQueryOptions(
-      (locationState?.selected_clothes ?? []).map((cloth) => cloth.id)
-    )
-  );
-
-  const getClothesUnavailableDaysRanges = (cloth_id: number) => {
-    return clothesUnavailableDaysRanges?.results
-      .find((result) => result.cloth_id === cloth_id)
-      ?.unavailable_ranges.map((range) => ({
-        from: new Date(range.start),
-        to: new Date(range.end),
-      }));
-  };
-
   // Don't render if state is invalid (will redirect)
   if (!locationState) {
     return null;
@@ -332,12 +316,19 @@ function CreateOrderForm() {
 
   const onSubmit = async (values: FormValues) => {
     try {
+      const orderLevelOccasionDatetime = values.occasion_datetime
+        ? format(values.occasion_datetime, "yyyy-MM-dd HH:mm:ss")
+        : undefined;
+      const orderLevelDaysOfRent = values.days_of_rent ?? undefined;
+
       const requestData: TCreateOrderRequest = {
         existing_client: true,
         client_id,
         entity_type,
         entity_id,
         delivery_date: format(values.delivery_date, "yyyy-MM-dd HH:mm:ss"),
+        ...(orderLevelOccasionDatetime && { occasion_datetime: orderLevelOccasionDatetime }),
+        ...(orderLevelDaysOfRent != null && { days_of_rent: orderLevelDaysOfRent }),
         ...(values.has_order_discount &&
           values.order_discount_type &&
           values.order_discount_type !== "none" &&
@@ -365,17 +356,6 @@ function CreateOrderForm() {
               : {}),
             ...(item.notes ? { notes: item.notes } : {}),
           };
-          if (item.type === "rent") {
-            return {
-              ...base,
-              days_of_rent: item.days_of_rent ?? 1,
-              occasion_datetime: format(
-                item.occasion_datetime,
-                "yyyy-MM-dd HH:mm:ss"
-              ),
-              delivery_date: format(item.delivery_date, "yyyy-MM-dd"),
-            };
-          }
           return base;
         }),
       };
@@ -399,122 +379,218 @@ function CreateOrderForm() {
   };
 
   return (
-    <div dir="rtl" className="space-y-6">
-      {/* Breadcrumbs */}
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Link
-          to="/orders/choose-client"
-          className="hover:text-foreground transition-colors"
+    <div dir="rtl" className="min-h-screen bg-muted/30">
+      <div className="mx-auto max-w-4xl space-y-6 py-6 px-4">
+        {/* Breadcrumbs */}
+        <nav
+          className="flex items-center gap-2 rounded-lg border bg-card px-4 py-3 text-sm shadow-sm"
+          aria-label="مسار التنقل"
         >
-          اختيار العميل
-        </Link>
-        <ChevronRight className="h-4 w-4" />
-        <Link
-          to="/orders/choose-clothes"
-          className="hover:text-foreground transition-colors"
-          state={client ? { client } : null}
-        >
-          اختيار الملابس
-        </Link>
-        <ChevronRight className="h-4 w-4" />
-        <span className="text-foreground font-medium">إنشاء الطلب</span>
-      </div>
+          <Link
+            to="/orders/choose-client"
+            className="text-muted-foreground transition-colors hover:text-foreground"
+          >
+            اختيار العميل
+          </Link>
+          <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/70" />
+          <Link
+            to="/orders/choose-clothes"
+            className="text-muted-foreground transition-colors hover:text-foreground"
+            state={client ? { client } : null}
+          >
+            اختيار الملابس
+          </Link>
+          <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/70" />
+          <span className="font-medium text-foreground">إنشاء الطلب</span>
+        </nav>
 
-      {/* Client Info */}
-      {client && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">معلومات العميل</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <p className="text-sm text-muted-foreground">الاسم الكامل</p>
-                <p className="font-medium">
-                  {client.first_name} {client.middle_name} {client.last_name}
-                </p>
+        {/* Client Info */}
+        {client && (
+          <Card className="overflow-hidden border shadow-sm">
+            <CardHeader className="border-b bg-muted/20 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                  <User className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg">معلومات العميل</CardTitle>
+                  <CardDescription>العميل المختار لهذا الطلب</CardDescription>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">الرقم القومي</p>
-                <p className="font-medium">{client.national_id}</p>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
+                <div className="space-y-1 rounded-lg border bg-muted/10 p-4">
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    الاسم الكامل
+                  </p>
+                  <p className="font-medium text-foreground">
+                    {client.first_name} {client.middle_name} {client.last_name}
+                  </p>
+                </div>
+                <div className="space-y-1 rounded-lg border bg-muted/10 p-4">
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    الرقم القومي
+                  </p>
+                  <p className="font-medium text-foreground">
+                    {client.national_id || "—"}
+                  </p>
+                </div>
+                <div className="space-y-1 rounded-lg border bg-muted/10 p-4 sm:col-span-2 md:col-span-1">
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    أرقام الهاتف
+                  </p>
+                  <p className="font-medium text-foreground">
+                    {client.phones?.map((p) => p.phone).join("، ") || "—"}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">أرقام الهاتف</p>
-                <p className="font-medium">
-                  {client.phones?.map((p) => p.phone).join(", ") || "-"}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+            </CardContent>
+          </Card>
+        )}
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Order Level Fields */}
-          <Card>
-            <CardHeader>
-              <CardTitle>معلومات الطلب</CardTitle>
-              <CardDescription>أدخل معلومات الطلب الأساسية</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="paid"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>المبلغ المدفوع</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          placeholder="0.00"
-                          {...field}
-                          onChange={(e) =>
-                            field.onChange(parseFloat(e.target.value) || 0)
-                          }
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="delivery_date"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>تاريخ التسليم</FormLabel>
-                      <FormControl>
-                        <DatePicker
-                          value={field.value}
-                          onChange={field.onChange}
-                          placeholder="اختر تاريخ التسليم"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+          <Card className="overflow-hidden border shadow-sm">
+            <CardHeader className="border-b bg-muted/20 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                  <FileText className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg">معلومات الطلب</CardTitle>
+                  <CardDescription>المبلغ، تاريخ التسليم، الخصم والملاحظات</CardDescription>
+                </div>
               </div>
+            </CardHeader>
+            <CardContent className="space-y-6 pt-6">
+              {/* المبلغ وتاريخ التسليم */}
+              <div>
+                <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
+                  <Banknote className="h-4 w-4 text-muted-foreground" />
+                  المدفوع وتاريخ التسليم
+                </h3>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="paid"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>المبلغ المدفوع (ج.م)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            placeholder="0.00"
+                            className="h-10"
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(parseFloat(e.target.value) || 0)
+                            }
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="delivery_date"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>تاريخ التسليم</FormLabel>
+                        <FormControl>
+                          <DatePicker
+                            value={field.value}
+                            onChange={field.onChange}
+                            placeholder="اختر تاريخ التسليم"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              {hasRentItem && (
+                <>
+                  <Separator />
+                  <div className="rounded-xl border-2 border-primary/20 bg-primary/5 p-5">
+                    <h3 className="mb-1 flex items-center gap-2 text-sm font-semibold text-foreground">
+                      <CalendarClock className="h-4 w-4 text-primary" />
+                      تواريخ الإيجار (تنطبق على الطلب بالكامل)
+                    </h3>
+                    <p className="mb-4 text-xs text-muted-foreground">
+                      حدد تاريخ ووقت المناسبة وعدد أيام الإيجار لجميع القطع المؤجرة.
+                    </p>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <FormField
+                        control={form.control}
+                        name="occasion_datetime"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>تاريخ ووقت المناسبة</FormLabel>
+                            <FormControl>
+                              <SimpleDateTimePicker
+                                value={field.value}
+                                onChange={field.onChange}
+                                placeholder="اختر تاريخ ووقت المناسبة"
+                                minDate={new Date()}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="days_of_rent"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>عدد أيام الإيجار</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                min={1}
+                                placeholder="1"
+                                className="h-10"
+                                value={field.value ?? ""}
+                                onChange={(e) =>
+                                  field.onChange(e.target.value ? parseInt(e.target.value, 10) : undefined)
+                                }
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
 
               <Separator />
 
-              <div className="space-y-4">
+              {/* خصم الطلب */}
+              <div>
+                <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
+                  <Percent className="h-4 w-4 text-muted-foreground" />
+                  خصم الطلب
+                </h3>
                 <FormField
                   control={form.control}
                   name="has_order_discount"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                    <FormItem className="flex flex-row items-center justify-between rounded-xl border bg-muted/10 p-4">
                       <div className="space-y-0.5">
                         <FormLabel className="text-base">
                           إضافة خصم على الطلب
                         </FormLabel>
                         <CardDescription>
-                          تفعيل الخصم على مستوى الطلب
+                          تفعيل الخصم على مستوى الطلب بالكامل
                         </CardDescription>
                       </div>
                       <FormControl>
@@ -527,9 +603,8 @@ function CreateOrderForm() {
                     </FormItem>
                   )}
                 />
-
                 {hasOrderDiscount && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
                     <FormField
                       control={form.control}
                       name="order_discount_type"
@@ -541,7 +616,7 @@ function CreateOrderForm() {
                             value={field.value}
                           >
                             <FormControl>
-                              <SelectTrigger>
+                              <SelectTrigger className="h-10">
                                 <SelectValue placeholder="اختر نوع الخصم" />
                               </SelectTrigger>
                             </FormControl>
@@ -556,7 +631,6 @@ function CreateOrderForm() {
                         </FormItem>
                       )}
                     />
-
                     <FormField
                       control={form.control}
                       name="order_discount_value"
@@ -569,6 +643,7 @@ function CreateOrderForm() {
                               step="0.01"
                               min="0"
                               placeholder="0.00"
+                              className="h-10"
                               {...field}
                               onChange={(e) =>
                                 field.onChange(parseFloat(e.target.value) || 0)
@@ -590,11 +665,14 @@ function CreateOrderForm() {
                 name="order_notes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>ملاحظات الطلب</FormLabel>
+                    <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-foreground">
+                      <StickyNote className="h-4 w-4 text-muted-foreground" />
+                      ملاحظات الطلب
+                    </h3>
                     <FormControl>
                       <Textarea
-                        placeholder="أدخل ملاحظات حول الطلب..."
-                        className="resize-none"
+                        placeholder="أدخل ملاحظات حول الطلب (اختياري)..."
+                        className="resize-none rounded-lg"
                         rows={4}
                         {...field}
                       />
@@ -606,42 +684,79 @@ function CreateOrderForm() {
             </CardContent>
           </Card>
 
-          {/* Items Forms */}
-          <div className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>الملابس المختارة</CardTitle>
-                <CardDescription>أدخل تفاصيل كل قطعة ملابس</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {fields.map((field, index) => {
-                  const cloth = selected_clothes.find(
-                    (c) => c.id === field.cloth_id
-                  );
-                  const itemHasDiscount = watchedItems?.[index]?.has_discount;
-                  const itemType = watchedItems?.[index]?.type;
+          {/* تفاصيل المنتج المختار */}
+          <Card className="overflow-hidden border shadow-sm">
+            <CardHeader className="border-b bg-muted/20 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                  <Shirt className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg">تفاصيل المنتج المختار</CardTitle>
+                  <CardDescription>
+                    أدخل السعر، نوع الطلب، الخصم والملاحظات لكل قطعة — {fields.length} قطعة
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-5 pt-6">
+              {fields.map((field, index) => {
+                const cloth = selected_clothes.find(
+                  (c) => c.id === field.cloth_id
+                );
+                const itemHasDiscount = items?.[index]?.has_discount;
+                const itemType = items?.[index]?.type;
 
-                  return (
-                    <Card key={field.id} className="border-2">
-                      <CardHeader>
-                        <CardTitle className="text-base">
-                          {cloth?.code} - {cloth?.name}
+                return (
+                  <Card
+                    key={field.id}
+                    className="overflow-hidden border-2 border-muted/40 bg-card shadow-sm transition-shadow hover:border-primary/20 hover:shadow-md"
+                  >
+                    {/* هيدر القطعة: رقم + كود + اسم + badge النوع */}
+                    <CardHeader className="flex flex-row items-center gap-3 border-b bg-muted/10 py-4">
+                      <span
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground"
+                        aria-hidden
+                      >
+                        {index + 1}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <CardTitle className="truncate text-base font-semibold">
+                          {cloth?.name}
                         </CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <p className="mt-0.5 truncate text-sm text-muted-foreground">
+                          الكود: {cloth?.code}
+                        </p>
+                      </div>
+                      <Badge
+                        variant={itemType === "buy" ? "secondary" : "default"}
+                        className="shrink-0"
+                      >
+                        {itemType === "buy" ? "شراء" : "إيجار"}
+                      </Badge>
+                    </CardHeader>
+
+                    <CardContent className="space-y-4 pt-4">
+                      {/* السعر ونوع الطلب — في صندوق واحد واضح */}
+                      <div className="rounded-xl border bg-muted/5 p-4">
+                        <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          <Banknote className="h-4 w-4" />
+                          السعر ونوع الطلب
+                        </p>
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                           <FormField
                             control={form.control}
                             name={`items.${index}.price`}
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>السعر</FormLabel>
+                                <FormLabel>السعر (ج.م)</FormLabel>
                                 <FormControl>
                                   <Input
                                     type="number"
                                     step="0.01"
                                     min="0"
                                     placeholder="0.00"
+                                    className="h-10"
                                     {...field}
                                     onChange={(e) =>
                                       field.onChange(
@@ -654,27 +769,29 @@ function CreateOrderForm() {
                               </FormItem>
                             )}
                           />
-
                           <FormField
                             control={form.control}
                             name={`items.${index}.type`}
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>نوع الطلب</FormLabel>
+                                <FormLabel>
+                                  <span className="flex items-center gap-1.5">
+                                    <Tag className="h-4 w-4" />
+                                    نوع الطلب
+                                  </span>
+                                </FormLabel>
                                 <Select
                                   onValueChange={field.onChange}
                                   value={field.value}
                                 >
                                   <FormControl>
-                                    <SelectTrigger>
+                                    <SelectTrigger className="h-10">
                                       <SelectValue placeholder="اختر نوع الطلب" />
                                     </SelectTrigger>
                                   </FormControl>
                                   <SelectContent>
                                     <SelectItem value="rent">إيجار</SelectItem>
-                                    <SelectItem value="buy">
-                                      شراء
-                                    </SelectItem>
+                                    <SelectItem value="buy">شراء</SelectItem>
                                   </SelectContent>
                                 </Select>
                                 <FormMessage />
@@ -682,212 +799,155 @@ function CreateOrderForm() {
                             )}
                           />
                         </div>
+                      </div>
 
-                        {itemType === "rent" && (
-                          <FormField
-                            control={form.control}
-                            name={`items.${index}.days_of_rent`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>عدد أيام الإيجار</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    type="number"
-                                    min="1"
-                                    placeholder="1"
-                                    {...field}
-                                    onChange={(e) =>
-                                      field.onChange(
-                                        parseInt(e.target.value) || 1
-                                      )
-                                    }
-                                    value={field.value || 1}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        )}
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <FormField
-                            control={form.control}
-                            name={`items.${index}.occasion_datetime`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>تاريخ ووقت المناسبة</FormLabel>
-                                <FormControl>
-                                  <SimpleDateTimePicker
-                                    value={field.value}
-                                    onChange={field.onChange}
-                                    placeholder="اختر تاريخ ووقت المناسبة"
-                                    minDate={new Date()}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={form.control}
-                            name={`items.${index}.delivery_date`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>تاريخ التسليم</FormLabel>
-                                <FormControl>
-                                  {isLoadingUnavailableDaysRanges ? (
-                                    <Loader2Icon className="h-4 w-4 animate-spin" />
-                                  ) : (
-                                    <DatePicker
-                                      value={field.value}
-                                      onChange={field.onChange}
-                                      placeholder="اختر تاريخ التسليم"
-                                      allowPastDates={false}
-                                      disabledRanges={getClothesUnavailableDaysRanges(
-                                        cloth?.id ?? 0
-                                      )}
-                                    />
-                                  )}
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-
-                        <Separator />
-
-                        <div className="space-y-4">
-                          <FormField
-                            control={form.control}
-                            name={`items.${index}.has_discount`}
-                            render={({ field }) => (
-                              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                                <div className="space-y-0.5">
-                                  <FormLabel className="text-base">
-                                    إضافة خصم على هذه القطعة
-                                  </FormLabel>
-                                  <CardDescription>
-                                    تفعيل الخصم على مستوى القطعة
-                                  </CardDescription>
-                                </div>
-                                <FormControl>
-                                  <Switch
-                                    dir="ltr"
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                  />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-
-                          {itemHasDiscount && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <FormField
-                                control={form.control}
-                                name={`items.${index}.discount_type`}
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>نوع الخصم</FormLabel>
-                                    <Select
-                                      onValueChange={field.onChange}
-                                      value={field.value}
-                                    >
-                                      <FormControl>
-                                        <SelectTrigger>
-                                          <SelectValue placeholder="اختر نوع الخصم" />
-                                        </SelectTrigger>
-                                      </FormControl>
-                                      <SelectContent>
-                                        <SelectItem value="percentage">
-                                          نسبة مئوية
-                                        </SelectItem>
-                                        <SelectItem value="fixed">
-                                          مبلغ ثابت
-                                        </SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-
-                              <FormField
-                                control={form.control}
-                                name={`items.${index}.discount_value`}
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>قيمة الخصم</FormLabel>
-                                    <FormControl>
-                                      <Input
-                                        type="number"
-                                        step="0.01"
-                                        min="0"
-                                        placeholder="0.00"
-                                        {...field}
-                                        onChange={(e) =>
-                                          field.onChange(
-                                            parseFloat(e.target.value) || 0
-                                          )
-                                        }
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                            </div>
-                          )}
-                        </div>
-
-                        <Separator />
-
+                      {/* خصم القطعة */}
+                      <div className="rounded-xl border bg-muted/5 p-4">
+                        <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          <Percent className="h-4 w-4" />
+                          خصم القطعة
+                        </p>
                         <FormField
                           control={form.control}
-                          name={`items.${index}.notes`}
+                          name={`items.${index}.has_discount`}
                           render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>ملاحظات</FormLabel>
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border bg-background p-3">
+                              <div className="space-y-0.5">
+                                <FormLabel className="text-sm font-medium">
+                                  إضافة خصم على هذه القطعة
+                                </FormLabel>
+                                <CardDescription className="text-xs">
+                                  نسبة مئوية أو مبلغ ثابت
+                                </CardDescription>
+                              </div>
                               <FormControl>
-                                <Textarea
-                                  placeholder="أدخل ملاحظات حول هذه القطعة..."
-                                  className="resize-none"
-                                  rows={3}
-                                  {...field}
+                                <Switch
+                                  dir="ltr"
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
                                 />
                               </FormControl>
-                              <FormMessage />
                             </FormItem>
                           )}
                         />
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </CardContent>
-            </Card>
-          </div>
+                        {itemHasDiscount && (
+                          <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            <FormField
+                              control={form.control}
+                              name={`items.${index}.discount_type`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>نوع الخصم</FormLabel>
+                                  <Select
+                                    onValueChange={field.onChange}
+                                    value={field.value}
+                                  >
+                                    <FormControl>
+                                      <SelectTrigger className="h-10">
+                                        <SelectValue placeholder="اختر نوع الخصم" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      <SelectItem value="percentage">
+                                        نسبة مئوية
+                                      </SelectItem>
+                                      <SelectItem value="fixed">
+                                        مبلغ ثابت
+                                      </SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name={`items.${index}.discount_value`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>قيمة الخصم</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="number"
+                                      step="0.01"
+                                      min="0"
+                                      placeholder="0.00"
+                                      className="h-10"
+                                      {...field}
+                                      onChange={(e) =>
+                                        field.onChange(
+                                          parseFloat(e.target.value) || 0
+                                        )
+                                      }
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        )}
+                      </div>
 
-          <div className="flex justify-end gap-4">
+                      {/* ملاحظات القطعة */}
+                      <FormField
+                        control={form.control}
+                        name={`items.${index}.notes`}
+                        render={({ field }) => (
+                          <FormItem className="rounded-xl border bg-muted/5 p-4">
+                            <FormLabel>
+                              <span className="flex items-center gap-1.5">
+                                <StickyNote className="h-4 w-4" />
+                                ملاحظات القطعة
+                              </span>
+                            </FormLabel>
+                            <FormControl>
+                              <Textarea
+                                placeholder="ملاحظات خاصة بهذه القطعة (اختياري)..."
+                                className="resize-none rounded-lg border-0 bg-transparent focus-visible:ring-0"
+                                rows={2}
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </CardContent>
+          </Card>
+
+          {/* Footer Actions */}
+          <div className="flex flex-col gap-3 border-t bg-card pt-6 sm:flex-row sm:justify-end sm:gap-4">
             <Button
               type="button"
               variant="outline"
+              className="order-2 sm:order-1 h-11 min-w-[120px]"
               onClick={() => navigate(-1)}
             >
               إلغاء
             </Button>
-            <Button type="submit" disabled={isCreatingOrder}>
-              {isCreatingOrder && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <Button
+              type="submit"
+              disabled={isCreatingOrder}
+              className="order-1 h-11 min-w-[160px] sm:order-2"
+            >
+              {isCreatingOrder ? (
+                <>
+                  <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                  جاري الإنشاء...
+                </>
+              ) : (
+                "إنشاء الطلب"
               )}
-              إنشاء الطلب
             </Button>
           </div>
         </form>
       </Form>
+      </div>
     </div>
   );
 }
