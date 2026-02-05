@@ -209,6 +209,8 @@ export type TCreateOrderRequest = {
   entity_type: TEntity;
   entity_id: number;
   delivery_date: string;
+  /** موعد الاستلام (Y-m-d H:i:s) */
+  visit_datetime?: string;
   /** على مستوى الطلب لطلبات الإيجار (Y-m-d H:i:s) */
   occasion_datetime?: string;
   /** على مستوى الطلب لطلبات الإيجار */
@@ -226,6 +228,8 @@ export type TCreateOrderWithNewClientRequest = {
   entity_type: TEntity;
   entity_id: number;
   delivery_date: string;
+  /** موعد الاستلام (Y-m-d H:i:s) */
+  visit_datetime?: string;
   /** على مستوى الطلب لطلبات الإيجار (Y-m-d H:i:s) */
   occasion_datetime?: string;
   /** على مستوى الطلب لطلبات الإيجار */

@@ -48,23 +48,17 @@ function getInfoValues(order: TOrder): string[] {
     Array.isArray(rawPhones) && rawPhones[1]?.phone
       ? String(rawPhones[1].phone).trim()
       : (c as { phone_secondary?: string }).phone_secondary?.trim() || "-";
-  const items = order.items ?? [];
-  const firstItem = items[0];
   const visitDate =
     order.visit_datetime && String(order.visit_datetime).trim()
       ? formatDate(String(order.visit_datetime))
       : "-";
   const occasionDate =
-    firstItem &&
-    (firstItem as { occasion_datetime?: string | null }).occasion_datetime &&
-    String((firstItem as { occasion_datetime?: string }).occasion_datetime).trim()
-      ? formatDate(String((firstItem as { occasion_datetime: string }).occasion_datetime))
+    order.occasion_datetime && String(order.occasion_datetime).trim()
+      ? formatDate(String(order.occasion_datetime))
       : "-";
   const deliveryDate =
-    firstItem &&
-    (firstItem as { delivery_date?: string | null }).delivery_date &&
-    String((firstItem as { delivery_date?: string }).delivery_date).trim()
-      ? formatDate(String((firstItem as { delivery_date: string }).delivery_date))
+    order.delivery_date && String(order.delivery_date).trim()
+      ? formatDate(String(order.delivery_date))
       : "-";
   return [name, phone1, phone2, addressStr, visitDate, occasionDate, deliveryDate];
 }

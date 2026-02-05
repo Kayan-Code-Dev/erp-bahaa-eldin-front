@@ -273,7 +273,7 @@ function OrderDetails() {
                 )}
               <div>
                 <p className="text-sm font-medium text-muted-foreground">
-                  تاريخ الزيارة
+                  موعد الاستلام
                 </p>
                 <p className="text-lg">
                   {formatDate(orderData.visit_datetime)}
@@ -281,7 +281,7 @@ function OrderDetails() {
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">
-                  تاريخ التسليم
+                  موعد الاسترجاع
                 </p>
                 <p className="text-lg">
                   {orderData.delivery_date ? formatDate(orderData.delivery_date) : "-"}
@@ -289,10 +289,18 @@ function OrderDetails() {
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">
-                  تاريخ المناسبة
+                  موعد الفرح
                 </p>
                 <p className="text-lg">
                   {orderData.occasion_datetime ? formatDate(orderData.occasion_datetime) : "-"}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  تاريخ إنشاء الفاتورة
+                </p>
+                <p className="text-lg">
+                  {formatDate(orderData.created_at)}
                 </p>
               </div>
               <div>

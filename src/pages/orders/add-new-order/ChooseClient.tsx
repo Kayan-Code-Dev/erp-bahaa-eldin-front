@@ -136,7 +136,9 @@ function ChooseClient() {
 
   const [entityType, setEntityType] = useState<TEntity | undefined>();
   const [entityId, setEntityId] = useState<string>("");
-  const [deliveryDate, setDeliveryDate] = useState<Date | undefined>();
+  const [deliveryDate, setDeliveryDate] = useState<Date | undefined>(); // موعد الاسترجاع
+  const [receiveDate, setReceiveDate] = useState<Date | undefined>(); // visit_datetime = موعد الاستلام
+  const [branchDate, setBranchDate] = useState<Date | undefined>(); // تاريخ الفرع (للعرض فقط حالياً)
 
   const [nameFilter, setNameFilter] = useState("");
   const [categoryId, setCategoryId] = useState("");
@@ -486,6 +488,7 @@ function ChooseClient() {
       entity_type: entityType!,
       entity_id: Number(entityId),
       delivery_date: deliveryDate ? format(deliveryDate, "yyyy-MM-dd HH:mm:ss") : format(new Date(), "yyyy-MM-dd HH:mm:ss"),
+      ...(receiveDate && { visit_datetime: format(receiveDate, "yyyy-MM-dd HH:mm:ss") }),
       ...(orderLevelOccasionDatetime && { occasion_datetime: orderLevelOccasionDatetime }),
       ...(orderLevelDaysOfRent != null && { days_of_rent: orderLevelDaysOfRent }),
       order_notes: selectedProducts.map((p) => p.notes).filter(Boolean).join(" - ") || undefined,
@@ -527,6 +530,7 @@ function ChooseClient() {
       entity_type: entityType!,
       entity_id: Number(entityId),
       delivery_date: deliveryDate ? format(deliveryDate, "yyyy-MM-dd HH:mm:ss") : format(new Date(), "yyyy-MM-dd HH:mm:ss"),
+      ...(receiveDate && { visit_datetime: format(receiveDate, "yyyy-MM-dd HH:mm:ss") }),
       ...(orderLevelOccasionDatetime && { occasion_datetime: orderLevelOccasionDatetime }),
       ...(orderLevelDaysOfRent != null && { days_of_rent: orderLevelDaysOfRent }),
       order_notes: selectedProducts.map((p) => p.notes).filter(Boolean).join(" - ") || undefined,
@@ -563,8 +567,12 @@ function ChooseClient() {
       toast.error("يجب اختيار نوع المكان والمكان");
       return;
     }
+    if (!receiveDate) {
+      toast.error("يجب اختيار تاريخ الاستلام");
+      return;
+    }
     if (!deliveryDate) {
-      toast.error("يجب اختيار تاريخ التسليم");
+      toast.error("يجب اختيار تاريخ الاسترجاع");
       return;
     }
     if (selectedProducts.length === 0) {
@@ -695,7 +703,7 @@ function ChooseClient() {
                       </p>
                     </div>
                   </div>
-                  <div className="space-y-4 w-full">
+                <div className="space-y-4 w-full">
                     <EntitySelect
                       mode="standalone"
                       entityType={entityType}
@@ -706,18 +714,44 @@ function ChooseClient() {
                       entityIdLabel="المكان"
                       required
                     />
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                     <div className="space-y-2">
-                      <Label htmlFor="delivery-date" className="text-gray-700 font-medium">
-                        تاريخ التسليم
+                      <Label htmlFor="receive-date" className="text-gray-700 font-medium">
+                        تاريخ الاستلام
                       </Label>
                       <DatePicker
-                        value={deliveryDate}
-                        onChange={setDeliveryDate}
-                        placeholder="اختر تاريخ التسليم"
+                        value={receiveDate}
+                        onChange={setReceiveDate}
+                        placeholder="اختر تاريخ الاستلام"
                         minDate={new Date()}
                         className="h-12 rounded-lg w-full"
                       />
                     </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="branch-date" className="text-gray-700 font-medium">
+                        تاريخ الفرع
+                      </Label>
+                      <DatePicker
+                        value={branchDate}
+                        onChange={setBranchDate}
+                        placeholder="اختر تاريخ الفرع"
+                        minDate={new Date()}
+                        className="h-12 rounded-lg w-full"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="delivery-date" className="text-gray-700 font-medium">
+                        تاريخ الاسترجاع
+                      </Label>
+                      <DatePicker
+                        value={deliveryDate}
+                        onChange={setDeliveryDate}
+                        placeholder="اختر تاريخ الاسترجاع"
+                        minDate={new Date()}
+                        className="h-12 rounded-lg w-full"
+                      />
+                    </div>
+                  </div>
                     {entityType && entityId && deliveryDate && (
                       <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                         <p className="text-sm text-blue-700">جاهز لعرض الملابس المتاحة</p>
@@ -760,8 +794,11 @@ function ChooseClient() {
                     <TabsContent value="existing" className="mt-6 space-y-4">
                       {(selectedClientFromList || selectedClient) && (
                         <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                          <div className="flex items-start justify-between">
-                            <div>
+                          <div className="flex items-start justify-between gap-3 flex-row-reverse">
+                            <Badge className="bg-green-100 text-green-800 border-green-200 shrink-0">
+                              مختار
+                            </Badge>
+                            <div className="text-right">
                               <p className="font-bold text-green-800">العميل المختار:</p>
                               <p className="font-medium text-gray-900">
                                 {(() => {
@@ -790,9 +827,6 @@ function ChooseClient() {
                                 </p>
                               </div>
                             </div>
-                            <Badge className="bg-green-100 text-green-800 border-green-200">
-                              مختار
-                            </Badge>
                           </div>
                         </div>
                       )}

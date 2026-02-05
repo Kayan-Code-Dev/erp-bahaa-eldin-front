@@ -290,15 +290,15 @@ function OrderItemDetails() {
                 <Calendar className="h-5 w-5 text-primary" />
                 <div>
                   <CardTitle className="text-base">تواريخ الإيجار</CardTitle>
-                  <CardDescription>أيام الإيجار، المناسبة، التسليم</CardDescription>
+                  <CardDescription>أيام الإيجار، موعد الفرح، موعد الاسترجاع</CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="pt-4">
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
                 <FieldRow label="عدد أيام الإيجار" value={item.days_of_rent} />
-                <FieldRow label="تاريخ المناسبة" value={item.occasion_datetime ? formatDate(item.occasion_datetime) : null} />
-                <FieldRow label="تاريخ التسليم" value={item.delivery_date ? formatDate(item.delivery_date) : null} />
+                <FieldRow label="موعد الفرح" value={item.occasion_datetime ? formatDate(item.occasion_datetime) : null} />
+                <FieldRow label="موعد الاسترجاع" value={item.delivery_date ? formatDate(item.delivery_date) : null} />
               </div>
             </CardContent>
           </Card>
