@@ -177,3 +177,4 @@ export function OrderReceiptAckPrint({
     </div>
   );
 }
+ 
