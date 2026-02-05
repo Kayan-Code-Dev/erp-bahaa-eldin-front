@@ -52,12 +52,23 @@ export const useGetOrdersQueryOptions = (
   per_page: number,
   filters?: {
     status?: string;
+    order_id?: string | number;
     date_from?: string;
     date_to?: string;
     returned?: boolean;
     overdue?: boolean;
     delayed?: boolean;
     client_id?: string | number;
+    item_name?: string;
+    item_code?: string;
+    invoice_date_from?: string;
+    invoice_date_to?: string;
+    visit_date_from?: string;
+    visit_date_to?: string;
+    delivery_date_from?: string;
+    delivery_date_to?: string;
+    return_date_from?: string;
+    return_date_to?: string;
   },
 ) => {
   return queryOptions({

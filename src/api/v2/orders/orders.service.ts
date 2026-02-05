@@ -27,26 +27,87 @@ export const getOrders = async (
   per_page: number,
   filters?: {
     status?: string;
+    /** فلترة حسب رقم الفاتورة */
+    order_id?: string | number;
+    /** فلترة عامة بالتاريخ (إن وُجدت في الـ API) */
     date_from?: string;
     date_to?: string;
     returned?: boolean;
     overdue?: boolean;
     delayed?: boolean;
+    /** فلترة حسب العميل */
     client_id?: string | number;
+    /** فلترة حسب اسم الصنف */
+    item_name?: string;
+    /** فلترة حسب كود الصنف */
+    item_code?: string;
+    /** فلترة حسب تاريخ إنشاء الفاتورة */
+    invoice_date_from?: string;
+    invoice_date_to?: string;
+    /** فلترة حسب تاريخ التأجير (visit_datetime) */
+    visit_date_from?: string;
+    visit_date_to?: string;
+    /** فلترة حسب تاريخ التسليم (delivery_date) */
+    delivery_date_from?: string;
+    delivery_date_to?: string;
+    /** فلترة حسب تاريخ الاسترجاع / المناسبة (occasion_datetime) */
+    return_date_from?: string;
+    return_date_to?: string;
   },
 ) => {
   try {
     const params: Record<string, string | number | boolean> = { page, per_page };
     if (filters?.status) params.status = filters.status;
+
+    // فلاتر عامة حسب التاريخ (موجودة مسبقًا)
     if (filters?.date_from) params.date_from = filters.date_from;
     if (filters?.date_to) params.date_to = filters.date_to;
+
     if (filters?.returned === true) params.returned = 1;
     if (filters?.overdue === true) params.overdue = 1;
     if (filters?.delayed === true) params.delayed = true;
     if (filters?.delayed === false) params.delayed = false;
+
+    // رقم الفاتورة (نرسلها كـ id و order_id ليتوافق مع الباك)
+    if (filters?.order_id !== undefined && filters.order_id !== "" && filters.order_id != null) {
+      const normalizedOrderId =
+        typeof filters.order_id === "string" ? Number(filters.order_id) : filters.order_id;
+      if (Number.isFinite(normalizedOrderId as number)) {
+        params.id = normalizedOrderId;
+        params.order_id = normalizedOrderId;
+      }
+    }
+
+    // العميل
     if (filters?.client_id !== undefined && filters.client_id !== "" && filters.client_id != null) {
       params.client_id = typeof filters.client_id === "string" ? Number(filters.client_id) : filters.client_id;
     }
+
+    // اسم الصنف
+    if (filters?.item_name && filters.item_name.trim() !== "") {
+      params.item_name = filters.item_name.trim();
+    }
+
+    // كود الصنف
+    if (filters?.item_code && filters.item_code.trim() !== "") {
+      params.item_code = filters.item_code.trim();
+    }
+
+    // تواريخ الفاتورة
+    if (filters?.invoice_date_from) params.invoice_date_from = filters.invoice_date_from;
+    if (filters?.invoice_date_to) params.invoice_date_to = filters.invoice_date_to;
+
+    // تواريخ التأجير
+    if (filters?.visit_date_from) params.visit_date_from = filters.visit_date_from;
+    if (filters?.visit_date_to) params.visit_date_to = filters.visit_date_to;
+
+    // تواريخ التسليم
+    if (filters?.delivery_date_from) params.delivery_date_from = filters.delivery_date_from;
+    if (filters?.delivery_date_to) params.delivery_date_to = filters.delivery_date_to;
+
+    // تواريخ الاسترجاع / المناسبة
+    if (filters?.return_date_from) params.return_date_from = filters.return_date_from;
+    if (filters?.return_date_to) params.return_date_to = filters.return_date_to;
 
     const { data: responseData } = await api.get<TPaginationResponse<TOrder>>(
       `/orders`,

@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useSearchParams, useNavigate } from "react-router";
-import { Download, Eye, Pencil, FileText, FileUser, FileCheck } from "lucide-react";
+import { Download, Eye, Pencil, FileText, FileUser, FileCheck, Filter } from "lucide-react";
 import {
   Table,
   TableHeader,
@@ -21,6 +21,9 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import CustomPagination from "@/components/custom/CustomPagination";
 import {
   useExportOrdersToCSVMutationOptions,
@@ -40,6 +43,37 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { CustomCalendar } from "@/components/custom/CustomCalendar";
+import { ClientsSelect } from "@/components/custom/ClientsSelect";
+import useDebounce from "@/hooks/useDebounce";
+
+const ordersFilterSchema = z.object({
+  order_id: z.string().optional(),
+  client_id: z.string().optional(),
+  item_name: z.string().optional(),
+  item_code: z.string().optional(),
+  invoice_date_from: z.string().optional(),
+  invoice_date_to: z.string().optional(),
+  visit_date_from: z.string().optional(),
+  visit_date_to: z.string().optional(),
+  delivery_date_from: z.string().optional(),
+  delivery_date_to: z.string().optional(),
+  return_date_from: z.string().optional(),
+  return_date_to: z.string().optional(),
+});
+
+type OrdersFilterFormValues = z.infer<typeof ordersFilterSchema>;
+
+const FILTER_DEBOUNCE_MS = 500;
 
 const getStatusVariant = (status: TOrder["status"]) => {
   switch (status) {
@@ -72,6 +106,50 @@ function OrdersList() {
   const navigate = useNavigate();
   const page = Number(searchParams.get("page")) || 1;
   const per_page = 10;
+  const [showFilters, setShowFilters] = useState(false);
+
+  // Filters form
+  const form = useForm<OrdersFilterFormValues>({
+    resolver: zodResolver(ordersFilterSchema),
+    defaultValues: {
+      order_id: "",
+      client_id: "",
+      item_name: "",
+      item_code: "",
+      invoice_date_from: "",
+      invoice_date_to: "",
+      visit_date_from: "",
+      visit_date_to: "",
+      delivery_date_from: "",
+      delivery_date_to: "",
+      return_date_from: "",
+      return_date_to: "",
+    },
+  });
+
+  const formValues = form.watch();
+  const debouncedFormValues = useDebounce({
+    value: formValues,
+    delay: FILTER_DEBOUNCE_MS,
+  });
+
+  const filters = useMemo(() => {
+    const v = debouncedFormValues;
+    return {
+      order_id: v.order_id && v.order_id.trim() !== "" ? v.order_id : undefined,
+      client_id: v.client_id && v.client_id.trim() !== "" ? v.client_id : undefined,
+      item_name: v.item_name && v.item_name.trim() !== "" ? v.item_name : undefined,
+      item_code: v.item_code && v.item_code.trim() !== "" ? v.item_code : undefined,
+      invoice_date_from: v.invoice_date_from || undefined,
+      invoice_date_to: v.invoice_date_to || undefined,
+      visit_date_from: v.visit_date_from || undefined,
+      visit_date_to: v.visit_date_to || undefined,
+      delivery_date_from: v.delivery_date_from || undefined,
+      delivery_date_to: v.delivery_date_to || undefined,
+      return_date_from: v.return_date_from || undefined,
+      return_date_to: v.return_date_to || undefined,
+    };
+  }, [debouncedFormValues]);
 
   // Modal state
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -85,7 +163,7 @@ function OrdersList() {
 
   // Data fetching
   const { data, isPending } = useQuery(
-    useGetOrdersQueryOptions(page, per_page)
+    useGetOrdersQueryOptions(page, per_page, filters)
   );
 
   const displayedOrders = useMemo(() => {
@@ -156,6 +234,16 @@ function OrdersList() {
             <CardDescription>عرض وإدارة جميع الطلبات في النظام</CardDescription>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-1"
+              onClick={() => setShowFilters((prev) => !prev)}
+            >
+              <Filter className="ml-1 h-4 w-4" />
+              {showFilters ? "إخفاء الفلاتر" : "الفلاتر"}
+            </Button>
             <div className="inline-flex rounded-md border bg-muted/40 p-0.5">
               <Button
                 type="button"
@@ -207,6 +295,259 @@ function OrdersList() {
         </CardHeader>
 
         <CardContent>
+          {/* Filters */}
+          {showFilters && (
+          <div className="mb-4 rounded-lg border bg-muted/30 p-4">
+            <h3 className="mb-3 text-sm font-semibold text-foreground">الفلاتر</h3>
+            <Form {...form}>
+              <form className="space-y-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
+                  {/* رقم الفاتورة */}
+                  <FormField
+                    control={form.control}
+                    name="order_id"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>رقم الفاتورة</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="مثال: 1024"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* العميل */}
+                  <FormField
+                    control={form.control}
+                    name="client_id"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>العميل</FormLabel>
+                        <FormControl>
+                          <ClientsSelect
+                            value={field.value ?? ""}
+                            onChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* اسم الصنف */}
+                  <FormField
+                    control={form.control}
+                    name="item_name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>الصنف</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="ابحث باسم الصنف"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* كود الصنف */}
+                  <FormField
+                    control={form.control}
+                    name="item_code"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>كود الصنف</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="ابحث بكود الصنف"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* تاريخ الفاتورة من / إلى */}
+                  <FormField
+                    control={form.control}
+                    name="invoice_date_from"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>تاريخ الفاتورة من</FormLabel>
+                        <FormControl>
+                          <CustomCalendar
+                            value={field.value}
+                            onChange={field.onChange}
+                            placeholder="اختر التاريخ"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="invoice_date_to"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>تاريخ الفاتورة إلى</FormLabel>
+                        <FormControl>
+                          <CustomCalendar
+                            value={field.value}
+                            onChange={field.onChange}
+                            placeholder="اختر التاريخ"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* تاريخ التأجير من / إلى */}
+                  <FormField
+                    control={form.control}
+                    name="visit_date_from"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>تاريخ التأجير من</FormLabel>
+                        <FormControl>
+                          <CustomCalendar
+                            value={field.value}
+                            onChange={field.onChange}
+                            placeholder="اختر التاريخ"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="visit_date_to"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>تاريخ التأجير إلى</FormLabel>
+                        <FormControl>
+                          <CustomCalendar
+                            value={field.value}
+                            onChange={field.onChange}
+                            placeholder="اختر التاريخ"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* تاريخ التسليم من / إلى */}
+                  <FormField
+                    control={form.control}
+                    name="delivery_date_from"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>تاريخ التسليم من</FormLabel>
+                        <FormControl>
+                          <CustomCalendar
+                            value={field.value}
+                            onChange={field.onChange}
+                            placeholder="اختر التاريخ"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="delivery_date_to"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>تاريخ التسليم إلى</FormLabel>
+                        <FormControl>
+                          <CustomCalendar
+                            value={field.value}
+                            onChange={field.onChange}
+                            placeholder="اختر التاريخ"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* تاريخ الاسترجاع من / إلى */}
+                  <FormField
+                    control={form.control}
+                    name="return_date_from"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>تاريخ الاسترجاع من</FormLabel>
+                        <FormControl>
+                          <CustomCalendar
+                            value={field.value}
+                            onChange={field.onChange}
+                            placeholder="اختر التاريخ"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="return_date_to"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>تاريخ الاسترجاع إلى</FormLabel>
+                        <FormControl>
+                          <CustomCalendar
+                            value={field.value}
+                            onChange={field.onChange}
+                            placeholder="اختر التاريخ"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="flex justify-end">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() =>
+                      form.reset({
+                        order_id: "",
+                        client_id: "",
+                        item_name: "",
+                        item_code: "",
+                        invoice_date_from: "",
+                        invoice_date_to: "",
+                        visit_date_from: "",
+                        visit_date_to: "",
+                        delivery_date_from: "",
+                        delivery_date_to: "",
+                        return_date_from: "",
+                        return_date_to: "",
+                      })
+                    }
+                  >
+                    مسح الفلاتر
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </div>
+          )}
+
           <div className="overflow-hidden rounded-md border">
             <Table>
               <TableHeader>
@@ -260,6 +601,26 @@ function OrdersList() {
                             <span className="font-normal text-gray-700">
                               {order.client?.phones && order.client.phones.length > 1
                                 ? order.client.phones[1]?.phone
+                                : "-"}
+                            </span>
+                          </p>
+                          <p className="font-semibold text-gray-900">
+                            العنوان:{" "}
+                            <span className="font-normal text-gray-700">
+                              {order.client?.address
+                                ? `${order.client.address.country_name ?? ""}${
+                                    order.client.address.city_name
+                                      ? ` - ${order.client.address.city_name}`
+                                      : ""
+                                  }${
+                                    order.client.address.street
+                                      ? ` - ${order.client.address.street}`
+                                      : ""
+                                  }${
+                                    order.client.address.building
+                                      ? ` - ${order.client.address.building}`
+                                      : ""
+                                  }`
                                 : "-"}
                             </span>
                           </p>
