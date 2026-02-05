@@ -84,6 +84,7 @@ import {
   deliveriesFilterSchema,
   type DeliveriesFilterFormValues,
 } from "./deliveriesFilter.schema";
+import { getAllCustodies } from "@/api/v2/custody/custody.service";
 
 function DeliveriesList() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -91,11 +92,16 @@ function DeliveriesList() {
   const page = Number(searchParams.get("page")) || 1;
   const per_page = Number(searchParams.get("per_page")) || DEFAULT_PER_PAGE;
 
+  // تاريخ اليوم بصيغة YYYY-MM-DD ليكون الفلتر الافتراضي
+  const today = new Date().toISOString().split("T")[0];
+  const initialDateFrom = searchParams.get("date_from") || today;
+  const initialDateTo = searchParams.get("date_to") || today;
+
   const form = useForm<DeliveriesFilterFormValues>({
     resolver: zodResolver(deliveriesFilterSchema),
     defaultValues: {
-      date_from: searchParams.get("date_from") || undefined,
-      date_to: searchParams.get("date_to") || undefined,
+      date_from: initialDateFrom,
+      date_to: initialDateTo,
       client_id: searchParams.get("client_id") || undefined,
     },
   });
@@ -109,6 +115,7 @@ function DeliveriesList() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [orderToAction, setOrderToAction] = useState<TOrder | null>(null);
   const [custodyModalOrder, setCustodyModalOrder] = useState<TOrder | null>(null);
+  const [hasCustodyByOrderId, setHasCustodyByOrderId] = useState<Record<number, boolean>>({});
 
   const formValues = form.watch();
   const debouncedFormValues = useDebounce({
@@ -147,8 +154,9 @@ function DeliveriesList() {
   const filters = useMemo(() => {
     const values = debouncedFormValues;
     return {
-      date_from: values.date_from || undefined,
-      date_to: values.date_to || undefined,
+      // نستخدم حقول الفلتر كتاريخ تسليم (delivery_date_*)
+      delivery_date_from: values.date_from || undefined,
+      delivery_date_to: values.date_to || undefined,
       client_id:
         values.client_id && values.client_id.trim() !== ""
           ? values.client_id
@@ -187,6 +195,48 @@ function DeliveriesList() {
     if (orderTypeFilter === "all") return base;
     return base.filter((order) => order.order_type === orderTypeFilter);
   }, [data?.data, orderTypeFilter]);
+
+  // تحميل حالة وجود ضمان لكل طلب في الصفحة الحالية
+  useEffect(() => {
+    const loadCustodies = async () => {
+      if (!displayedOrders.length) {
+        setHasCustodyByOrderId({});
+        return;
+      }
+
+      try {
+        const entries = await Promise.all(
+          displayedOrders.map(async (order) => {
+            try {
+              const res = await getAllCustodies({
+                order_id: order.id,
+                client_id: order.client_id,
+                page: 1,
+                per_page: 1,
+              });
+              const hasAny =
+                !!res &&
+                Array.isArray((res as any).data) &&
+                (res as any).data.length > 0;
+              return [order.id, hasAny] as const;
+            } catch {
+              return [order.id, false] as const;
+            }
+          })
+        );
+
+        const map: Record<number, boolean> = {};
+        for (const [id, has] of entries) {
+          map[id] = has;
+        }
+        setHasCustodyByOrderId(map);
+      } catch {
+        // في حالة الخطأ، نترك الخريطة كما هي ولا نمنع الزر
+      }
+    };
+
+    loadCustodies();
+  }, [displayedOrders]);
 
   // Export Mutation
   const { mutate: exportOrdersToCSV, isPending: isExporting } = useMutation(
@@ -666,28 +716,25 @@ function DeliveriesList() {
                                     </Tooltip>
                                   )}
 
-                                  {/* Create Custody (للطلبات الإيجار بدون ضمان) */}
-                                  {order.order_type === "rent" && (() => {
-                                    const count = (order as TOrder & { custodies_count?: number }).custodies_count;
-                                    if (count !== undefined && count > 0) return null;
-                                    return (
-                                      <Tooltip>
-                                        <TooltipTrigger asChild>
-                                          <Button
-                                            variant="outline"
-                                            size="icon"
-                                            className="h-8 w-8 shrink-0"
-                                            onClick={() => setCustodyModalOrder(order)}
-                                          >
-                                            <ShieldPlus className="h-4 w-4 text-purple-600" />
-                                          </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent side="top">
-                                          إنشاء ضمان
-                                        </TooltipContent>
-                                      </Tooltip>
-                                    );
-                                  })()}
+                          {/* Create Custody (للطلبات الإيجار بدون ضمان) */}
+                          {order.order_type === "rent" &&
+                            !hasCustodyByOrderId[order.id] && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className="h-8 w-8 shrink-0"
+                                    onClick={() => setCustodyModalOrder(order)}
+                                  >
+                                    <ShieldPlus className="h-4 w-4 text-purple-600" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent side="top">
+                                  إنشاء ضمان
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
 
                                   {/* Cancel Order */}
                                   {canCancelOrder(order) && (
