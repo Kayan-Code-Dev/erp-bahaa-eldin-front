@@ -24,6 +24,8 @@ export type TOrderClient = {
   date_of_birth: string | null;
   national_id: string | null;
   address_id: number | null;
+  /** أرقام هواتف العميل كما في رد الـ clients (إن وُجدت) */
+  phones?: { phone: string; type?: string }[];
   source?: string | null;
   breast_size?: string | null;
   waist_size?: string | null;

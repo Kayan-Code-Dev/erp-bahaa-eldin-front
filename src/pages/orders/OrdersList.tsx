@@ -193,15 +193,7 @@ function OrdersList() {
               >
                 تفصيل
               </Button>
-              <Button
-                type="button"
-                variant={orderTypeFilter === "mixed" ? "default" : "ghost"}
-                size="sm"
-                className="px-2 text-xs"
-                onClick={() => setOrderTypeFilter("mixed")}
-              >
-                مختلط
-              </Button>
+
             </div>
             <Button
               variant="outline"
@@ -220,8 +212,9 @@ function OrdersList() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="text-center w-16">#</TableHead>
+                  <TableHead className="text-right w-64">بيانات العميل</TableHead>
                   <TableHead className="text-right w-64">التواريخ / الإجراءات</TableHead>
-                  <TableHead className="text-right w-[40%]">الأصناف / المبالغ / الحالة</TableHead>
+                  <TableHead className="text-right w-[32%]">الأصناف / المبالغ / الحالة</TableHead>
                   <TableHead className="text-center w-40">الموظف</TableHead>
                 </TableRow>
               </TableHeader>
@@ -239,7 +232,41 @@ function OrdersList() {
                         <p className="underline text-sm">#{order.id}</p>
                       </TableCell>
 
-                      {/* العمود 2: التواريخ + الأكشن */}
+                      {/* العمود 2: بيانات العميل */}
+                      <TableCell className="align-top">
+                        <div className="flex flex-col gap-1 text-sm text-right">
+                          <p className="font-semibold text-gray-900">
+                            الاسم:{" "}
+                            <span className="font-normal text-gray-700">
+                              {order.client?.name ?? "-"}
+                            </span>
+                          </p>
+                          <p className="font-semibold text-gray-900">
+                            الرقم القومي:{" "}
+                            <span className="font-normal text-gray-700">
+                              {order.client?.national_id ?? "-"}
+                            </span>
+                          </p>
+                          <p className="font-semibold text-gray-900">
+                            الهاتف:{" "}
+                            <span className="font-normal text-gray-700">
+                              {order.client?.phones && order.client.phones.length > 0
+                                ? order.client.phones[0]?.phone
+                                : "-"}
+                            </span>
+                          </p>
+                          <p className="font-semibold text-gray-900">
+                            هاتف آخر:{" "}
+                            <span className="font-normal text-gray-700">
+                              {order.client?.phones && order.client.phones.length > 1
+                                ? order.client.phones[1]?.phone
+                                : "-"}
+                            </span>
+                          </p>
+                        </div>
+                      </TableCell>
+
+                      {/* العمود 3: التواريخ + الأكشن */}
                       <TableCell className="align-top">
                         <div className="flex flex-col gap-1 text-sm text-right">
                           <p className="font-semibold text-gray-900">
@@ -361,7 +388,7 @@ function OrdersList() {
                         </div>
                       </TableCell>
 
-                      {/* العمود 3: الأصناف + المبالغ + حالة الطلب */}
+                      {/* العمود 4: الأصناف + المبالغ + حالة الطلب */}
                       <TableCell className="align-top">
                         <div className="flex flex-col gap-2 text-sm text-right">
                           <p className="font-semibold text-gray-900">
@@ -370,9 +397,9 @@ function OrdersList() {
                               {" "}
                               {order.items && order.items.length > 0
                                 ? order.items
-                                    .map((item) => item.name)
-                                    .filter(Boolean)
-                                    .join("، ")
+                                  .map((item) => item.name)
+                                  .filter(Boolean)
+                                  .join("، ")
                                 : "-"}
                             </span>
                           </p>
@@ -408,7 +435,7 @@ function OrdersList() {
                         </div>
                       </TableCell>
 
-                      {/* العمود 4: الموظف */}
+                      {/* العمود 5: الموظف */}
                       <TableCell className="align-top text-center">
                         <div className="flex flex-col items-center justify-center gap-1 text-sm">
                           <span className="font-medium text-gray-900">
@@ -420,7 +447,7 @@ function OrdersList() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={4} className="py-10 text-center text-muted-foreground">
+                    <TableCell colSpan={5} className="py-10 text-center text-muted-foreground">
                       لا توجد طلبات مطابقة للفلاتر الحالية.
                     </TableCell>
                   </TableRow>
