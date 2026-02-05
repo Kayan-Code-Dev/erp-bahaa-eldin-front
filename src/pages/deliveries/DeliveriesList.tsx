@@ -174,7 +174,6 @@ function DeliveriesList() {
     useGetOrdersQueryOptions(page, per_page, filters)
   );
 
-  // فلترة حسب نوع الطلب (إيجار / بيع / تفصيل / مختلط)
   const [orderTypeFilter, setOrderTypeFilter] = useState<TOrder["order_type"] | "all">("all");
 
   const displayedOrders = useMemo(() => {
@@ -382,15 +381,7 @@ function DeliveriesList() {
               >
                 تفصيل
               </Button>
-              <Button
-                type="button"
-                variant={orderTypeFilter === "mixed" ? "default" : "ghost"}
-                size="sm"
-                className="px-2 text-xs"
-                onClick={() => setOrderTypeFilter("mixed")}
-              >
-                مختلط
-              </Button>
+
             </div>
             <Button
               variant="outline"
@@ -490,9 +481,10 @@ function DeliveriesList() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="text-center w-16">#</TableHead>
-                    <TableHead className="text-center w-64">التواريخ</TableHead>
-                    <TableHead className="text-center w-[40%]">الأصناف / المبالغ / الحالة</TableHead>
-                    <TableHead className="text-center w-40">الإجراءات</TableHead>
+                    <TableHead className="text-right w-64">بيانات العميل</TableHead>
+                    <TableHead className="text-right w-64">التواريخ / الإجراءات</TableHead>
+                    <TableHead className="text-right w-[32%]">الأصناف / المبالغ / الحالة</TableHead>
+                    <TableHead className="text-center w-40">الموظف</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -501,7 +493,7 @@ function DeliveriesList() {
                   ) : displayedOrders.length > 0 ? (
                     displayedOrders.map((order) => (
                       <TableRow key={order.id} className="align-top">
-                        {/* رقم الطلب */}
+                        {/* العمود 1: رقم الطلب */}
                         <TableCell
                           className="font-medium text-center cursor-pointer align-top pt-4"
                           onClick={() => handleViewOrder(order)}
@@ -511,7 +503,61 @@ function DeliveriesList() {
                           </p>
                         </TableCell>
 
-                        {/* التواريخ */}
+                        {/* العمود 2: بيانات العميل */}
+                        <TableCell className="align-top">
+                          <div className="flex flex-col gap-1 text-sm text-right">
+                            <p className="font-semibold text-gray-900">
+                              الاسم:{" "}
+                              <span className="font-normal text-gray-700">
+                                {order.client?.name ?? "-"}
+                              </span>
+                            </p>
+                            <p className="font-semibold text-gray-900">
+                              الرقم القومي:{" "}
+                              <span className="font-normal text-gray-700">
+                                {order.client?.national_id ?? "-"}
+                              </span>
+                            </p>
+                            <p className="font-semibold text-gray-900">
+                              الهاتف:{" "}
+                              <span className="font-normal text-gray-700">
+                                {order.client && (order.client as any).phones && (order.client as any).phones.length > 0
+                                  ? (order.client as any).phones[0]?.phone
+                                  : "-"}
+                              </span>
+                            </p>
+                            <p className="font-semibold text-gray-900">
+                              هاتف الواتساب:{" "}
+                              <span className="font-normal text-gray-700">
+                                {order.client && (order.client as any).phones && (order.client as any).phones.length > 1
+                                  ? (order.client as any).phones[1]?.phone
+                                  : "-"}
+                              </span>
+                            </p>
+                            <p className="font-semibold text-gray-900">
+                              العنوان:{" "}
+                              <span className="font-normal text-gray-700">
+                                {order.client?.address
+                                  ? `${order.client.address.country_name ?? ""}${
+                                      order.client.address.city_name
+                                        ? ` - ${order.client.address.city_name}`
+                                        : ""
+                                    }${
+                                      order.client.address.street
+                                        ? ` - ${order.client.address.street}`
+                                        : ""
+                                    }${
+                                      order.client.address.building
+                                        ? ` - ${order.client.address.building}`
+                                        : ""
+                                    }`
+                                  : "-"}
+                              </span>
+                            </p>
+                          </div>
+                        </TableCell>
+
+                        {/* العمود 3: التواريخ + الأكشن */}
                         <TableCell className="align-top">
                           <div className="flex flex-col gap-1 text-sm text-right">
                             <p className="font-semibold text-gray-700">
@@ -544,19 +590,149 @@ function DeliveriesList() {
                                   : "-"}
                               </span>
                             </p>
+                            <div className="mt-2">
+                              <TooltipProvider delayDuration={300}>
+                                <div className="flex flex-wrap items-center gap-1 justify-start">
+                                  {/* View */}
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        variant="outline"
+                                        size="icon"
+                                        className="h-8 w-8 shrink-0"
+                                        onClick={() => handleOpenView(order)}
+                                      >
+                                        <Eye className="h-4 w-4" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top">
+                                      عرض التفاصيل
+                                    </TooltipContent>
+                                  </Tooltip>
+
+                                  {/* Edit */}
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        variant="outline"
+                                        size="icon"
+                                        className="h-8 w-8 shrink-0"
+                                        onClick={() => handleEditOrder(order)}
+                                      >
+                                        <Edit className="h-4 w-4" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top">
+                                      تعديل
+                                    </TooltipContent>
+                                  </Tooltip>
+
+                                  {/* Mark as Delivered */}
+                                  {canMarkAsDelivered(order) && (
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button
+                                          variant="outline"
+                                          size="icon"
+                                          className="h-8 w-8 shrink-0"
+                                          onClick={() => handleMarkAsDelivered(order)}
+                                          disabled={isDelivering}
+                                        >
+                                          <CheckCircle className="h-4 w-4 text-emerald-600" />
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent side="top">
+                                        تعليم كـ تم التسليم
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  )}
+
+                                  {/* Add Payment */}
+                                  {order.status !== "paid" && order.status !== "canceled" && (
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button
+                                          variant="outline"
+                                          size="icon"
+                                          className="h-8 w-8 shrink-0"
+                                          onClick={() => handleAddPayment(order)}
+                                        >
+                                          <CreditCard className="h-4 w-4 text-blue-600" />
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent side="top">
+                                        إضافة دفعة
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  )}
+
+                                  {/* Create Custody (للطلبات الإيجار بدون ضمان) */}
+                                  {order.order_type === "rent" && (() => {
+                                    const count = (order as TOrder & { custodies_count?: number }).custodies_count;
+                                    if (count !== undefined && count > 0) return null;
+                                    return (
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <Button
+                                            variant="outline"
+                                            size="icon"
+                                            className="h-8 w-8 shrink-0"
+                                            onClick={() => setCustodyModalOrder(order)}
+                                          >
+                                            <ShieldPlus className="h-4 w-4 text-purple-600" />
+                                          </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="top">
+                                          إنشاء ضمان
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    );
+                                  })()}
+
+                                  {/* Cancel Order */}
+                                  {canCancelOrder(order) && (
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button
+                                          variant="outline"
+                                          size="icon"
+                                          className="h-8 w-8 shrink-0"
+                                          onClick={() => handleOpenCancelDialog(order)}
+                                        >
+                                          <Ban className="h-4 w-4 text-yellow-700" />
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent side="top">
+                                        إلغاء الحجز
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  )}
+
+                                  {/* Delete Order */}
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        variant="outline"
+                                        size="icon"
+                                        className="h-8 w-8 shrink-0"
+                                        onClick={() => handleOpenDeleteDialog(order)}
+                                      >
+                                        <Trash2 className="h-4 w-4 text-red-600" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top">
+                                      حذف الطلب
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </div>
+                              </TooltipProvider>
+                            </div>
                           </div>
                         </TableCell>
 
-                        {/* الأصناف + المبالغ + الحالة */}
+                        {/* العمود 4: الأصناف + المبالغ + حالة الطلب */}
                         <TableCell className="align-top">
                           <div className="flex flex-col gap-2 text-sm text-right">
-                            <p className="font-semibold text-gray-900">
-                              العميل:
-                              <span className="font-normal text-gray-700">
-                                {" "}
-                                {order.client.name}
-                              </span>
-                            </p>
                             <p className="font-semibold text-gray-900">
                               الأصناف:
                               <span className="font-normal text-gray-700">
@@ -601,106 +777,12 @@ function DeliveriesList() {
                           </div>
                         </TableCell>
 
-                        {/* الإجراءات */}
-                        <TableCell className="text-center align-top">
-                          <div className="flex flex-col items-center justify-start gap-2 text-sm">
-                            {/* View Button */}
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 hover:bg-blue-50 hover:text-blue-600"
-                                    onClick={() => handleOpenView(order)}
-                                  >
-                                    <Eye className="h-4 w-4" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>عرض التفاصيل</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-
-                            {/* Mark as Delivered */}
-                            {canMarkAsDelivered(order) && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="w-full justify-center"
-                                onClick={() => handleMarkAsDelivered(order)}
-                                disabled={isDelivering}
-                              >
-                                <CheckCircle className="ml-1 h-4 w-4 text-emerald-600" />
-                                تعليم كـ تم التسليم
-                              </Button>
-                            )}
-
-                            {/* Add Payment */}
-                            {order.status !== "paid" && order.status !== "canceled" && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="w-full justify-center"
-                                onClick={() => handleAddPayment(order)}
-                              >
-                                <CreditCard className="ml-1 h-4 w-4 text-blue-600" />
-                                إضافة دفعة
-                              </Button>
-                            )}
-
-                            {/* Create Custody (للطلبات الإيجار بدون ضمان) */}
-                            {order.order_type === "rent" && (() => {
-                              const count = (order as TOrder & { custodies_count?: number }).custodies_count;
-                              if (count !== undefined && count > 0) return null;
-                              return (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="w-full justify-center"
-                                  onClick={() => setCustodyModalOrder(order)}
-                                >
-                                  <ShieldPlus className="ml-1 h-4 w-4 text-purple-600" />
-                                  إنشاء ضمان
-                                </Button>
-                              );
-                            })()}
-
-                            {/* Edit Order */}
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="w-full justify-center"
-                              onClick={() => handleEditOrder(order)}
-                            >
-                              <Edit className="ml-1 h-4 w-4 text-gray-700" />
-                              تعديل الطلب
-                            </Button>
-
-                            {/* Cancel Order */}
-                            {canCancelOrder(order) && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="w-full justify-center text-yellow-700 hover:bg-yellow-50"
-                                onClick={() => handleOpenCancelDialog(order)}
-                              >
-                                <Ban className="ml-1 h-4 w-4" />
-                                إلغاء الحجز
-                              </Button>
-                            )}
-
-                            {/* Delete Order */}
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="w-full justify-center text-red-600 hover:bg-red-50"
-                              onClick={() => handleOpenDeleteDialog(order)}
-                            >
-                              <Trash2 className="ml-1 h-4 w-4" />
-                              حذف الطلب
-                            </Button>
+                        {/* العمود 5: الموظف */}
+                        <TableCell className="align-top text-center">
+                          <div className="flex flex-col items-center justify-center gap-1 text-sm">
+                            <span className="font-medium text-gray-900">
+                              {order.employee_name ?? "-"}
+                            </span>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -708,7 +790,7 @@ function DeliveriesList() {
                   ) : (
                     <TableRow>
                       <TableCell
-                        colSpan={4}
+                        colSpan={5}
                         className="py-10 text-center text-muted-foreground"
                       >
                         لا توجد تسليمات مطابقة للفلاتر الحالية.
