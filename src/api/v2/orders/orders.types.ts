@@ -138,6 +138,8 @@ export type TOrder = {
   factory_notes: string | null;
   priority: string;
   client: TOrderClient;
+  /** اسم الموظف الذي أنشأ الطلب (إن توفر) */
+  employee_name?: string | null;
   inventory?: TOrderInventory | null;
   items: TOrderItem[];
   /** Set by API when filtering returned/overdue orders */

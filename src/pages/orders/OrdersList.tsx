@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useSearchParams, useNavigate } from "react-router";
-import { ChevronDown, Download, Eye, Pencil, Printer, FileText, FileUser, FileCheck } from "lucide-react";
+import { Download, Eye, Pencil, FileText, FileUser, FileCheck } from "lucide-react";
 import {
   Table,
   TableHeader,
@@ -33,12 +33,7 @@ import { OrderDetailsModal } from "./OrderDetailsModal";
 import { OrderInvoicePrintModal } from "./OrderInvoicePrintModal";
 import { OrderReceiptAckPrintModal } from "./OrderReceiptAckPrintModal";
 import { getOrderTypeLabel } from "@/api/v2/orders/order.utils";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+// dropdown menu imports تمت إزالتها بعد استبدال القائمة بأزرار مباشرة
 import {
   Tooltip,
   TooltipContent,
