@@ -266,6 +266,14 @@ export const sidebarLabels: SidebarLabel[] = [
       },
     ],
   },
+  // 11. Workshop management
+  {
+    icon: null,
+    label: "إدارة الورشة",
+    path: "/workshop",
+    level: 1,
+    iconComponent: createIcon(Wrench),
+  },
   // 11. Reports
   {
     icon: null,
