@@ -206,6 +206,8 @@ export type TCreateOrderItemRequest = {
 export type TCreateOrderRequest = {
   existing_client: true;
   client_id: number;
+  /** الموظف الذي أنشأ الفاتورة */
+  employee_id?: number;
   entity_type: TEntity;
   entity_id: number;
   delivery_date: string;
@@ -225,6 +227,8 @@ export type TCreateOrderRequest = {
 export type TCreateOrderWithNewClientRequest = {
   existing_client: false;
   client: TCreateClientRequest;
+  /** الموظف الذي أنشأ الفاتورة */
+  employee_id?: number;
   entity_type: TEntity;
   entity_id: number;
   delivery_date: string;

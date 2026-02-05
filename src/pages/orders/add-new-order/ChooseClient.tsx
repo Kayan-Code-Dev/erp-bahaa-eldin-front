@@ -82,6 +82,8 @@ import { CategoriesSelect } from "@/components/custom/CategoriesSelect";
 import { ClothModelsSelect } from "@/components/custom/ClothModelsSelect";
 import { SubcategoriesSelect } from "@/components/custom/SubcategoriesSelect";
 import useDebounce from "@/hooks/useDebounce";
+import { EmployeesSelect } from "@/components/custom/EmployeesSelect";
+import { TGetEmployeesParams } from "@/api/v2/employees/employees.types";
 
 const newClientFormSchema = z.object({
   name: z.string().min(1, { message: "الاسم مطلوب" }),
@@ -139,6 +141,7 @@ function ChooseClient() {
   const [deliveryDate, setDeliveryDate] = useState<Date | undefined>(); // موعد الاسترجاع
   const [receiveDate, setReceiveDate] = useState<Date | undefined>(); // visit_datetime = موعد الاستلام
   const [branchDate, setBranchDate] = useState<Date | undefined>(); // تاريخ الفرع (للعرض فقط حالياً)
+  const [employeeId, setEmployeeId] = useState<string>(""); // الموظف الذي أنشأ الفاتورة
 
   const [nameFilter, setNameFilter] = useState("");
   const [categoryId, setCategoryId] = useState("");
@@ -477,6 +480,21 @@ function ChooseClient() {
     : undefined;
   const orderLevelDaysOfRent = firstRentProduct?.days_of_rent ?? (firstRentProduct ? 1 : undefined);
 
+  // إعداد باراميترات الموظفين حسب المكان (الفرع حالياً)
+  const employeeParams: TGetEmployeesParams = useMemo(() => {
+    const base: TGetEmployeesParams = {
+      per_page: 20,
+      employment_status: "active",
+    };
+    if (entityType === "branch" && entityId) {
+      return {
+        ...base,
+        branch_id: Number(entityId),
+      };
+    }
+    return base;
+  }, [entityType, entityId]);
+
   const buildOrderPayload = (clientId: number): TCreateOrderRequest => {
     const hasOrderDiscount =
       orderDiscount.type &&
@@ -485,6 +503,7 @@ function ChooseClient() {
     return {
       existing_client: true,
       client_id: clientId,
+      ...(employeeId && { employee_id: Number(employeeId) }),
       entity_type: entityType!,
       entity_id: Number(entityId),
       delivery_date: deliveryDate ? format(deliveryDate, "yyyy-MM-dd HH:mm:ss") : format(new Date(), "yyyy-MM-dd HH:mm:ss"),
@@ -527,6 +546,7 @@ function ChooseClient() {
     return {
       existing_client: false,
       client,
+      ...(employeeId && { employee_id: Number(employeeId) }),
       entity_type: entityType!,
       entity_id: Number(entityId),
       delivery_date: deliveryDate ? format(deliveryDate, "yyyy-MM-dd HH:mm:ss") : format(new Date(), "yyyy-MM-dd HH:mm:ss"),
@@ -565,6 +585,10 @@ function ChooseClient() {
     }
     if (!entityType || !entityId) {
       toast.error("يجب اختيار نوع المكان والمكان");
+      return;
+    }
+    if (!employeeId) {
+      toast.error("يجب اختيار الموظف الذي أنشأ الفاتورة");
       return;
     }
     if (!receiveDate) {
@@ -655,6 +679,24 @@ function ChooseClient() {
     });
   };
 
+  // منع تغيير المكان بعد إضافة منتجات، مع السماح باختيار منتجات أخرى من نفس المكان
+  const handleEntityTypeChangeStandalone = (value: TEntity | undefined) => {
+    if (selectedProducts.length > 0) {
+      toast.error("لا يمكن تغيير نوع المكان بعد إضافة منتجات للطلب");
+      return;
+    }
+    setEntityType(value);
+    setEntityId("");
+  };
+
+  const handleEntityIdChangeStandalone = (value: string) => {
+    if (selectedProducts.length > 0) {
+      toast.error("لا يمكن تغيير المكان بعد إضافة منتجات للطلب");
+      return;
+    }
+    setEntityId(value);
+  };
+
   return (
     <div dir="rtl" className="min-h-screen bg-gray-50 p-4 lg:p-6">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -708,12 +750,25 @@ function ChooseClient() {
                       mode="standalone"
                       entityType={entityType}
                       entityId={entityId}
-                      onEntityTypeChange={setEntityType}
-                      onEntityIdChange={setEntityId}
+                      onEntityTypeChange={handleEntityTypeChangeStandalone}
+                      onEntityIdChange={handleEntityIdChangeStandalone}
                       entityTypeLabel="نوع المكان"
                       entityIdLabel="المكان"
                       required
                     />
+                    {/* اختيار الموظف الذي أنشأ الفاتورة */}
+                    <div className="space-y-2">
+                      <Label className="text-gray-700 font-medium">
+                        الموظف المسؤول عن الفاتورة
+                      </Label>
+                      <EmployeesSelect
+                        params={employeeParams}
+                        value={employeeId}
+                        onChange={setEmployeeId}
+                        disabled={!entityType || !entityId}
+                        placeholder="اختر الموظف..."
+                      />
+                    </div>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                     <div className="space-y-2">
                       <Label htmlFor="receive-date" className="text-gray-700 font-medium">
@@ -794,39 +849,37 @@ function ChooseClient() {
                     <TabsContent value="existing" className="mt-6 space-y-4">
                       {(selectedClientFromList || selectedClient) && (
                         <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                          <div className="flex items-start justify-between gap-3 flex-row-reverse">
-                            <Badge className="bg-green-100 text-green-800 border-green-200 shrink-0">
+                          <div className="flex flex-col items-end gap-2 text-right">
+                            <p className="font-bold text-green-800">:العميل المختار</p>
+                            <p className="font-medium text-gray-900">
+                              {(() => {
+                                const c = selectedClientFromList ?? selectedClient;
+                                return (
+                                  c?.name ??
+                                  ([c?.first_name, c?.middle_name, c?.last_name]
+                                    .filter(Boolean)
+                                    .join(" ")
+                                    .trim() || "—")
+                                );
+                              })()}
+                            </p>
+                            <div className="mt-1 space-y-1">
+                              <p className="text-sm text-gray-600">
+                                الرقم القومي:{" "}
+                                {selectedClientFromList?.national_id ||
+                                  selectedClient?.national_id ||
+                                  "-"}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                الهاتف:{" "}
+                                {selectedClientFromList?.phones?.[0]?.phone ||
+                                  selectedClient?.phones?.[0]?.phone ||
+                                  "-"}
+                              </p>
+                            </div>
+                            <Badge className="bg-green-100 text-green-800 border-green-200">
                               مختار
                             </Badge>
-                            <div className="text-right">
-                              <p className="font-bold text-green-800">العميل المختار:</p>
-                              <p className="font-medium text-gray-900">
-                                {(() => {
-                                  const c = selectedClientFromList ?? selectedClient;
-                                  return (
-                                    c?.name ??
-                                    ([c?.first_name, c?.middle_name, c?.last_name]
-                                      .filter(Boolean)
-                                      .join(" ")
-                                      .trim() || "—")
-                                  );
-                                })()}
-                              </p>
-                              <div className="mt-2 space-y-1">
-                                <p className="text-sm text-gray-600">
-                                  الرقم القومي:{" "}
-                                  {selectedClientFromList?.national_id ||
-                                    selectedClient?.national_id ||
-                                    "-"}
-                                </p>
-                                <p className="text-sm text-gray-600">
-                                  الهاتف:{" "}
-                                  {selectedClientFromList?.phones?.[0]?.phone ||
-                                    selectedClient?.phones?.[0]?.phone ||
-                                    "-"}
-                                </p>
-                              </div>
-                            </div>
                           </div>
                         </div>
                       )}
@@ -1124,7 +1177,7 @@ function ChooseClient() {
                   </div>
                 </section>
 
-                {/* ملخص الملابس المختارة */}
+                {/* ملخص الملابس المختارة (في الآخر) */}
                 {selectedProducts.length > 0 && (
                   <section className="rounded-2xl border bg-white p-5 space-y-4">
                     <div className="flex items-center gap-3">
