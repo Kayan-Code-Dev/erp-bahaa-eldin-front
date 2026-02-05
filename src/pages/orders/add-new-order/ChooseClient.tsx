@@ -698,7 +698,7 @@ function ChooseClient() {
   };
 
   return (
-    <div dir="rtl" className="min-h-screen bg-gray-50 p-4 lg:p-6">
+    <div dir="rtl" className="min-h-screen   ">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Link to="/orders/list" className="hover:text-foreground transition-colors">
@@ -728,12 +728,12 @@ function ChooseClient() {
             </CardDescription>
           </CardHeader>
 
-          <CardContent className="p-6 space-y-8">
-            <div className="space-y-6">
+          <CardContent className="p-6 space-y-8 ">
+            <div className="space-y-6 ">
               {/* العمود الأيسر: الأساسيات + بيانات العميل + خصم الطلب + ملخص الملابس */}
-              <div className="space-y-6">
+              <div className="space-y-6 ">
                 {/* الأساسيات */}
-                <section className="rounded-2xl border bg-white p-5 space-y-4">
+                <section className="rounded-2xl border bg-muted/30 p-5 space-y-4">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-purple-50 rounded-lg">
                       <Calendar className="h-6 w-6 text-purple-600" />
@@ -816,7 +816,7 @@ function ChooseClient() {
                 </section>
 
                 {/* بيانات العميل (موجود / جديد) */}
-                <section className="rounded-2xl border bg-white p-5 space-y-4" dir="rtl">
+                <section className="rounded-2xl border bg-muted/30 p-5 space-y-4" dir="rtl">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-blue-50 rounded-lg">
                       <User className="h-6 w-6 text-blue-600" />
@@ -1121,7 +1121,7 @@ function ChooseClient() {
                 </section>
 
                 {/* خصم الطلب كاملاً */}
-                <section className="rounded-2xl border bg-white p-5 space-y-4">
+                <section className="rounded-2xl border bg-muted/30 p-5 space-y-4 ">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-amber-50 rounded-lg">
                       <Percent className="h-5 w-5 text-amber-600" />
@@ -1179,7 +1179,7 @@ function ChooseClient() {
 
                 {/* ملخص الملابس المختارة (في الآخر) */}
                 {selectedProducts.length > 0 && (
-                  <section className="rounded-2xl border bg-white p-5 space-y-4">
+                  <section className="rounded-2xl border bg-muted/30 p-5 space-y-4">
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-green-50 rounded-lg">
                         <ShoppingBag className="h-6 w-6 text-green-600" />
@@ -1290,7 +1290,7 @@ function ChooseClient() {
               {/* العمود الأيمن: فلاتر الملابس + جدول الملابس + تفاصيل القطعة + المقاسات */}
               <div className="space-y-6">
                 {/* فلترة الملابس */}
-                <section className="rounded-2xl border bg-white p-5 space-y-4">
+                <section className="rounded-2xl border bg-muted/30 p-5 space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-amber-50 rounded-lg">
@@ -1364,7 +1364,7 @@ function ChooseClient() {
                 </section>
 
                 {/* جدول الملابس المتاحة */}
-                <section className="rounded-2xl border bg-white p-5 space-y-4">
+                <section className="rounded-2xl border bg-muted/30 p-5 space-y-4">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-blue-50 rounded-lg">
                       <ShoppingBag className="h-6 w-6 text-blue-800" />
@@ -1482,7 +1482,7 @@ function ChooseClient() {
 
                 {/* تفاصيل المنتج المختار */}
                 {selectedProduct && (
-                  <section className="rounded-2xl border bg-white p-5 space-y-5">
+                  <section className="rounded-2xl border bg-muted/30 p-5 space-y-5">
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-primary/10 rounded-lg">
                         <ShoppingBag className="h-6 w-6 text-primary" />
@@ -1682,7 +1682,7 @@ function ChooseClient() {
                 )}
 
                 {/* المقاسات + زر إضافة المنتج */}
-                <section className="rounded-2xl border bg-white p-5 space-y-4">
+                <section className="rounded-2xl border bg-muted/30 p-5 space-y-4">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-purple-50 rounded-lg">
                       <Ruler className="h-6 w-6 text-purple-600" />
