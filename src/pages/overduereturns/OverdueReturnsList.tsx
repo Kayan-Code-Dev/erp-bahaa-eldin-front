@@ -129,9 +129,9 @@ function OverdueReturnsList() {
     const values = debouncedFormValues;
     return {
       ...OVERDUE_RETURNS_FILTER,
-      // الفلترة تكون حسب تاريخ الاسترجاع (return_date_*)
-      return_date_from: values.date_from || undefined,
-      return_date_to: values.date_to || undefined,
+      // الفلترة تكون حسب تاريخ الاسترجاع لكن بأسماء الباراميترات date_from / date_to كما يطلب الـ API
+      date_from: values.date_from || undefined,
+      date_to: values.date_to || undefined,
       client_id:
         values.client_id && values.client_id.trim() !== ""
           ? values.client_id

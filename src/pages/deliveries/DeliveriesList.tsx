@@ -622,7 +622,7 @@ function DeliveriesList() {
                               </span>
                             </p>
                             <p className="text-gray-700">
-                              تأجير:{" "}
+                              الفرح:{" "}
                               <span className="font-medium">
                                 {order.visit_datetime
                                   ? formatDate(order.visit_datetime)
