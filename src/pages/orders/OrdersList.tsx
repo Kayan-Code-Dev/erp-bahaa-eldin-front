@@ -256,7 +256,7 @@ function OrdersList() {
                             </span>
                           </p>
                           <p className="font-semibold text-gray-900">
-                            هاتف آخر:{" "}
+                            هاتف الواتساب:{" "}
                             <span className="font-normal text-gray-700">
                               {order.client?.phones && order.client.phones.length > 1
                                 ? order.client.phones[1]?.phone
