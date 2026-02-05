@@ -379,11 +379,11 @@ function OverdueReturnsList() {
                           <Badge
                             variant="secondary"
                             className={getStatusVariant(
-                              order.is_overdue || order.status === "overdue" ? "overdue" : order.status
+                              order.is_overdue ? "overdue" : order.status
                             )}
                           >
                             {getStatusLabel(
-                              order.is_overdue || order.status === "overdue" ? "overdue" : order.status
+                              order.is_overdue ? "overdue" : order.status
                             )}
                           </Badge>
                         </TableCell>
