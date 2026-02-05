@@ -67,11 +67,16 @@ function OverdueReturnsList() {
   const page = Number(searchParams.get("page")) || 1;
   const per_page = Number(searchParams.get("per_page")) || DEFAULT_PER_PAGE;
 
+  // تاريخ اليوم لعرض الارجاعات المتأخرة الخاصة باليوم افتراضيًا
+  const today = new Date().toISOString().split("T")[0];
+  const initialDateFrom = searchParams.get("date_from") || today;
+  const initialDateTo = searchParams.get("date_to") || today;
+
   const form = useForm<OverduereturnsFilterFormValues>({
     resolver: zodResolver(overduereturnsFilterSchema),
     defaultValues: {
-      date_from: searchParams.get("date_from") || undefined,
-      date_to: searchParams.get("date_to") || undefined,
+      date_from: initialDateFrom,
+      date_to: initialDateTo,
       client_id: searchParams.get("client_id") || undefined,
     },
   });
@@ -124,8 +129,9 @@ function OverdueReturnsList() {
     const values = debouncedFormValues;
     return {
       ...OVERDUE_RETURNS_FILTER,
-      date_from: values.date_from || undefined,
-      date_to: values.date_to || undefined,
+      // الفلترة تكون حسب تاريخ الاسترجاع (return_date_*)
+      return_date_from: values.date_from || undefined,
+      return_date_to: values.date_to || undefined,
       client_id:
         values.client_id && values.client_id.trim() !== ""
           ? values.client_id
