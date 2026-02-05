@@ -31,6 +31,7 @@ export const getOrders = async (
     date_to?: string;
     returned?: boolean;
     overdue?: boolean;
+    delayed?: boolean;
     client_id?: string | number;
   },
 ) => {
@@ -41,6 +42,8 @@ export const getOrders = async (
     if (filters?.date_to) params.date_to = filters.date_to;
     if (filters?.returned === true) params.returned = 1;
     if (filters?.overdue === true) params.overdue = 1;
+    if (filters?.delayed === true) params.delayed = true;
+    if (filters?.delayed === false) params.delayed = false;
     if (filters?.client_id !== undefined && filters.client_id !== "" && filters.client_id != null) {
       params.client_id = typeof filters.client_id === "string" ? Number(filters.client_id) : filters.client_id;
     }

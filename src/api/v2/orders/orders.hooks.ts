@@ -56,6 +56,7 @@ export const useGetOrdersQueryOptions = (
     date_to?: string;
     returned?: boolean;
     overdue?: boolean;
+    delayed?: boolean;
     client_id?: string | number;
   },
 ) => {
