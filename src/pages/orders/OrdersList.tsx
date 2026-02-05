@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useSearchParams, useNavigate } from "react-router";
-import { ChevronDown, Download, Eye, Pencil, Printer } from "lucide-react";
+import { ChevronDown, Download, Eye, Pencil, Printer, FileText, FileUser, FileCheck } from "lucide-react";
 import {
   Table,
   TableHeader,
@@ -168,15 +168,10 @@ function OrdersList() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-center">رقم الطلب</TableHead>
-                  <TableHead className="text-center">العميل</TableHead>
-                  <TableHead className="text-center">السعر الإجمالي</TableHead>
-                  <TableHead className="text-center">المدفوع</TableHead>
-                  <TableHead className="text-center">المتبقي</TableHead>
-                  <TableHead className="text-center">الحالة</TableHead>
-                  <TableHead className="text-center">نوع الطلب</TableHead>
-                  <TableHead className="text-center">تاريخ الإنشاء</TableHead>
-                  <TableHead className="text-center">إجراءات</TableHead>
+                  <TableHead className="text-center w-16">#</TableHead>
+                  <TableHead className="text-center w-64">التواريخ / الإجراءات</TableHead>
+                  <TableHead className="text-center w-[40%]">الأصناف / المبالغ / الحالة</TableHead>
+                  <TableHead className="text-center w-40">الموظف</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -184,115 +179,198 @@ function OrdersList() {
                   <OrdersTableSkeleton rows={5} />
                 ) : data && data.data.length > 0 ? (
                   data.data.map((order) => (
-                    <TableRow key={order.id}>
+                    <TableRow key={order.id} className="align-top">
+                      {/* العمود 1: رقم الطلب */}
                       <TableCell
-                        className="font-medium text-center cursor-pointer"
+                        className="font-medium text-center cursor-pointer align-top pt-4"
                         onClick={() => handleViewOrder(order)}
                       >
-                        <p className="underline">#{order.id}</p>
+                        <p className="underline text-sm">#{order.id}</p>
                       </TableCell>
-                      <TableCell className="text-center">
-                        {order.client.name}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {order.total_price} ج.م
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {order.paid} ج.م
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {order.remaining} ج.م
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Badge
-                          variant="secondary"
-                          className={getStatusVariant(order.status)}
-                        >
-                          {getStatusLabel(order.status)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {getOrderTypeLabel(order.order_type)}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {formatDate(order.created_at)}
-                      </TableCell>
-                      <TableCell>
-                        <TooltipProvider delayDuration={300}>
-                          <div className="flex items-center gap-1 justify-center">
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  size="icon"
-                                  className="h-8 w-8 shrink-0"
-                                  onClick={() => handleOpenView(order)}
-                                >
-                                  <Eye className="h-4 w-4" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent side="top">
-                                عرض التفاصيل
-                              </TooltipContent>
-                            </Tooltip>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  size="icon"
-                                  className="h-8 w-8 shrink-0"
-                                  onClick={() => handleEditOrder(order)}
-                                >
-                                  <Pencil className="h-4 w-4" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent side="top">
-                                تعديل
-                              </TooltipContent>
-                            </Tooltip>
-                            <DropdownMenu>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <DropdownMenuTrigger asChild>
+
+                      {/* العمود 2: التواريخ + الأكشن */}
+                      <TableCell className="align-top">
+                        <div className="flex flex-col gap-1 text-sm text-right">
+                          <p className="font-semibold text-gray-700">
+                            تاريخ الفاتورة:{" "}
+                            <span className="font-normal">
+                              {formatDate(order.created_at)}
+                            </span>
+                          </p>
+                          <p className="text-gray-700">
+                            تأجير:{" "}
+                            <span className="font-medium">
+                              {order.visit_datetime
+                                ? formatDate(order.visit_datetime)
+                                : "-"}
+                            </span>
+                          </p>
+                          <p className="text-gray-700">
+                            تسليم:{" "}
+                            <span className="font-medium">
+                              {order.delivery_date
+                                ? formatDate(order.delivery_date)
+                                : "-"}
+                            </span>
+                          </p>
+                          <p className="text-gray-700">
+                            استرجاع:{" "}
+                            <span className="font-medium">
+                              {order.occasion_datetime
+                                ? formatDate(order.occasion_datetime)
+                                : "-"}
+                            </span>
+                          </p>
+                          <div className="mt-2">
+                            <TooltipProvider delayDuration={300}>
+                              <div className="flex flex-wrap items-center gap-1 justify-start">
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
                                     <Button
                                       variant="outline"
-                                      size="sm"
-                                      className="h-8 gap-1.5 shrink-0 px-2.5"
+                                      size="icon"
+                                      className="h-8 w-8 shrink-0"
+                                      onClick={() => handleOpenView(order)}
                                     >
-                                      <Printer className="h-4 w-4" />
-                                      طباعة
-                                      <ChevronDown className="h-3.5 w-3.5 opacity-70" />
+                                      <Eye className="h-4 w-4" />
                                     </Button>
-                                  </DropdownMenuTrigger>
-                                </TooltipTrigger>
-                                <TooltipContent side="top">
-                                  طباعة الفاتورة أو الإقرار
-                                </TooltipContent>
-                              </Tooltip>
-                              <DropdownMenuContent align="end" className="w-48">
-                                <DropdownMenuItem onClick={() => handlePrintInvoice(order)}>
-                                  <Printer className="ml-2 h-4 w-4" />
-                                  طباعة الفاتورة
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handlePrintInvoice(order, "نسخة العميل")}>
-                                  <Printer className="ml-2 h-4 w-4" />
-                                  نسخة عميل
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handlePrintAck(order)}>
-                                  <Printer className="ml-2 h-4 w-4" />
-                                  إقرار استلام
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top">
+                                    عرض التفاصيل
+                                  </TooltipContent>
+                                </Tooltip>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="outline"
+                                      size="icon"
+                                      className="h-8 w-8 shrink-0"
+                                      onClick={() => handleEditOrder(order)}
+                                    >
+                                      <Pencil className="h-4 w-4" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top">
+                                    تعديل
+                                  </TooltipContent>
+                                </Tooltip>
+                                {/* نسخة إدارة */}
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="outline"
+                                      size="icon"
+                                      className="h-8 w-8 shrink-0"
+                                      onClick={() => handlePrintInvoice(order)}
+                                    >
+                                      <FileText className="h-4 w-4" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top">
+                                    نسخة إدارة
+                                  </TooltipContent>
+                                </Tooltip>
+                                {/* نسخة عميل */}
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="outline"
+                                      size="icon"
+                                      className="h-8 w-8 shrink-0"
+                                      onClick={() =>
+                                        handlePrintInvoice(order, "نسخة العميل")
+                                      }
+                                    >
+                                      <FileUser className="h-4 w-4" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top">
+                                    نسخة عميل
+                                  </TooltipContent>
+                                </Tooltip>
+                                {/* إقرار استلام */}
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="outline"
+                                      size="icon"
+                                      className="h-8 w-8 shrink-0"
+                                      onClick={() => handlePrintAck(order)}
+                                    >
+                                      <FileCheck className="h-4 w-4" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top">
+                                    إقرار استلام
+                                  </TooltipContent>
+                                </Tooltip>
+                              </div>
+                            </TooltipProvider>
                           </div>
-                        </TooltipProvider>
+                        </div>
+                      </TableCell>
+
+                      {/* العمود 3: الأصناف + المبالغ + حالة الطلب */}
+                      <TableCell className="align-top">
+                        <div className="flex flex-col gap-2 text-sm text-right">
+                          <p className="font-semibold text-gray-900">
+                            الأصناف:
+                            <span className="font-normal text-gray-700">
+                              {" "}
+                              {order.items && order.items.length > 0
+                                ? order.items
+                                    .map((item) => item.name)
+                                    .filter(Boolean)
+                                    .join("، ")
+                                : "-"}
+                            </span>
+                          </p>
+                          <p className="text-gray-700">
+                            السعر:{" "}
+                            <span className="font-medium">
+                              {order.total_price} ج.م
+                            </span>
+                          </p>
+                          <p className="text-gray-700">
+                            المدفوع:{" "}
+                            <span className="font-medium text-green-700">
+                              {order.paid} ج.م
+                            </span>
+                          </p>
+                          <p className="text-gray-700">
+                            المتبقي:{" "}
+                            <span className="font-medium text-blue-700">
+                              {order.remaining} ج.م
+                            </span>
+                          </p>
+                          <div className="mt-1">
+                            <Badge
+                              variant="secondary"
+                              className={getStatusVariant(order.status)}
+                            >
+                              {getStatusLabel(order.status)}
+                            </Badge>
+                            <span className="ml-2 text-xs text-muted-foreground">
+                              ({getOrderTypeLabel(order.order_type)})
+                            </span>
+                          </div>
+                        </div>
+                      </TableCell>
+
+                      {/* العمود 4: الموظف */}
+                      <TableCell className="align-top text-center">
+                        <div className="flex flex-col items-center justify-center gap-1 text-sm">
+                          <span className="font-medium text-gray-900">
+                            {order.employee_name ?? "-"}
+                          </span>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
                     <TableCell
-                      colSpan={9}
+                      colSpan={4}
                       className="py-10 text-center text-muted-foreground"
                     >
                       لا توجد طلبات لعرضها.
