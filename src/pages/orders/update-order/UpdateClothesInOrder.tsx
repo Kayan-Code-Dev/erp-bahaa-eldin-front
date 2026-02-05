@@ -423,7 +423,7 @@ function UpdateClothesInOrder() {
           <CardHeader>
             <CardTitle>ملابس الطلب الحالية ({currentItems.length})</CardTitle>
             <CardDescription>
-              الملابس الموجودة في الطلب. يمكنك حذف أي قطعة ولكن يجب استبدالها
+              المنتجات الموجودة في الطلب. يمكنك حذف أي قطعة ولكن يجب استبدالها
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -476,7 +476,7 @@ function UpdateClothesInOrder() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <AlertCircle className="h-5 w-5 text-destructive" />
-              الملابس المحذوفة التي تحتاج استبدال ({removedItems.length})
+              المنتجات المحذوفة التي تحتاج استبدال ({removedItems.length})
             </CardTitle>
             <CardDescription>
               يجب استبدال كل قطعة ملابس محذوفة بقطعة أخرى بنفس السعر أو أعلى
@@ -582,7 +582,7 @@ function UpdateClothesInOrder() {
                         </div>
                       ) : (
                         <p className="text-sm text-muted-foreground">
-                          اختر تاريخ التسليم لعرض الملابس المتاحة
+                          اختر تاريخ التسليم لعرض المنتجات المتاحة
                         </p>
                       )}
                     </div>
@@ -606,7 +606,7 @@ function UpdateClothesInOrder() {
         <Card>
           <CardHeader>
             <CardTitle>
-              الملابس الجديدة المختارة ({selectedClothes.length})
+              المنتجات الجديدة المختارة ({selectedClothes.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -700,7 +700,7 @@ function UpdateClothesInOrder() {
                     <TableHead className="text-center">الكود</TableHead>
                     <TableHead className="text-center">الاسم</TableHead>
                     <TableHead className="text-center">الوصف</TableHead>
-                    <TableHead className="text-center">نوع الملابس</TableHead>
+                    <TableHead className="text-center">نوع المنتج</TableHead>
                     <TableHead className="text-center">الحالة</TableHead>
                   </TableRow>
                 </TableHeader>

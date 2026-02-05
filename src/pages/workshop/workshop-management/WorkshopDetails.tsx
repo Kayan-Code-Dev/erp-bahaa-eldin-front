@@ -261,7 +261,7 @@ function WorkshopDetails() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              title="إرجاع الملابس"
+                              title="إرجاع المنتج"
                               onClick={() => handleOpenReturnModal(cloth)}
                             >
                               <RotateCcw className="h-4 w-4" />
@@ -269,7 +269,7 @@ function WorkshopDetails() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              title="عرض تاريخ الملابس"
+                              title="عرض تاريخ المنتج"
                               onClick={() => handleOpenHistoryModal(cloth)}
                             >
                               <History className="h-4 w-4" />
@@ -297,7 +297,7 @@ function WorkshopDetails() {
         {data && (
           <CardFooter className="flex items-center justify-between">
             <div className="text-sm text-muted-foreground">
-              إجمالي الملابس: {data.total || 0}
+              إجمالي المنتجات: {data.total || 0}
             </div>
             <Pagination>
               <PaginationContent>

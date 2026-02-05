@@ -29,7 +29,6 @@ import {
   Minus,
   FileBarChart,
   ArrowRightLeft,
-  Layers,
   Globe,
   MapPin,
   Tags,
@@ -483,13 +482,13 @@ export const sidebarLabels: SidebarLabel[] = [
           },
         ],
       },
-      {
-        icon: null,
-        label: "ادارة الموديلات",
-        path: "/clothes/models",
-        level: 2,
-        iconComponent: createIcon(Layers),
-      },
+      // {
+      //   icon: null,
+      //   label: "ادارة الموديلات",
+      //   path: "/clothes/models",
+      //   level: 2,
+      //   iconComponent: createIcon(Layers),
+      // },
     ],
   },
   // {

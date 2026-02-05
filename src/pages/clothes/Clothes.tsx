@@ -22,15 +22,15 @@ function Clothes() {
         const url = window.URL.createObjectURL(new Blob([blob]));
         const link = document.createElement("a");
         link.href = url;
-        link.setAttribute("download", `clothes-${new Date().toISOString().split("T")[0]}.csv`);
+        link.setAttribute("download", `products-${new Date().toISOString().split("T")[0]}.csv`);
         document.body.appendChild(link);
         link.click();
         link.remove();
         window.URL.revokeObjectURL(url);
-        toast.success("تم تصدير الملابس بنجاح");
+        toast.success("تم تصدير المنتجات بنجاح");
       },
       onError: (error: any) => {
-        toast.error("خطأ أثناء تصدير الملابس. الرجاء المحاولة مرة أخرى.", {
+        toast.error("خطأ أثناء تصدير المنتجات. الرجاء المحاولة مرة أخرى.", {
           description: error.message,
         });
       },
@@ -41,9 +41,9 @@ function Clothes() {
     <div dir="rtl" className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">الملابس</h1>
+          <h1 className="text-2xl font-bold tracking-tight">المنتجات</h1>
           <p className="text-muted-foreground">
-            إدارة وعرض جميع الملابس في النظام
+            إدارة وعرض جميع المنتجات في النظام
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -57,7 +57,7 @@ function Clothes() {
           </Button>
           <Button onClick={() => setIsCreateModalOpen(true)}>
             <Plus className="ml-2 h-4 w-4" />
-            إضافة ملابس
+            إضافة منتج
           </Button>
         </div>
       </div>

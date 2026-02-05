@@ -124,13 +124,13 @@ function ClothesTableContent() {
     if (selectedCloth) {
       deleteCloth(selectedCloth.id, {
         onSuccess: () => {
-          toast.success("تم حذف الملابس بنجاح", {
-            description: "تم حذف الملابس من النظام.",
+          toast.success("تم حذف المنتج بنجاح", {
+            description: "تم حذف المنتج من النظام.",
           });
           onCloseModal();
         },
         onError: (error) => {
-          toast.error("حدث خطأ أثناء حذف الملابس", {
+          toast.error("حدث خطأ أثناء حذف المنتج", {
             description: error.message,
           });
         },
@@ -231,7 +231,7 @@ function ClothesTableContent() {
           <div>
             <CardTitle>تصفية البحث</CardTitle>
             <CardDescription>
-              استخدم الفلاتر التالية للبحث عن الملابس
+              استخدم الفلاتر التالية للبحث عن المنتجات
             </CardDescription>
           </div>
           <Button
@@ -247,7 +247,7 @@ function ClothesTableContent() {
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">اسم الملابس</label>
+                <label className="text-sm font-medium">اسم المنتج</label>
                 <Input
                   placeholder="ابحث بالاسم..."
                   value={name}
@@ -313,9 +313,9 @@ function ClothesTableContent() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>الملابس</CardTitle>
+              <CardTitle>المنتجات</CardTitle>
               <CardDescription>
-                عرض وإدارة جميع الملابس في النظام
+                عرض وإدارة جميع المنتجات في النظام
               </CardDescription>
             </div>
           </CardHeader>
@@ -392,7 +392,7 @@ function ClothesTableContent() {
                         colSpan={8}
                         className="py-10 text-center text-muted-foreground"
                       >
-                        لا توجد ملابس لعرضها.
+                        لا توجد منتجات لعرضها.
                       </TableCell>
                     </TableRow>
                   )}
@@ -403,7 +403,7 @@ function ClothesTableContent() {
 
           <CardFooter className="flex items-center justify-between">
             <CustomPagination
-              totalElementsLabel="إجمالي الملابس"
+              totalElementsLabel="إجمالي المنتجات"
               totalElements={data?.total}
               totalPages={data?.total_pages}
               isLoading={isPending}
@@ -421,10 +421,10 @@ function ClothesTableContent() {
       <ControlledConfirmationModal
         open={isDeleteModalOpen}
         onOpenChange={setIsDeleteModalOpen}
-        alertTitle="حذف الملابس"
+        alertTitle="حذف المنتج"
         alertMessage={
           <>
-            هل أنت متأكد أنك تريد حذف الملابس{" "}
+            هل أنت متأكد أنك تريد حذف المنتج{" "}
             <strong>{selectedCloth?.name}</strong>؟
           </>
         }

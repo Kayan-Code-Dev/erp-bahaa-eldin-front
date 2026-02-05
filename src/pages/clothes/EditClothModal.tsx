@@ -124,13 +124,13 @@ export function EditClothModal({ cloth, open, onOpenChange }: Props) {
       { id: cloth.id, req: requestData },
       {
         onSuccess: () => {
-          toast.success("تم تعديل الملابس بنجاح", {
-            description: "تم تحديث بيانات الملابس بنجاح.",
+          toast.success("تم تعديل المنتج بنجاح", {
+            description: "تم تحديث بيانات المنتج بنجاح.",
           });
           onOpenChange(false);
         },
         onError: (error) => {
-          toast.error("حدث خطأ أثناء تعديل الملابس", {
+          toast.error("حدث خطأ أثناء تعديل المنتج", {
             description: error.message,
           });
         },
@@ -143,7 +143,7 @@ export function EditClothModal({ cloth, open, onOpenChange }: Props) {
       <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto scrollbar-hide">
         <DialogHeader>
           <DialogTitle className="text-center">
-            تعديل الملابس: {cloth?.name}
+            تعديل المنتج: {cloth?.name}
           </DialogTitle>
           <DialogDescription className="text-center">
             قم بتعديل البيانات وانقر "حفظ" لحفظ التغييرات.
@@ -164,7 +164,7 @@ export function EditClothModal({ cloth, open, onOpenChange }: Props) {
                   <FormItem>
                     <FormLabel>الكود</FormLabel>
                     <FormControl>
-                      <Input placeholder="كود الملابس..." {...field} />
+                      <Input placeholder="كود المنتج..." {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -178,7 +178,7 @@ export function EditClothModal({ cloth, open, onOpenChange }: Props) {
                   <FormItem>
                     <FormLabel>الاسم</FormLabel>
                     <FormControl>
-                      <Input placeholder="اسم الملابس..." {...field} />
+                      <Input placeholder="اسم المنتج..." {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

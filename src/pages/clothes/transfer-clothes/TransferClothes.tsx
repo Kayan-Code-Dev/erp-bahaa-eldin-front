@@ -165,9 +165,9 @@ function TransferClothes() {
     <div dir="rtl" className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>نقل الملابس</CardTitle>
+          <CardTitle>نقل المنتجات</CardTitle>
           <CardDescription>
-            إنشاء طلب جديد لنقل الملابس بين الفروع والمصانع والورش
+            إنشاء طلب جديد لنقل المنتجات بين الفروع والمصانع والورش
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -246,12 +246,12 @@ function TransferClothes() {
               </div>
             </div>
 
-            {/* Clothes Table */}
+            {/* Products Table */}
             {fromEntityType && fromEntityId && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <Label className="text-base font-semibold">
-                    اختر الملابس
+                    اختر المنتجات
                   </Label>
                   {clothesData?.data && clothesData.data.length > 0 && (
                     <Button
@@ -321,7 +321,7 @@ function TransferClothes() {
                     </Table>
                   ) : (
                     <div className="p-8 text-center text-muted-foreground">
-                      لا توجد ملابس متاحة في هذا المكان
+                      لا توجد منتجات متاحة في هذا المكان
                     </div>
                   )}
                 </div>

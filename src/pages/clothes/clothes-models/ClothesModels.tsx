@@ -87,9 +87,9 @@ function ClothesModels() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle>إدارة موديلات الملابس</CardTitle>
+            <CardTitle>إدارة موديلات المنتجات</CardTitle>
             <CardDescription>
-              عرض وتعديل وإنشاء موديلات الملابس في النظام.
+              عرض وتعديل وإنشاء موديلات المنتجات في النظام.
             </CardDescription>
           </div>
           <Button onClick={() => setIsCreateModalOpen(true)}>

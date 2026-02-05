@@ -119,14 +119,14 @@ export function CreateClothModal({ open, onOpenChange }: Props) {
 
     createCloth(requestData, {
       onSuccess: () => {
-        toast.success("تم إنشاء الملابس بنجاح", {
-          description: "تمت إضافة الملابس بنجاح للنظام.",
+        toast.success("تم إنشاء المنتج بنجاح", {
+          description: "تمت إضافة المنتج بنجاح للنظام.",
         });
         form.reset();
         onOpenChange(false);
       },
       onError: (error) => {
-        toast.error("حدث خطأ أثناء إنشاء الملابس", {
+        toast.error("حدث خطأ أثناء إنشاء المنتج", {
           description: error.message,
         });
       },
@@ -137,9 +137,9 @@ export function CreateClothModal({ open, onOpenChange }: Props) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto scrollbar-hide">
         <DialogHeader>
-          <DialogTitle className="text-center">إنشاء ملابس جديدة</DialogTitle>
+          <DialogTitle className="text-center">إنشاء منتج جديد</DialogTitle>
           <DialogDescription className="text-center">
-            املأ البيانات لإضافة ملابس جديدة للنظام.
+            املأ البيانات لإضافة منتج جديد للنظام.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -157,7 +157,7 @@ export function CreateClothModal({ open, onOpenChange }: Props) {
                   <FormItem>
                     <FormLabel>الكود</FormLabel>
                     <FormControl>
-                      <Input placeholder="كود الملابس..." {...field} />
+                      <Input placeholder="كود المنتج..." {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -171,7 +171,7 @@ export function CreateClothModal({ open, onOpenChange }: Props) {
                   <FormItem>
                     <FormLabel>الاسم</FormLabel>
                     <FormControl>
-                      <Input placeholder="اسم الملابس..." {...field} />
+                      <Input placeholder="اسم المنتج..." {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -187,7 +187,7 @@ export function CreateClothModal({ open, onOpenChange }: Props) {
                   <FormLabel>الوصف</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="وصف الملابس..."
+                      placeholder="وصف المنتج..."
                       className="min-h-[80px]"
                       {...field}
                     />

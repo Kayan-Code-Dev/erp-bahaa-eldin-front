@@ -21,7 +21,7 @@ export const getClothes = async (params: TGetClothesRequestParams) => {
     );
     return data;
   } catch (error: any) {
-    populateError(error, "خطأ فى جلب الملابس");
+    populateError(error, "خطأ فى جلب المنتجات");
   }
 };
 
@@ -33,7 +33,7 @@ export const createClothes = async (data: TCreateClothesRequest) => {
     );
     return responseData;
   } catch (error: any) {
-    populateError(error, "خطأ فى إنشاء الملابس");
+    populateError(error, "خطأ فى إنشاء المنتجات");
   }
 };
 
@@ -48,7 +48,7 @@ export const updateClothes = async (
     );
     return responseData;
   } catch (error: any) {
-    populateError(error, "خطأ فى تحديث الملابس");
+    populateError(error, "خطأ فى تحديث المنتج");
   }
 };
 
@@ -59,7 +59,7 @@ export const deleteClothes = async (id: number) => {
     );
     return responseData;
   } catch (error: any) {
-    populateError(error, "خطأ فى حذف الملابس");
+    populateError(error, "خطأ فى حذف المنتج");
   }
 };
 
@@ -70,7 +70,7 @@ export const getClothesById = async (id: number) => {
     );
     return responseData;
   } catch (error: any) {
-    populateError(error, "خطأ فى جلب الملابس");
+    populateError(error, "خطأ فى جلب المنتجات");
   }
 };
 
@@ -87,7 +87,7 @@ export const getClothesAvialbelByDate = async (
       );
     return responseData;
   } catch (error: any) {
-    populateError(error, "خطأ فى جلب الملابس المتاحة للتاريخ");
+    populateError(error, "خطأ فى جلب المنتجات المتاحة للتاريخ");
   }
 };
 
@@ -102,7 +102,7 @@ export const getClothethesUnavailableDaysRangesbyIds = async (
       );
     return responseData;
   } catch (error: any) {
-    populateError(error, "خطأ فى جلب الملابس الغير متاحة للتاريخ");
+    populateError(error, "خطأ فى جلب المنتجات غير المتاحة للتاريخ");
   }
 };
 
@@ -112,6 +112,6 @@ export const exportClothesToCSV = async () => {
     const { data } = await api.get(`/clothes/export`, { responseType: "blob" });
     return data;
   } catch (error) {
-    populateError(error, "خطأ فى تصدير الملابس");
+    populateError(error, "خطأ فى تصدير المنتجات");
   }
 };

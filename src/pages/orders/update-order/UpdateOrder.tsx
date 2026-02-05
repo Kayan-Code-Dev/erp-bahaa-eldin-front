@@ -201,7 +201,7 @@ function UpdateOrder() {
   useEffect(() => {
     // Validate state
     if (!locationState) {
-      toast.error("يجب عليك اختيار الطلب والملابس أولاً");
+      toast.error("يجب عليك اختيار الطلب المنتجات أولاً");
       setTimeout(() => {
         navigate("/orders/list");
       }, 0);
@@ -504,7 +504,7 @@ function UpdateOrder() {
           className="hover:text-foreground transition-colors"
           state={{ order: fullOrder }}
         >
-          تحديث الملابس
+          تحديث المنتج
         </Link>
         <ChevronRight className="h-4 w-4" />
         <span className="text-foreground font-medium">تحديث الطلب</span>
@@ -537,9 +537,9 @@ function UpdateOrder() {
       {removedItemsDetails.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>الملابس المحذوفة والمستبدلة</CardTitle>
+            <CardTitle>المنتجات المحذوفة والمستبدلة</CardTitle>
             <CardDescription>
-              قائمة الملابس التي تم حذفها من الطلب واستبدالها
+              قائمة المنتجات التي تم حذفها من الطلب واستبدالها
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -757,7 +757,7 @@ function UpdateOrder() {
           <div className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>الملابس المختارة</CardTitle>
+                <CardTitle>المنتجات المختارة</CardTitle>
                 <CardDescription>أدخل تفاصيل كل قطعة ملابس</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">

@@ -122,7 +122,7 @@ export function CreateClothesModel({ open, onOpenChange }: Props) {
                 <FormItem>
                   <FormLabel>الاسم</FormLabel>
                   <FormControl>
-                    <Input placeholder="موديل الملابس" {...field} />
+                    <Input placeholder="موديل المنتج" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

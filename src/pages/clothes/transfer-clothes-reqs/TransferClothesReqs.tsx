@@ -306,11 +306,11 @@ function TransferClothesReqs() {
         link.click();
         link.remove();
         window.URL.revokeObjectURL(url);
-        toast.success("تم تصدير طلبات نقل الملابس بنجاح");
+        toast.success("تم تصدير طلبات نقل المنتجات بنجاح");
       },
       onError: (error: any) => {
         toast.error(
-          "خطأ أثناء تصدير طلبات نقل الملابس. الرجاء المحاولة مرة أخرى.",
+          "خطأ أثناء تصدير طلبات نقل المنتجات. الرجاء المحاولة مرة أخرى.",
           {
             description: error.message,
           }
@@ -324,9 +324,9 @@ function TransferClothesReqs() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle>طلبات نقل الملابس</CardTitle>
+            <CardTitle>طلبات نقل المنتجات</CardTitle>
             <CardDescription>
-              عرض وإدارة جميع طلبات نقل الملابس بين الفروع والمصانع والورش
+              عرض وإدارة جميع طلبات نقل المنتجات بين الفروع والمصانع والورش
             </CardDescription>
           </div>
           <Button
@@ -490,7 +490,7 @@ function TransferClothesReqs() {
         alertTitle="تأكيد القبول"
         alertMessage={
           <>
-            هل أنت متأكد أنك تريد قبول طلب نقل الملابس رقم{" "}
+            هل أنت متأكد أنك تريد قبول طلب نقل المنتجات رقم{" "}
             <strong>{selectedTransfer?.id}</strong>؟
           </>
         }
@@ -508,7 +508,7 @@ function TransferClothesReqs() {
         alertTitle="تأكيد الرفض"
         alertMessage={
           <>
-            هل أنت متأكد أنك تريد رفض طلب نقل الملابس رقم{" "}
+            هل أنت متأكد أنك تريد رفض طلب نقل المنتجات رقم{" "}
             <strong>{selectedTransfer?.id}</strong>؟
           </>
         }
@@ -525,7 +525,7 @@ function TransferClothesReqs() {
         alertTitle="تأكيد الحذف"
         alertMessage={
           <>
-            هل أنت متأكد أنك تريد حذف طلب نقل الملابس رقم{" "}
+            هل أنت متأكد أنك تريد حذف طلب نقل المنتجات رقم{" "}
             <strong>{selectedTransfer?.id}</strong>؟
           </>
         }
@@ -549,7 +549,7 @@ function TransferClothesReqs() {
         <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>تفاصيل طلب النقل #{selectedTransfer?.id}</DialogTitle>
-            <DialogDescription>عرض تفاصيل طلب نقل الملابس</DialogDescription>
+            <DialogDescription>عرض تفاصيل طلب نقل المنتجات</DialogDescription>
           </DialogHeader>
           {transferDetails && (
             <div className="space-y-4">
