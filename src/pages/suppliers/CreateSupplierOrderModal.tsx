@@ -32,7 +32,7 @@ export function CreateSupplierOrderModal({
         <DialogHeader>
           <DialogTitle>إضافة طلبية مورد</DialogTitle>
           <DialogDescription>
-            املأ البيانات لإضافة طلبية جديدة للمورد مع أصناف الملابس.
+            املأ البيانات لإضافة طلبية جديدة للمورد مع أصناف المنتجات.
           </DialogDescription>
         </DialogHeader>
         <div className="overflow-y-auto flex-1 pr-2">

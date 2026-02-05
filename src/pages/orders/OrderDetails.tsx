@@ -487,7 +487,7 @@ function OrderDetails() {
                         <TableCell className="text-center">
                           <Button
                             variant="outline"
-                            title="إرجاع الملابس"
+                            title="إرجاع المنتج"
                             disabled={item.returnable === 0}
                             onClick={() =>
                               setReturnItemModal({

@@ -116,7 +116,7 @@ const formSchema = z
     order_discount_type: z.enum(["none", "percentage", "fixed"]).optional(),
     order_discount_value: z.number().min(0).optional(),
     order_notes: z.string().optional(),
-    items: z.array(orderItemSchema).min(1, "يجب اختيار ملابس على الأقل"),
+    items: z.array(orderItemSchema).min(1, "يجب اختيار منتج واحد على الأقل"),
   })
   .refine(
     (data) => {
@@ -229,7 +229,7 @@ function CreateOrderForm() {
   useEffect(() => {
     // Validate required state
     if (!locationState) {
-      toast.error("يجب عليك اختيار العميل والملابس أولاً");
+      toast.error("يجب عليك اختيار العميل والمنتجات أولاً");
       navigate("/orders/choose-client");
       return;
     }
@@ -281,7 +281,7 @@ function CreateOrderForm() {
       !Array.isArray(selected_clothes) ||
       selected_clothes.length === 0
     ) {
-      toast.error("يجب عليك اختيار ملابس على الأقل");
+      toast.error("يجب عليك اختيار منتج واحد على الأقل");
       navigate("/orders/choose-clothes", {
         state: locationState.client ? { client: locationState.client } : null,
       });
@@ -399,7 +399,7 @@ function CreateOrderForm() {
             className="text-muted-foreground transition-colors hover:text-foreground"
             state={client ? { client } : null}
           >
-            اختيار الملابس
+            اختيار المنتجات
           </Link>
           <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/70" />
           <span className="font-medium text-foreground">إنشاء الطلب</span>

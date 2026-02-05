@@ -99,14 +99,14 @@ export function UpdateWorkshopClothStatusModal({
       },
       {
         onSuccess: () => {
-          toast.success("تم تحديث حالة الملابس بنجاح", {
-            description: "تم تحديث حالة الملابس في النظام.",
+          toast.success("تم تحديث حالة المنتج بنجاح", {
+            description: "تم تحديث حالة المنتج في النظام.",
           });
           form.reset();
           onOpenChange(false);
         },
         onError: (error) => {
-          toast.error("حدث خطأ أثناء تحديث حالة الملابس", {
+          toast.error("حدث خطأ أثناء تحديث حالة المنتج", {
             description: error.message,
           });
         },
@@ -118,9 +118,9 @@ export function UpdateWorkshopClothStatusModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto scrollbar-hide">
         <DialogHeader>
-          <DialogTitle className="text-center">تحديث حالة الملابس</DialogTitle>
+          <DialogTitle className="text-center">تحديث حالة المنتج</DialogTitle>
           <DialogDescription className="text-center">
-            قم بتحديث حالة الملابس وإضافة ملاحظات.
+            قم بتحديث حالة المنتج وإضافة ملاحظات.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>

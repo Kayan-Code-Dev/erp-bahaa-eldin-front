@@ -710,7 +710,7 @@ function ChooseClient() {
         <div className="mb-2">
           <h1 className="text-3xl font-bold text-gray-900">إنشاء طلب إيجار جديد</h1>
           <p className="text-gray-600 mt-2">
-            أدخل بيانات العميل، اختر الملابس المتاحة، وأدخل تفاصيل الطلب
+            أدخل بيانات العميل، اختر المنتجات المتاحة، وأدخل تفاصيل الطلب
           </p>
         </div>
 
@@ -724,13 +724,13 @@ function ChooseClient() {
               <span>كل خطوات إنشاء طلب الإيجار</span>
             </CardTitle>
             <CardDescription className="mt-1 text-sm text-gray-600">
-              اختر المكان والتاريخ، حدد أو أنشئ عميل، ثم اختر الملابس وأدخل التفاصيل والمقاسات من نفس البطاقة.
+              اختر المكان والتاريخ، حدد أو أنشئ عميل، ثم اختر المنتجات وأدخل التفاصيل والمقاسات من نفس البطاقة.
             </CardDescription>
           </CardHeader>
 
           <CardContent className="p-6 space-y-8 ">
             <div className="space-y-6 ">
-              {/* العمود الأيسر: الأساسيات + بيانات العميل + خصم الطلب + ملخص الملابس */}
+              {/* العمود الأيسر: الأساسيات + بيانات العميل + خصم الطلب + ملخص المنتجات */}
               <div className="space-y-6 ">
                 {/* الأساسيات */}
                 <section className="rounded-2xl border bg-muted/30 p-5 space-y-4">
@@ -741,7 +741,7 @@ function ChooseClient() {
                     <div>
                       <h2 className="text-base font-semibold text-purple-900">الأساسيات</h2>
                       <p className="text-xs text-gray-600 mt-1">
-                        اختر نوع المكان، المكان، وتاريخ التسليم قبل اختيار الملابس
+                        اختر نوع المكان، المكان، وتاريخ التسليم قبل اختيار المنتجات
                       </p>
                     </div>
                   </div>
@@ -809,7 +809,7 @@ function ChooseClient() {
                   </div>
                     {entityType && entityId && deliveryDate && (
                       <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                        <p className="text-sm text-blue-700">جاهز لعرض الملابس المتاحة</p>
+                        <p className="text-sm text-blue-700">جاهز لعرض المنتجات المتاحة</p>
                       </div>
                     )}
                   </div>
@@ -1177,7 +1177,7 @@ function ChooseClient() {
                   </div>
                 </section>
 
-                {/* ملخص الملابس المختارة (في الآخر) */}
+                {/* ملخص المنتجات المختارة (في الآخر) */}
                 {selectedProducts.length > 0 && (
                   <section className="rounded-2xl border bg-muted/30 p-5 space-y-4">
                     <div className="flex items-center gap-3">
@@ -1186,7 +1186,7 @@ function ChooseClient() {
                       </div>
                       <div>
                         <h2 className="text-base font-semibold text-green-900">
-                          الملابس المختارة
+                          المنتجات المختارة
                         </h2>
                         <p className="text-xs text-gray-600 mt-1">
                           {selectedProducts.length} قطعة مضافة إلى الطلب
@@ -1287,9 +1287,9 @@ function ChooseClient() {
                 )}
               </div>
 
-              {/* العمود الأيمن: فلاتر الملابس + جدول الملابس + تفاصيل القطعة + المقاسات */}
+              {/* العمود الأيمن: فلاتر المنتجات + جدول المنتجات + تفاصيل القطعة + المقاسات */}
               <div className="space-y-6">
-                {/* فلترة الملابس */}
+                {/* فلترة المنتجات */}
                 <section className="rounded-2xl border bg-muted/30 p-5 space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -1298,10 +1298,10 @@ function ChooseClient() {
                       </div>
                       <div>
                         <h2 className="text-base font-semibold text-amber-900">
-                          فلترة الملابس
+                          فلترة المنتجات
                         </h2>
                         <p className="text-xs text-gray-600 mt-1">
-                          ابحث عن الملابس المتاحة حسب الاسم، الفئة، الموديل والفئات الفرعية
+                          ابحث عن المنتجات المتاحة حسب الاسم، الفئة، الموديل والفئات الفرعية
                         </p>
                       </div>
                     </div>
@@ -1325,7 +1325,7 @@ function ChooseClient() {
                     <div className="pt-4 space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label className="text-gray-700 font-medium">اسم الملابس</Label>
+                          <Label className="text-gray-700 font-medium">اسم المنتج</Label>
                           <Input
                             placeholder="ابحث بالاسم..."
                             value={nameFilter}
@@ -1363,18 +1363,18 @@ function ChooseClient() {
                   )}
                 </section>
 
-                {/* جدول الملابس المتاحة */}
+                {/* جدول المنتجات المتاحة */}
                 <section className="rounded-2xl border bg-muted/30 p-5 space-y-4">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-blue-50 rounded-lg">
                       <ShoppingBag className="h-6 w-6 text-blue-800" />
                     </div>
                     <div>
-                      <h2 className="text-base font-semibold text-blue-900">الملابس المتاحة</h2>
+                      <h2 className="text-base font-semibold text-blue-900">المنتجات المتاحة</h2>
                       <p className="text-xs text-gray-600 mt-1">
                         {entityType && entityId && deliveryDate
-                          ? `إجمالي الملابس المتاحة: ${clothesData?.total || 0}`
-                          : "اختر المكان والتاريخ لعرض الملابس"}
+                          ? `إجمالي المنتجات المتاحة: ${clothesData?.total || 0}`
+                          : "اختر المكان والتاريخ لعرض المنتجات"}
                       </p>
                     </div>
                   </div>
@@ -1397,7 +1397,7 @@ function ChooseClient() {
                     ) : availableClothes.length === 0 ? (
                       <div className="text-center py-10 text-gray-500">
                         <ShoppingBag className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                        <p>لا توجد ملابس متاحة حسب الفلاتر المحددة</p>
+                        <p>لا توجد منتجات متاحة حسب الفلاتر المحددة</p>
                       </div>
                     ) : (
                       <div className="overflow-hidden rounded-md border">
@@ -1706,7 +1706,7 @@ function ChooseClient() {
                         قم باختيار المنتج
                       </p>
                       <p className="text-sm text-muted-foreground max-w-sm">
-                        اختر قطعة من جدول الملابس المتاحة أعلاه، ثم أدخل المقاسات (اختياري) واضغط
+                        اختر قطعة من جدول المنتجات المتاحة أعلاه، ثم أدخل المقاسات (اختياري) واضغط
                         إضافة المنتج.
                       </p>
                     </div>

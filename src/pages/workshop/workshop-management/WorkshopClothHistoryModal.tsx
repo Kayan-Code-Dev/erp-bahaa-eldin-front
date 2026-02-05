@@ -80,11 +80,11 @@ export function WorkshopClothHistoryModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-4xl max-h-[95vh] overflow-y-auto scrollbar-hide">
         <DialogHeader>
-          <DialogTitle className="text-center">تاريخ الملابس</DialogTitle>
+          <DialogTitle className="text-center">تاريخ المنتج</DialogTitle>
           <DialogDescription className="text-center">
             {cloth
-              ? `تاريخ الملابس: ${cloth.name} (${cloth.code})`
-              : "عرض تاريخ الملابس"}
+              ? `تاريخ المنتج: ${cloth.name} (${cloth.code})`
+              : "عرض تاريخ المنتج"}
           </DialogDescription>
         </DialogHeader>
 

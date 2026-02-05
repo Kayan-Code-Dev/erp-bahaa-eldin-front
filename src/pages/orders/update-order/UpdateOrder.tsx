@@ -137,7 +137,7 @@ const formSchema = z
     order_discount_type: z.enum(["none", "percentage", "fixed"]).optional(),
     order_discount_value: z.number().min(0).optional(),
     order_notes: z.string().optional(),
-    items: z.array(orderItemSchema).min(1, "يجب اختيار ملابس على الأقل"),
+    items: z.array(orderItemSchema).min(1, "يجب اختيار منتج واحد على الأقل"),
     minPaid: z.number().optional(), // Minimum paid amount
   })
   .refine(
@@ -219,9 +219,9 @@ function UpdateOrder() {
       return;
     }
 
-    // Validate clothes array
+    // Validate products array
     if (!clothes || !Array.isArray(clothes) || clothes.length === 0) {
-      toast.error("يجب اختيار ملابس على الأقل");
+      toast.error("يجب اختيار منتج واحد على الأقل");
       setTimeout(() => {
         navigate("/orders/update-clothes-in-order", {
           state: { order },
@@ -758,7 +758,7 @@ function UpdateOrder() {
             <Card>
               <CardHeader>
                 <CardTitle>المنتجات المختارة</CardTitle>
-                <CardDescription>أدخل تفاصيل كل قطعة ملابس</CardDescription>
+                <CardDescription>أدخل تفاصيل كل منتج مختار</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {fields.map((field, index) => {

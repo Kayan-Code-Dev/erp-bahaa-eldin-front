@@ -155,8 +155,8 @@ function WorkshopDetails() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle>ملابس الورشة رقم {workshopId}</CardTitle>
-            <CardDescription>عرض وتحديث حالة ملابس الورشة.</CardDescription>
+            <CardTitle>منتجات الورشة رقم {workshopId}</CardTitle>
+            <CardDescription>عرض وتحديث حالة منتجات الورشة.</CardDescription>
           </div>
           <Button variant="outline">
             <Link
@@ -284,7 +284,7 @@ function WorkshopDetails() {
                         colSpan={7}
                         className="py-10 text-center text-muted-foreground"
                       >
-                        لا توجد ملابس لعرضها.
+                        لا توجد منتجات لعرضها.
                       </TableCell>
                     </TableRow>
                   )}

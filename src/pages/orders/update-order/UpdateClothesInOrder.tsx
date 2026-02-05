@@ -251,7 +251,7 @@ function UpdateClothesInOrder() {
     );
     if (itemsNeedingReplacement.length > 0) {
       toast.error(
-        `يجب استبدال ${itemsNeedingReplacement.length} قطعة ملابس تم حذفها`
+        `يجب استبدال ${itemsNeedingReplacement.length} قطعة منتج تم حذفها`
       );
       return;
     }
@@ -349,7 +349,7 @@ function UpdateClothesInOrder() {
           قائمة الطلبات
         </Link>
         <ChevronRight className="h-4 w-4" />
-        <span className="text-foreground font-medium">تحديث ملابس الطلب</span>
+        <span className="text-foreground font-medium">تحديث منتجات الطلب</span>
       </div>
 
       {/* Order Info */}
@@ -421,7 +421,7 @@ function UpdateClothesInOrder() {
       {currentItems.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>ملابس الطلب الحالية ({currentItems.length})</CardTitle>
+            <CardTitle>منتجات الطلب الحالية ({currentItems.length})</CardTitle>
             <CardDescription>
               المنتجات الموجودة في الطلب. يمكنك حذف أي قطعة ولكن يجب استبدالها
             </CardDescription>
@@ -479,7 +479,7 @@ function UpdateClothesInOrder() {
               المنتجات المحذوفة التي تحتاج استبدال ({removedItems.length})
             </CardTitle>
             <CardDescription>
-              يجب استبدال كل قطعة ملابس محذوفة بقطعة أخرى بنفس السعر أو أعلى
+              يجب استبدال كل قطعة منتج محذوفة بقطعة أخرى بنفس السعر أو أعلى
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -636,17 +636,17 @@ function UpdateClothesInOrder() {
       {/* Available Clothes Table */}
       <Card>
         <CardHeader>
-          <CardTitle>الملابس المتاحة</CardTitle>
+            <CardTitle>المنتجات المتاحة</CardTitle>
           <CardDescription>
             {canFetchClothes
-              ? `إجمالي الملابس المتاحة: ${availableClothes.length || 0}`
-              : "اختر تاريخ التسليم لعرض الملابس المتاحة"}
+              ? `إجمالي المنتجات المتاحة: ${availableClothes.length || 0}`
+              : "اختر تاريخ التسليم لعرض المنتجات المتاحة"}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {!canFetchClothes ? (
             <div className="text-center py-10 text-muted-foreground">
-              يرجى اختيار تاريخ التسليم لعرض الملابس
+              يرجى اختيار تاريخ التسليم لعرض المنتجات
             </div>
           ) : isPending ? (
             <div className="overflow-hidden rounded-md border">
@@ -657,7 +657,7 @@ function UpdateClothesInOrder() {
                     <TableHead className="text-center">الكود</TableHead>
                     <TableHead className="text-center">الاسم</TableHead>
                     <TableHead className="text-center">الوصف</TableHead>
-                    <TableHead className="text-center">نوع الملابس</TableHead>
+                    <TableHead className="text-center">نوع المنتج</TableHead>
                     <TableHead className="text-center">الحالة</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -689,7 +689,7 @@ function UpdateClothesInOrder() {
             </div>
           ) : availableClothes.length === 0 ? (
             <div className="text-center py-10 text-muted-foreground">
-              لا توجد ملابس متاحة للتاريخ المحدد
+              لا توجد منتجات متاحة للتاريخ المحدد
             </div>
           ) : (
             <div className="overflow-hidden rounded-md border">

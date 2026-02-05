@@ -72,14 +72,14 @@ export function ReturnWorkshopClothModal({
       },
       {
         onSuccess: () => {
-          toast.success("تم إرجاع الملابس بنجاح", {
-            description: "تمت إرجاع الملابس بنجاح للنظام.",
+          toast.success("تم إرجاع المنتج بنجاح", {
+            description: "تمت إرجاع المنتج بنجاح للنظام.",
           });
           form.reset();
           onOpenChange(false);
         },
         onError: (error) => {
-          toast.error("حدث خطأ أثناء إرجاع الملابس", {
+          toast.error("حدث خطأ أثناء إرجاع المنتج", {
             description: error.message,
           });
         },
@@ -98,11 +98,11 @@ export function ReturnWorkshopClothModal({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto scrollbar-hide">
         <DialogHeader>
-          <DialogTitle className="text-center">إرجاع الملابس</DialogTitle>
+          <DialogTitle className="text-center">إرجاع المنتجات</DialogTitle>
           <DialogDescription className="text-center">
             {cloth
-              ? `إرجاع الملابس: ${cloth.name} (${cloth.code})`
-              : "املأ البيانات لإرجاع الملابس."}
+              ? `إرجاع المنتج: ${cloth.name} (${cloth.code})`
+              : "املأ البيانات لإرجاع المنتج."}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -120,7 +120,7 @@ export function ReturnWorkshopClothModal({
                   <FormLabel>الملاحظات</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="أضف ملاحظات حول إرجاع الملابس..."
+                      placeholder="أضف ملاحظات حول إرجاع المنتج..."
                       className="min-h-[100px]"
                       {...field}
                     />

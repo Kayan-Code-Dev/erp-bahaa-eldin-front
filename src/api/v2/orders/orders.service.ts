@@ -294,7 +294,7 @@ export const returnOrderItem = async (
     });
     await api.post(`/orders/${order_id}/items/${item_id}/return`, formData);
   } catch (error: any) {
-    populateError(error, "خطأ فى إرجاع الملابس");
+    populateError(error, "خطأ فى إرجاع المنتجات");
   }
 };
 

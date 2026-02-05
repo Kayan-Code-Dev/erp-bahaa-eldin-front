@@ -80,7 +80,7 @@ export const getWorkshopCloths = async (workshop_id: number, page: number, per_p
     >(`/workshops/${workshop_id}/clothes`, { params: { page, per_page, status } });
     return response;
   } catch (error) {
-    populateError(error, "خطأ فى جلب الملابس");
+    populateError(error, "خطأ فى جلب المنتجات");
   }
 };
 
@@ -122,7 +122,7 @@ export const updateWorkshopClothStatus = async (
       cloth_id,
     });
   } catch (error) {
-    populateError(error, "خطأ فى تحديث حالة الملابس");
+    populateError(error, "خطأ فى تحديث حالة المنتج");
   }
 };
 
@@ -137,7 +137,7 @@ export const returnWorkshopCloth = async (
       notes,
     });
   } catch (error) {
-    populateError(error, "خطأ فى إعادة الملابس");
+    populateError(error, "خطأ فى إعادة المنتج");
   }
 };
 
@@ -151,7 +151,7 @@ export const getWorkshopClothHistory = async (
     );
     return response;
   } catch (error) {
-    populateError(error, "خطأ فى جلب تاريخ الملابس");
+    populateError(error, "خطأ فى جلب تاريخ المنتج");
   }
 };
 

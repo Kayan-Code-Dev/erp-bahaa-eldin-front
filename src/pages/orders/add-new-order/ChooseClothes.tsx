@@ -111,7 +111,7 @@ function ChooseClothes() {
       return;
     }
     if (selectedClothes.length === 0) {
-      toast.error("يجب عليك اختيار ملابس على الأقل");
+      toast.error("يجب عليك اختيار منتج واحد على الأقل");
       return;
     }
 
@@ -140,7 +140,7 @@ function ChooseClothes() {
           اختيار العميل
         </Link>
         <ChevronRight className="h-4 w-4" />
-        <span className="text-foreground font-medium">اختيار الملابس</span>
+        <span className="text-foreground font-medium">اختيار المنتج</span>
       </div>
 
       {/* Client Info */}
@@ -177,7 +177,7 @@ function ChooseClothes() {
         <CardHeader>
           <CardTitle>اختر المكان والتاريخ</CardTitle>
           <CardDescription>
-            اختر نوع المكان والمكان وتاريخ التسليم لعرض الملابس المتاحة
+            اختر نوع المكان والمكان وتاريخ التسليم لعرض المنتجات المتاحة
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -210,7 +210,7 @@ function ChooseClothes() {
       {selectedClothes.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>الملابس المختارة ({selectedClothes.length})</CardTitle>
+            <CardTitle>المنتجات المختارة ({selectedClothes.length})</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
@@ -239,17 +239,17 @@ function ChooseClothes() {
       {/* Clothes Table */}
       <Card>
         <CardHeader>
-          <CardTitle>الملابس المتاحة</CardTitle>
+          <CardTitle>المنتجات المتاحة</CardTitle>
           <CardDescription>
             {canFetchClothes
-              ? `إجمالي الملابس المتاحة: ${data?.total_available || 0}`
-              : "اختر المكان والتاريخ لعرض الملابس المتاحة"}
+              ? `إجمالي المنتجات المتاحة: ${data?.total_available || 0}`
+              : "اختر المكان والتاريخ لعرض المنتجات المتاحة"}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {!canFetchClothes ? (
             <div className="text-center py-10 text-muted-foreground">
-              يرجى اختيار نوع المكان والمكان وتاريخ التسليم لعرض الملابس
+              يرجى اختيار نوع المكان والمكان وتاريخ التسليم لعرض المنتجات
             </div>
           ) : isPending ? (
             <div className="overflow-hidden rounded-md border">
@@ -260,7 +260,7 @@ function ChooseClothes() {
                     <TableHead className="text-center">الكود</TableHead>
                     <TableHead className="text-center">الاسم</TableHead>
                     <TableHead className="text-center">الوصف</TableHead>
-                    <TableHead className="text-center">نوع الملابس</TableHead>
+                    <TableHead className="text-center">نوع المنتج</TableHead>
                     <TableHead className="text-center">الحالة</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -292,7 +292,7 @@ function ChooseClothes() {
             </div>
           ) : availableClothes.length === 0 ? (
             <div className="text-center py-10 text-muted-foreground">
-              لا توجد ملابس متاحة للتاريخ المحدد
+              لا توجد منتجات متاحة للتاريخ المحدد
             </div>
           ) : (
             <div className="overflow-hidden rounded-md border">
@@ -303,7 +303,7 @@ function ChooseClothes() {
                     <TableHead className="text-center">الكود</TableHead>
                     <TableHead className="text-center">الاسم</TableHead>
                     <TableHead className="text-center">الوصف</TableHead>
-                    <TableHead className="text-center">نوع الملابس</TableHead>
+                    <TableHead className="text-center">نوع المنتج</TableHead>
                     <TableHead className="text-center">الحالة</TableHead>
                   </TableRow>
                 </TableHeader>

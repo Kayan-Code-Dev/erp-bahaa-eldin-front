@@ -734,7 +734,7 @@ export function CreateSupplierOrderForm({
         <CardHeader>
           <CardTitle>إضافة طلبية مورد</CardTitle>
           <CardDescription>
-            املأ البيانات لإضافة طلبية جديدة للمورد مع أصناف الملابس.
+            املأ البيانات لإضافة طلبية جديدة للمورد مع أصناف المنتجات.
           </CardDescription>
         </CardHeader>
         <CardContent>{formContent}</CardContent>
