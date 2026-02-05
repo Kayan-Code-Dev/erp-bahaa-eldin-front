@@ -93,17 +93,17 @@ export const getOrders = async (
       params.item_code = filters.item_code.trim();
     }
 
-    // تواريخ الفاتورة
-    if (filters?.invoice_date_from) params.invoice_date_from = filters.invoice_date_from;
-    if (filters?.invoice_date_to) params.invoice_date_to = filters.invoice_date_to;
+    // تواريخ الفاتورة -> تُرسل كـ date_from / date_to كما في الـ API
+    if (filters?.invoice_date_from) params.date_from = filters.invoice_date_from;
+    if (filters?.invoice_date_to) params.date_to = filters.invoice_date_to;
 
     // تواريخ التأجير
     if (filters?.visit_date_from) params.visit_date_from = filters.visit_date_from;
     if (filters?.visit_date_to) params.visit_date_to = filters.visit_date_to;
 
-    // تواريخ التسليم
-    if (filters?.delivery_date_from) params.delivery_date_from = filters.delivery_date_from;
-    if (filters?.delivery_date_to) params.delivery_date_to = filters.delivery_date_to;
+    // تواريخ التسليم -> تُرسل كـ delivery_from / delivery_to كما في الـ API
+    if (filters?.delivery_date_from) params.delivery_from = filters.delivery_date_from;
+    if (filters?.delivery_date_to) params.delivery_to = filters.delivery_date_to;
 
     // تواريخ الاسترجاع / المناسبة
     if (filters?.return_date_from) params.return_date_from = filters.return_date_from;
