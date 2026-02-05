@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useSearchParams, useNavigate } from "react-router";
@@ -86,11 +86,18 @@ function OrdersList() {
   const [printCopyLabel, setPrintCopyLabel] = useState<string | undefined>(undefined);
   const [ackModalOpen, setAckModalOpen] = useState(false);
   const [selectedOrderForAck, setSelectedOrderForAck] = useState<TOrder | null>(null);
+  const [orderTypeFilter, setOrderTypeFilter] = useState<TOrder["order_type"] | "all">("all");
 
   // Data fetching
   const { data, isPending } = useQuery(
     useGetOrdersQueryOptions(page, per_page)
   );
+
+  const displayedOrders = useMemo(() => {
+    if (!data?.data) return [];
+    if (orderTypeFilter === "all") return data.data;
+    return data.data.filter((order) => order.order_type === orderTypeFilter);
+  }, [data?.data, orderTypeFilter]);
 
   // Export Mutation
   const { mutate: exportOrdersToCSV, isPending: isExporting } = useMutation(
@@ -153,14 +160,63 @@ function OrdersList() {
             <CardTitle>قائمة الطلبات</CardTitle>
             <CardDescription>عرض وإدارة جميع الطلبات في النظام</CardDescription>
           </div>
-          <Button
-            variant="outline"
-            onClick={handleExport}
-            disabled={isExporting}
-          >
-            <Download className="ml-2 h-4 w-4" />
-            {isExporting ? "جاري التصدير..." : "تصدير إلى CSV"}
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
+            <div className="inline-flex rounded-md border bg-muted/40 p-0.5">
+              <Button
+                type="button"
+                variant={orderTypeFilter === "all" ? "default" : "ghost"}
+                size="sm"
+                className="px-2 text-xs"
+                onClick={() => setOrderTypeFilter("all")}
+              >
+                الكل
+              </Button>
+              <Button
+                type="button"
+                variant={orderTypeFilter === "rent" ? "default" : "ghost"}
+                size="sm"
+                className="px-2 text-xs"
+                onClick={() => setOrderTypeFilter("rent")}
+              >
+                إيجار
+              </Button>
+              <Button
+                type="button"
+                variant={orderTypeFilter === "buy" ? "default" : "ghost"}
+                size="sm"
+                className="px-2 text-xs"
+                onClick={() => setOrderTypeFilter("buy")}
+              >
+                بيع
+              </Button>
+              <Button
+                type="button"
+                variant={orderTypeFilter === "tailoring" ? "default" : "ghost"}
+                size="sm"
+                className="px-2 text-xs"
+                onClick={() => setOrderTypeFilter("tailoring")}
+              >
+                تفصيل
+              </Button>
+              <Button
+                type="button"
+                variant={orderTypeFilter === "mixed" ? "default" : "ghost"}
+                size="sm"
+                className="px-2 text-xs"
+                onClick={() => setOrderTypeFilter("mixed")}
+              >
+                مختلط
+              </Button>
+            </div>
+            <Button
+              variant="outline"
+              onClick={handleExport}
+              disabled={isExporting}
+            >
+              <Download className="ml-2 h-4 w-4" />
+              {isExporting ? "جاري التصدير..." : "تصدير إلى CSV"}
+            </Button>
+          </div>
         </CardHeader>
 
         <CardContent>
@@ -177,8 +233,8 @@ function OrdersList() {
               <TableBody>
                 {isPending ? (
                   <OrdersTableSkeleton rows={5} />
-                ) : data && data.data.length > 0 ? (
-                  data.data.map((order) => (
+                ) : displayedOrders.length > 0 ? (
+                  displayedOrders.map((order) => (
                     <TableRow key={order.id} className="align-top">
                       {/* العمود 1: رقم الطلب */}
                       <TableCell
@@ -369,11 +425,8 @@ function OrdersList() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell
-                      colSpan={4}
-                      className="py-10 text-center text-muted-foreground"
-                    >
-                      لا توجد طلبات لعرضها.
+                    <TableCell colSpan={4} className="py-10 text-center text-muted-foreground">
+                      لا توجد طلبات مطابقة للفلاتر الحالية.
                     </TableCell>
                   </TableRow>
                 )}
