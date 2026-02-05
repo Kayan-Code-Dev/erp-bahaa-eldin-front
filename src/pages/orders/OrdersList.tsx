@@ -220,8 +220,8 @@ function OrdersList() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="text-center w-16">#</TableHead>
-                  <TableHead className="text-center w-64">التواريخ / الإجراءات</TableHead>
-                  <TableHead className="text-center w-[40%]">الأصناف / المبالغ / الحالة</TableHead>
+                  <TableHead className="text-right w-64">التواريخ / الإجراءات</TableHead>
+                  <TableHead className="text-right w-[40%]">الأصناف / المبالغ / الحالة</TableHead>
                   <TableHead className="text-center w-40">الموظف</TableHead>
                 </TableRow>
               </TableHeader>
@@ -242,31 +242,31 @@ function OrdersList() {
                       {/* العمود 2: التواريخ + الأكشن */}
                       <TableCell className="align-top">
                         <div className="flex flex-col gap-1 text-sm text-right">
-                          <p className="font-semibold text-gray-700">
+                          <p className="font-semibold text-gray-900">
                             تاريخ الفاتورة:{" "}
-                            <span className="font-normal">
+                            <span className="font-normal text-gray-700">
                               {formatDate(order.created_at)}
                             </span>
                           </p>
-                          <p className="text-gray-700">
+                          <p className="font-semibold text-gray-900">
                             تأجير:{" "}
-                            <span className="font-medium">
+                            <span className="font-normal text-gray-700">
                               {order.visit_datetime
                                 ? formatDate(order.visit_datetime)
                                 : "-"}
                             </span>
                           </p>
-                          <p className="text-gray-700">
+                          <p className="font-semibold text-gray-900">
                             تسليم:{" "}
-                            <span className="font-medium">
+                            <span className="font-normal text-gray-700">
                               {order.delivery_date
                                 ? formatDate(order.delivery_date)
                                 : "-"}
                             </span>
                           </p>
-                          <p className="text-gray-700">
+                          <p className="font-semibold text-gray-900">
                             استرجاع:{" "}
-                            <span className="font-medium">
+                            <span className="font-normal text-gray-700">
                               {order.occasion_datetime
                                 ? formatDate(order.occasion_datetime)
                                 : "-"}
@@ -376,19 +376,19 @@ function OrdersList() {
                                 : "-"}
                             </span>
                           </p>
-                          <p className="text-gray-700">
+                          <p className="font-semibold text-gray-900">
                             السعر:{" "}
                             <span className="font-medium">
                               {order.total_price} ج.م
                             </span>
                           </p>
-                          <p className="text-gray-700">
+                          <p className="font-semibold text-gray-900">
                             المدفوع:{" "}
                             <span className="font-medium text-green-700">
                               {order.paid} ج.م
                             </span>
                           </p>
-                          <p className="text-gray-700">
+                          <p className="font-semibold text-gray-900">
                             المتبقي:{" "}
                             <span className="font-medium text-blue-700">
                               {order.remaining} ج.م
