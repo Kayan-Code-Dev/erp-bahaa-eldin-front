@@ -1,5 +1,4 @@
 import {
-  FACTORY_MANAGEMENT,
   READ_CATEGORIES,
   READ_CITIES,
   READ_COUNTRIES,
@@ -227,46 +226,7 @@ export const sidebarLabels: SidebarLabel[] = [
     level: 1,
     iconComponent: createIcon(Building2),
   },
-  // 10. Supplier management
-  {
-    icon: null,
-    label: "إدارة الموردين",
-    path: "/suppliers",
-    level: 1,
-    permission: FACTORY_MANAGEMENT,
-    iconComponent: createIcon(Factory),
-    subItems: [
-      {
-        icon: null,
-        label: "عرض الموردين",
-        path: "/suppliers",
-        level: 2,
-        iconComponent: createIcon(List),
-      },
-      {
-        icon: null,
-        label: "عرض الطلبيات",
-        path: "/suppliers/orders",
-        level: 2,
-        iconComponent: createIcon(Receipt),
-      },
-      {
-        icon: null,
-        label: "إضافة موردين",
-        path: "/suppliers/add",
-        level: 2,
-        iconComponent: createIcon(PlusCircle),
-      },
-      {
-        icon: null,
-        label: "إضافة طلبية",
-        path: "/suppliers/orders/add",
-        level: 2,
-        iconComponent: createIcon(FileText),
-      },
-    ],
-  },
-  // 11. Workshop management
+  // 10. Workshop management
   {
     icon: null,
     label: "إدارة الورشة",
@@ -274,7 +234,15 @@ export const sidebarLabels: SidebarLabel[] = [
     level: 1,
     iconComponent: createIcon(Wrench),
   },
-  // 11. Reports
+  // 11. إدارة المصنع (صفحة /factory) أسفل إدارة الورشة
+  {
+    icon: null,
+    label: "إدارة المصنع",
+    path: "/factory",
+    level: 1,
+    iconComponent: createIcon(Factory),
+  },
+  // 12. Reports
   {
     icon: null,
     label: "التقارير",
@@ -523,13 +491,6 @@ export const sidebarLabels: SidebarLabel[] = [
         iconComponent: createIcon(Layers),
       },
     ],
-  },
-  {
-    icon: null,
-    label: "إدارة الورشة",
-    path: "/workshop",
-    level: 1,
-    iconComponent: createIcon(Wrench),
   },
   // {
   //   icon: permissions,

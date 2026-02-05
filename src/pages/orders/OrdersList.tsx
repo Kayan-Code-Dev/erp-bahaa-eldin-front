@@ -311,7 +311,8 @@ function OrdersList() {
                         <FormLabel>رقم الفاتورة</FormLabel>
                         <FormControl>
                           <Input
-                            type="number"
+                            type="text"
+                            inputMode="numeric"
                             placeholder="مثال: 1024"
                             {...field}
                           />
