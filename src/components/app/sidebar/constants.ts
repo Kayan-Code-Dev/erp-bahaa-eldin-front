@@ -202,20 +202,66 @@ export const sidebarLabels: SidebarLabel[] = [
       },
     ],
   },
-  // 8. Permissions
+  // 8. Permissions and Roles
   {
     icon: null,
-    label: "الصلاحيات",
-    path: "/content/roles",
+    label: "الصلاحيات والأذونات",
+    path: "/permissions-roles",
     level: 1,
     iconComponent: createIcon(Shield),
     subItems: [
       {
         icon: null,
-        label: "الصلاحيات",
-        path: "/content/roles",
+        label: "المشرف",
+        path: "/permissions-roles/admins",
         level: 2,
-        iconComponent: createIcon(Shield),
+        iconComponent: createIcon(UserCircle),
+        subItems: [
+          {
+            icon: null,
+            label: "الأذونات",
+            path: "/permissions-roles/admins/permissions",
+            level: 3,
+            iconComponent: createIcon(ShieldEllipsis),
+          },
+          {
+            icon: null,
+            label: "الصلاحيات",
+            path: "/permissions-roles/admins/roles",
+            level: 3,
+            iconComponent: createIcon(Shield),
+            subItems: [
+              {
+                icon: null,
+                label: "إضافة صلاحية جديدة",
+                path: "/permissions-roles/admins/roles/create",
+                level: 4,
+                iconComponent: createIcon(PlusCircle),
+              },
+              {
+                icon: null,
+                label: "قائمة الصلاحيات",
+                path: "/permissions-roles/admins/roles/list-roles",
+                level: 4,
+                iconComponent: createIcon(List),
+              },
+            ],
+          },
+        ],
+      },
+      {
+        icon: null,
+        label: "مدير الفروع",
+        path: "/permissions-roles/branches-managers/roles",
+        level: 2,
+        iconComponent: createIcon(Building2),
+      },
+      {
+        icon: null,
+        label: "الفرع",
+        path: "/permissions-roles/branches/roles",
+        level: 2,
+        iconComponent: createIcon(Building),
       },
     ],
   },
