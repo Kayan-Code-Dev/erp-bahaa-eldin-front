@@ -367,10 +367,11 @@ function CreateSupplier() {
                           <FormLabel>الإجمالي</FormLabel>
                           <FormControl>
                             <Input
-                              type="number"
-                              min={0}
-                              {...field}
-                              onChange={(e) => field.onChange(Number(e.target.value))}
+                              value={field.value ?? ""}
+                              onChange={(e) => {
+                                const val = e.target.value.replace(/[^0-9.]/g, "");
+                                field.onChange(val === "" ? 0 : Number(val) || 0);
+                              }}
                             />
                           </FormControl>
                           <FormMessage />
@@ -385,10 +386,11 @@ function CreateSupplier() {
                           <FormLabel>المدفوع</FormLabel>
                           <FormControl>
                             <Input
-                              type="number"
-                              min={0}
-                              {...field}
-                              onChange={(e) => field.onChange(Number(e.target.value))}
+                              value={field.value ?? ""}
+                              onChange={(e) => {
+                                const val = e.target.value.replace(/[^0-9.]/g, "");
+                                field.onChange(val === "" ? 0 : Number(val) || 0);
+                              }}
                             />
                           </FormControl>
                           <FormMessage />
@@ -402,7 +404,7 @@ function CreateSupplier() {
                         <FormItem>
                           <FormLabel>المتبقي</FormLabel>
                           <FormControl>
-                            <Input type="number" min={0} readOnly {...field} />
+                            <Input readOnly value={field.value ?? ""} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -493,10 +495,11 @@ function CreateSupplier() {
                               <FormLabel>السعر</FormLabel>
                               <FormControl>
                                 <Input
-                                  type="number"
-                                  min={0}
-                                  {...f}
-                                  onChange={(e) => f.onChange(Number(e.target.value))}
+                                  value={f.value ?? ""}
+                                  onChange={(e) => {
+                                    const val = e.target.value.replace(/[^0-9.]/g, "");
+                                    f.onChange(val === "" ? 0 : Number(val) || 0);
+                                  }}
                                 />
                               </FormControl>
                               <FormMessage />

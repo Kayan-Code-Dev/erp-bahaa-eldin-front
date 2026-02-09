@@ -241,16 +241,13 @@ export function CreateCustodyModal({ open, onOpenChange, orderId, onSuccess }: P
                     <FormLabel>القيمة (ج.م)</FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
                         placeholder="أدخل قيمة الضمان"
-                        {...field}
+                        value={field.value || ""}
                         onChange={(e) => {
-                          const value = e.target.value
-                            ? parseFloat(e.target.value)
-                            : undefined;
+                          const val = e.target.value.replace(/[^0-9.]/g, "");
+                          const value = val ? parseFloat(val) : undefined;
                           field.onChange(value);
                         }}
-                        value={field.value || ""}
                       />
                     </FormControl>
                     <FormMessage />

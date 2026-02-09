@@ -350,10 +350,12 @@ function EditEmployee({ employee, onCancel, onSuccess }: EditEmployeeProps) {
                     <FormLabel>الراتب الأساسي</FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
                         placeholder="0"
-                        {...field}
-                        onChange={(e) => field.onChange(e.target.value)}
+                        value={field.value ?? ""}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/[^0-9.]/g, "");
+                          field.onChange(val);
+                        }}
                       />
                     </FormControl>
                     <FormMessage />

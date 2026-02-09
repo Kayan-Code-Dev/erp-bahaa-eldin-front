@@ -174,17 +174,13 @@ export function CreatePaymentModal({ open, onOpenChange, orderId }: Props) {
                   <FormLabel>المبلغ (ج.م)</FormLabel>
                   <FormControl>
                     <Input
-                      type="number"
-                      step="0.01"
                       placeholder="أدخل المبلغ"
-                      {...field}
+                      value={field.value || ""}
                       onChange={(e) => {
-                        const value = e.target.value
-                          ? parseFloat(e.target.value)
-                          : undefined;
+                        const val = e.target.value.replace(/[^0-9.]/g, "");
+                        const value = val ? parseFloat(val) : undefined;
                         field.onChange(value);
                       }}
-                      value={field.value || ""}
                     />
                   </FormControl>
                   <FormMessage />

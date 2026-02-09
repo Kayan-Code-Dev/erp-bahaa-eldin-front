@@ -250,7 +250,10 @@ export function EditBranchesInventoryModal({
                       <FormItem className="flex-1">
                         <FormLabel>السعر</FormLabel>
                         <FormControl>
-                          <Input type="number" {...field} />
+                          <Input value={field.value ?? ""} onChange={(e) => {
+                            const val = e.target.value.replace(/[^0-9.]/g, "");
+                            field.onChange(val === "" ? 0 : Number(val) || 0);
+                          }} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -263,7 +266,10 @@ export function EditBranchesInventoryModal({
                       <FormItem className="flex-1">
                         <FormLabel>الكمية</FormLabel>
                         <FormControl>
-                          <Input type="number" {...field} />
+                          <Input value={field.value ?? ""} onChange={(e) => {
+                            const val = e.target.value.replace(/[^0-9]/g, "");
+                            field.onChange(val ? Number(val) : 0);
+                          }} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

@@ -613,15 +613,13 @@ function UpdateOrder() {
                       </FormLabel>
                       <FormControl>
                         <Input
-                          type="number"
-                          step="0.01"
-                          min={form.watch("minPaid") || 0}
                           placeholder="0.00"
-                          {...field}
+                          value={field.value ?? ""}
                           disabled={true}
-                          onChange={(e) =>
-                            field.onChange(parseFloat(e.target.value) || 0)
-                          }
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/[^0-9.]/g, "");
+                            field.onChange(val === "" ? 0 : parseFloat(val) || 0);
+                          }}
                         />
                       </FormControl>
                       <FormMessage />
@@ -712,14 +710,12 @@ function UpdateOrder() {
                           <FormLabel>قيمة الخصم</FormLabel>
                           <FormControl>
                             <Input
-                              type="number"
-                              step="0.01"
-                              min="0"
                               placeholder="0.00"
-                              {...field}
-                              onChange={(e) =>
-                                field.onChange(parseFloat(e.target.value) || 0)
-                              }
+                              value={field.value ?? ""}
+                              onChange={(e) => {
+                                const val = e.target.value.replace(/[^0-9.]/g, "");
+                                field.onChange(val === "" ? 0 : parseFloat(val) || 0);
+                              }}
                             />
                           </FormControl>
                           <FormMessage />
@@ -819,16 +815,13 @@ function UpdateOrder() {
                                 </FormLabel>
                                 <FormControl>
                                   <Input
-                                    type="number"
-                                    step="0.01"
-                                    min={minPrice}
                                     placeholder="0.00"
-                                    {...field}
-                                    onChange={(e) =>
-                                      field.onChange(
-                                        parseFloat(e.target.value) || 0
-                                      )
-                                    }
+                                    value={field.value ?? ""}
+                                    onChange={(e) => {
+                                      const val = e.target.value.replace(/[^0-9.]/g, "");
+                                      const numVal = val === "" ? 0 : parseFloat(val) || 0;
+                                      field.onChange(numVal >= minPrice ? numVal : minPrice);
+                                    }}
                                   />
                                 </FormControl>
                                 <FormMessage />
@@ -871,16 +864,12 @@ function UpdateOrder() {
                                 <FormLabel>عدد أيام الإيجار</FormLabel>
                                 <FormControl>
                                   <Input
-                                    type="number"
-                                    min="1"
                                     placeholder="1"
-                                    {...field}
-                                    onChange={(e) =>
-                                      field.onChange(
-                                        parseInt(e.target.value) || 1
-                                      )
-                                    }
-                                    value={field.value || 1}
+                                    value={field.value ?? ""}
+                                    onChange={(e) => {
+                                      const val = e.target.value.replace(/[^0-9]/g, "");
+                                      field.onChange(val ? parseInt(val, 10) : 1);
+                                    }}
                                   />
                                 </FormControl>
                                 <FormMessage />
@@ -1002,16 +991,12 @@ function UpdateOrder() {
                                     <FormLabel>قيمة الخصم</FormLabel>
                                     <FormControl>
                                       <Input
-                                        type="number"
-                                        step="0.01"
-                                        min="0"
                                         placeholder="0.00"
-                                        {...field}
-                                        onChange={(e) =>
-                                          field.onChange(
-                                            parseFloat(e.target.value) || 0
-                                          )
-                                        }
+                                        value={field.value ?? ""}
+                                        onChange={(e) => {
+                                          const val = e.target.value.replace(/[^0-9.]/g, "");
+                                          field.onChange(val === "" ? 0 : parseFloat(val) || 0);
+                                        }}
                                       />
                                     </FormControl>
                                     <FormMessage />

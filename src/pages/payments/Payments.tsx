@@ -457,10 +457,12 @@ function Payments() {
                             <FormLabel>رقم الطلب</FormLabel>
                             <FormControl>
                               <Input
-                                type="number"
                                 placeholder="رقم الطلب..."
-                                {...field}
                                 value={field.value || ""}
+                                onChange={(e) => {
+                                  const val = e.target.value.replace(/[^0-9]/g, "");
+                                  field.onChange(val || "");
+                                }}
                               />
                             </FormControl>
                           </FormItem>
@@ -512,10 +514,12 @@ function Payments() {
                             <FormLabel>المبلغ الأدنى</FormLabel>
                             <FormControl>
                               <Input
-                                type="number"
                                 placeholder="المبلغ الأدنى..."
-                                {...field}
                                 value={field.value || ""}
+                                onChange={(e) => {
+                                  const val = e.target.value.replace(/[^0-9.]/g, "");
+                                  field.onChange(val || "");
+                                }}
                               />
                             </FormControl>
                           </FormItem>
@@ -531,10 +535,12 @@ function Payments() {
                             <FormLabel>المبلغ الأعلى</FormLabel>
                             <FormControl>
                               <Input
-                                type="number"
                                 placeholder="المبلغ الأعلى..."
-                                {...field}
                                 value={field.value || ""}
+                                onChange={(e) => {
+                                  const val = e.target.value.replace(/[^0-9.]/g, "");
+                                  field.onChange(val || "");
+                                }}
                               />
                             </FormControl>
                           </FormItem>

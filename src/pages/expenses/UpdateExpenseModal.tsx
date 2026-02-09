@@ -179,11 +179,12 @@ export function UpdateExpenseModal({
                     <FormLabel>المبلغ</FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
-                        step="0.01"
                         placeholder="0.00"
-                        {...field}
                         value={field.value || ""}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/[^0-9.]/g, "");
+                          field.onChange(val === "" ? 0 : parseFloat(val) || 0);
+                        }}
                       />
                     </FormControl>
                     <FormMessage />

@@ -140,11 +140,11 @@ export default function CreateEmployeeTransferModal({ open, onOpenChange }: Prop
                                             <FormLabel>الكمية</FormLabel>
                                             <FormControl>
                                                 <Input
-                                                    type="number"
-                                                    {...field}
-                                                    onChange={(e) =>
-                                                        field.onChange(Number(e.target.value))
-                                                    }
+                                                    value={field.value ?? ""}
+                                                    onChange={(e) => {
+                                                      const val = e.target.value.replace(/[^0-9]/g, "");
+                                                      field.onChange(val ? Number(val) : 0);
+                                                    }}
                                                 />
                                             </FormControl>
                                             <FormMessage />

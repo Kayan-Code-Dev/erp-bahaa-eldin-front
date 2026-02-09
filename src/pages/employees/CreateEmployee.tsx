@@ -470,10 +470,12 @@ function CreateEmployee() {
                     <FormLabel>الراتب الأساسي</FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
                         placeholder="0"
-                        {...field}
-                        onChange={(e) => field.onChange(e.target.value)}
+                        value={field.value ?? ""}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/[^0-9.]/g, "");
+                          field.onChange(val);
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
@@ -489,10 +491,12 @@ function CreateEmployee() {
                     <FormLabel>بدل المواصلات</FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
                         placeholder="0"
-                        {...field}
-                        onChange={(e) => field.onChange(e.target.value)}
+                        value={field.value ?? ""}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/[^0-9.]/g, "");
+                          field.onChange(val);
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
@@ -508,10 +512,12 @@ function CreateEmployee() {
                     <FormLabel>بدل السكن</FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
                         placeholder="0"
-                        {...field}
-                        onChange={(e) => field.onChange(e.target.value)}
+                        value={field.value ?? ""}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/[^0-9.]/g, "");
+                          field.onChange(val);
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
@@ -527,10 +533,12 @@ function CreateEmployee() {
                     <FormLabel>بدلات أخرى</FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
                         placeholder="0"
-                        {...field}
-                        onChange={(e) => field.onChange(e.target.value)}
+                        value={field.value ?? ""}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/[^0-9.]/g, "");
+                          field.onChange(val);
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
@@ -546,11 +554,12 @@ function CreateEmployee() {
                     <FormLabel>معدل العمل الإضافي</FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
-                        step="0.01"
                         placeholder="0"
-                        {...field}
-                        onChange={(e) => field.onChange(e.target.value)}
+                        value={field.value ?? ""}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/[^0-9.]/g, "");
+                          field.onChange(val);
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
@@ -566,11 +575,12 @@ function CreateEmployee() {
                     <FormLabel>معدل العمولة</FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
-                        step="0.01"
                         placeholder="0"
-                        {...field}
-                        onChange={(e) => field.onChange(e.target.value)}
+                        value={field.value ?? ""}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/[^0-9.]/g, "");
+                          field.onChange(val);
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
@@ -722,10 +732,12 @@ function CreateEmployee() {
                     <FormLabel>ساعات العمل اليومية</FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
                         placeholder="8"
-                        {...field}
-                        onChange={(e) => field.onChange(e.target.value)}
+                        value={field.value ?? ""}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/[^0-9]/g, "");
+                          field.onChange(val);
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
@@ -741,10 +753,12 @@ function CreateEmployee() {
                     <FormLabel>حد التأخير (بالدقائق)</FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
                         placeholder="15"
-                        {...field}
-                        onChange={(e) => field.onChange(e.target.value)}
+                        value={field.value ?? ""}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/[^0-9]/g, "");
+                          field.onChange(val);
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
@@ -760,10 +774,12 @@ function CreateEmployee() {
                     <FormLabel>أيام الإجازة السنوية</FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
                         placeholder="21"
-                        {...field}
-                        onChange={(e) => field.onChange(e.target.value)}
+                        value={field.value ?? ""}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/[^0-9]/g, "");
+                          field.onChange(val);
+                        }}
                       />
                     </FormControl>
                     <FormMessage />

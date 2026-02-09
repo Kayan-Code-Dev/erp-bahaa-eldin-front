@@ -355,7 +355,10 @@ export function CreateSupplierModal({ open, onOpenChange }: Props) {
                       <FormItem>
                         <FormLabel>الإجمالي</FormLabel>
                         <FormControl>
-                          <Input type="number" min={0} {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
+                          <Input value={field.value ?? ""} onChange={(e) => {
+                            const val = e.target.value.replace(/[^0-9.]/g, "");
+                            field.onChange(val === "" ? 0 : Number(val) || 0);
+                          }} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -368,7 +371,10 @@ export function CreateSupplierModal({ open, onOpenChange }: Props) {
                       <FormItem>
                         <FormLabel>المدفوع</FormLabel>
                         <FormControl>
-                          <Input type="number" min={0} {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
+                          <Input value={field.value ?? ""} onChange={(e) => {
+                            const val = e.target.value.replace(/[^0-9.]/g, "");
+                            field.onChange(val === "" ? 0 : Number(val) || 0);
+                          }} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -381,7 +387,7 @@ export function CreateSupplierModal({ open, onOpenChange }: Props) {
                       <FormItem>
                         <FormLabel>المتبقي</FormLabel>
                         <FormControl>
-                          <Input type="number" min={0} readOnly {...field} />
+                          <Input readOnly value={field.value ?? ""} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -458,7 +464,10 @@ export function CreateSupplierModal({ open, onOpenChange }: Props) {
                           <FormItem>
                             <FormLabel>السعر</FormLabel>
                             <FormControl>
-                              <Input type="number" min={0} {...f} onChange={(e) => f.onChange(Number(e.target.value))} />
+                              <Input value={f.value ?? ""} onChange={(e) => {
+                                const val = e.target.value.replace(/[^0-9.]/g, "");
+                                f.onChange(val === "" ? 0 : Number(val) || 0);
+                              }} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>

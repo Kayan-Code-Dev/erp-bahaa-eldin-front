@@ -161,10 +161,12 @@ export function CreateLateEmployeeDeductionModal({
                     <FormLabel>دقائق التأخير *</FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
-                        step="1"
                         placeholder="دقائق التأخير..."
-                        {...field}
+                        value={field.value ?? ""}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/[^0-9]/g, "");
+                          field.onChange(val ? parseInt(val, 10) : undefined);
+                        }}
                       />
                     </FormControl>
                     <FormMessage />

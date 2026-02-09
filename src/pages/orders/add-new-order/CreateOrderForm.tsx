@@ -492,15 +492,13 @@ function CreateOrderForm() {
                             <FormLabel>المبلغ المدفوع (ج.م)</FormLabel>
                             <FormControl>
                               <Input
-                                type="number"
-                                step="0.01"
-                                min="0"
                                 placeholder="0.00"
                                 className="h-10"
-                                {...field}
-                                onChange={(e) =>
-                                  field.onChange(parseFloat(e.target.value) || 0)
-                                }
+                                value={field.value ?? ""}
+                                onChange={(e) => {
+                                  const val = e.target.value.replace(/[^0-9.]/g, "");
+                                  field.onChange(val === "" ? 0 : parseFloat(val) || 0);
+                                }}
                               />
                             </FormControl>
                             <FormMessage />
@@ -564,16 +562,13 @@ function CreateOrderForm() {
                               <FormLabel>عدد أيام الإيجار</FormLabel>
                               <FormControl>
                                 <Input
-                                  type="number"
-                                  min={1}
                                   placeholder="1"
                                   className="h-10"
                                   value={field.value ?? ""}
-                                  onChange={(e) =>
-                                    field.onChange(
-                                      e.target.value ? parseInt(e.target.value, 10) : undefined
-                                    )
-                                  }
+                                  onChange={(e) => {
+                                    const val = e.target.value.replace(/[^0-9]/g, "");
+                                    field.onChange(val ? parseInt(val, 10) : undefined);
+                                  }}
                                 />
                               </FormControl>
                               <FormMessage />
@@ -654,15 +649,13 @@ function CreateOrderForm() {
                               <FormLabel>قيمة الخصم</FormLabel>
                               <FormControl>
                                 <Input
-                                  type="number"
-                                  step="0.01"
-                                  min="0"
                                   placeholder="0.00"
                                   className="h-10"
-                                  {...field}
-                                  onChange={(e) =>
-                                    field.onChange(parseFloat(e.target.value) || 0)
-                                  }
+                                  value={field.value ?? ""}
+                                  onChange={(e) => {
+                                    const val = e.target.value.replace(/[^0-9.]/g, "");
+                                    field.onChange(val === "" ? 0 : parseFloat(val) || 0);
+                                  }}
                                 />
                               </FormControl>
                               <FormMessage />
@@ -769,17 +762,13 @@ function CreateOrderForm() {
                                     <FormLabel>السعر (ج.م)</FormLabel>
                                     <FormControl>
                                       <Input
-                                        type="number"
-                                        step="0.01"
-                                        min="0"
                                         placeholder="0.00"
                                         className="h-10"
-                                        {...field}
-                                        onChange={(e) =>
-                                          field.onChange(
-                                            parseFloat(e.target.value) || 0
-                                          )
-                                        }
+                                        value={field.value ?? ""}
+                                        onChange={(e) => {
+                                          const val = e.target.value.replace(/[^0-9.]/g, "");
+                                          field.onChange(val === "" ? 0 : parseFloat(val) || 0);
+                                        }}
                                       />
                                     </FormControl>
                                     <FormMessage />
@@ -885,17 +874,13 @@ function CreateOrderForm() {
                                       <FormLabel>قيمة الخصم</FormLabel>
                                       <FormControl>
                                         <Input
-                                          type="number"
-                                          step="0.01"
-                                          min="0"
                                           placeholder="0.00"
                                           className="h-10"
-                                          {...field}
-                                          onChange={(e) =>
-                                            field.onChange(
-                                              parseFloat(e.target.value) || 0
-                                            )
-                                          }
+                                          value={field.value ?? ""}
+                                          onChange={(e) => {
+                                            const val = e.target.value.replace(/[^0-9.]/g, "");
+                                            field.onChange(val === "" ? 0 : parseFloat(val) || 0);
+                                          }}
                                         />
                                       </FormControl>
                                       <FormMessage />

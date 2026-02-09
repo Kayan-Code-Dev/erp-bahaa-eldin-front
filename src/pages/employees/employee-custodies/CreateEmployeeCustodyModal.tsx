@@ -231,10 +231,12 @@ export function CreateEmployeeCustodyModal({ open, onOpenChange }: Props) {
                     <FormLabel>القيمة</FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
                         placeholder="0"
-                        {...field}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
+                        value={field.value ?? ""}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/[^0-9.]/g, "");
+                          field.onChange(val === "" ? 0 : Number(val) || 0);
+                        }}
                         disabled={isPending}
                       />
                     </FormControl>

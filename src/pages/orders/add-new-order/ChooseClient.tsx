@@ -1197,15 +1197,15 @@ function ChooseClient() {
                       <div className="space-y-2">
                         <Label className="text-gray-700 font-medium">قيمة الخصم</Label>
                         <Input
-                          type="number"
-                          min={0}
                           value={orderDiscount.value || ""}
-                          onChange={(e) =>
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/[^0-9.]/g, "");
+                            const numVal = val === "" ? 0 : parseFloat(val) || 0;
                             setOrderDiscount({
                               ...orderDiscount,
-                              value: Number(e.target.value) || 0,
-                            })
-                          }
+                              value: numVal,
+                            });
+                          }}
                           className="h-11 rounded-lg"
                           placeholder={
                             orderDiscount.type === "percentage" ? "مثال: 10" : "مثال: 50"
@@ -1549,15 +1549,14 @@ function ChooseClient() {
                           </Label>
                           <Input
                             id="quantity"
-                            type="number"
-                            min="1"
                             value={productDetails.quantity}
-                            onChange={(e) =>
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/[^0-9]/g, "");
                               setProductDetails({
                                 ...productDetails,
-                                quantity: e.target.value,
-                              })
-                            }
+                                quantity: val || "1",
+                              });
+                            }}
                             className="h-10 rounded-lg"
                           />
                         </div>
@@ -1568,14 +1567,14 @@ function ChooseClient() {
                           <div className="relative">
                             <Input
                               id="price"
-                              type="number"
                               value={productDetails.price}
-                              onChange={(e) =>
+                              onChange={(e) => {
+                                const val = e.target.value.replace(/[^0-9.]/g, "");
                                 setProductDetails({
                                   ...productDetails,
-                                  price: e.target.value,
-                                })
-                              }
+                                  price: val,
+                                });
+                              }}
                               className="h-10 rounded-lg pr-10"
                             />
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
@@ -1623,14 +1622,14 @@ function ChooseClient() {
                         <div className="relative mt-2">
                           <Input
                             id="paid"
-                            type="number"
                             value={productDetails.paid}
-                            onChange={(e) =>
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/[^0-9.]/g, "");
                               setProductDetails({
                                 ...productDetails,
-                                paid: e.target.value,
-                              })
-                            }
+                                paid: val,
+                              });
+                            }}
                             className="h-10 rounded-lg pr-10"
                           />
                           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
@@ -1677,15 +1676,14 @@ function ChooseClient() {
                             </Label>
                             <Input
                               id="discount_value"
-                              type="number"
-                              min="0"
                               value={productDetails.discount_value}
-                              onChange={(e) =>
+                              onChange={(e) => {
+                                const val = e.target.value.replace(/[^0-9.]/g, "");
                                 setProductDetails({
                                   ...productDetails,
-                                  discount_value: e.target.value,
-                                })
-                              }
+                                  discount_value: val,
+                                });
+                              }}
                               className="h-10 rounded-lg"
                             />
                           </div>

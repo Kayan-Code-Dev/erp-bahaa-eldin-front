@@ -267,11 +267,11 @@ export function EditSupplierOrderModal({ order, open, onOpenChange }: Props) {
                   <FormLabel>المدفوع</FormLabel>
                   <FormControl>
                     <Input
-                      type="number"
-                      min={0}
-                      {...field}
                       value={field.value ?? ""}
-                      onChange={(e) => field.onChange(e.target.value === "" ? 0 : Number(e.target.value))}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/[^0-9.]/g, "");
+                        field.onChange(val === "" ? 0 : Number(val) || 0);
+                      }}
                       disabled={isPending}
                     />
                   </FormControl>
