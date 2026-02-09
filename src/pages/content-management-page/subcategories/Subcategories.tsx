@@ -162,7 +162,7 @@ function Subcategories() {
                           {subcategory.name}
                         </TableCell>
                         <TableCell className="text-center">
-                          {subcategory.category.name}
+                          {subcategory.category?.name || "-"}
                         </TableCell>
                         <TableCell className="text-center">
                           {subcategory.description || "-"}
