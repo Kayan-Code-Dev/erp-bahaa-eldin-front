@@ -35,6 +35,8 @@ import {
   FolderTree,
   Building,
   Briefcase,
+  Layers,
+  ShoppingCart,
 } from "lucide-react";
 
 const iconSize = 20;
@@ -482,13 +484,44 @@ export const sidebarLabels: SidebarLabel[] = [
           },
         ],
       },
-      // {
-      //   icon: null,
-      //   label: "ادارة الموديلات",
-      //   path: "/clothes/models",
-      //   level: 2,
-      //   iconComponent: createIcon(Layers),
-      // },
+      {
+        icon: null,
+        label: "ادارة الموديلات",
+        path: "/clothes/models",
+        level: 2,
+        iconComponent: createIcon(Layers),
+      },
+    ],
+  },
+  // Suppliers management
+  {
+    icon: null,
+    label: "الموردين",
+    path: "/suppliers",
+    level: 1,
+    iconComponent: createIcon(ShoppingCart),
+    subItems: [
+      {
+        icon: null,
+        label: "قائمة الموردين",
+        path: "/suppliers",
+        level: 2,
+        iconComponent: createIcon(List),
+      },
+      {
+        icon: null,
+        label: "إضافة مورد جديد",
+        path: "/suppliers/add",
+        level: 2,
+        iconComponent: createIcon(PlusCircle),
+      },
+      {
+        icon: null,
+        label: "طلبيات الموردين",
+        path: "/suppliers/orders",
+        level: 2,
+        iconComponent: createIcon(FileText),
+      },
     ],
   },
   // {
