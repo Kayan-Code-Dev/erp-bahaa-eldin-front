@@ -128,6 +128,14 @@ const formSchema = z
   )
   .refine(
     (data) => {
+      const hasRent = data.items.some((i) => i.type === "rent");
+      if (hasRent && !data.occasion_datetime) return false;
+      return true;
+    },
+    { message: "تاريخ المناسبة مطلوب للإيجار", path: ["occasion_datetime"] }
+  )
+  .refine(
+    (data) => {
       if (data.has_order_discount) {
         return (
           data.order_discount_type &&

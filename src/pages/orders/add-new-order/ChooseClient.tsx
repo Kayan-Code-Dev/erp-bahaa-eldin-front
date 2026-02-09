@@ -140,7 +140,7 @@ function ChooseClient() {
   const [entityId, setEntityId] = useState<string>("");
   const [deliveryDate, setDeliveryDate] = useState<Date | undefined>(); // موعد الاسترجاع
   const [receiveDate, setReceiveDate] = useState<Date | undefined>(); // visit_datetime = موعد الاستلام
-  const [branchDate, setBranchDate] = useState<Date | undefined>(); // تاريخ الفرع (للعرض فقط حالياً)
+  const [branchDate, setBranchDate] = useState<Date | undefined>(); // تاريخ الفرح
   const [employeeId, setEmployeeId] = useState<string>(""); // الموظف الذي أنشأ الفاتورة
 
   const [nameFilter, setNameFilter] = useState("");
@@ -436,13 +436,30 @@ function ChooseClient() {
     return labels[status] || status;
   };
 
+  const firstRentProduct = selectedProducts.find((p) => p.type === "rent");
+  const hasRentProduct = !!firstRentProduct;
+
+  // تاريخ المناسبة على مستوى الطلب
+  const orderLevelOccasionDatetime =
+    hasRentProduct && branchDate
+      ? format(branchDate, "yyyy-MM-dd HH:mm:ss")
+      : undefined;
+
+  // عدد أيام الإيجار على مستوى الطلب
+  const orderLevelDaysOfRent = hasRentProduct
+    ? firstRentProduct?.days_of_rent
+      ? Number(firstRentProduct.days_of_rent)
+      : 1
+    : undefined;
+
   const buildOrderItems = () =>
     selectedProducts.map((product) => {
       const hasItemDiscount =
         product.discount_type &&
         product.discount_type !== "none" &&
         (product.discount_value ?? 0) > 0;
-      const base = {
+
+      let item: any = {
         cloth_id: product.cloth_id,
         price: product.price,
         quantity: product.quantity ?? 1,
@@ -456,10 +473,26 @@ function ChooseClient() {
             }
           : {}),
       };
+
+      // في طلبات الإيجار نرسل تاريخ المناسبة وعدد الأيام أيضاً على مستوى القطعة
+      if (product.type === "rent" && orderLevelOccasionDatetime) {
+        item = {
+          ...item,
+          occasion_datetime: orderLevelOccasionDatetime,
+          days_of_rent:
+            product.days_of_rent != null
+              ? Number(product.days_of_rent)
+              : orderLevelDaysOfRent ?? 1,
+          ...(deliveryDate && {
+            delivery_date: format(deliveryDate, "yyyy-MM-dd HH:mm:ss"),
+          }),
+        };
+      }
+
       if (product.measurements) {
         const m = product.measurements;
         return {
-          ...base,
+          ...item,
           ...(m.sleeveLength?.trim() && { sleeve_length: m.sleeveLength.trim() }),
           ...(m.forearm?.trim() && { forearm: m.forearm.trim() }),
           ...(m.shoulderWidth?.trim() && { shoulder_width: m.shoulderWidth.trim() }),
@@ -471,14 +504,9 @@ function ChooseClient() {
           ...(m.dressSize?.trim() && { dress_size: m.dressSize.trim() }),
         };
       }
-      return base;
-    });
 
-  const firstRentProduct = selectedProducts.find((p) => p.type === "rent");
-  const orderLevelOccasionDatetime = firstRentProduct?.weddingDate
-    ? format(firstRentProduct.weddingDate, "yyyy-MM-dd HH:mm:ss")
-    : undefined;
-  const orderLevelDaysOfRent = firstRentProduct?.days_of_rent ?? (firstRentProduct ? 1 : undefined);
+      return item;
+    });
 
   // إعداد باراميترات الموظفين حسب المكان (الفرع حالياً)
   const employeeParams: TGetEmployeesParams = useMemo(() => {
@@ -603,6 +631,11 @@ function ChooseClient() {
       toast.error("يجب إضافة منتجات على الأقل");
       return;
     }
+    const hasRent = selectedProducts.some((p) => p.type === "rent");
+    if (hasRent && !branchDate) {
+      toast.error("تاريخ المناسبة مطلوب للإيجار");
+      return;
+    }
 
     if (activeTab === "new") {
       const valid = await newClientForm.trigger();
@@ -655,6 +688,11 @@ function ChooseClient() {
   const handleNewClientSubmitAndCreateOrder = (values: NewClientFormValues) => {
     if (!entityType || !entityId) {
       toast.error("يجب اختيار نوع المكان والمكان");
+      return;
+    }
+    const hasRent = selectedProducts.some((p) => p.type === "rent");
+    if (hasRent && !branchDate) {
+      toast.error("تاريخ المناسبة مطلوب للإيجار");
       return;
     }
     if (!deliveryDate) {
@@ -784,13 +822,14 @@ function ChooseClient() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="branch-date" className="text-gray-700 font-medium">
-                        تاريخ الفرع
+                        تاريخ الفرح
                       </Label>
                       <DatePicker
                         value={branchDate}
                         onChange={setBranchDate}
-                        placeholder="اختر تاريخ الفرع"
-                        minDate={new Date()}
+                        placeholder="اختر تاريخ الفرح"
+                        allowPastDates={true}
+                        allowFutureDates={true}
                         className="h-12 rounded-lg w-full"
                       />
                     </div>
