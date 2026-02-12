@@ -56,6 +56,7 @@ import { formatDate } from "@/utils/formatDate";
 import { OrdersTableSkeleton } from "@/pages/orders/OrdersTableSkeleton";
 import { OrderDetailsModal } from "@/pages/orders/OrderDetailsModal";
 import { CreateCustodyModal } from "@/pages/orders/CreateCustodyModal";
+import { CreatePaymentModal } from "@/pages/orders/CreatePaymentModal";
 import { getOrderTypeLabel, getStatusVariant, getStatusLabel } from "@/api/v2/orders/order.utils";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -115,6 +116,7 @@ function DeliveriesList() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [orderToAction, setOrderToAction] = useState<TOrder | null>(null);
   const [custodyModalOrder, setCustodyModalOrder] = useState<TOrder | null>(null);
+  const [paymentModalOrderId, setPaymentModalOrderId] = useState<number | null>(null);
   const [hasCustodyByOrderId, setHasCustodyByOrderId] = useState<Record<number, boolean>>({});
 
   const formValues = form.watch();
@@ -285,7 +287,7 @@ function DeliveriesList() {
   };
 
   const handleAddPayment = (order: TOrder) => {
-    navigate(`/orders/${order.id}`);
+    setPaymentModalOrderId(order.id);
   };
 
   const handleEditOrder = (order: TOrder) => {
@@ -710,7 +712,10 @@ function DeliveriesList() {
                                           variant="outline"
                                           size="icon"
                                           className="h-8 w-8 shrink-0"
-                                          onClick={() => handleAddPayment(order)}
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleAddPayment(order);
+                                          }}
                                         >
                                           <CreditCard className="h-4 w-4 text-blue-600" />
                                         </Button>
@@ -937,6 +942,22 @@ function DeliveriesList() {
           onSuccess={() => {
             refetch();
             setCustodyModalOrder(null);
+          }}
+        />
+      )}
+
+      {/* Add Payment Modal */}
+      {paymentModalOrderId !== null && (
+        <CreatePaymentModal
+          open={paymentModalOrderId !== null}
+          onOpenChange={(open) => {
+            if (!open) {
+              setPaymentModalOrderId(null);
+            }
+          }}
+          orderId={paymentModalOrderId}
+          onSuccess={() => {
+            refetch();
           }}
         />
       )}

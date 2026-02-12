@@ -75,9 +75,10 @@ type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   orderId: number;
+  onSuccess?: () => void;
 };
 
-export function CreatePaymentModal({ open, onOpenChange, orderId }: Props) {
+export function CreatePaymentModal({ open, onOpenChange, orderId, onSuccess }: Props) {
   const { mutate: createPayment, isPending } = useMutation(
     useCreatePaymentMutationOptions()
   );
@@ -128,6 +129,7 @@ export function CreatePaymentModal({ open, onOpenChange, orderId }: Props) {
           notes: "",
         });
         onOpenChange(false);
+        onSuccess?.();
       },
       onError: (error) => {
         toast.error("حدث خطأ أثناء إنشاء المدفوعة", {
