@@ -116,7 +116,7 @@ function DeliveriesList() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [orderToAction, setOrderToAction] = useState<TOrder | null>(null);
   const [custodyModalOrder, setCustodyModalOrder] = useState<TOrder | null>(null);
-  const [paymentModalOrderId, setPaymentModalOrderId] = useState<number | null>(null);
+  const [paymentModalOrder, setPaymentModalOrder] = useState<TOrder | null>(null);
   const [hasCustodyByOrderId, setHasCustodyByOrderId] = useState<Record<number, boolean>>({});
 
   const formValues = form.watch();
@@ -287,7 +287,7 @@ function DeliveriesList() {
   };
 
   const handleAddPayment = (order: TOrder) => {
-    setPaymentModalOrderId(order.id);
+    setPaymentModalOrder(order);
   };
 
   const handleEditOrder = (order: TOrder) => {
@@ -947,17 +947,18 @@ function DeliveriesList() {
       )}
 
       {/* Add Payment Modal */}
-      {paymentModalOrderId !== null && (
+      {paymentModalOrder && (
         <CreatePaymentModal
-          open={paymentModalOrderId !== null}
+          open={!!paymentModalOrder}
           onOpenChange={(open) => {
             if (!open) {
-              setPaymentModalOrderId(null);
+              setPaymentModalOrder(null);
             }
           }}
-          orderId={paymentModalOrderId}
+          order={paymentModalOrder}
           onSuccess={() => {
             refetch();
+            setPaymentModalOrder(null);
           }}
         />
       )}

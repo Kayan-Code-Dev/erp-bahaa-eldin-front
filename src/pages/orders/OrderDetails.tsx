@@ -527,7 +527,7 @@ function OrderDetails() {
           />
 
           {/* Payments Table */}
-          <OrderPaymentsTable orderId={orderData.id} />
+          <OrderPaymentsTable orderId={orderData.id} order={orderData} />
         </>
       ) : (
         <Card>

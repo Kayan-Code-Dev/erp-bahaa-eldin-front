@@ -1,9 +1,14 @@
 export type TPaymentStatus = "pending" | "paid" | "canceled";
 export type TPaymentType = "initial" | "fee" | "normal";
 
+export type TClothPayment = {
+  cloth_id: number;
+  amount: number;
+};
+
 export type TCreatePaymentRequest = {
   order_id: number;
-  amount: number;
+  cloth_payments: TClothPayment[];
   status: TPaymentStatus; // only use paid or canceled in the form
   payment_type: TPaymentType;
   payment_date: string;

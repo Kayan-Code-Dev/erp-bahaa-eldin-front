@@ -24,9 +24,12 @@ import { formatDate } from "@/utils/formatDate";
 import { PaymentDetailsModal } from "@/pages/payments/PaymentDetailsModal";
 import { CreatePaymentModal } from "./CreatePaymentModal";
 import { toast } from "sonner";
+import { useGetOrderDetailsQueryOptions } from "@/api/v2/orders/orders.hooks";
+import { TOrder } from "@/api/v2/orders/orders.types";
 
 type Props = {
   orderId: number;
+  order?: TOrder;
 };
 
 const getStatusLabel = (status: TPaymentStatus) => {
@@ -84,12 +87,20 @@ function PaymentsTableSkeleton({ rows = 5 }: { rows?: number }) {
   ));
 }
 
-export function OrderPaymentsTable({ orderId }: Props) {
+export function OrderPaymentsTable({ orderId, order: orderProp }: Props) {
   const [page, setPage] = useState(1);
   const [selectedPayment, setSelectedPayment] = useState<TPayment | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const per_page = 10;
+
+  // Fetch order details if not provided
+  const { data: orderData } = useQuery({
+    ...useGetOrderDetailsQueryOptions(orderId),
+    enabled: !!orderId && !orderProp,
+  });
+
+  const order = orderProp || orderData;
 
   const { data, isPending } = useQuery({
     ...useGetPaymentsQueryOptions({
@@ -301,11 +312,17 @@ export function OrderPaymentsTable({ orderId }: Props) {
       )}
 
       {/* Create Payment Modal */}
-      <CreatePaymentModal
-        open={isCreateModalOpen}
-        onOpenChange={setIsCreateModalOpen}
-        orderId={orderId}
-      />
+      {order && (
+        <CreatePaymentModal
+          open={isCreateModalOpen}
+          onOpenChange={setIsCreateModalOpen}
+          order={order}
+          onSuccess={() => {
+            // Refetch payments after successful creation
+            window.location.reload();
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DatePicker } from "@/components/custom/DatePicker";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useMutation } from "@tanstack/react-query";
@@ -37,6 +37,10 @@ import {
 } from "@/api/v2/payments/payments.types";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { TOrder } from "@/api/v2/orders/orders.types";
+import { Plus, Trash2 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 const paymentStatuses: TPaymentStatus[] = ["paid", "canceled", "pending"];
 
@@ -54,13 +58,21 @@ const paymentTypeLabels: Record<TPaymentType, string> = {
   normal: "عادي",
 };
 
-// Schema for the form
-const formSchema = z.object({
+// Schema for cloth payment
+const clothPaymentSchema = z.object({
+  cloth_id: z.number().min(1, { message: "يجب اختيار قطعة" }),
   amount: z
     .number({
       required_error: "المبلغ مطلوب",
     })
     .min(0.01, { message: "المبلغ يجب أن يكون أكبر من صفر" }),
+});
+
+// Schema for the form
+const formSchema = z.object({
+  cloth_payments: z
+    .array(clothPaymentSchema)
+    .min(1, { message: "يجب اختيار قطعة واحدة على الأقل" }),
   status: z.enum(["paid", "canceled", "pending"], {
     required_error: "الحالة مطلوبة",
   }),
@@ -74,11 +86,11 @@ const formSchema = z.object({
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  orderId: number;
+  order: TOrder;
   onSuccess?: () => void;
 };
 
-export function CreatePaymentModal({ open, onOpenChange, orderId, onSuccess }: Props) {
+export function CreatePaymentModal({ open, onOpenChange, order, onSuccess }: Props) {
   const { mutate: createPayment, isPending } = useMutation(
     useCreatePaymentMutationOptions()
   );
@@ -86,12 +98,17 @@ export function CreatePaymentModal({ open, onOpenChange, orderId, onSuccess }: P
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      amount: undefined,
+      cloth_payments: [],
       status: "pending",
       payment_type: "normal",
-      payment_date: new Date().toISOString().split("T")[0], // Today's date
+      payment_date: new Date().toISOString().split("T")[0],
       notes: "",
     },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "cloth_payments",
   });
 
   // Helper function to convert Date to string (YYYY-MM-DD)
@@ -106,13 +123,39 @@ export function CreatePaymentModal({ open, onOpenChange, orderId, onSuccess }: P
     return new Date(dateString);
   };
 
+  // Get available cloth items from order
+  const availableClothes = order.items || [];
+
+  // Get selected cloth IDs
+  const selectedClothIds = fields.map((field) => field.cloth_id);
+
+  // Get available clothes that are not yet selected
+  const unselectedClothes = availableClothes.filter(
+    (cloth) => !selectedClothIds.includes(cloth.cloth_id || cloth.id)
+  );
+
+  const handleAddCloth = () => {
+    if (unselectedClothes.length > 0) {
+      const firstUnselected = unselectedClothes[0];
+      append({
+        cloth_id: firstUnselected.cloth_id || firstUnselected.id,
+        amount: 0,
+      });
+    }
+  };
+
   const onSubmit = (values: z.infer<typeof formSchema>) => {
+    // Format payment_date to yyyy-MM-dd HH:mm:ss
+    const paymentDate = values.payment_date
+      ? format(new Date(values.payment_date + "T00:00:00"), "yyyy-MM-dd HH:mm:ss")
+      : format(new Date(), "yyyy-MM-dd HH:mm:ss");
+
     const requestData: TCreatePaymentRequest = {
-      order_id: orderId,
-      amount: values.amount,
+      order_id: order.id,
+      cloth_payments: values.cloth_payments,
       status: values.status,
       payment_type: values.payment_type,
-      payment_date: format(values.payment_date, "yyyy-MM-dd HH:mm:ss"),
+      payment_date: paymentDate,
       notes: values.notes,
     };
 
@@ -122,7 +165,7 @@ export function CreatePaymentModal({ open, onOpenChange, orderId, onSuccess }: P
           description: "تمت إضافة المدفوعة بنجاح للنظام.",
         });
         form.reset({
-          amount: undefined,
+          cloth_payments: [],
           status: "pending",
           payment_type: "normal",
           payment_date: new Date().toISOString().split("T")[0],
@@ -142,7 +185,7 @@ export function CreatePaymentModal({ open, onOpenChange, orderId, onSuccess }: P
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
       form.reset({
-        amount: undefined,
+        cloth_payments: [],
         status: "pending",
         payment_type: "normal",
         payment_date: new Date().toISOString().split("T")[0],
@@ -154,11 +197,11 @@ export function CreatePaymentModal({ open, onOpenChange, orderId, onSuccess }: P
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-center">إنشاء دفعة جديدة</DialogTitle>
           <DialogDescription className="text-center">
-            املأ البيانات لإضافة دفعة جديدة للطلب.
+            اختر القطع المراد الدفع لها وأدخل المبلغ لكل قطعة
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -167,28 +210,165 @@ export function CreatePaymentModal({ open, onOpenChange, orderId, onSuccess }: P
             className="space-y-4"
             dir="rtl"
           >
-            {/* Amount */}
-            <FormField
-              control={form.control}
-              name="amount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>المبلغ (ج.م)</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="أدخل المبلغ"
-                      value={field.value || ""}
-                      onChange={(e) => {
-                        const val = e.target.value.replace(/[^0-9.]/g, "");
-                        const value = val ? parseFloat(val) : undefined;
-                        field.onChange(value);
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+            {/* Cloth Payments */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <FormLabel className="text-base font-semibold">
+                  القطع المختارة
+                </FormLabel>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAddCloth}
+                  disabled={unselectedClothes.length === 0 || isPending}
+                >
+                  <Plus className="ml-2 h-4 w-4" />
+                  إضافة قطعة
+                </Button>
+              </div>
+
+              {fields.length === 0 && (
+                <Card>
+                  <CardContent className="py-8 text-center text-muted-foreground">
+                    لم يتم اختيار أي قطعة. اضغط على "إضافة قطعة" لبدء الاختيار.
+                  </CardContent>
+                </Card>
               )}
-            />
+
+              {fields.map((field, index) => {
+                const cloth = availableClothes.find(
+                  (c) => (c.cloth_id || c.id) === field.cloth_id
+                );
+                const clothName = cloth
+                  ? `${cloth.code} - ${cloth.name}`
+                  : "قطعة غير معروفة";
+
+                return (
+                  <Card key={field.id}>
+                    <CardContent className="pt-6">
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <FormLabel className="text-sm font-medium">
+                            قطعة #{index + 1}
+                          </FormLabel>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => remove(index)}
+                            disabled={isPending}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+
+                        <FormField
+                          control={form.control}
+                          name={`cloth_payments.${index}.cloth_id`}
+                          render={({ field: clothField }) => (
+                            <FormItem>
+                              <FormLabel>القطعة</FormLabel>
+                              <Select
+                                value={clothField.value?.toString()}
+                                onValueChange={(value) => {
+                                  clothField.onChange(Number(value));
+                                }}
+                                disabled={isPending}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="اختر القطعة" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {availableClothes.map((c) => {
+                                    const clothId = c.cloth_id || c.id;
+                                    const isSelected =
+                                      selectedClothIds.includes(clothId) &&
+                                      clothField.value !== clothId;
+                                    return (
+                                      <SelectItem
+                                        key={clothId}
+                                        value={clothId.toString()}
+                                        disabled={isSelected}
+                                      >
+                                        {c.code} - {c.name}
+                                        {isSelected && " (مختارة بالفعل)"}
+                                      </SelectItem>
+                                    );
+                                  })}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name={`cloth_payments.${index}.amount`}
+                          render={({ field: amountField }) => (
+                            <FormItem>
+                              <FormLabel>المبلغ (ج.م)</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="أدخل المبلغ"
+                                  value={amountField.value || ""}
+                                  onChange={(e) => {
+                                    const val = e.target.value.replace(/[^0-9.]/g, "");
+                                    const value = val ? parseFloat(val) : undefined;
+                                    amountField.onChange(value);
+                                  }}
+                                  disabled={isPending}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        {cloth && (
+                          <div className="text-sm text-muted-foreground">
+                            {(() => {
+                              const quantity = cloth.quantity ?? 1;
+                              const pricePerUnit = parseFloat(cloth.price || "0");
+                              const totalPrice = pricePerUnit * quantity;
+                              const paid = parseFloat(
+                                (cloth as any).item_paid ?? (cloth as any).item_paid ?? "0"
+                              );
+                              const remaining = Math.max(0, totalPrice - paid);
+                              return (
+                                <>
+                                  <p>
+                                    السعر الأصلي (لكل الكمية):{" "}
+                                    {totalPrice.toLocaleString()} ج.م
+                                  </p>
+                                  <p>
+                                    المدفوع: {paid.toLocaleString()} ج.م
+                                  </p>
+                                  <p>
+                                    المتبقي: {remaining.toLocaleString()} ج.م
+                                  </p>
+                                </>
+                              );
+                            })()}
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+
+              {fields.length > 0 && form.formState.errors.cloth_payments && (
+                <p className="text-sm text-destructive">
+                  {form.formState.errors.cloth_payments.message}
+                </p>
+              )}
+            </div>
+
+            <Separator />
 
             {/* Status */}
             <FormField
@@ -200,6 +380,7 @@ export function CreatePaymentModal({ open, onOpenChange, orderId, onSuccess }: P
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
+                    disabled={isPending}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -229,6 +410,7 @@ export function CreatePaymentModal({ open, onOpenChange, orderId, onSuccess }: P
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
+                    disabled={isPending}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -265,6 +447,7 @@ export function CreatePaymentModal({ open, onOpenChange, orderId, onSuccess }: P
                       allowPastDates={true}
                       allowFutureDates={true}
                       showLabel={true}
+                      disabled={isPending}
                     />
                   </FormControl>
                   <FormMessage />
@@ -284,6 +467,7 @@ export function CreatePaymentModal({ open, onOpenChange, orderId, onSuccess }: P
                       placeholder="أدخل الملاحظات"
                       {...field}
                       rows={3}
+                      disabled={isPending}
                     />
                   </FormControl>
                   <FormMessage />
@@ -310,4 +494,3 @@ export function CreatePaymentModal({ open, onOpenChange, orderId, onSuccess }: P
     </Dialog>
   );
 }
-
