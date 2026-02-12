@@ -312,12 +312,12 @@ function ChooseClient() {
 
   const handleClothSelect = (cloth: any) => {
     // لو حالة القطعة ليست جاهزة للإيجار، لا نسمح باختيارها ونظهر سبب الرفض
-    if (cloth.status && cloth.status !== "ready_for_rent") {
-      toast.error("لا يمكن اختيار هذه القطعة", {
-        description: `حالة القطعة الحالية: ${getStatusLabel(cloth.status)}`,
-      });
-      return;
-    }
+    // if (cloth.status && cloth.status !== "ready_for_rent") {
+    //   toast.error("لا يمكن اختيار هذه القطعة", {
+    //     description: `حالة القطعة الحالية: ${getStatusLabel(cloth.status)}`,
+    //   });
+    //   return;
+    // }
 
     setSelectedProduct(cloth);
     setProductDetails({
