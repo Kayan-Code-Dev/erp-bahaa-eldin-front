@@ -1,4 +1,5 @@
 import { TOrder } from "@/api/v2/orders/orders.types";
+import { OrderEmployeeName } from "@/components/custom/OrderEmployeeName";
 
 const HEADER_BG = "#907457";
 const HEADER_DARK = "#7a6349";
@@ -7,8 +8,6 @@ type Props = {
   order: TOrder;
   /** Logo path (default: /app-logo.svg) */
   logoUrl?: string;
-  /** Employee name shown in header */
-  employeeName?: string;
   /** When true (invoice copy): show item name and code only, prices empty. When false (client copy): show all data */
   hideItemPrices?: boolean;
 };
@@ -84,7 +83,6 @@ const EMPTY_PRICE = "";
 export function OrderInvoicePrint({
   order,
   logoUrl = "/app-logo.svg",
-  employeeName = "-----------------------",
   hideItemPrices = false,
 }: Props) {
   const totalPriceRaw =
@@ -119,7 +117,10 @@ export function OrderInvoicePrint({
               <span className="invoice-header-label text-sm font-semibold text-white/95">رقم الفاتورة: </span>
               <span className="invoice-header-label text-sm font-semibold text-white/95">{order.id}</span>
             </div>
-            <div className="invoice-header-line text-xs font-medium text-white/95">اسم الموظف: {employeeName}</div>
+            <div className="invoice-header-line text-xs font-medium text-white/95">
+              اسم الموظف:{" "}
+              <OrderEmployeeName order={order} className="inline-block" />
+            </div>
             <div className="invoice-header-line text-xs font-medium text-white/95">التاريخ: {invoiceDate}</div>
           </div>
           <div className="invoice-print-header-logo shrink-0 h-[4.5rem] flex items-center justify-center bg-white/10 rounded-lg p-1.5">

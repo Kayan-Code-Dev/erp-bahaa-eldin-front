@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
 import { TOrder } from "@/api/v2/orders/orders.types";
@@ -141,6 +141,9 @@ export function OrderReceiptAckPrintModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[95vh] overflow-y-auto">
+        <DialogTitle className="text-base font-semibold">
+          طباعة إقرار استلام
+        </DialogTitle>
         {isPending ? (
           <div className="space-y-4">
             <Skeleton className="h-8 w-full" />

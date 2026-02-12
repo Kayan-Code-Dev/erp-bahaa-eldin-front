@@ -1,4 +1,5 @@
 import { TOrder } from "@/api/v2/orders/orders.types";
+import { OrderEmployeeName } from "@/components/custom/OrderEmployeeName";
 
 const HEADER_BG = "#907457";
 
@@ -12,7 +13,6 @@ const RULES_ITEMS = [
 type Props = {
   order: TOrder;
   logoUrl?: string;
-  employeeName?: string;
 };
 
 function formatDate(s: string): string {
@@ -28,7 +28,6 @@ function formatDate(s: string): string {
 export function OrderReceiptAckPrint({
   order,
   logoUrl = "/app-logo.svg",
-  employeeName = "-----------------------",
 }: Props) {
   const c = order.client;
   const clientName = c?.name?.trim() || "-";
@@ -63,7 +62,10 @@ export function OrderReceiptAckPrint({
               <span className="text-white/95 font-bold">رقم الفاتورة:</span>
               <span className="font-bold text-white">{order.id}</span>
             </div>
-            <div className="font-bold text-white/95">اسم الموظف: {employeeName}</div>
+            <div className="font-bold text-white/95">
+              اسم الموظف:{" "}
+              <OrderEmployeeName order={order} className="inline-block" />
+            </div>
             <div className="font-bold text-white/95">التاريخ: {invoiceDate}</div>
           </div>
           <div className="invoice-print-header-logo shrink-0 bg-white/10 rounded-lg p-2 flex items-center justify-center">
@@ -104,7 +106,10 @@ export function OrderReceiptAckPrint({
           {items.length > 0 ? (
             <ol className="list-decimal list-inside space-y-0.5">
               {items.map((item) => (
-                <li key={item.id} className="font-bold">{item.name || "-"}</li>
+                <li key={item.id} className="font-bold">
+                  {item.name || "-"}
+                  {item.code ? ` (${item.code})` : ""}
+                </li>
               ))}
             </ol>
           ) : (
