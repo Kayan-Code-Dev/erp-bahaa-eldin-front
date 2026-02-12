@@ -311,6 +311,14 @@ function ChooseClient() {
   };
 
   const handleClothSelect = (cloth: any) => {
+    // لو حالة القطعة ليست جاهزة للإيجار، لا نسمح باختيارها ونظهر سبب الرفض
+    if (cloth.status && cloth.status !== "ready_for_rent") {
+      toast.error("لا يمكن اختيار هذه القطعة", {
+        description: `حالة القطعة الحالية: ${getStatusLabel(cloth.status)}`,
+      });
+      return;
+    }
+
     setSelectedProduct(cloth);
     setProductDetails({
       ...productDetails,
@@ -468,9 +476,9 @@ function ChooseClient() {
         notes: product.notes || undefined,
         ...(hasItemDiscount
           ? {
-              discount_type: product.discount_type as "percentage" | "fixed",
-              discount_value: Number(product.discount_value),
-            }
+            discount_type: product.discount_type as "percentage" | "fixed",
+            discount_value: Number(product.discount_value),
+          }
           : {}),
       };
 
@@ -541,9 +549,9 @@ function ChooseClient() {
       order_notes: selectedProducts.map((p) => p.notes).filter(Boolean).join(" - ") || undefined,
       ...(hasOrderDiscount
         ? {
-            discount_type: orderDiscount.type as "percentage" | "fixed",
-            discount_value: orderDiscount.value,
-          }
+          discount_type: orderDiscount.type as "percentage" | "fixed",
+          discount_value: orderDiscount.value,
+        }
         : {}),
       items: buildOrderItems(),
     };
@@ -584,9 +592,9 @@ function ChooseClient() {
       order_notes: selectedProducts.map((p) => p.notes).filter(Boolean).join(" - ") || undefined,
       ...(hasOrderDiscount
         ? {
-            discount_type: orderDiscount.type as "percentage" | "fixed",
-            discount_value: orderDiscount.value,
-          }
+          discount_type: orderDiscount.type as "percentage" | "fixed",
+          discount_value: orderDiscount.value,
+        }
         : {}),
       items: buildOrderItems(),
     };
@@ -783,7 +791,7 @@ function ChooseClient() {
                       </p>
                     </div>
                   </div>
-                <div className="space-y-4 w-full">
+                  <div className="space-y-4 w-full">
                     <EntitySelect
                       mode="standalone"
                       entityType={entityType}
@@ -807,45 +815,45 @@ function ChooseClient() {
                         placeholder="اختر الموظف..."
                       />
                     </div>
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="receive-date" className="text-gray-700 font-medium">
-                        تاريخ الاستلام
-                      </Label>
-                      <DatePicker
-                        value={receiveDate}
-                        onChange={setReceiveDate}
-                        placeholder="اختر تاريخ الاستلام"
-                        minDate={new Date()}
-                        className="h-12 rounded-lg w-full"
-                      />
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                      <div className="space-y-2">
+                        <Label htmlFor="receive-date" className="text-gray-700 font-medium">
+                          تاريخ الاستلام
+                        </Label>
+                        <DatePicker
+                          value={receiveDate}
+                          onChange={setReceiveDate}
+                          placeholder="اختر تاريخ الاستلام"
+                          minDate={new Date()}
+                          className="h-12 rounded-lg w-full"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="branch-date" className="text-gray-700 font-medium">
+                          تاريخ الفرح
+                        </Label>
+                        <DatePicker
+                          value={branchDate}
+                          onChange={setBranchDate}
+                          placeholder="اختر تاريخ الفرح"
+                          allowPastDates={true}
+                          allowFutureDates={true}
+                          className="h-12 rounded-lg w-full"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="delivery-date" className="text-gray-700 font-medium">
+                          تاريخ الاسترجاع
+                        </Label>
+                        <DatePicker
+                          value={deliveryDate}
+                          onChange={setDeliveryDate}
+                          placeholder="اختر تاريخ الاسترجاع"
+                          minDate={new Date()}
+                          className="h-12 rounded-lg w-full"
+                        />
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="branch-date" className="text-gray-700 font-medium">
-                        تاريخ الفرح
-                      </Label>
-                      <DatePicker
-                        value={branchDate}
-                        onChange={setBranchDate}
-                        placeholder="اختر تاريخ الفرح"
-                        allowPastDates={true}
-                        allowFutureDates={true}
-                        className="h-12 rounded-lg w-full"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="delivery-date" className="text-gray-700 font-medium">
-                        تاريخ الاسترجاع
-                      </Label>
-                      <DatePicker
-                        value={deliveryDate}
-                        onChange={setDeliveryDate}
-                        placeholder="اختر تاريخ الاسترجاع"
-                        minDate={new Date()}
-                        className="h-12 rounded-lg w-full"
-                      />
-                    </div>
-                  </div>
                     {entityType && entityId && deliveryDate && (
                       <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                         <p className="text-sm text-blue-700">جاهز لعرض المنتجات المتاحة</p>
@@ -1248,9 +1256,9 @@ function ChooseClient() {
                         const measurementsSummary =
                           cloth.measurements
                             ? Object.entries(cloth.measurements)
-                                .filter(([, v]) => v != null && String(v).trim() !== "")
-                                .map(([k, v]) => `${measurementLabels[k] ?? k}: ${v}`)
-                                .join("، ")
+                              .filter(([, v]) => v != null && String(v).trim() !== "")
+                              .map(([k, v]) => `${measurementLabels[k] ?? k}: ${v}`)
+                              .join("، ")
                             : null;
                         return (
                           <div
@@ -1265,13 +1273,12 @@ function ChooseClient() {
                                 </Badge>
                                 <Badge
                                   variant="outline"
-                                  className={`text-xs ${
-                                    cloth.type === "rent"
+                                  className={`text-xs ${cloth.type === "rent"
                                       ? "bg-blue-50 text-blue-700"
                                       : cloth.type === "tailoring"
                                         ? "bg-purple-50 text-purple-700"
                                         : "bg-amber-50 text-amber-700"
-                                  }`}
+                                    }`}
                                 >
                                   {cloth.type === "rent"
                                     ? "إيجار"
@@ -1461,13 +1468,12 @@ function ChooseClient() {
                               return (
                                 <TableRow
                                   key={cloth.id}
-                                  className={`${
-                                    isSelected
+                                  className={`${isSelected
                                       ? "bg-green-50"
                                       : selectedProduct?.id === cloth.id
                                         ? "bg-blue-50"
                                         : ""
-                                  }`}
+                                    }`}
                                 >
                                   <TableCell className="text-center">
                                     {cloth.id}
@@ -1519,218 +1525,25 @@ function ChooseClient() {
                   </div>
                 </section>
 
-                {/* تفاصيل المنتج المختار */}
-                {selectedProduct && (
-                  <section className="rounded-2xl border bg-muted/30 p-5 space-y-5">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-primary/10 rounded-lg">
-                        <ShoppingBag className="h-6 w-6 text-primary" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <h2 className="text-base font-semibold text-foreground">
-                          تفاصيل المنتج المختار
-                        </h2>
+                {/* تفاصيل المنتج المختار + المقاسات (في سكشن واحد) */}
+                <section className="rounded-2xl border bg-muted/30 p-5 space-y-5">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <ShoppingBag className="h-6 w-6 text-primary" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h2 className="text-base font-semibold text-foreground">
+                        تفاصيل المنتج المختار والمقاسات
+                      </h2>
+                      {selectedProduct ? (
                         <p className="text-xs text-gray-600 mt-1">
                           {selectedProduct.code} — {selectedProduct.name}
                         </p>
-                      </div>
-                    </div>
-
-                    {/* السعر والكمية ونوع الطلب */}
-                    <div className="rounded-xl border bg-muted/5 p-4">
-                      <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        <Banknote className="h-4 w-4" />
-                        السعر والكمية ونوع الطلب
-                      </p>
-                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                        <div className="space-y-2">
-                          <Label htmlFor="quantity" className="font-medium">
-                            الكمية
-                          </Label>
-                          <Input
-                            id="quantity"
-                            value={productDetails.quantity}
-                            onChange={(e) => {
-                              const val = e.target.value.replace(/[^0-9]/g, "");
-                              setProductDetails({
-                                ...productDetails,
-                                quantity: val || "1",
-                              });
-                            }}
-                            className="h-10 rounded-lg"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="price" className="font-medium">
-                            السعر (ج.م)
-                          </Label>
-                          <div className="relative">
-                            <Input
-                              id="price"
-                              value={productDetails.price}
-                              onChange={(e) => {
-                                const val = e.target.value.replace(/[^0-9.]/g, "");
-                                setProductDetails({
-                                  ...productDetails,
-                                  price: val,
-                                });
-                              }}
-                              className="h-10 rounded-lg pr-10"
-                            />
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                              ج.م
-                            </span>
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label
-                            htmlFor="type"
-                            className="flex items-center gap-1.5 font-medium"
-                          >
-                            <Tag className="h-4 w-4" />
-                            نوع الطلب
-                          </Label>
-                          <Select
-                            value={productDetails.type}
-                            onValueChange={(value: "rent" | "buy" | "tailoring") =>
-                              setProductDetails({ ...productDetails, type: value })
-                            }
-                          >
-                            <SelectTrigger className="h-10 rounded-lg" id="type">
-                              <SelectValue placeholder="اختر نوع الطلب" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="rent">إيجار</SelectItem>
-                              <SelectItem value="buy">شراء</SelectItem>
-                              <SelectItem value="tailoring">تفصيل</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* المدفوع */}
-                    <div className="rounded-xl border bg-muted/5 p-4">
-                      <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        <Banknote className="h-4 w-4" />
-                        المدفوع
-                      </p>
-                      <div className="max-w-xs">
-                        <Label htmlFor="paid" className="font-medium">
-                          المدفوع (ج.م)
-                        </Label>
-                        <div className="relative mt-2">
-                          <Input
-                            id="paid"
-                            value={productDetails.paid}
-                            onChange={(e) => {
-                              const val = e.target.value.replace(/[^0-9.]/g, "");
-                              setProductDetails({
-                                ...productDetails,
-                                paid: val,
-                              });
-                            }}
-                            className="h-10 rounded-lg pr-10"
-                          />
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                            ج.م
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* الخصم */}
-                    <div className="rounded-xl border bg-muted/5 p-4">
-                      <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        <Percent className="h-4 w-4" />
-                        الخصم
-                      </p>
-                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <div className="space-y-2">
-                          <Label htmlFor="discount_type" className="font-medium">
-                            نوع الخصم
-                          </Label>
-                          <Select
-                            value={productDetails.discount_type}
-                            onValueChange={(value: "none" | "percentage" | "fixed") =>
-                              setProductDetails({
-                                ...productDetails,
-                                discount_type: value,
-                              })
-                            }
-                          >
-                            <SelectTrigger className="h-10 rounded-lg" id="discount_type">
-                              <SelectValue placeholder="اختر نوع الخصم" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="none">لا يوجد</SelectItem>
-                              <SelectItem value="percentage">نسبة مئوية</SelectItem>
-                              <SelectItem value="fixed">مبلغ ثابت</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        {productDetails.discount_type !== "none" && (
-                          <div className="space-y-2">
-                            <Label htmlFor="discount_value" className="font-medium">
-                              قيمة الخصم
-                            </Label>
-                            <Input
-                              id="discount_value"
-                              value={productDetails.discount_value}
-                              onChange={(e) => {
-                                const val = e.target.value.replace(/[^0-9.]/g, "");
-                                setProductDetails({
-                                  ...productDetails,
-                                  discount_value: val,
-                                });
-                              }}
-                              className="h-10 rounded-lg"
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* ملاحظات */}
-                    <div className="rounded-xl border bg-muted/5 p-4">
-                      <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        <StickyNote className="h-4 w-4" />
-                        ملاحظات
-                      </p>
-                      <div className="space-y-2">
-                        <Label htmlFor="notes" className="font-medium">
-                          ملاحظات حول المنتج
-                        </Label>
-                        <Input
-                          id="notes"
-                          placeholder="ملاحظات اختيارية..."
-                          value={productDetails.notes}
-                          onChange={(e) =>
-                            setProductDetails({
-                              ...productDetails,
-                              notes: e.target.value,
-                            })
-                          }
-                          className="h-10 rounded-lg"
-                        />
-                      </div>
-                    </div>
-                  </section>
-                )}
-
-                {/* المقاسات + زر إضافة المنتج */}
-                <section className="rounded-2xl border bg-muted/30 p-5 space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-purple-50 rounded-lg">
-                      <Ruler className="h-6 w-6 text-purple-600" />
-                    </div>
-                    <div>
-                      <h2 className="text-base font-semibold text-purple-900">
-                        المقاسات (اختياري)
-                      </h2>
-                      <p className="text-xs text-gray-600 mt-1">
-                        يمكنك إدخال مقاسات هذا المنتج وسيتم إرسالها مع الطلب. جميع الحقول اختيارية.
-                      </p>
+                      ) : (
+                        <p className="text-xs text-gray-600 mt-1">
+                          قم باختيار منتج من الجدول لعرض التفاصيل وإدخال المقاسات
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -1743,58 +1556,247 @@ function ChooseClient() {
                         قم باختيار المنتج
                       </p>
                       <p className="text-sm text-muted-foreground max-w-sm">
-                        اختر قطعة من جدول المنتجات المتاحة أعلاه، ثم أدخل المقاسات (اختياري) واضغط
-                        إضافة المنتج.
+                        اختر قطعة من جدول المنتجات المتاحة أعلاه، ثم أدخل التفاصيل والمقاسات (اختياري)
+                        واضغط إضافة المنتج.
                       </p>
                     </div>
                   ) : (
                     <>
-                      <p className="text-sm text-muted-foreground mb-4 pb-2 border-b">
-                        تُربط هذه المقاسات بالمنتج عند إضافته للطلب، بغض النظر عن نوع الطلب. جميع
-                        الحقول اختيارية.
-                      </p>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {[
-                          { key: "sleeveLength", label: "طول الكم", placeholder: "سم" },
-                          { key: "forearm", label: "الزند", placeholder: "سم" },
-                          { key: "shoulderWidth", label: "عرض الكتف", placeholder: "سم" },
-                          { key: "cuffs", label: "الإسوار", placeholder: "سم" },
-                          { key: "waist", label: "الوسط", placeholder: "سم" },
-                          { key: "chestLength", label: "طول الصدر", placeholder: "سم" },
-                          { key: "totalLength", label: "الطول الكلي", placeholder: "سم" },
-                          { key: "hinch", label: "الهش", placeholder: "سم" },
-                          {
-                            key: "dressSize",
-                            label: "مقاس الفستان",
-                            placeholder: "S, M, L, XL",
-                          },
-                        ].map(({ key, label, placeholder }) => (
-                          <div key={key} className="space-y-2">
-                            <Label className="text-gray-700 font-medium">{label}</Label>
+                      {/* السعر والكمية ونوع الطلب */}
+                      <div className="rounded-xl border bg-muted/5 p-4">
+                        <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          <Banknote className="h-4 w-4" />
+                          السعر والكمية ونوع الطلب
+                        </p>
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                          <div className="space-y-2">
+                            <Label htmlFor="quantity" className="font-medium">
+                              الكمية
+                            </Label>
                             <Input
-                              value={(measurements as any)[key]}
-                              onChange={(e) =>
-                                setMeasurements({ ...measurements, [key]: e.target.value })
-                              }
-                              className="h-11 rounded-lg"
-                              placeholder={placeholder}
+                              id="quantity"
+                              value={productDetails.quantity}
+                              onChange={(e) => {
+                                const val = e.target.value.replace(/[^0-9]/g, "");
+                                setProductDetails({
+                                  ...productDetails,
+                                  quantity: val || "1",
+                                });
+                              }}
+                              className="h-10 rounded-lg"
                             />
                           </div>
-                        ))}
+                          <div className="space-y-2">
+                            <Label htmlFor="price" className="font-medium">
+                              السعر (ج.م)
+                            </Label>
+                            <div className="relative">
+                              <Input
+                                id="price"
+                                value={productDetails.price}
+                                onChange={(e) => {
+                                  const val = e.target.value.replace(/[^0-9.]/g, "");
+                                  setProductDetails({
+                                    ...productDetails,
+                                    price: val,
+                                  });
+                                }}
+                                className="h-10 rounded-lg pr-10"
+                              />
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                                ج.م
+                              </span>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <Label
+                              htmlFor="type"
+                              className="flex items-center gap-1.5 font-medium"
+                            >
+                              <Tag className="h-4 w-4" />
+                              نوع الطلب
+                            </Label>
+                            <Select
+                              value={productDetails.type}
+                              onValueChange={(value: "rent" | "buy" | "tailoring") =>
+                                setProductDetails({ ...productDetails, type: value })
+                              }
+                            >
+                              <SelectTrigger className="h-10 rounded-lg" id="type">
+                                <SelectValue placeholder="اختر نوع الطلب" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="rent">إيجار</SelectItem>
+                                <SelectItem value="buy">شراء</SelectItem>
+                                <SelectItem value="tailoring">تفصيل</SelectItem>
+                              </SelectContent>
+                            </Select>
+
+                          </div>
+                          <div className="max-w-xs">
+                            <Label htmlFor="paid" className="font-medium">
+                              المدفوع (ج.م)
+                            </Label>
+                            <div className="relative mt-2">
+                              <Input
+                                id="paid"
+                                value={productDetails.paid}
+                                onChange={(e) => {
+                                  const val = e.target.value.replace(/[^0-9.]/g, "");
+                                  setProductDetails({
+                                    ...productDetails,
+                                    paid: val,
+                                  });
+                                }}
+                                className="h-10 rounded-lg pr-10"
+                              />
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                                ج.م
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+
+                      {/* الخصم */}
+                      <div className="rounded-xl border bg-muted/5 p-4">
+                        <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          <Percent className="h-4 w-4" />
+                          الخصم
+                        </p>
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                          <div className="space-y-2">
+                            <Label htmlFor="discount_type" className="font-medium">
+                              نوع الخصم
+                            </Label>
+                            <Select
+                              value={productDetails.discount_type}
+                              onValueChange={(value: "none" | "percentage" | "fixed") =>
+                                setProductDetails({
+                                  ...productDetails,
+                                  discount_type: value,
+                                })
+                              }
+                            >
+                              <SelectTrigger className="h-10 rounded-lg" id="discount_type">
+                                <SelectValue placeholder="اختر نوع الخصم" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="none">لا يوجد</SelectItem>
+                                <SelectItem value="percentage">نسبة مئوية</SelectItem>
+                                <SelectItem value="fixed">مبلغ ثابت</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          {productDetails.discount_type !== "none" && (
+                            <div className="space-y-2">
+                              <Label htmlFor="discount_value" className="font-medium">
+                                قيمة الخصم
+                              </Label>
+                              <Input
+                                id="discount_value"
+                                value={productDetails.discount_value}
+                                onChange={(e) => {
+                                  const val = e.target.value.replace(/[^0-9.]/g, "");
+                                  setProductDetails({
+                                    ...productDetails,
+                                    discount_value: val,
+                                  });
+                                }}
+                                className="h-10 rounded-lg"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* ملاحظات */}
+                      <div className="rounded-xl border bg-muted/5 p-4">
+                        <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          <StickyNote className="h-4 w-4" />
+                          ملاحظات
+                        </p>
+                        <div className="space-y-2">
+                          <Label htmlFor="notes" className="font-medium">
+                            ملاحظات حول المنتج
+                          </Label>
+                          <Input
+                            id="notes"
+                            placeholder="ملاحظات اختيارية..."
+                            value={productDetails.notes}
+                            onChange={(e) =>
+                              setProductDetails({
+                                ...productDetails,
+                                notes: e.target.value,
+                              })
+                            }
+                            className="h-10 rounded-lg"
+                          />
+                        </div>
+                      </div>
+
+                      {/* المقاسات */}
+                      <div className="rounded-xl border bg-muted/5 p-4 space-y-4">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-purple-50 rounded-lg">
+                            <Ruler className="h-6 w-6 text-purple-600" />
+                          </div>
+                          <div>
+                            <h3 className="text-sm font-semibold text-purple-900">
+                              المقاسات (اختياري)
+                            </h3>
+                            <p className="text-xs text-gray-600 mt-1">
+                              يمكنك إدخال مقاسات هذا المنتج وسيتم إرسالها مع الطلب. جميع الحقول اختيارية.
+                            </p>
+                          </div>
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-2 pb-2 border-b">
+                          تُربط هذه المقاسات بالمنتج عند إضافته للطلب، بغض النظر عن نوع الطلب. جميع
+                          الحقول اختيارية.
+                        </p>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          {[
+                            { key: "sleeveLength", label: "طول الكم", placeholder: "سم" },
+                            { key: "forearm", label: "الزند", placeholder: "سم" },
+                            { key: "shoulderWidth", label: "عرض الكتف", placeholder: "سم" },
+                            { key: "cuffs", label: "الإسوار", placeholder: "سم" },
+                            { key: "waist", label: "الوسط", placeholder: "سم" },
+                            { key: "chestLength", label: "طول الصدر", placeholder: "سم" },
+                            { key: "totalLength", label: "الطول الكلي", placeholder: "سم" },
+                            { key: "hinch", label: "الهش", placeholder: "سم" },
+                            {
+                              key: "dressSize",
+                              label: "مقاس الفستان",
+                              placeholder: "S, M, L, XL",
+                            },
+                          ].map(({ key, label, placeholder }) => (
+                            <div key={key} className="space-y-2">
+                              <Label className="text-gray-700 font-medium">{label}</Label>
+                              <Input
+                                value={(measurements as any)[key]}
+                                onChange={(e) =>
+                                  setMeasurements({ ...measurements, [key]: e.target.value })
+                                }
+                                className="h-11 rounded-lg"
+                                placeholder={placeholder}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* زر إضافة المنتج */}
+                      <div className="flex justify-center pt-6 mt-2 border-t">
+                        <Button
+                          onClick={handleAddProduct}
+                          className="h-12 px-8 rounded-lg bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800"
+                        >
+                          <Plus className="ml-2 h-5 w-5" />
+                          إضافة المنتج إلى الطلب
+                        </Button>
                       </div>
                     </>
-                  )}
-
-                  {selectedProduct && (
-                    <div className="flex justify-center pt-6 mt-6 border-t">
-                      <Button
-                        onClick={handleAddProduct}
-                        className="h-12 px-8 rounded-lg bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800"
-                      >
-                        <Plus className="ml-2 h-5 w-5" />
-                        إضافة المنتج إلى الطلب
-                      </Button>
-                    </div>
                   )}
                 </section>
               </div>
