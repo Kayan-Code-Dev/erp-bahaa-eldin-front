@@ -240,9 +240,6 @@ export function CreatePaymentModal({ open, onOpenChange, order, onSuccess }: Pro
                 const cloth = availableClothes.find(
                   (c) => (c.cloth_id || c.id) === field.cloth_id
                 );
-                const clothName = cloth
-                  ? `${cloth.code} - ${cloth.name}`
-                  : "قطعة غير معروفة";
 
                 return (
                   <Card key={field.id}>

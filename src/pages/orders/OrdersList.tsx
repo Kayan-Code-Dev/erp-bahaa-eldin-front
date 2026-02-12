@@ -760,9 +760,13 @@ function OrdersList() {
                               {" "}
                               {order.items && order.items.length > 0
                                 ? order.items
-                                  .map((item) => item.name)
-                                  .filter(Boolean)
-                                  .join("، ")
+                                    .map((item) =>
+                                      item.code
+                                        ? `${item.name} (${item.code})`
+                                        : item.name
+                                    )
+                                    .filter(Boolean)
+                                    .join("، ")
                                 : "-"}
                             </span>
                           </p>
