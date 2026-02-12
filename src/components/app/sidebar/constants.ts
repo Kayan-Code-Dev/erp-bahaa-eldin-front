@@ -306,6 +306,7 @@ export const sidebarLabels: SidebarLabel[] = [
     level: 1,
     iconComponent: createIcon(FileBarChart),
   },
+  // Disabled: Orders and sales management menu section
   // {
   //   icon: orders,
   //   label: "إدارة الطلبات والمبيعات",
@@ -358,6 +359,7 @@ export const sidebarLabels: SidebarLabel[] = [
   //     },
   //   ],
   // },
+  // Disabled: Human resources management menu section
   // {
   //   icon: hr,
   //   label: "إدارة الموارد البشرية",
@@ -427,6 +429,7 @@ export const sidebarLabels: SidebarLabel[] = [
   //   ],
   // },
 
+  // Disabled: Inventory management menu section
   // {
   //   icon: inventory,
   //   label: "إدارة المخزون",
@@ -579,6 +582,7 @@ export const sidebarLabels: SidebarLabel[] = [
       },
     ],
   },
+  // Disabled: Permissions and roles management menu section
   // {
   //   icon: permissions,
   //   label: "إدارة الصلاحيات و الاذونات",

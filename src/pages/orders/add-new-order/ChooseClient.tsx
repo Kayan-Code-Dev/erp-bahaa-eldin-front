@@ -312,6 +312,7 @@ function ChooseClient() {
 
   const handleClothSelect = (cloth: any) => {
     // If cloth status is not ready for rent, don't allow selection and show rejection reason
+    // Disabled code: validation for cloth status before selection
     // if (cloth.status && cloth.status !== "ready_for_rent") {
     //   toast.error("لا يمكن اختيار هذه القطعة", {
     //     description: `حالة القطعة الحالية: ${getStatusLabel(cloth.status)}`,
