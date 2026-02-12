@@ -138,10 +138,10 @@ function ChooseClient() {
 
   const [entityType, setEntityType] = useState<TEntity | undefined>();
   const [entityId, setEntityId] = useState<string>("");
-  const [deliveryDate, setDeliveryDate] = useState<Date | undefined>(); // موعد الاسترجاع
-  const [receiveDate, setReceiveDate] = useState<Date | undefined>(); // visit_datetime = موعد الاستلام
-  const [branchDate, setBranchDate] = useState<Date | undefined>(); // تاريخ الفرح
-  const [employeeId, setEmployeeId] = useState<string>(""); // الموظف الذي أنشأ الفاتورة
+  const [deliveryDate, setDeliveryDate] = useState<Date | undefined>(); // Return date
+  const [receiveDate, setReceiveDate] = useState<Date | undefined>(); // visit_datetime = Receive date
+  const [branchDate, setBranchDate] = useState<Date | undefined>(); // Occasion/wedding date
+  const [employeeId, setEmployeeId] = useState<string>(""); // Employee who created the invoice
 
   const [nameFilter, setNameFilter] = useState("");
   const [categoryId, setCategoryId] = useState("");
@@ -311,7 +311,7 @@ function ChooseClient() {
   };
 
   const handleClothSelect = (cloth: any) => {
-    // لو حالة القطعة ليست جاهزة للإيجار، لا نسمح باختيارها ونظهر سبب الرفض
+    // If cloth status is not ready for rent, don't allow selection and show rejection reason
     // if (cloth.status && cloth.status !== "ready_for_rent") {
     //   toast.error("لا يمكن اختيار هذه القطعة", {
     //     description: `حالة القطعة الحالية: ${getStatusLabel(cloth.status)}`,
@@ -361,7 +361,7 @@ function ChooseClient() {
       cloth_type: selectedProduct.cloth_type,
       subtotal: parseFloat(productDetails.price) * parseInt(productDetails.quantity),
     };
-    // إرفاق المقاسات (إن وُجدت) مع كل منتج، وجميع الحقول اختيارية
+    // Attach measurements (if present) to each product, all fields are optional
     const hasMeasurements = Object.values(measurements).some(
       (value) => value != null && String(value).trim() !== ""
     );
@@ -382,7 +382,7 @@ function ChooseClient() {
       discount_type: "none",
       discount_value: "0",
     });
-    // إعادة تعيين المقاسات بعد إضافة المنتج لتفادي تكرارها عن طريق الخطأ مع منتج آخر
+    // Reset measurements after adding product to avoid accidentally repeating them with another product
     setMeasurements({
       sleeveLength: "",
       forearm: "",
@@ -447,13 +447,13 @@ function ChooseClient() {
   const firstRentProduct = selectedProducts.find((p) => p.type === "rent");
   const hasRentProduct = !!firstRentProduct;
 
-  // تاريخ المناسبة على مستوى الطلب
+  // Occasion date at order level
   const orderLevelOccasionDatetime =
     hasRentProduct && branchDate
       ? format(branchDate, "yyyy-MM-dd HH:mm:ss")
       : undefined;
 
-  // عدد أيام الإيجار على مستوى الطلب
+  // Number of rental days at order level
   const orderLevelDaysOfRent = hasRentProduct
     ? firstRentProduct?.days_of_rent
       ? Number(firstRentProduct.days_of_rent)
@@ -482,7 +482,7 @@ function ChooseClient() {
           : {}),
       };
 
-      // في طلبات الإيجار نرسل تاريخ المناسبة وعدد الأيام أيضاً على مستوى القطعة
+      // For rental orders, send occasion date and number of days also at item level
       if (product.type === "rent" && orderLevelOccasionDatetime) {
         item = {
           ...item,
@@ -516,7 +516,7 @@ function ChooseClient() {
       return item;
     });
 
-  // إعداد باراميترات الموظفين حسب المكان (الفرع حالياً)
+  // Setup employee parameters based on location (branch currently)
   const employeeParams: TGetEmployeesParams = useMemo(() => {
     const base: TGetEmployeesParams = {
       per_page: 20,
@@ -725,7 +725,7 @@ function ChooseClient() {
     });
   };
 
-  // منع تغيير المكان بعد إضافة منتجات، مع السماح باختيار منتجات أخرى من نفس المكان
+  // Prevent changing location after adding products, but allow selecting other products from the same location
   const handleEntityTypeChangeStandalone = (value: TEntity | undefined) => {
     if (selectedProducts.length > 0) {
       toast.error("لا يمكن تغيير نوع المكان بعد إضافة منتجات للطلب");
@@ -760,7 +760,7 @@ function ChooseClient() {
           </p>
         </div>
 
-        {/* بطاقة واحدة شاملة لكل خطوات إنشاء الطلب */}
+        {/* Single comprehensive card for all order creation steps */}
         <Card className="shadow-xl border-gray-200">
           <CardHeader className="border-b bg-white">
             <CardTitle className="flex items-center gap-3 text-xl text-gray-900">
@@ -776,9 +776,9 @@ function ChooseClient() {
 
           <CardContent className="p-6 space-y-8 ">
             <div className="space-y-6 ">
-              {/* العمود الأيسر: الأساسيات + بيانات العميل + خصم الطلب + ملخص المنتجات */}
+              {/* Left column: Basics + Client data + Order discount + Selected products summary */}
               <div className="space-y-6 ">
-                {/* الأساسيات */}
+                {/* Basics */}
                 <section className="rounded-2xl border bg-muted/30 p-5 space-y-4">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-purple-50 rounded-lg">
@@ -802,7 +802,7 @@ function ChooseClient() {
                       entityIdLabel="المكان"
                       required
                     />
-                    {/* اختيار الموظف الذي أنشأ الفاتورة */}
+                    {/* Select employee who created the invoice */}
                     <div className="space-y-2">
                       <Label className="text-gray-700 font-medium">
                         الموظف المسؤول عن الفاتورة
@@ -862,7 +862,7 @@ function ChooseClient() {
                   </div>
                 </section>
 
-                {/* بيانات العميل (موجود / جديد) */}
+                {/* Client data (existing / new) */}
                 <section className="rounded-2xl border bg-muted/30 p-5 space-y-4" dir="rtl">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-blue-50 rounded-lg">
@@ -892,7 +892,7 @@ function ChooseClient() {
                       </TabsTrigger>
                     </TabsList>
 
-                    {/* عميل موجود */}
+                    {/* Existing client */}
                     <TabsContent value="existing" className="mt-6 space-y-4">
                       {(selectedClientFromList || selectedClient) && (
                         <div className="bg-green-50 border border-green-200 rounded-lg p-4">
@@ -942,7 +942,7 @@ function ChooseClient() {
                       </div>
                     </TabsContent>
 
-                    {/* عميل جديد */}
+                    {/* New client */}
                     <TabsContent value="new" className="mt-6" dir="rtl">
                       <Form {...newClientForm}>
                         <form
@@ -954,7 +954,7 @@ function ChooseClient() {
                             أدخل بيانات العميل الجديد وسيتم إنشاء الطلب باسمه بعد الحفظ.
                           </p>
 
-                          {/* البيانات الأساسية */}
+                          {/* Basic information */}
                           <div className="rounded-xl border bg-muted/30 p-4 space-y-4">
                             <div className="flex items-center gap-2 text-right">
                               <UserCircle className="h-5 w-5 text-primary" />
@@ -1047,7 +1047,7 @@ function ChooseClient() {
                             </div>
                           </div>
 
-                          {/* أرقام الهاتف */}
+                          {/* Phone numbers */}
                           <div className="rounded-xl border bg-muted/30 p-4 space-y-4">
                             <div className="flex items-center gap-2 text-right">
                               <Phone className="h-5 w-5 text-primary" />
@@ -1099,7 +1099,7 @@ function ChooseClient() {
                             </div>
                           </div>
 
-                          {/* العنوان */}
+                          {/* Address */}
                           <div className="rounded-xl border bg-muted/30 p-4 space-y-4">
                             <div className="flex items-center gap-2 text-right">
                               <MapPin className="h-5 w-5 text-primary" />
@@ -1167,7 +1167,7 @@ function ChooseClient() {
                   </Tabs>
                 </section>
 
-                {/* خصم الطلب كاملاً */}
+                {/* Order-level discount */}
                 <section className="rounded-2xl border bg-muted/30 p-5 space-y-4 ">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-amber-50 rounded-lg">
@@ -1224,7 +1224,7 @@ function ChooseClient() {
                   </div>
                 </section>
 
-                {/* ملخص المنتجات المختارة (في الآخر) */}
+                {/* Selected products summary (at the end) */}
                 {selectedProducts.length > 0 && (
                   <section className="rounded-2xl border bg-muted/30 p-5 space-y-4">
                     <div className="flex items-center gap-3">
@@ -1333,9 +1333,9 @@ function ChooseClient() {
                 )}
               </div>
 
-              {/* العمود الأيمن: فلاتر المنتجات + جدول المنتجات + تفاصيل القطعة + المقاسات */}
+              {/* Right column: Product filters + Products table + Item details + Measurements */}
               <div className="space-y-6">
-                {/* فلترة المنتجات */}
+                {/* Product filtering */}
                 <section className="rounded-2xl border bg-muted/30 p-5 space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -1409,7 +1409,7 @@ function ChooseClient() {
                   )}
                 </section>
 
-                {/* جدول المنتجات المتاحة */}
+                {/* Available products table */}
                 <section className="rounded-2xl border bg-muted/30 p-5 space-y-4">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-blue-50 rounded-lg">
@@ -1525,7 +1525,7 @@ function ChooseClient() {
                   </div>
                 </section>
 
-                {/* تفاصيل المنتج المختار + المقاسات (في سكشن واحد) */}
+                {/* Selected product details + Measurements (in one section) */}
                 <section className="rounded-2xl border bg-muted/30 p-5 space-y-5">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-primary/10 rounded-lg">
@@ -1562,7 +1562,7 @@ function ChooseClient() {
                     </div>
                   ) : (
                     <>
-                      {/* السعر والكمية ونوع الطلب */}
+                      {/* Price, quantity and order type */}
                       <div className="rounded-xl border bg-muted/5 p-4">
                         <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                           <Banknote className="h-4 w-4" />
@@ -1659,7 +1659,7 @@ function ChooseClient() {
                       </div>
 
 
-                      {/* الخصم */}
+                      {/* Discount */}
                       <div className="rounded-xl border bg-muted/5 p-4">
                         <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                           <Percent className="h-4 w-4" />
@@ -1711,7 +1711,7 @@ function ChooseClient() {
                         </div>
                       </div>
 
-                      {/* ملاحظات */}
+                      {/* Notes */}
                       <div className="rounded-xl border bg-muted/5 p-4">
                         <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                           <StickyNote className="h-4 w-4" />
@@ -1736,7 +1736,7 @@ function ChooseClient() {
                         </div>
                       </div>
 
-                      {/* المقاسات */}
+                      {/* Measurements */}
                       <div className="rounded-xl border bg-muted/5 p-4 space-y-4">
                         <div className="flex items-center gap-3">
                           <div className="p-2 bg-purple-50 rounded-lg">
@@ -1786,7 +1786,7 @@ function ChooseClient() {
                         </div>
                       </div>
 
-                      {/* زر إضافة المنتج */}
+                      {/* Add product button */}
                       <div className="flex justify-center pt-6 mt-2 border-t">
                         <Button
                           onClick={handleAddProduct}

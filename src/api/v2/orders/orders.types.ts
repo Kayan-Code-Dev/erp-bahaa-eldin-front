@@ -24,7 +24,7 @@ export type TOrderClient = {
   date_of_birth: string | null;
   national_id: string | null;
   address_id: number | null;
-  /** أرقام هواتف العميل كما في رد الـ clients (إن وُجدت) */
+  /** Client phone numbers as in clients response (if available) */
   phones?: { phone: string; type?: string }[];
   source?: string | null;
   breast_size?: string | null;
@@ -115,11 +115,11 @@ export type TOrder = {
   paid: string;
   remaining: string;
   visit_datetime: string;
-  /** تاريخ التسليم (Y-m-d H:i:s) */
+  /** Delivery date (Y-m-d H:i:s) */
   delivery_date?: string | null;
-  /** تاريخ ووقت المناسبة لطلبات الإيجار */
+  /** Occasion date and time for rental orders */
   occasion_datetime?: string | null;
-  /** عدد أيام الإيجار */
+  /** Number of rental days */
   days_of_rent?: number | null;
   order_notes: string | null;
   discount_type: TDiscountType | null;
@@ -140,7 +140,7 @@ export type TOrder = {
   factory_notes: string | null;
   priority: string;
   client: TOrderClient;
-  /** اسم الموظف الذي أنشأ الطلب (إن توفر) */
+  /** Name of employee who created the order (if available) */
   employee_name?: string | null;
   inventory?: TOrderInventory | null;
   items: TOrderItem[];
@@ -210,16 +210,16 @@ export type TCreateOrderItemRequest = {
 export type TCreateOrderRequest = {
   existing_client: true;
   client_id: number;
-  /** الموظف الذي أنشأ الفاتورة */
+  /** Employee who created the invoice */
   employee_id?: number;
   entity_type: TEntity;
   entity_id: number;
   delivery_date: string;
-  /** موعد الاستلام (Y-m-d H:i:s) */
+  /** Receive date/time (Y-m-d H:i:s) */
   visit_datetime?: string;
-  /** على مستوى الطلب لطلبات الإيجار (Y-m-d H:i:s) */
+  /** At order level for rental orders (Y-m-d H:i:s) */
   occasion_datetime?: string;
-  /** على مستوى الطلب لطلبات الإيجار */
+  /** At order level for rental orders */
   days_of_rent?: number;
   order_notes?: string;
   discount_type?: TDiscountType;
@@ -231,16 +231,16 @@ export type TCreateOrderRequest = {
 export type TCreateOrderWithNewClientRequest = {
   existing_client: false;
   client: TCreateClientRequest;
-  /** الموظف الذي أنشأ الفاتورة */
+  /** Employee who created the invoice */
   employee_id?: number;
   entity_type: TEntity;
   entity_id: number;
   delivery_date: string;
-  /** موعد الاستلام (Y-m-d H:i:s) */
+  /** Receive date/time (Y-m-d H:i:s) */
   visit_datetime?: string;
-  /** على مستوى الطلب لطلبات الإيجار (Y-m-d H:i:s) */
+  /** At order level for rental orders (Y-m-d H:i:s) */
   occasion_datetime?: string;
-  /** على مستوى الطلب لطلبات الإيجار */
+  /** At order level for rental orders */
   days_of_rent?: number;
   order_notes?: string;
   discount_type?: TDiscountType;
@@ -248,7 +248,7 @@ export type TCreateOrderWithNewClientRequest = {
   items: TCreateOrderItemRequest[];
 };
 
-/** إرجاع الطلب بالكامل: POST /orders/:id/return */
+/** Return entire order: POST /orders/:id/return */
 export type TReturnOrderFullRequest = {
   items: {
     cloth_id: number;

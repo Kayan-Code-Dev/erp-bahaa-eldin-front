@@ -37,7 +37,7 @@ import { OrderInvoicePrintModal } from "./OrderInvoicePrintModal";
 import { OrderReceiptAckPrintModal } from "./OrderReceiptAckPrintModal";
 import { getOrderTypeLabel } from "@/api/v2/orders/order.utils";
 import { OrderEmployeeName } from "@/components/custom/OrderEmployeeName";
-// dropdown menu imports تمت إزالتها بعد استبدال القائمة بأزرار مباشرة
+// dropdown menu imports removed after replacing menu with direct buttons
 import {
   Tooltip,
   TooltipContent,
@@ -303,7 +303,7 @@ function OrdersList() {
             <Form {...form}>
               <form className="space-y-4">
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
-                  {/* رقم الفاتورة */}
+                  {/* Invoice number */}
                   <FormField
                     control={form.control}
                     name="order_id"
@@ -323,7 +323,7 @@ function OrdersList() {
                     )}
                   />
 
-                  {/* العميل */}
+                  {/* Client */}
                   <FormField
                     control={form.control}
                     name="client_id"
@@ -341,7 +341,7 @@ function OrdersList() {
                     )}
                   />
 
-                  {/* اسم الصنف */}
+                  {/* Item name */}
                   <FormField
                     control={form.control}
                     name="item_name"
@@ -359,7 +359,7 @@ function OrdersList() {
                     )}
                   />
 
-                  {/* كود الصنف */}
+                  {/* Item code */}
                   <FormField
                     control={form.control}
                     name="item_code"
@@ -377,7 +377,7 @@ function OrdersList() {
                     )}
                   />
 
-                  {/* تاريخ الفاتورة من / إلى */}
+                  {/* Invoice date from / to */}
                   <FormField
                     control={form.control}
                     name="invoice_date_from"
@@ -413,7 +413,7 @@ function OrdersList() {
                     )}
                   />
 
-                  {/* تاريخ التأجير من / إلى */}
+                  {/* Rental date from / to */}
                   <FormField
                     control={form.control}
                     name="visit_date_from"
@@ -449,7 +449,7 @@ function OrdersList() {
                     )}
                   />
 
-                  {/* تاريخ التسليم من / إلى */}
+                  {/* Delivery date from / to */}
                   <FormField
                     control={form.control}
                     name="delivery_date_from"
@@ -485,7 +485,7 @@ function OrdersList() {
                     )}
                   />
 
-                  {/* تاريخ الاسترجاع من / إلى */}
+                  {/* Return date from / to */}
                   <FormField
                     control={form.control}
                     name="return_date_from"
@@ -567,7 +567,7 @@ function OrdersList() {
                 ) : displayedOrders.length > 0 ? (
                   displayedOrders.map((order) => (
                     <TableRow key={order.id} className="align-top">
-                      {/* العمود 1: رقم الطلب */}
+                      {/* Column 1: Order number */}
                       <TableCell
                         className="font-medium text-center cursor-pointer align-top pt-4"
                         onClick={() => handleViewOrder(order)}
@@ -575,7 +575,7 @@ function OrdersList() {
                         <p className="underline text-sm">#{order.id}</p>
                       </TableCell>
 
-                      {/* العمود 2: بيانات العميل */}
+                      {/* Column 2: Client data */}
                       <TableCell className="align-top">
                         <div className="flex flex-col gap-1 text-sm text-right">
                           <p className="font-semibold text-gray-900">
@@ -629,7 +629,7 @@ function OrdersList() {
                         </div>
                       </TableCell>
 
-                      {/* العمود 3: التواريخ + الأكشن */}
+                      {/* Column 3: Dates + Actions */}
                       <TableCell className="align-top">
                         <div className="flex flex-col gap-1 text-sm text-right">
                           <p className="font-semibold text-gray-900">
@@ -695,7 +695,7 @@ function OrdersList() {
                                     تعديل
                                   </TooltipContent>
                                 </Tooltip>
-                                {/* نسخة إدارة */}
+                                {/* Management copy */}
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <Button
@@ -711,7 +711,7 @@ function OrdersList() {
                                     نسخة إدارة
                                   </TooltipContent>
                                 </Tooltip>
-                                {/* نسخة عميل */}
+                                {/* Client copy */}
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <Button
@@ -729,7 +729,7 @@ function OrdersList() {
                                     نسخة عميل
                                   </TooltipContent>
                                 </Tooltip>
-                                {/* إقرار استلام */}
+                                {/* Receipt acknowledgment */}
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <Button
@@ -751,7 +751,7 @@ function OrdersList() {
                         </div>
                       </TableCell>
 
-                      {/* العمود 4: الأصناف + المبالغ + حالة الطلب */}
+                      {/* Column 4: Items + Amounts + Order status */}
                       <TableCell className="align-top">
                         <div className="flex flex-col gap-2 text-sm text-right">
                           <p className="font-semibold text-gray-900">
@@ -802,7 +802,7 @@ function OrdersList() {
                         </div>
                       </TableCell>
 
-                      {/* العمود 5: الموظف */}
+                      {/* Column 5: Employee */}
                       <TableCell className="align-top text-center">
                         <div className="flex flex-col items-center justify-center gap-1 text-sm">
                           <OrderEmployeeName

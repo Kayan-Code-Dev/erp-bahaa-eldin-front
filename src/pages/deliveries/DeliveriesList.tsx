@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-// dropdown menu imports تمت إزالتها بعد استبدال القائمة بأزرار مباشرة
+// dropdown menu imports removed after replacing menu with direct buttons
 import {
   AlertDialog,
   AlertDialogAction,
@@ -94,7 +94,7 @@ function DeliveriesList() {
   const page = Number(searchParams.get("page")) || 1;
   const per_page = Number(searchParams.get("per_page")) || DEFAULT_PER_PAGE;
 
-  // تاريخ اليوم بصيغة YYYY-MM-DD ليكون الفلتر الافتراضي
+  // Today's date in YYYY-MM-DD format as default filter
   const today = new Date().toISOString().split("T")[0];
   const initialDateFrom = searchParams.get("date_from") || today;
   const initialDateTo = searchParams.get("date_to") || today;
@@ -157,7 +157,7 @@ function DeliveriesList() {
   const filters = useMemo(() => {
     const values = debouncedFormValues;
     return {
-      // نستخدم حقول الفلتر كتاريخ تسليم (delivery_date_*)
+      // Use filter fields as delivery date (delivery_date_*)
       delivery_date_from: values.date_from || undefined,
       delivery_date_to: values.date_to || undefined,
       client_id:
@@ -170,7 +170,7 @@ function DeliveriesList() {
   useEffect(() => {
     const params = new URLSearchParams(searchParams);
 
-    // نزامن قيم الفورم نفسها مع الـ URL (date_from/date_to)
+    // Synchronize form values with URL (date_from/date_to)
     if (debouncedFormValues.date_from) params.set("date_from", debouncedFormValues.date_from);
     else params.delete("date_from");
 
@@ -204,7 +204,7 @@ function DeliveriesList() {
     return base.filter((order) => order.order_type === orderTypeFilter);
   }, [data?.data, orderTypeFilter]);
 
-  // تحميل حالة وجود ضمان لكل طلب في الصفحة الحالية
+  // Load custody status for each order on current page
   useEffect(() => {
     const loadCustodies = async () => {
       if (!displayedOrders.length) {
@@ -239,7 +239,7 @@ function DeliveriesList() {
         }
         setHasCustodyByOrderId(map);
       } catch {
-        // في حالة الخطأ، نترك الخريطة كما هي ولا نمنع الزر
+        // On error, leave map as is and don't block the button
       }
     };
 
@@ -551,7 +551,7 @@ function DeliveriesList() {
                   ) : displayedOrders.length > 0 ? (
                     displayedOrders.map((order) => (
                       <TableRow key={order.id} className="align-top">
-                        {/* العمود 1: رقم الطلب */}
+                        {/* Column 1: Order number */}
                         <TableCell
                           className="font-medium text-center cursor-pointer align-top pt-4"
                           onClick={() => handleViewOrder(order)}
@@ -561,7 +561,7 @@ function DeliveriesList() {
                           </p>
                         </TableCell>
 
-                        {/* العمود 2: بيانات العميل */}
+                        {/* Column 2: Client data */}
                         <TableCell className="align-top">
                           <div className="flex flex-col gap-1 text-sm text-right">
                             <p className="font-semibold text-gray-900">
@@ -615,7 +615,7 @@ function DeliveriesList() {
                           </div>
                         </TableCell>
 
-                        {/* العمود 3: التواريخ + الأكشن */}
+                        {/* Column 3: Dates + Actions */}
                         <TableCell className="align-top">
                           <div className="flex flex-col gap-1 text-sm text-right">
                             <p className="font-semibold text-gray-700">
@@ -727,7 +727,7 @@ function DeliveriesList() {
                                     </Tooltip>
                                   )}
 
-                          {/* Create Custody (للطلبات الإيجار بدون ضمان) */}
+                          {/* Create Custody (for rent orders without custody) */}
                           {order.order_type === "rent" &&
                             !hasCustodyByOrderId[order.id] && (
                               <Tooltip>
@@ -788,7 +788,7 @@ function DeliveriesList() {
                           </div>
                         </TableCell>
 
-                        {/* العمود 4: الأصناف + المبالغ + حالة الطلب */}
+                        {/* Column 4: Items + Amounts + Order status */}
                         <TableCell className="align-top">
                           <div className="flex flex-col gap-2 text-sm text-right">
                             <p className="font-semibold text-gray-900">
@@ -839,7 +839,7 @@ function DeliveriesList() {
                           </div>
                         </TableCell>
 
-                        {/* العمود 5: الموظف */}
+                        {/* Column 5: Employee */}
                         <TableCell className="align-top text-center">
                           <div className="flex flex-col items-center justify-center gap-1 text-sm">
                             <OrderEmployeeName

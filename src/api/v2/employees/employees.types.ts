@@ -26,7 +26,7 @@ export type TCreateEmployeeRequest = {
   manager_id?: number;
   employment_type?: TEmploymentType;
   roles?: number[];
-  /** قائمة الفروع المرتبطة بالموظف كما في JSON الإنشاء */
+  /** List of branches associated with employee as in creation JSON */
   branch_ids?: number[];
   base_salary?: number;
   transport_allowance?: number;

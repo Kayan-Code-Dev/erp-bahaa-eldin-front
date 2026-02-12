@@ -8,13 +8,13 @@ type Props = {
 };
 
 /**
- * يعرض اسم الموظف الذي أنشأ الطلب.
- * يعتمد أولاً على `order.employee_name` لو موجودة من الـ API،
- * ولو غير موجودة يحاول يجلب بيانات الموظف من `/employees/:id`
- * باستخدام `employee_id` الموجود في رد الطلب.
+ * Displays the name of the employee who created the order.
+ * First relies on `order.employee_name` if available from the API,
+ * otherwise tries to fetch employee data from `/employees/:id`
+ * using `employee_id` found in the order response.
  */
 export function OrderEmployeeName({ order, className }: Props) {
-  // بعض الـ APIs ترجع employee_name مباشرة، وبعضها ترجع employee_id فقط
+  // Some APIs return employee_name directly, others return only employee_id
   const rawEmployeeId = (order as any).employee_id as number | null | undefined;
   const employeeId = rawEmployeeId && rawEmployeeId > 0 ? rawEmployeeId : null;
 
@@ -22,7 +22,7 @@ export function OrderEmployeeName({ order, className }: Props) {
     typeof order.employee_name === "string" &&
     order.employee_name.trim().length > 0;
 
-  // لو في اسم جاهز من الـ API نستخدمه مباشرة بدون طلب إضافي
+  // If name is available from API, use it directly without additional request
   const { data: employeeData, isLoading } = useQuery(
     useGetEmployeeQueryOptions(employeeId || 0),
   );
@@ -40,4 +40,3 @@ export function OrderEmployeeName({ order, className }: Props) {
 
   return <span className={className}>{displayName}</span>;
 }
-

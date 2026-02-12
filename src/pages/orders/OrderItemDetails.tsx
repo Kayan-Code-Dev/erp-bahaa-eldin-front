@@ -30,7 +30,7 @@ const getDiscountTypeLabel = (type?: string | null) => {
   return type;
 };
 
-/** عرض حقل مع التسمية — يظهر الصف فقط إن كانت القيمة موجودة إن رغبت */
+/** Display field with label — shows row only if value exists if desired */
 function FieldRow({
   label,
   value,
@@ -55,7 +55,7 @@ function FieldRow({
   );
 }
 
-/** قسم المقاسات (من الطلب: sleeve_length, forearm, ...) */
+/** Measurements section (from order: sleeve_length, forearm, ...) */
 function MeasurementsSection({ item }: { item: TOrderItem }) {
   const fields: { key: keyof TOrderItem; label: string }[] = [
     { key: "sleeve_length", label: "طول الكم" },
@@ -98,7 +98,7 @@ function MeasurementsSection({ item }: { item: TOrderItem }) {
   );
 }
 
-/** مقاسات المنتج (من الـ API على القطعة: breast_size, waist_size, sleeve_size) */
+/** Product measurements (from API on item: breast_size, waist_size, sleeve_size) */
 function ProductSizesSection({ item }: { item: TOrderItem }) {
   const hasAny =
     (item.breast_size != null && String(item.breast_size).trim() !== "") ||
@@ -191,7 +191,7 @@ function OrderItemDetails() {
           </span>
         </nav>
 
-        {/* عنوان الصفحة */}
+        {/* Page title */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold">
@@ -209,7 +209,7 @@ function OrderItemDetails() {
           </Button>
         </div>
 
-        {/* أساسيات المنتج */}
+        {/* Product basics */}
         <Card className="overflow-hidden border shadow-sm">
           <CardHeader className="border-b bg-muted/20 pb-3">
             <div className="flex items-center gap-2">
@@ -243,13 +243,13 @@ function OrderItemDetails() {
           </CardContent>
         </Card>
 
-        {/* مقاسات المنتج (breast_size, waist_size, sleeve_size) */}
+        {/* Product measurements (breast_size, waist_size, sleeve_size) */}
         <ProductSizesSection item={item} />
 
-        {/* مقاسات الطلب (sleeve_length, forearm, ...) */}
+        {/* Order measurements (sleeve_length, forearm, ...) */}
         <MeasurementsSection item={item} />
 
-        {/* مالية */}
+        {/* Financial */}
         <Card className="overflow-hidden border shadow-sm">
           <CardHeader className="border-b bg-muted/20 pb-3">
             <div className="flex items-center gap-2">
@@ -280,7 +280,7 @@ function OrderItemDetails() {
           </CardContent>
         </Card>
 
-        {/* إيجار (إن وجد) */}
+        {/* Rental (if present) */}
         {(item.days_of_rent != null ||
           item.occasion_datetime ||
           item.delivery_date) && (
@@ -304,7 +304,7 @@ function OrderItemDetails() {
           </Card>
         )}
 
-        {/* مصنع */}
+        {/* Factory */}
         {(item.factory_status != null ||
           item.factory_rejection_reason != null ||
           item.factory_notes != null) && (
@@ -352,7 +352,7 @@ function OrderItemDetails() {
           </Card>
         )}
 
-        {/* ملاحظات */}
+        {/* Notes */}
         {item.notes != null && String(item.notes).trim() !== "" && (
           <Card className="overflow-hidden border shadow-sm">
             <CardHeader className="border-b bg-muted/20 pb-3">

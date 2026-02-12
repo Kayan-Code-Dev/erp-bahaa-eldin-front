@@ -134,7 +134,7 @@ export const useReturnOrderItemMutationOptions = () => {
   });
 };
 
-/** إرجاع الطلب بالكامل: POST /orders/:id/return */
+/** Return entire order: POST /orders/:id/return */
 export const useReturnOrderFullMutationOptions = () => {
   const qClient = useQueryClient();
   return mutationOptions({

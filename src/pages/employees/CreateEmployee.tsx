@@ -172,7 +172,7 @@ function CreateEmployee() {
       manager_id: values.manager_id ? Number(values.manager_id) : undefined,
       employment_type: values.employment_type as TCreateEmployeeRequest["employment_type"],
       roles: values.roles ? values.roles.map(Number) : undefined,
-      // branch_ids كما في JSON المرسل: مصفوفة أرقام للفروع المختارة
+      // branch_ids as in sent JSON: array of numbers for selected branches
       branch_ids: values.branch_ids && values.branch_ids.length > 0
         ? values.branch_ids.map((id) => Number(id))
         : undefined,

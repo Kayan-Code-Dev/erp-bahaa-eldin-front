@@ -14,7 +14,7 @@ type Props = {
 
 const RULES_TEXT = `إقرار من المستفيد: أقر بأنني استلمت الفاتورة من 1 إلى 7 أسماء ظاهرة وأوضح أنني مسؤول عن التأخير. 2000 جنيه لإيجار السروال و 500 للجلب. لا يجوز استبدال أو إرجاع الفواتير إلا بعد 3 أشهر. لا يسمح بإخراج المنتجات من المحل في حالة غير مكتملة البيع. يلزم إحضار الفواتير الشخصية مع الفاتورة عند الاستبدال أو الإرجاع.`;
 
-/* First table: label only (no عمود الصنف) */
+/* First table: label only (no item column) */
 const INFO_ROWS: { label: string }[] = [
   { label: "اسم العروسة" },
   { label: "هاتف العروسة" },
@@ -254,13 +254,13 @@ export function OrderInvoicePrint({
             position: absolute; left: 0; top: 0; width: 100%; max-width: 100%; padding: 0; box-sizing: border-box;
             page-break-inside: avoid; page-break-after: avoid;
           }
-          /* الهيدر عند الطباعة: اللوغو بنفس ارتفاع الهيدر وبحجم أوضح */
+          /* Header when printing: logo at same height as header and clearer size */
           .invoice-print-header { padding-top: 0.4rem !important; padding-bottom: 0.4rem !important; margin-bottom: 0.35rem !important; }
           .invoice-print-header-inner { padding-left: 0.5rem !important; padding-right: 0.5rem !important; gap: 0.5rem !important; min-height: 4rem !important; }
           .invoice-print-header .invoice-header-label, .invoice-print-header .invoice-header-line { font-size: 9px !important; }
           .invoice-print-header-logo { padding: 0.25rem !important; height: 4rem !important; min-height: 4rem !important; max-height: 4rem !important; }
           .invoice-logo-img { max-height: 100% !important; height: 100% !important; width: auto !important; max-width: 160px !important; object-fit: contain !important; object-position: center !important; }
-          /* تصغير جدول بيانات الطلب عند الطباعة فقط */
+          /* Shrink order data table only when printing */
           .invoice-print-info-block { margin-bottom: 0.5rem !important; }
           .invoice-print-info-block h2 { font-size: 9px !important; margin-bottom: 0.25rem !important; padding-bottom: 0.25rem !important; }
           .invoice-print-table-info .invoice-print-td { padding: 0.2rem 0.4rem !important; font-size: 9px !important; }

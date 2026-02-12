@@ -3,7 +3,7 @@ import { OrderEmployeeName } from "@/components/custom/OrderEmployeeName";
 
 const HEADER_BG = "#907457";
 
-/** قواعد وتعليمات الإقرار — في آخر الصفحة */
+/** Receipt acknowledgment rules and instructions — at the bottom of the page */
 const RULES_ITEMS = [
   "ميعاد استلام المنتج من 1 ظهراً حتى 7 مساءً وإحضار التأمينات اللازمة.",
   "لا يمكن استرجاع أو استبدال المنتج بعد مرور 3 أيام من تاريخ الشراء إلا في حالة وجود عيب مصنعي.",
@@ -51,7 +51,7 @@ export function OrderReceiptAckPrint({
       className="invoice-print-root w-full min-h-screen flex flex-col bg-white text-gray-900 font-semibold text-[14px] leading-snug"
       style={{ fontFamily: "'Cairo', 'Segoe UI', Arial, sans-serif" }}
     >
-      {/* Header — مصغّر */}
+      {/* Header — minimized */}
       <header
         className="invoice-print-header w-full py-3 mb-3 text-white rounded-b-xl shadow-sm font-semibold"
         style={{ backgroundColor: HEADER_BG }}
@@ -75,9 +75,9 @@ export function OrderReceiptAckPrint({
       </header>
 
       <div className="invoice-print-content flex-1 flex flex-col min-h-0 max-w-[210mm] mx-auto px-6 pb-3 w-full">
-        {/* المحتوى من العنوان حتى التوقيع */}
+        {/* Content from title to signature */}
         <div className="invoice-print-body shrink-0">
-        {/* 1. عنوان الإقرار — في الأعلى */}
+        {/* 1. Receipt acknowledgment title — at the top */}
         <div className="invoice-print-title-wrap flex flex-col items-center justify-center text-center mb-3">
           <h1 className="invoice-print-title text-[22px] font-bold text-gray-900 tracking-tight">
             إقرار استلام
@@ -85,7 +85,7 @@ export function OrderReceiptAckPrint({
           <span className="invoice-print-title-line mt-1 block h-0.5 w-24 rounded-full bg-gray-400" aria-hidden />
         </div>
 
-        {/* 2. استلمت أنا / الرقم القومي / المقيم في — من اليمين */}
+        {/* 2. I received / National ID / Resident in — from the right */}
         <div className="invoice-print-recipient text-right mb-3 space-y-1 text-[14px] font-semibold">
           <p className="text-gray-900">
             <span className="font-bold text-gray-700">استلمت أنا :</span>{" "}
@@ -101,7 +101,7 @@ export function OrderReceiptAckPrint({
           </p>
         </div>
 
-        {/* 3. قائمة المنتجات مرقمة */}
+        {/* 3. Numbered products list */}
         <div className="invoice-print-items-list mb-3 text-[14px] font-semibold text-gray-900">
           {items.length > 0 ? (
             <ol className="list-decimal list-inside space-y-0.5">
@@ -117,20 +117,20 @@ export function OrderReceiptAckPrint({
           )}
         </div>
 
-        {/* 4. فترة التأجير */}
+        {/* 4. Rental period */}
         <p className="invoice-print-rental text-[14px] font-semibold text-gray-900 mb-2">
           وذلك بتأجيره من تاريخ{" "}
           <span className="font-bold">{startDate}</span> حتى تاريخ{" "}
           <span className="font-bold">{endDate}</span>
         </p>
 
-        {/* 5. إقرار الاستلام ودفع العربون */}
+        {/* 5. Receipt acknowledgment and deposit payment */}
         <p className="invoice-print-deposit text-[14px] font-semibold text-gray-900 mb-4">
           وذلك إقرار مني بالاستلام ودفع عربون وقدره :{" "}
           <span className="font-bold">{paid} ج.م</span>
         </p>
 
-        {/* 6. المستلم والتوقيع */}
+        {/* 6. Recipient and signature */}
         <div className="invoice-print-signature flex justify-end mt-2 pt-3 border-t-2 border-gray-300 space-y-3">
           <div className="invoice-print-signature-box text-right min-w-[220px] space-y-2 text-[14px] font-semibold text-gray-900">
             <p>
@@ -145,7 +145,7 @@ export function OrderReceiptAckPrint({
         </div>
         </div>
 
-        {/* 7. القواعد والتعليمات — ثابتة في آخر الصفحة مع مسافة فوق الفوتر */}
+        {/* 7. Rules and instructions — fixed at the bottom of the page with spacing above footer */}
         <div className="invoice-print-rules mt-auto pt-3 pb-8 border-t-2 border-gray-200 shrink-0">
           <h2 className="invoice-print-rules-title text-[13px] font-bold text-gray-800 mb-1.5 pb-1">
             القواعد والتعليمات
@@ -163,7 +163,7 @@ export function OrderReceiptAckPrint({
         </div>
       </div>
 
-      {/* Footer — مصغّر */}
+      {/* Footer — minimized */}
       <div
         className="invoice-print-footer w-full mt-auto py-2 px-4 text-center text-white rounded-t-xl text-[13px] font-bold shadow-sm shrink-0"
         style={{ backgroundColor: HEADER_BG }}

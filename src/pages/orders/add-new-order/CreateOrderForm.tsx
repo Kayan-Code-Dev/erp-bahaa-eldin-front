@@ -70,7 +70,7 @@ type LocationState = {
   client?: TClientResponse;
 };
 
-// Zod schema for order form (تواريخ الإيجار على مستوى الطلب وليس القطعة)
+// Zod schema for order form (rental dates at order level, not item level)
 const orderItemSchema = z
   .object({
     cloth_id: z.number(),
@@ -415,7 +415,7 @@ function CreateOrderForm() {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* بطاقة واحدة شاملة لكل تفاصيل الطلب */}
+            {/* Single comprehensive card for all order details */}
             <Card className="overflow-hidden border shadow-sm">
               <CardHeader className="border-b bg-muted/20 pb-4">
                 <div className="flex items-center gap-3">
@@ -432,7 +432,7 @@ function CreateOrderForm() {
               </CardHeader>
 
               <CardContent className="space-y-8 pt-6">
-                {/* معلومات العميل داخل البطاقة */}
+                {/* Client information inside the card */}
                 {client && (
                   <section aria-label="معلومات العميل" className="rounded-xl border bg-muted/10 p-5 space-y-4">
                     <div className="flex items-center gap-3">
@@ -475,9 +475,9 @@ function CreateOrderForm() {
 
                 <Separator />
 
-                {/* 1) المبلغ وتاريخ التسليم + تواريخ الإيجار على مستوى الطلب */}
-                <section aria-label="تفاصيل الطلب" className="space-y-6">
-                  {/* المبلغ وتاريخ التسليم */}
+                {/* 1) Payment amount and delivery date + Rental dates at order level */}
+                <section aria-label="Order details" className="space-y-6">
+                  {/* Payment amount and delivery date */}
                   <div>
                     <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
                       <Banknote className="h-4 w-4 text-muted-foreground" />
@@ -525,7 +525,7 @@ function CreateOrderForm() {
                     </div>
                   </div>
 
-                  {/* تواريخ الإيجار على مستوى الطلب */}
+                  {/* Rental dates at order level */}
                   {hasRentItem && (
                     <div className="rounded-xl border-2 border-primary/20 bg-primary/5 p-5">
                       <h3 className="mb-1 flex items-center gap-2 text-sm font-semibold text-foreground">
@@ -582,9 +582,9 @@ function CreateOrderForm() {
 
                 <Separator />
 
-                {/* 2) خصم الطلب وملاحظات الطلب */}
-                <section aria-label="خصم الطلب والملاحظات" className="space-y-6">
-                  {/* خصم الطلب */}
+                {/* 2) Order discount and order notes */}
+                <section aria-label="Order discount and notes" className="space-y-6">
+                  {/* Order discount */}
                   <div>
                     <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
                       <Percent className="h-4 w-4 text-muted-foreground" />
@@ -666,7 +666,7 @@ function CreateOrderForm() {
                     )}
                   </div>
 
-                  {/* ملاحظات الطلب */}
+                  {/* Order notes */}
                   <FormField
                     control={form.control}
                     name="order_notes"
@@ -692,7 +692,7 @@ function CreateOrderForm() {
 
                 <Separator />
 
-                {/* 3) تفاصيل القطع المختارة داخل نفس الكارد */}
+                {/* 3) Selected items details inside the same card */}
                 <section aria-label="تفاصيل القطع المختارة" className="space-y-5">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
@@ -722,7 +722,7 @@ function CreateOrderForm() {
                         key={field.id}
                         className="rounded-2xl border-2 border-muted/40 bg-card shadow-sm transition-shadow hover:border-primary/20 hover:shadow-md"
                       >
-                        {/* هيدر القطعة: رقم + كود + اسم + badge النوع */}
+                        {/* Item header: number + code + name + type badge */}
                         <div className="flex flex-row items-center gap-3 border-b bg-muted/10 px-4 py-4">
                           <span
                             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground"
@@ -747,7 +747,7 @@ function CreateOrderForm() {
                         </div>
 
                         <div className="space-y-4 px-4 pb-5 pt-4">
-                          {/* السعر ونوع الطلب — في صندوق واحد واضح */}
+                          {/* Price and order type — in one clear box */}
                           <div className="rounded-xl border bg-muted/5 p-4">
                             <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                               <Banknote className="h-4 w-4" />
@@ -807,7 +807,7 @@ function CreateOrderForm() {
                             </div>
                           </div>
 
-                          {/* خصم القطعة */}
+                          {/* Item discount */}
                           <div className="rounded-xl border bg-muted/5 p-4">
                             <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                               <Percent className="h-4 w-4" />
@@ -891,7 +891,7 @@ function CreateOrderForm() {
                             )}
                           </div>
 
-                          {/* ملاحظات القطعة */}
+                          {/* Item notes */}
                           <FormField
                             control={form.control}
                             name={`items.${index}.notes`}
@@ -922,7 +922,7 @@ function CreateOrderForm() {
                 </section>
               </CardContent>
 
-              {/* أزرار الإجراء أسفل نفس الكارد */}
+              {/* Action buttons at the bottom of the same card */}
               <CardFooter className="flex flex-col gap-3 border-t bg-card pt-6 sm:flex-row sm:justify-end sm:gap-4">
                 <Button
                   type="button"

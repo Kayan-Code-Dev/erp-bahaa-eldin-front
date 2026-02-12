@@ -178,7 +178,7 @@ function Payments() {
     };
   }, [page, per_page, debouncedFormValues]);
 
-  // مزامنة البارامترات مع الـ URL
+  // Synchronize parameters with URL
   useEffect(() => {
     const next = new URLSearchParams();
     next.set("page", String(page));

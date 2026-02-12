@@ -290,7 +290,7 @@ export const sidebarLabels: SidebarLabel[] = [
     level: 1,
     iconComponent: createIcon(Wrench),
   },
-  // 11. إدارة المصنع (صفحة /factory) أسفل إدارة الورشة
+  // 11. Factory management (page /factory) below workshop management
   {
     icon: null,
     label: "إدارة المصنع",

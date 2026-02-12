@@ -64,7 +64,7 @@ function ReturnsList() {
   const page = Number(searchParams.get("page")) || 1;
   const per_page = Number(searchParams.get("per_page")) || DEFAULT_PER_PAGE;
 
-  // تاريخ اليوم لعرض الارجاعات حسب اليوم افتراضيًا
+  // Today's date to display returns for today by default
   const today = new Date().toISOString().split("T")[0];
   const initialDateFrom = searchParams.get("date_from") || today;
   const initialDateTo = searchParams.get("date_to") || today;
@@ -84,7 +84,7 @@ function ReturnsList() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<TOrder | null>(null);
   
-  // إرجاع الطلب بالكامل
+  // Return entire order
   const [orderToReturn, setOrderToReturn] = useState<TOrder | null>(null);
 
   // Watch form values
@@ -127,7 +127,7 @@ function ReturnsList() {
     const values = debouncedFormValues;
     return {
       ...RETURNS_FILTER,
-      // الفلترة تكون حسب تاريخ الاسترجاع لكن بأسماء الباراميترات date_from / date_to كما يطلب الـ API
+      // Filtering is by return date but using parameter names date_from / date_to as required by API
       date_from: values.date_from || undefined,
       date_to: values.date_to || undefined,
       client_id:
@@ -137,7 +137,7 @@ function ReturnsList() {
     };
   }, [debouncedFormValues]);
 
-  // Update URL params when filters change (نزامن قيم الفورم نفسها)
+  // Update URL params when filters change (synchronize form values)
   useEffect(() => {
     const params = new URLSearchParams(searchParams);
     if (debouncedFormValues.date_from) params.set("date_from", debouncedFormValues.date_from);
@@ -156,7 +156,7 @@ function ReturnsList() {
     useGetOrdersQueryOptions(page, per_page, filters)
   );
 
-  // API returns delivered orders (تم التسليم); show all
+  // API returns delivered orders; show all
   const displayedOrders = useMemo(() => data?.data ?? [], [data?.data]);
 
   // Export Mutation
@@ -346,7 +346,7 @@ function ReturnsList() {
                   ) : displayedOrders.length > 0 ? (
                     displayedOrders.map((order) => (
                       <TableRow key={order.id} className="align-top">
-                        {/* العمود 1: رقم الطلب */}
+                        {/* Column 1: Order number */}
                         <TableCell
                           className="font-medium text-center cursor-pointer align-top pt-4"
                           onClick={() => handleViewOrder(order)}
@@ -354,7 +354,7 @@ function ReturnsList() {
                           <p className="underline text-sm">#{order.id}</p>
                         </TableCell>
 
-                        {/* العمود 2: بيانات العميل */}
+                        {/* Column 2: Client data */}
                         <TableCell className="align-top">
                           <div className="flex flex-col gap-1 text-sm text-right">
                             <p className="font-semibold text-gray-900">
@@ -408,7 +408,7 @@ function ReturnsList() {
                           </div>
                         </TableCell>
 
-                        {/* العمود 3: التواريخ + الأكشن */}
+                        {/* Column 3: Dates + Actions */}
                         <TableCell className="align-top">
                           <div className="flex flex-col gap-1 text-sm text-right">
                             <p className="font-semibold text-gray-900">
@@ -461,7 +461,7 @@ function ReturnsList() {
                                     </TooltipContent>
                                   </Tooltip>
 
-                                  {/* إرجاع الطلب بالكامل */}
+                                  {/* Return entire order */}
                                   {canReturnOrder(order) && (
                                     <Tooltip>
                                       <TooltipTrigger asChild>
@@ -485,7 +485,7 @@ function ReturnsList() {
                           </div>
                         </TableCell>
 
-                        {/* العمود 4: الأصناف + المبالغ + حالة الطلب */}
+                        {/* Column 4: Items + Amounts + Order status */}
                         <TableCell className="align-top">
                           <div className="flex flex-col gap-2 text-sm text-right">
                             <p className="font-semibold text-gray-900">
@@ -536,7 +536,7 @@ function ReturnsList() {
                           </div>
                         </TableCell>
 
-                        {/* العمود 5: الموظف */}
+                        {/* Column 5: Employee */}
                         <TableCell className="align-top text-center">
                           <div className="flex flex-col items-center justify-center gap-1 text-sm">
                             <OrderEmployeeName
@@ -580,7 +580,7 @@ function ReturnsList() {
         onOpenChange={setIsViewModalOpen}
       />
 
-      {/* إرجاع الطلب بالكامل */}
+      {/* Return entire order */}
       <ReturnOrderFullModal
         open={!!orderToReturn}
         onOpenChange={(open) => !open && setOrderToReturn(null)}
