@@ -36,6 +36,7 @@ import { OrderDetailsModal } from "./OrderDetailsModal";
 import { OrderInvoicePrintModal } from "./OrderInvoicePrintModal";
 import { OrderReceiptAckPrintModal } from "./OrderReceiptAckPrintModal";
 import { getOrderTypeLabel } from "@/api/v2/orders/order.utils";
+import { OrderEmployeeName } from "@/components/custom/OrderEmployeeName";
 // dropdown menu imports تمت إزالتها بعد استبدال القائمة بأزرار مباشرة
 import {
   Tooltip,
@@ -800,9 +801,10 @@ function OrdersList() {
                       {/* العمود 5: الموظف */}
                       <TableCell className="align-top text-center">
                         <div className="flex flex-col items-center justify-center gap-1 text-sm">
-                          <span className="font-medium text-gray-900">
-                            {order.employee_name ?? "-"}
-                          </span>
+                          <OrderEmployeeName
+                            order={order}
+                            className="font-medium text-gray-900"
+                          />
                         </div>
                       </TableCell>
                     </TableRow>

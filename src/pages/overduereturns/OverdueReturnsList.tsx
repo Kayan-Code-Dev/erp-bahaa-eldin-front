@@ -51,6 +51,7 @@ import { CustomCalendar } from "@/components/custom/CustomCalendar";
 import { ClientsSelect } from "@/components/custom/ClientsSelect";
 import useDebounce from "@/hooks/useDebounce";
 import { ReturnOrderFullModal } from "@/pages/orders/ReturnOrderFullModal";
+import { OrderEmployeeName } from "@/components/custom/OrderEmployeeName";
 import {
   DEFAULT_PER_PAGE,
   FILTER_DEBOUNCE_MS,
@@ -551,9 +552,10 @@ function OverdueReturnsList() {
                         {/* العمود 5: الموظف */}
                         <TableCell className="align-top text-center">
                           <div className="flex flex-col items-center justify-center gap-1 text-sm">
-                            <span className="font-medium text-gray-900">
-                              {order.employee_name ?? "-"}
-                            </span>
+                            <OrderEmployeeName
+                              order={order}
+                              className="font-medium text-gray-900"
+                            />
                           </div>
                         </TableCell>
                       </TableRow>

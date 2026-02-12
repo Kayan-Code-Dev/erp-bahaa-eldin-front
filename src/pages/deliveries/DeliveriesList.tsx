@@ -58,6 +58,7 @@ import { OrderDetailsModal } from "@/pages/orders/OrderDetailsModal";
 import { CreateCustodyModal } from "@/pages/orders/CreateCustodyModal";
 import { CreatePaymentModal } from "@/pages/orders/CreatePaymentModal";
 import { getOrderTypeLabel, getStatusVariant, getStatusLabel } from "@/api/v2/orders/order.utils";
+import { OrderEmployeeName } from "@/components/custom/OrderEmployeeName";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -837,9 +838,10 @@ function DeliveriesList() {
                         {/* العمود 5: الموظف */}
                         <TableCell className="align-top text-center">
                           <div className="flex flex-col items-center justify-center gap-1 text-sm">
-                            <span className="font-medium text-gray-900">
-                              {order.employee_name ?? "-"}
-                            </span>
+                            <OrderEmployeeName
+                              order={order}
+                              className="font-medium text-gray-900"
+                            />
                           </div>
                         </TableCell>
                       </TableRow>
