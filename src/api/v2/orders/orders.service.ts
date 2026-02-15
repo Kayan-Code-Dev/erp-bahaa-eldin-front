@@ -39,8 +39,8 @@ export const getOrders = async (
     client_id?: string | number;
     /** Filter by item name */
     item_name?: string;
-    /** Filter by item code */
-    item_code?: string;
+    /** Filter by item/cloth type code */
+    cloth_type_code?: string;
     /** Filter by invoice creation date */
     invoice_date_from?: string;
     invoice_date_to?: string;
@@ -88,9 +88,9 @@ export const getOrders = async (
       params.item_name = filters.item_name.trim();
     }
 
-    // Item code
-    if (filters?.item_code && filters.item_code.trim() !== "") {
-      params.item_code = filters.item_code.trim();
+    // Item/cloth type code
+    if (filters?.cloth_type_code && filters.cloth_type_code.trim() !== "") {
+      params.cloth_type_code = filters.cloth_type_code.trim();
     }
 
     // Invoice dates -> sent as date_from / date_to as per API

@@ -61,7 +61,7 @@ const ordersFilterSchema = z.object({
   order_id: z.string().optional(),
   client_id: z.string().optional(),
   item_name: z.string().optional(),
-  item_code: z.string().optional(),
+  cloth_type_code: z.string().optional(),
   invoice_date_from: z.string().optional(),
   invoice_date_to: z.string().optional(),
   visit_date_from: z.string().optional(),
@@ -116,7 +116,7 @@ function OrdersList() {
       order_id: "",
       client_id: "",
       item_name: "",
-      item_code: "",
+      cloth_type_code: "",
       invoice_date_from: "",
       invoice_date_to: "",
       visit_date_from: "",
@@ -140,7 +140,7 @@ function OrdersList() {
       order_id: v.order_id && v.order_id.trim() !== "" ? v.order_id : undefined,
       client_id: v.client_id && v.client_id.trim() !== "" ? v.client_id : undefined,
       item_name: v.item_name && v.item_name.trim() !== "" ? v.item_name : undefined,
-      item_code: v.item_code && v.item_code.trim() !== "" ? v.item_code : undefined,
+      cloth_type_code: v.cloth_type_code && v.cloth_type_code.trim() !== "" ? v.cloth_type_code : undefined,
       invoice_date_from: v.invoice_date_from || undefined,
       invoice_date_to: v.invoice_date_to || undefined,
       visit_date_from: v.visit_date_from || undefined,
@@ -359,10 +359,10 @@ function OrdersList() {
                     )}
                   />
 
-                  {/* Item code */}
+                  {/* Item code (cloth_type_code) */}
                   <FormField
                     control={form.control}
-                    name="item_code"
+                    name="cloth_type_code"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>كود الصنف</FormLabel>
@@ -530,7 +530,7 @@ function OrdersList() {
                         order_id: "",
                         client_id: "",
                         item_name: "",
-                        item_code: "",
+                        cloth_type_code: "",
                         invoice_date_from: "",
                         invoice_date_to: "",
                         visit_date_from: "",

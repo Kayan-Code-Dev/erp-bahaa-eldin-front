@@ -60,7 +60,7 @@ export const useGetOrdersQueryOptions = (
     delayed?: boolean;
     client_id?: string | number;
     item_name?: string;
-    item_code?: string;
+    cloth_type_code?: string;
     invoice_date_from?: string;
     invoice_date_to?: string;
     visit_date_from?: string;
