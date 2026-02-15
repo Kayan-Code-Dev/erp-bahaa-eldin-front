@@ -19,7 +19,7 @@ export function SidebarNav({ items, keyPrefix = "nav" }: SidebarNavProps) {
   const { pathname } = useLocation();
 
   return (
-    <SidebarMenu>
+    <SidebarMenu className="group-data-[collapsible=icon]:items-center">
       {items.map((item, index) => {
         const active = includeRoute(pathname, item.path, item.level);
         const uniqueKey = `${keyPrefix}-${index}-${item.label}`;
@@ -32,7 +32,7 @@ export function SidebarNav({ items, keyPrefix = "nav" }: SidebarNavProps) {
 
         // --- 2. RENDER SIMPLE ITEM (NO SUB-MENU) ---
         return (
-          <SidebarMenuItem key={uniqueKey} className="py-0.5 px-1">
+          <SidebarMenuItem key={uniqueKey} className="py-0.5 px-1 group-data-[collapsible=icon]:w-fit group-data-[collapsible=icon]:mx-auto">
             <SidebarMenuButton
               asChild
               isActive={active}

@@ -71,7 +71,7 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-3 group-data-[collapsible=icon]:overflow-hidden group-data-[collapsible=icon]:px-1.5 scrollbar-thin scrollbar-track-sidebar-accent/50 scrollbar-thumb-sidebar-border">
+      <SidebarContent className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-3 group-data-[collapsible=icon]:overflow-hidden group-data-[collapsible=icon]:px-2 group-data-[collapsible=icon]:items-center scrollbar-thin scrollbar-track-sidebar-accent/50 scrollbar-thumb-sidebar-border">
         <SidebarNav items={sidebarLabels} />
       </SidebarContent>
     </Sidebar>

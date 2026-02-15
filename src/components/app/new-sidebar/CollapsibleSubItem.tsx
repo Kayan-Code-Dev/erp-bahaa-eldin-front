@@ -33,8 +33,8 @@ const CollapsibleSubItem = ({ item, keyPrefix }: { item: SidebarLabel; keyPrefix
             className="py-1 w-full"
             onOpenChange={setOpen}
         >
-            <SidebarGroup className="px-1">
-                <SidebarMenuItem className="relative">
+            <SidebarGroup className="px-1 group-data-[collapsible=icon]:items-center">
+                <SidebarMenuItem className="relative group-data-[collapsible=icon]:w-fit group-data-[collapsible=icon]:mx-auto">
                     <CollapsibleTrigger asChild>
                         <SidebarMenuButton
                             asChild

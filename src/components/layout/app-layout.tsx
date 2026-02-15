@@ -5,7 +5,7 @@ import { SidebarProvider, useSidebar } from "../ui/sidebar";
 import { AppSidebar } from "../app/new-sidebar/AppSideBar";
 
 const SIDEBAR_WIDTH_OPEN = "20rem";  /* w-80 in AppSidebar */
-const SIDEBAR_WIDTH_ICON = "3rem";
+const SIDEBAR_WIDTH_ICON = "4rem";
 
 function MainContent() {
   const { open } = useSidebar();
