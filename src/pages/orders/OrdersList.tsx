@@ -298,256 +298,256 @@ function OrdersList() {
         <CardContent>
           {/* Filters */}
           {showFilters && (
-          <div className="mb-4 rounded-lg border bg-muted/30 p-4">
-            <h3 className="mb-3 text-sm font-semibold text-foreground">الفلاتر</h3>
-            <Form {...form}>
-              <form className="space-y-4">
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
-                  {/* Invoice number */}
-                  <FormField
-                    control={form.control}
-                    name="order_id"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>رقم الفاتورة</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="text"
-                            inputMode="numeric"
-                            placeholder="مثال: 1024"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+            <div className="mb-4 rounded-lg border bg-muted/30 p-4">
+              <h3 className="mb-3 text-sm font-semibold text-foreground">الفلاتر</h3>
+              <Form {...form}>
+                <form className="space-y-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
+                    {/* Invoice number */}
+                    <FormField
+                      control={form.control}
+                      name="order_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>رقم الفاتورة</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="text"
+                              inputMode="numeric"
+                              placeholder="مثال: 1024"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  {/* Client */}
-                  <FormField
-                    control={form.control}
-                    name="client_id"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>العميل</FormLabel>
-                        <FormControl>
-                          <ClientsSelect
-                            value={field.value ?? ""}
-                            onChange={field.onChange}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    {/* Client */}
+                    <FormField
+                      control={form.control}
+                      name="client_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>العميل</FormLabel>
+                          <FormControl>
+                            <ClientsSelect
+                              value={field.value ?? ""}
+                              onChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  {/* Item name */}
-                  <FormField
-                    control={form.control}
-                    name="item_name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>الصنف</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="ابحث باسم الصنف"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    {/* Item name */}
+                    <FormField
+                      control={form.control}
+                      name="item_name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>الصنف</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="ابحث باسم الصنف"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  {/* Item code (cloth_type_code) */}
-                  <FormField
-                    control={form.control}
-                    name="cloth_type_code"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>كود الصنف</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="ابحث بكود الصنف"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    {/* Item code (cloth_type_code) */}
+                    <FormField
+                      control={form.control}
+                      name="cloth_type_code"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>كود الصنف</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="ابحث بكود الصنف"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  {/* Invoice date from / to */}
-                  <FormField
-                    control={form.control}
-                    name="invoice_date_from"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>تاريخ الفاتورة من</FormLabel>
-                        <FormControl>
-                          <CustomCalendar
-                            value={field.value}
-                            onChange={field.onChange}
-                            placeholder="اختر التاريخ"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="invoice_date_to"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>تاريخ الفاتورة إلى</FormLabel>
-                        <FormControl>
-                          <CustomCalendar
-                            value={field.value}
-                            onChange={field.onChange}
-                            placeholder="اختر التاريخ"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    {/* Invoice date from / to */}
+                    <FormField
+                      control={form.control}
+                      name="invoice_date_from"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>تاريخ الفاتورة من</FormLabel>
+                          <FormControl>
+                            <CustomCalendar
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder="اختر التاريخ"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="invoice_date_to"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>تاريخ الفاتورة إلى</FormLabel>
+                          <FormControl>
+                            <CustomCalendar
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder="اختر التاريخ"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  {/* Rental date from / to */}
-                  <FormField
-                    control={form.control}
-                    name="visit_date_from"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>تاريخ التأجير من</FormLabel>
-                        <FormControl>
-                          <CustomCalendar
-                            value={field.value}
-                            onChange={field.onChange}
-                            placeholder="اختر التاريخ"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="visit_date_to"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>تاريخ التأجير إلى</FormLabel>
-                        <FormControl>
-                          <CustomCalendar
-                            value={field.value}
-                            onChange={field.onChange}
-                            placeholder="اختر التاريخ"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    {/* Rental date from / to */}
+                    <FormField
+                      control={form.control}
+                      name="visit_date_from"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>تاريخ التأجير من</FormLabel>
+                          <FormControl>
+                            <CustomCalendar
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder="اختر التاريخ"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="visit_date_to"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>تاريخ التأجير إلى</FormLabel>
+                          <FormControl>
+                            <CustomCalendar
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder="اختر التاريخ"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  {/* Delivery date from / to */}
-                  <FormField
-                    control={form.control}
-                    name="delivery_date_from"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>تاريخ التسليم من</FormLabel>
-                        <FormControl>
-                          <CustomCalendar
-                            value={field.value}
-                            onChange={field.onChange}
-                            placeholder="اختر التاريخ"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="delivery_date_to"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>تاريخ التسليم إلى</FormLabel>
-                        <FormControl>
-                          <CustomCalendar
-                            value={field.value}
-                            onChange={field.onChange}
-                            placeholder="اختر التاريخ"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    {/* Delivery date from / to */}
+                    <FormField
+                      control={form.control}
+                      name="delivery_date_from"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>تاريخ التسليم من</FormLabel>
+                          <FormControl>
+                            <CustomCalendar
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder="اختر التاريخ"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="delivery_date_to"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>تاريخ التسليم إلى</FormLabel>
+                          <FormControl>
+                            <CustomCalendar
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder="اختر التاريخ"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  {/* Return date from / to */}
-                  <FormField
-                    control={form.control}
-                    name="return_date_from"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>تاريخ الاسترجاع من</FormLabel>
-                        <FormControl>
-                          <CustomCalendar
-                            value={field.value}
-                            onChange={field.onChange}
-                            placeholder="اختر التاريخ"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="return_date_to"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>تاريخ الاسترجاع إلى</FormLabel>
-                        <FormControl>
-                          <CustomCalendar
-                            value={field.value}
-                            onChange={field.onChange}
-                            placeholder="اختر التاريخ"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="flex justify-end">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() =>
-                      form.reset({
-                        order_id: "",
-                        client_id: "",
-                        item_name: "",
-                        cloth_type_code: "",
-                        invoice_date_from: "",
-                        invoice_date_to: "",
-                        visit_date_from: "",
-                        visit_date_to: "",
-                        delivery_date_from: "",
-                        delivery_date_to: "",
-                        return_date_from: "",
-                        return_date_to: "",
-                      })
-                    }
-                  >
-                    مسح الفلاتر
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </div>
+                    {/* Return date from / to */}
+                    <FormField
+                      control={form.control}
+                      name="return_date_from"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>تاريخ الاسترجاع من</FormLabel>
+                          <FormControl>
+                            <CustomCalendar
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder="اختر التاريخ"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="return_date_to"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>تاريخ الاسترجاع إلى</FormLabel>
+                          <FormControl>
+                            <CustomCalendar
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder="اختر التاريخ"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div className="flex justify-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() =>
+                        form.reset({
+                          order_id: "",
+                          client_id: "",
+                          item_name: "",
+                          cloth_type_code: "",
+                          invoice_date_from: "",
+                          invoice_date_to: "",
+                          visit_date_from: "",
+                          visit_date_to: "",
+                          delivery_date_from: "",
+                          delivery_date_to: "",
+                          return_date_from: "",
+                          return_date_to: "",
+                        })
+                      }
+                    >
+                      مسح الفلاتر
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </div>
           )}
 
           <div className="overflow-hidden rounded-md border">
@@ -610,19 +610,16 @@ function OrdersList() {
                             العنوان:{" "}
                             <span className="font-normal text-gray-700">
                               {order.client?.address
-                                ? `${order.client.address.country_name ?? ""}${
-                                    order.client.address.city_name
-                                      ? ` - ${order.client.address.city_name}`
-                                      : ""
-                                  }${
-                                    order.client.address.street
-                                      ? ` - ${order.client.address.street}`
-                                      : ""
-                                  }${
-                                    order.client.address.building
-                                      ? ` - ${order.client.address.building}`
-                                      : ""
-                                  }`
+                                ? `${order.client.address.country_name ?? ""}${order.client.address.city_name
+                                  ? ` - ${order.client.address.city_name}`
+                                  : ""
+                                }${order.client.address.street
+                                  ? ` - ${order.client.address.street}`
+                                  : ""
+                                }${order.client.address.building
+                                  ? ` - ${order.client.address.building}`
+                                  : ""
+                                }`
                                 : "-"}
                             </span>
                           </p>
@@ -638,27 +635,30 @@ function OrdersList() {
                               {formatDate(order.created_at)}
                             </span>
                           </p>
+
                           <p className="font-semibold text-gray-900">
-                            تأجير:{" "}
+                            تسليم:{" "}
                             <span className="font-normal text-gray-700">
                               {order.visit_datetime
                                 ? formatDate(order.visit_datetime)
                                 : "-"}
+
                             </span>
                           </p>
                           <p className="font-semibold text-gray-900">
-                            تسليم:{" "}
+                            الفرح:{" "}
                             <span className="font-normal text-gray-700">
-                              {order.delivery_date
-                                ? formatDate(order.delivery_date)
+
+                              {order.occasion_datetime
+                                ? formatDate(order.occasion_datetime)
                                 : "-"}
                             </span>
                           </p>
                           <p className="font-semibold text-gray-900">
                             استرجاع:{" "}
                             <span className="font-normal text-gray-700">
-                              {order.occasion_datetime
-                                ? formatDate(order.occasion_datetime)
+                              {order.delivery_date
+                                ? formatDate(order.delivery_date)
                                 : "-"}
                             </span>
                           </p>
@@ -760,13 +760,13 @@ function OrdersList() {
                               {" "}
                               {order.items && order.items.length > 0
                                 ? order.items
-                                    .map((item) =>
-                                      item.code
-                                        ? `${item.name} (${item.code})`
-                                        : item.name
-                                    )
-                                    .filter(Boolean)
-                                    .join("، ")
+                                  .map((item) =>
+                                    item.code
+                                      ? `${item.name} (${item.code})`
+                                      : item.name
+                                  )
+                                  .filter(Boolean)
+                                  .join("، ")
                                 : "-"}
                             </span>
                           </p>
