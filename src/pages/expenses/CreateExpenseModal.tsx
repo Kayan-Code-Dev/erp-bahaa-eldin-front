@@ -39,15 +39,21 @@ import {
 } from "@/api/v2/expenses/expenses.types";
 import { DatePicker } from "@/components/custom/DatePicker";
 
+// Accept string or number from form controls and coerce to string (avoids "Expected string, received number")
+const stringOrNumber = (msg: string) =>
+  z.union([z.string(), z.number()]).transform((v) => (v == null || v === "" ? "" : String(v))).pipe(z.string().min(1, { message: msg }));
+const optionalStringOrNumber = () =>
+  z.union([z.string(), z.number()]).transform((v) => (v == null || v === "" ? undefined : String(v))).optional();
+
 const createExpenseSchema = z.object({
-  branch_id: z.string().min(1, { message: "الفرع مطلوب" }),
-  category: z.string().min(1, { message: "الفئة مطلوبة" }),
-  amount: z.string().min(1, { message: "المبلغ مطلوب" }),
-  expense_date: z.string().min(1, { message: "تاريخ المصروف مطلوب" }),
-  vendor: z.string().min(1, { message: "اسم المورد مطلوب" }),
-  reference_number: z.string().min(1, { message: "رقم المرجع مطلوب" }),
-  description: z.string().min(1, { message: "الوصف مطلوب" }),
-  notes: z.string().optional(),
+  branch_id: stringOrNumber("الفرع مطلوب"),
+  category: stringOrNumber("الفئة مطلوبة"),
+  amount: stringOrNumber("المبلغ مطلوب"),
+  expense_date: stringOrNumber("تاريخ المصروف مطلوب"),
+  vendor: stringOrNumber("اسم المورد مطلوب"),
+  reference_number: stringOrNumber("رقم المرجع مطلوب"),
+  description: stringOrNumber("الوصف مطلوب"),
+  notes: optionalStringOrNumber(),
 });
 
 type CreateExpenseFormValues = z.infer<typeof createExpenseSchema>;
@@ -176,7 +182,7 @@ export function CreateExpenseModal({ open, onOpenChange }: Props) {
                         value={field.value ?? ""}
                         onChange={(e) => {
                           const val = e.target.value.replace(/[^0-9.]/g, "");
-                          field.onChange(val === "" ? 0 : parseFloat(val) || 0);
+                          field.onChange(val);
                         }}
                       />
                     </FormControl>

@@ -19,7 +19,7 @@ import { SidebarNav } from "./SideBarNav";
 
 const CollapsibleSubItem = ({ item, keyPrefix }: { item: SidebarLabel; keyPrefix?: string }) => {
     const { pathname } = useLocation();
-    const active = includeRoute(pathname, item.path, item.level);
+    const active = includeRoute(pathname, item.path, item.level, !!item.subItems?.length);
     const hasActiveDescendant = hasActiveChild(pathname, item);
     // Parent should only be colored if it's active AND no child is active
     const shouldColorParent = active && !hasActiveDescendant;
