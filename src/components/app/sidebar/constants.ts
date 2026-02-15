@@ -40,8 +40,8 @@ import {
 } from "lucide-react";
 
 const iconSize = 20;
-const createIcon = (Icon: React.ComponentType<{ size?: number }>, size = iconSize) =>
-  React.createElement(Icon, { size });
+const createIcon = (Icon: React.ComponentType<{ size?: number; className?: string }>, size = iconSize) =>
+  React.createElement(Icon, { size, className: "shrink-0 text-current" });
 
 export type SidebarLabel = {
   icon: string | null;

@@ -132,6 +132,48 @@ body {
   }
 }
 
+/* App sidebar: force main theme colors so they always apply */
+[data-app-sidebar] [data-sidebar="sidebar"] {
+  background: var(--sidebar) !important;
+  color: var(--sidebar-foreground);
+  border-color: var(--sidebar-border);
+}
+[data-app-sidebar] [data-sidebar="sidebar"] a,
+[data-app-sidebar] [data-sidebar="sidebar"] button,
+[data-app-sidebar] [data-sidebar="sidebar"] [data-sidebar="menu-button"] {
+  color: inherit;
+}
+/* Sidebar accents (hover/active) use CSS variables */
+[data-app-sidebar] [data-sidebar="sidebar"] [data-sidebar="menu-button"]:hover {
+  background: var(--sidebar-accent);
+  color: var(--sidebar-accent-foreground);
+}
+[data-app-sidebar] [data-sidebar="sidebar"] [data-sidebar="menu-button"][data-active="true"],
+[data-app-sidebar] [data-sidebar="sidebar"] .sidebar-active-gold {
+  background: rgba(144, 116, 87, 0.22) !important;
+  color: var(--main-gold) !important;
+}
+[data-app-sidebar] [data-sidebar="sidebar"] [data-sidebar="menu-button"][data-active="true"]:hover,
+[data-app-sidebar] [data-sidebar="sidebar"] .sidebar-active-gold:hover {
+  background: rgba(144, 116, 87, 0.32) !important;
+  color: var(--main-gold) !important;
+}
+
+/* Sidebar layout: gap does not take flow space; main content uses margin so sidebar does not overlap */
+[data-slot="sidebar"]:has([data-app-sidebar]) [data-slot="sidebar-gap"] {
+  width: 0 !important;
+  min-width: 0 !important;
+  overflow: hidden;
+}
+
+/* Opened by hover: subtle distinction (shadow) so it’s clear it’s hover-open vs pinned */
+[data-app-sidebar][data-open-by="hover"] {
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.08);
+}
+[data-app-sidebar][data-open-by="hover"] [data-sidebar="sidebar"] {
+  border-radius: 12px 0 0 12px;
+}
+
 @layer utilities {
   .rtl-flip {
     transform: scaleX(-1);

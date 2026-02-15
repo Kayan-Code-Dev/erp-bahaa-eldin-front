@@ -1,8 +1,28 @@
 import Header from "@/components/app/header";
 import { useAuthStore } from "@/zustand-stores/auth.store";
 import { Link, Outlet } from "react-router";
-import { SidebarProvider } from "../ui/sidebar";
+import { SidebarProvider, useSidebar } from "../ui/sidebar";
 import { AppSidebar } from "../app/new-sidebar/AppSideBar";
+
+const SIDEBAR_WIDTH_OPEN = "20rem";  /* w-80 in AppSidebar */
+const SIDEBAR_WIDTH_ICON = "3rem";
+
+function MainContent() {
+  const { open } = useSidebar();
+  return (
+    <div
+      className="flex-1 min-w-0 flex flex-col min-h-screen transition-[margin] duration-200 ease-linear"
+      style={{
+        marginRight: open ? SIDEBAR_WIDTH_OPEN : SIDEBAR_WIDTH_ICON,
+      }}
+    >
+      <Header />
+      <div className="p-4 flex-1">
+        <Outlet />
+      </div>
+    </div>
+  );
+}
 
 function AppLayout() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -21,17 +41,10 @@ function AppLayout() {
     );
   }
   return (
-    <SidebarProvider>
-      <div className="min-h-screen bg-[#f2f2f2] w-full flex">
-        <div className="sticky top-0 h-screen overflow-y-auto hidden md:block scrollbar-hide w-80 flex-shrink-0">
-          <AppSidebar />
-        </div>
-        <div className="flex-1 min-w-0 w-full">
-          <Header />
-          <div className="p-4">
-            <Outlet />
-          </div>
-        </div>
+    <SidebarProvider defaultOpen={false}>
+      <div className="min-h-screen bg-[#f2f2f2] w-full flex flex-row">
+        <AppSidebar />
+        <MainContent />
       </div>
     </SidebarProvider>
   );

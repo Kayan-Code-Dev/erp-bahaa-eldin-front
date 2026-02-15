@@ -1,6 +1,7 @@
 import { Bell, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useSidebar } from "@/components/ui/sidebar";
 import MobileSidebar from "./sidebar/mobile-sidebar";
 import { useAuthStore } from "@/zustand-stores/auth.store";
 import { useLogoutMutationOptions } from "@/api/v2/auth/auth.hooks";
@@ -11,6 +12,7 @@ function Header() {
   const logout = useAuthStore((s) => s.logout);
   const { mutate: logoutMutation } = useMutation(useLogoutMutationOptions());
   const navigate = useNavigate();
+  const { toggleSidebar, open } = useSidebar();
 
   const handleLogout = () => {
     logoutMutation();
@@ -19,7 +21,19 @@ function Header() {
   };
   return (
     <header className="bg-white p-4 flex items-center justify-between border-b">
-      <div className="flex items-center md:order-2">
+      <div className="flex items-center gap-2 md:order-2">
+        {/* Desktop: menu button to open sidebar when collapsed */}
+        <div className="hidden md:block">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleSidebar}
+            title={open ? "إخفاء القائمة" : "فتح القائمة"}
+            aria-label={open ? "إخفاء القائمة" : "فتح القائمة"}
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+        </div>
         <Button
           variant="ghost"
           className="flex items-center gap-2"
