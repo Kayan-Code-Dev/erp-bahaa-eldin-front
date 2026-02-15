@@ -95,7 +95,7 @@ export function CreateLateEmployeeDeductionModal({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto scrollbar-hide">
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle className="text-center">إضافة خصم تأخير</DialogTitle>
           <DialogDescription className="text-center">

@@ -86,7 +86,7 @@ export function EditCountryModal({ country, open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md overflow-y-scroll scrollbar-hide max-h-[95vh]">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-center">
             تعديل دولة: {country?.name}

@@ -107,7 +107,7 @@ export function UpdateEmployeeCustodyModal({ employeeCustody, open, onOpenChange
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto scrollbar-hide">
+      <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle className="text-center">تحديث الضمان</DialogTitle>
           <DialogDescription className="text-center">
@@ -220,7 +220,7 @@ export function UpdateEmployeeCustodyModal({ employeeCustody, open, onOpenChange
               )}
             />
 
-            <DialogFooter className="mt-4 gap-2 border-t pt-4">
+            <DialogFooter className="gap-2">
               <Button
                 type="button"
                 variant="outline"

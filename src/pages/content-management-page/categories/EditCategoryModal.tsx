@@ -130,7 +130,7 @@ export function EditCategoryModal({ category, open, onOpenChange }: Props) {
                 </FormItem>
               )}
             />
-            <DialogFooter className="mt-4 gap-2 border-t pt-4">
+            <DialogFooter className="gap-2">
               <Button
                 type="button"
                 variant="outline"

@@ -217,7 +217,7 @@ export function CreateSupplierModal({ open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto scrollbar-hide" dir="rtl">
+      <DialogContent className="sm:max-w-2xl" dir="rtl">
         <DialogHeader>
           <DialogTitle className="text-center">إضافة مورد جديد</DialogTitle>
           <DialogDescription className="text-center">
@@ -500,7 +500,7 @@ export function CreateSupplierModal({ open, onOpenChange }: Props) {
               </>
             )}
 
-            <DialogFooter className="gap-2 pt-4 border-t">
+            <DialogFooter className="gap-2">
               <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
                 إلغاء
               </Button>

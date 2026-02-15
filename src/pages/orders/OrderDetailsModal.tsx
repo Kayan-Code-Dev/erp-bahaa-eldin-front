@@ -75,7 +75,7 @@ export function OrderDetailsModal({ order, open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-4xl max-h-[95vh] overflow-y-auto scrollbar-hide">
+      <DialogContent className="sm:max-w-4xl">
         <DialogHeader>
           <DialogTitle className="text-center">تفاصيل الطلب</DialogTitle>
           <DialogDescription className="text-center">
@@ -83,7 +83,7 @@ export function OrderDetailsModal({ order, open, onOpenChange }: Props) {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 mt-4" dir="rtl">
+        <div className="space-y-5 mt-2" dir="rtl">
           {isPending ? (
             <div className="space-y-4">
               <Skeleton className="h-6 w-full" />
@@ -92,7 +92,8 @@ export function OrderDetailsModal({ order, open, onOpenChange }: Props) {
             </div>
           ) : orderData ? (
             <>
-              {/* Order Basic Info */}
+              <div className="modal-section">
+                <p className="modal-section-title">معلومات الطلب</p>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">
@@ -207,11 +208,11 @@ export function OrderDetailsModal({ order, open, onOpenChange }: Props) {
                   </p>
                 </div>
               </div>
+              </div>
 
-              {/* Client Info */}
               {orderData.client && (
-                <div className="border-t pt-4">
-                  <h3 className="text-lg font-semibold mb-3">معلومات العميل</h3>
+                <div className="modal-section">
+                  <p className="modal-section-title">معلومات العميل</p>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">
@@ -275,11 +276,10 @@ export function OrderDetailsModal({ order, open, onOpenChange }: Props) {
                 </div>
               )}
 
-              {/* Inventory */}
               {orderData.inventory && (
-                <div className="border-t pt-4">
-                  <h3 className="text-lg font-semibold mb-3">المخزن / الفرع</h3>
-                  <p className="text-muted-foreground">
+                <div className="modal-section">
+                  <p className="modal-section-title">المخزن / الفرع</p>
+                  <p className="text-muted-foreground text-sm">
                     {orderData.inventory.name}
                     {orderData.inventory.inventoriable && (
                       <> — {orderData.inventory.inventoriable.name}</>
@@ -288,11 +288,10 @@ export function OrderDetailsModal({ order, open, onOpenChange }: Props) {
                 </div>
               )}
 
-              {/* Order Items */}
               {orderData.items && orderData.items.length > 0 && (
-                <div className="border-t pt-4">
-                  <h3 className="text-lg font-semibold mb-3">عناصر الطلب</h3>
-                  <div className="overflow-hidden rounded-md border">
+                <div className="modal-section">
+                  <p className="modal-section-title">عناصر الطلب</p>
+                  <div className="overflow-hidden rounded-lg border border-border/60">
                     <Table>
                       <TableHeader>
                         <TableRow>

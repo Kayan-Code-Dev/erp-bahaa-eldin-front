@@ -53,15 +53,19 @@ export function ApproveExpenseModal({
             هل تريد اعتماد هذا المصروف؟
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-2 text-right text-sm">
-          <p>
-            <span className="font-medium">المورد:</span> {expense?.vendor}
-          </p>
-          <p>
-            <span className="font-medium">المبلغ:</span> {expense?.amount} ج.م
-          </p>
+        <div className="modal-section" dir="rtl">
+          <div className="space-y-0">
+            <div className="modal-detail-row">
+              <span className="modal-detail-label">المورد</span>
+              <span className="modal-detail-value">{expense?.vendor ?? "-"}</span>
+            </div>
+            <div className="modal-detail-row">
+              <span className="modal-detail-label">المبلغ</span>
+              <span className="modal-detail-value">{expense?.amount ?? "-"} ج.م</span>
+            </div>
+          </div>
         </div>
-        <DialogFooter className="mt-4 gap-2 border-t pt-4 justify-between">
+        <DialogFooter className="gap-2 sm:justify-between">
           <Button
             type="button"
             variant="outline"

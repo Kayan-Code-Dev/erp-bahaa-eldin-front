@@ -189,4 +189,21 @@ body {
     right: 0;
     left: auto;
   }
+
+  /* Professional modal layout: section block */
+  .modal-section {
+    @apply rounded-xl border border-border/60 bg-muted/20 p-5 space-y-4;
+  }
+  .modal-section-title {
+    @apply text-sm font-semibold text-foreground mb-1;
+  }
+  .modal-detail-row {
+    @apply flex flex-wrap justify-between items-start gap-2 py-3 border-b border-border/40 last:border-0;
+  }
+  .modal-detail-label {
+    @apply text-sm text-muted-foreground shrink-0;
+  }
+  .modal-detail-value {
+    @apply text-sm font-medium text-foreground text-left;
+  }
 }

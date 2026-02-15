@@ -167,7 +167,7 @@ export function CustodyDetailsModal({ custodyId, open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-3xl max-h-[95vh] overflow-y-auto scrollbar-hide">
+      <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle className="text-center">تفاصيل الضمان</DialogTitle>
           <DialogDescription className="text-center">

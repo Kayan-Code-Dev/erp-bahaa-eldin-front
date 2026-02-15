@@ -120,7 +120,7 @@ export function OrderInvoicePrintModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[95vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl">
         <DialogTitle className="text-base font-semibold">
           {copyLabel ?? "طباعة الفاتورة"}
         </DialogTitle>

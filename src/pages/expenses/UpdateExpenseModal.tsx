@@ -129,7 +129,7 @@ export function UpdateExpenseModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle className="text-center">تعديل المصروف</DialogTitle>
           <DialogDescription className="text-center">
@@ -139,10 +139,12 @@ export function UpdateExpenseModal({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-4"
+            className="space-y-6"
             dir="rtl"
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="modal-section">
+              <p className="modal-section-title">البيانات الأساسية</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="category"
@@ -180,10 +182,10 @@ export function UpdateExpenseModal({
                     <FormControl>
                       <Input
                         placeholder="0.00"
-                        value={field.value || ""}
+                        value={field.value ?? ""}
                         onChange={(e) => {
                           const val = e.target.value.replace(/[^0-9.]/g, "");
-                          field.onChange(val === "" ? 0 : parseFloat(val) || 0);
+                          field.onChange(val);
                         }}
                       />
                     </FormControl>
@@ -241,8 +243,11 @@ export function UpdateExpenseModal({
                   </FormItem>
                 )}
               />
+              </div>
             </div>
 
+            <div className="modal-section">
+              <p className="modal-section-title">الوصف والملاحظات</p>
             <FormField
               control={form.control}
               name="description"
@@ -260,7 +265,6 @@ export function UpdateExpenseModal({
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="notes"
@@ -278,8 +282,9 @@ export function UpdateExpenseModal({
                 </FormItem>
               )}
             />
+            </div>
 
-            <DialogFooter className="mt-4 gap-2 border-t pt-4">
+            <DialogFooter className="gap-2">
               <Button
                 type="button"
                 variant="outline"

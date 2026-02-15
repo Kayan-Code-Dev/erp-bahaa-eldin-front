@@ -107,7 +107,7 @@ export function EditSupplierModal({ supplier, open, onOpenChange }: Props) {
                 </FormItem>
               )}
             />
-            <DialogFooter className="gap-2 border-t pt-4">
+            <DialogFooter className="gap-2">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 إلغاء
               </Button>

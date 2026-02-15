@@ -546,7 +546,7 @@ function TransferClothesReqs() {
           }
         }}
       >
-        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle>تفاصيل طلب النقل #{selectedTransfer?.id}</DialogTitle>
             <DialogDescription>عرض تفاصيل طلب نقل المنتجات</DialogDescription>

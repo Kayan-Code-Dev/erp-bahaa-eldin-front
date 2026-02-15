@@ -99,7 +99,7 @@ export function ManageJobTitleRolesModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md min-h-[50vh] max-h-[90vh] overflow-y-auto scrollbar-hide">
+      <DialogContent className="sm:max-w-md min-h-[50vh]">
         <DialogHeader>
           <DialogTitle className="text-center">
             إدارة صلاحيات المسمية الوظيفية

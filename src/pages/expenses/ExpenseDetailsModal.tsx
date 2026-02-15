@@ -47,88 +47,86 @@ export function ExpenseDetailsModal({
 }: Props) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle className="text-center">تفاصيل المصروف</DialogTitle>
         </DialogHeader>
         {expense ? (
-          <div className="space-y-4" dir="rtl">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-muted-foreground">رقم المصروف</p>
-                <p className="font-semibold">#{expense.id}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">الحالة</p>
-                <Badge
-                  className={getStatusBadgeClass(expense.status)}
-                  variant="secondary"
-                >
-                  {getStatusLabel(expense.status)}
-                </Badge>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">المبلغ</p>
-                <p className="font-semibold">{expense.amount} ج.م</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">تاريخ المصروف</p>
-                <p>{formatDate(expense.expense_date)}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">الفرع</p>
-                <p>{expense.branch?.name}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">الصندوق</p>
-                <p>{expense.cashbox?.name}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">المورد</p>
-                <p>{expense.vendor}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">رقم المرجع</p>
-                <p>{expense.reference_number}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">الفئة</p>
-                <p>
-                  {
-                    ExpenseCategories.find((c) => c.id === expense.category)
-                      ?.name
-                  }
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">تاريخ الإنشاء</p>
-                <p>{formatDate(expense.created_at)}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  تاريخ آخر تحديث
-                </p>
-                <p>{formatDate(expense.updated_at)}</p>
+          <div className="space-y-5" dir="rtl">
+            <div className="modal-section">
+              <p className="modal-section-title">معلومات المصروف</p>
+              <div className="space-y-0">
+                <div className="modal-detail-row">
+                  <span className="modal-detail-label">رقم المصروف</span>
+                  <span className="modal-detail-value">#{expense.id}</span>
+                </div>
+                <div className="modal-detail-row">
+                  <span className="modal-detail-label">الحالة</span>
+                  <Badge
+                    className={getStatusBadgeClass(expense.status)}
+                    variant="secondary"
+                  >
+                    {getStatusLabel(expense.status)}
+                  </Badge>
+                </div>
+                <div className="modal-detail-row">
+                  <span className="modal-detail-label">المبلغ</span>
+                  <span className="modal-detail-value">{expense.amount} ج.م</span>
+                </div>
+                <div className="modal-detail-row">
+                  <span className="modal-detail-label">تاريخ المصروف</span>
+                  <span className="modal-detail-value">{formatDate(expense.expense_date)}</span>
+                </div>
+                <div className="modal-detail-row">
+                  <span className="modal-detail-label">الفرع</span>
+                  <span className="modal-detail-value">{expense.branch?.name ?? "-"}</span>
+                </div>
+                <div className="modal-detail-row">
+                  <span className="modal-detail-label">الصندوق</span>
+                  <span className="modal-detail-value">{expense.cashbox?.name ?? "-"}</span>
+                </div>
+                <div className="modal-detail-row">
+                  <span className="modal-detail-label">المورد</span>
+                  <span className="modal-detail-value">{expense.vendor}</span>
+                </div>
+                <div className="modal-detail-row">
+                  <span className="modal-detail-label">رقم المرجع</span>
+                  <span className="modal-detail-value">{expense.reference_number}</span>
+                </div>
+                <div className="modal-detail-row">
+                  <span className="modal-detail-label">الفئة</span>
+                  <span className="modal-detail-value">
+                    {ExpenseCategories.find((c) => c.id === expense.category)?.name ?? "-"}
+                  </span>
+                </div>
+                <div className="modal-detail-row">
+                  <span className="modal-detail-label">تاريخ الإنشاء</span>
+                  <span className="modal-detail-value">{formatDate(expense.created_at)}</span>
+                </div>
+                <div className="modal-detail-row">
+                  <span className="modal-detail-label">تاريخ آخر تحديث</span>
+                  <span className="modal-detail-value">{formatDate(expense.updated_at)}</span>
+                </div>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">الوصف</p>
-              <p className="text-sm whitespace-pre-wrap">
+            <div className="modal-section">
+              <p className="modal-section-title">الوصف</p>
+              <p className="text-sm whitespace-pre-wrap text-foreground">
                 {expense.description || "-"}
               </p>
             </div>
 
             {expense.notes && (
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">الملاحظات</p>
-                <p className="text-sm whitespace-pre-wrap">{expense.notes}</p>
+              <div className="modal-section">
+                <p className="modal-section-title">الملاحظات</p>
+                <p className="text-sm whitespace-pre-wrap text-foreground">{expense.notes}</p>
               </div>
             )}
 
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">أنشئ بواسطة</p>
-              <p className="text-sm">
+            <div className="modal-section">
+              <p className="modal-section-title">أنشئ بواسطة</p>
+              <p className="text-sm text-foreground">
                 {expense.creator?.name} ({expense.creator?.email})
               </p>
             </div>

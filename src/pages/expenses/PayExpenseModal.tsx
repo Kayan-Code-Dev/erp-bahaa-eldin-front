@@ -61,7 +61,7 @@ export function PayExpenseModal({
             <span className="font-medium">المبلغ:</span> {expense?.amount} ج.م
           </p>
         </div>
-        <DialogFooter className="mt-4 gap-2 border-t pt-4 justify-between">
+        <DialogFooter className="gap-2 sm:justify-between">
           <Button
             type="button"
             variant="outline"

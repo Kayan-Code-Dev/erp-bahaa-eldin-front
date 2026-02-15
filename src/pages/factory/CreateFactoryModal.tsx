@@ -91,7 +91,7 @@ export function CreateFactoryModal({ open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto scrollbar-hide">
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle className="text-center">إنشاء مصنع جديد</DialogTitle>
           <DialogDescription className="text-center">
@@ -224,7 +224,7 @@ export function CreateFactoryModal({ open, onOpenChange }: Props) {
               />
             </div>
 
-            <DialogFooter className="mt-4 gap-2 border-t pt-4">
+            <DialogFooter className="gap-2">
               <Button
                 type="button"
                 variant="outline"

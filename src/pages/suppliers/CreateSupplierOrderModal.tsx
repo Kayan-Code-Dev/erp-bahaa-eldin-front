@@ -28,7 +28,7 @@ export function CreateSupplierOrderModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" dir="rtl">
+      <DialogContent className="max-w-4xl flex flex-col" dir="rtl">
         <DialogHeader>
           <DialogTitle>إضافة طلبية مورد</DialogTitle>
           <DialogDescription>

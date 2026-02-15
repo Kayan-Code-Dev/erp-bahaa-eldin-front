@@ -197,7 +197,7 @@ export function CreatePaymentModal({ open, onOpenChange, order, onSuccess }: Pro
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle className="text-center">إنشاء دفعة جديدة</DialogTitle>
           <DialogDescription className="text-center">

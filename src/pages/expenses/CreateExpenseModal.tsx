@@ -110,7 +110,7 @@ export function CreateExpenseModal({ open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle className="text-center">إضافة مصروف جديد</DialogTitle>
           <DialogDescription className="text-center">
@@ -120,10 +120,12 @@ export function CreateExpenseModal({ open, onOpenChange }: Props) {
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-4"
+            className="space-y-6"
             dir="rtl"
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="modal-section">
+              <p className="modal-section-title">البيانات الأساسية</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="branch_id"
@@ -240,8 +242,11 @@ export function CreateExpenseModal({ open, onOpenChange }: Props) {
                   </FormItem>
                 )}
               />
+              </div>
             </div>
 
+            <div className="modal-section">
+              <p className="modal-section-title">الوصف والملاحظات</p>
             <FormField
               control={form.control}
               name="description"
@@ -259,7 +264,6 @@ export function CreateExpenseModal({ open, onOpenChange }: Props) {
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="notes"
@@ -273,6 +277,7 @@ export function CreateExpenseModal({ open, onOpenChange }: Props) {
                 </FormItem>
               )}
             />
+            </div>
 
             <DialogFooter className="gap-2">
               <Button

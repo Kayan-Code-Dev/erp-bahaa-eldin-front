@@ -53,7 +53,7 @@ const getClientName = (client: {
 export function PaymentDetailsModal({ payment, open, onOpenChange }: Props) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>تفاصيل الدفعة</DialogTitle>
           <DialogDescription>

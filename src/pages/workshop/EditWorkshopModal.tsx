@@ -114,7 +114,7 @@ export function EditWorkshopModal({ workshop, open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto scrollbar-hide">
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle className="text-center">
             تعديل الورشة: {workshop?.name}
@@ -246,7 +246,7 @@ export function EditWorkshopModal({ workshop, open, onOpenChange }: Props) {
               )}
             />
 
-            <DialogFooter className="mt-4 gap-2 border-t pt-4">
+            <DialogFooter className="gap-2">
               <Button
                 type="button"
                 variant="outline"

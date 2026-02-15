@@ -151,7 +151,7 @@ export function ReturnOrderFullModal({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto" dir="rtl">
+      <DialogContent className="sm:max-w-2xl" dir="rtl">
         <DialogHeader>
           <DialogTitle>إرجاع الطلب بالكامل #{order.id}</DialogTitle>
           <DialogDescription>

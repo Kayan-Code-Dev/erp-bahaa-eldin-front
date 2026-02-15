@@ -115,7 +115,7 @@ export function CreateEmployeeDocumentModal({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto scrollbar-hide">
+      <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle className="text-center">إضافة وثيقة جديدة</DialogTitle>
           <DialogDescription className="text-center">

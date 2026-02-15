@@ -88,7 +88,7 @@ export function CreateDepartmentModal({ open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto scrollbar-hide">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-center">إنشاء قسم جديد</DialogTitle>
           <DialogDescription className="text-center">

@@ -132,7 +132,7 @@ export function ApproveWorkshopTransferModal({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto scrollbar-hide">
+      <DialogContent className="sm:max-w-4xl">
         <DialogHeader>
           <DialogTitle className="text-center">قبول طلب النقل</DialogTitle>
           <DialogDescription className="text-center">

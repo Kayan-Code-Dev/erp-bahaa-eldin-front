@@ -114,7 +114,7 @@ export function CreateClientModal({ open, onOpenChange, onClientCreated }: Props
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto scrollbar-hide">
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle className="text-center">إنشاء عميل جديد</DialogTitle>
           <DialogDescription className="text-center">
@@ -124,10 +124,11 @@ export function CreateClientModal({ open, onOpenChange, onClientCreated }: Props
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-4"
+            className="space-y-6"
             dir="rtl"
           >
-            {/* Name */}
+            <div className="modal-section">
+              <p className="modal-section-title">البيانات الشخصية</p>
             <FormField
               control={form.control}
               name="name"
@@ -141,9 +142,7 @@ export function CreateClientModal({ open, onOpenChange, onClientCreated }: Props
                 </FormItem>
               )}
             />
-
-            {/* Personal Information */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <FormField
                 control={form.control}
                 name="date_of_birth"
@@ -195,11 +194,11 @@ export function CreateClientModal({ open, onOpenChange, onClientCreated }: Props
                 )}
               />
             </div>
+            </div>
 
-            {/* Phone Numbers */}
-            <div className="space-y-4 border-t pt-4">
-              <h3 className="text-sm font-medium">أرقام الهاتف</h3>
-              <div className="grid grid-cols-2 gap-4">
+            <div className="modal-section">
+              <p className="modal-section-title">أرقام الهاتف</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="phone"
@@ -240,9 +239,8 @@ export function CreateClientModal({ open, onOpenChange, onClientCreated }: Props
               </div>
             </div>
 
-            {/* Address Section */}
-            <div className="space-y-4 border-t pt-4">
-              <h3 className="text-sm font-medium">العنوان</h3>
+            <div className="modal-section">
+              <p className="modal-section-title">العنوان والملاحظات</p>
               <FormField
                 control={form.control}
                 name="address"
@@ -289,7 +287,7 @@ export function CreateClientModal({ open, onOpenChange, onClientCreated }: Props
               />
             </div>
 
-            <DialogFooter className="mt-4 gap-2 border-t pt-4">
+            <DialogFooter className="gap-2">
               <Button
                 type="button"
                 variant="outline"

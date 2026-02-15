@@ -49,7 +49,7 @@ export function ViewPermissionsModal({ role, open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md max-h-[95vh] overflow-y-scroll scrollbar-hide">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-center">
             اذونات الدور: {role?.name}

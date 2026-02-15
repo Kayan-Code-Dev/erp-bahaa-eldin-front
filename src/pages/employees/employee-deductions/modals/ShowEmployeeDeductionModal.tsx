@@ -32,7 +32,7 @@ export function ShowEmployeeDeductionModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-4xl max-h-[95vh] overflow-y-auto scrollbar-hide">
+      <DialogContent className="sm:max-w-4xl">
         <DialogHeader>
           <DialogTitle className="text-center">تفاصيل الخصم</DialogTitle>
           <DialogDescription className="text-center">
