@@ -97,118 +97,152 @@ export function OrderReceiptAckPrint({
         </div>
       </header>
 
-      <div className="invoice-print-content flex-1 flex flex-col min-h-0 max-w-[210mm] mx-auto px-6 pb-3 w-full">
+      <main className="invoice-print-content flex-1 flex flex-col min-h-0 max-w-[210mm] mx-auto px-6 pb-3 w-full">
         {/* Content from title to signature */}
-        <div className="invoice-print-body shrink-0">
+        <section className="invoice-print-body shrink-0">
         {/* 1. Receipt acknowledgment title — at the top */}
-        <div className="invoice-print-title-wrap flex flex-col items-center justify-center text-center mb-3">
-          <h1 className="invoice-print-title text-[22px] font-bold text-gray-900 tracking-tight">
+        <header className="invoice-print-title-wrap flex flex-col items-center justify-center text-center mb-4">
+          <h1 className="invoice-print-title text-[24px] font-bold text-gray-900 tracking-tight mb-2">
             إقرار استلام
           </h1>
           <span className="invoice-print-title-line mt-1 block h-0.5 w-24 rounded-full bg-gray-400" aria-hidden />
-        </div>
+        </header>
 
         {/* 2. I received / National ID / Resident in / Phone — from the right */}
-        <div className="invoice-print-recipient text-right mb-3 space-y-1 text-[14px] font-semibold">
+        <section className="invoice-print-recipient text-right mb-4 space-y-1.5 text-[14px]" itemScope itemType="https://schema.org/Person">
           <p className="text-gray-900">
-            <span className="font-bold text-gray-700">استلمت أنا :</span>{" "}
-            <span className="font-bold text-gray-900">{clientName}</span>
+            <span className="font-semibold text-gray-700">استلمت أنا :</span>{" "}
+            <span className="font-bold text-gray-900" itemProp="name">{clientName}</span>
           </p>
           <p className="text-gray-900">
-            <span className="font-bold text-gray-700">الرقم القومي :</span>{" "}
-            <span className="font-bold text-gray-900">{nationalId}</span>
+            <span className="font-semibold text-gray-700">الرقم القومي :</span>{" "}
+            <span className="font-normal text-gray-900">{nationalId}</span>
           </p>
           <p className="text-gray-900">
-            <span className="font-bold text-gray-700">المقيم في :</span>{" "}
-            <span className="font-bold text-gray-900">{addressStr}</span>
+            <span className="font-semibold text-gray-700">المقيم في :</span>{" "}
+            <span className="font-normal text-gray-900" itemProp="address">{addressStr}</span>
           </p>
           {phoneStr && (
             <p className="text-gray-900">
-              <span className="font-bold text-gray-700">رقم الهاتف :</span>{" "}
-              <span className="font-bold text-gray-900">{phoneStr}</span>
+              <span className="font-semibold text-gray-700">رقم الهاتف :</span>{" "}
+              <span className="font-normal text-gray-900" itemProp="telephone">{phoneStr}</span>
             </p>
           )}
-        </div>
+        </section>
 
         {/* 3. Numbered products list */}
-        <div className="invoice-print-items-list mb-3 text-[14px] font-semibold text-gray-900">
+        <section className="invoice-print-items-list mb-4 text-[14px] text-gray-900">
+          <h2 className="sr-only">قائمة المنتجات</h2>
           {items.length > 0 ? (
-            <ol className="list-decimal list-inside space-y-0.5">
-              {items.map((item) => (
-                <li key={item.id} className="font-bold">
-                  {item.name || "-"}
-                  {item.code ? ` (${item.code})` : ""}
+            <ol className="list-decimal list-inside space-y-1" itemProp="itemListElement" itemScope itemType="https://schema.org/ItemList">
+              {items.map((item, index) => (
+                <li key={item.id} className="font-medium" itemProp="itemListElement" itemScope itemType="https://schema.org/Product">
+                  <span itemProp="name">{item.name || "-"}</span>
+                  {item.code && (
+                    <span className="text-gray-600 font-normal"> ({item.code})</span>
+                  )}
                 </li>
               ))}
             </ol>
           ) : (
-            <p className="text-gray-600">—</p>
+            <p className="text-gray-500 font-normal">—</p>
           )}
-        </div>
+        </section>
 
         {/* 4. Rental period */}
-        <p className="invoice-print-rental text-[14px] font-semibold text-gray-900 mb-2">
+        <p className="invoice-print-rental text-[14px] text-gray-900 mb-3">
           وذلك بتأجيره من تاريخ{" "}
-          <span className="font-bold">{startDate}</span> حتى تاريخ{" "}
-          <span className="font-bold">{endDate}</span>
+          <time className="font-semibold" dateTime={order.visit_datetime || undefined}>{startDate}</time> حتى تاريخ{" "}
+          <time className="font-semibold" dateTime={order.delivery_date || undefined}>{endDate}</time>
         </p>
 
         {/* 5. Receipt acknowledgment and deposit payment */}
-        <p className="invoice-print-deposit text-[14px] font-semibold text-gray-900 mb-4">
+        <p className="invoice-print-deposit text-[14px] text-gray-900 mb-5">
           وذلك إقرار مني بالاستلام ودفع عربون وقدره :{" "}
-          <span className="font-bold">{paid} ج.م</span>
+          <span className="font-bold text-gray-900" itemProp="totalPaymentDue">{paid} ج.م</span>
         </p>
 
         {/* 6. Recipient and signature */}
-        <div className="invoice-print-signature flex justify-end mt-2 pt-3 border-t-2 border-gray-300 space-y-3">
-          <div className="invoice-print-signature-box text-right min-w-[220px] space-y-2 text-[14px] font-semibold text-gray-900">
+        <section className="invoice-print-signature flex justify-end mt-4 pt-4 border-t-2 border-gray-300">
+          <div className="invoice-print-signature-box text-right min-w-[220px] space-y-3 text-[14px] text-gray-900">
             <p>
-              <span className="font-bold">المستلم :</span>{" "}
-              <span className="inline-block border-b-2 border-gray-500 min-w-[120px] align-bottom">&nbsp;</span>
+              <span className="font-semibold text-gray-700">المستلم :</span>{" "}
+              <span className="inline-block border-b-2 border-gray-500 min-w-[120px] align-bottom h-6">&nbsp;</span>
             </p>
             <p>
-              <span className="font-bold">التوقيع :</span>{" "}
-              <span className="inline-block border-b-2 border-gray-500 min-w-[120px] align-bottom">&nbsp;</span>
+              <span className="font-semibold text-gray-700">التوقيع :</span>{" "}
+              <span className="inline-block border-b-2 border-gray-500 min-w-[120px] align-bottom h-6">&nbsp;</span>
             </p>
           </div>
-        </div>
-        </div>
+        </section>
+        </section>
 
         {/* 7. Rules and instructions — fixed at the bottom of the page with spacing above footer */}
-        <div className="invoice-print-rules mt-auto pt-3 pb-8 border-t-2 border-gray-200 shrink-0">
-          <h2 className="invoice-print-rules-title text-[13px] font-bold text-gray-800 mb-1.5 pb-1">
+        <aside className="invoice-print-rules mt-auto pt-4 pb-8 border-t-2 border-gray-200 shrink-0">
+          <h2 className="invoice-print-rules-title text-[14px] font-bold text-gray-800 mb-2 pb-1.5">
             القواعد والتعليمات
           </h2>
-          <div className="invoice-print-notes-box rounded-lg border-2 border-gray-200 bg-gray-50 py-2 px-3">
-            <ul className="list-none space-y-0.5 text-[12px] font-semibold text-gray-800 leading-snug">
+          <div className="invoice-print-notes-box rounded-lg border-2 border-gray-200 bg-gray-50 py-3 px-4">
+            <ul className="list-none space-y-1 text-[13px] text-gray-800 leading-relaxed">
               {RULES_ITEMS.map((text, i) => (
-                <li key={i} className="flex gap-1.5">
-                  <span className="font-bold text-gray-600 shrink-0">{i + 1}.</span>
-                  <span>{text}</span>
+                <li key={i} className="flex gap-2">
+                  <span className="font-bold text-gray-700 shrink-0">{i + 1}.</span>
+                  <span className="font-normal">{text}</span>
                 </li>
               ))}
             </ul>
           </div>
-        </div>
-      </div>
+        </aside>
+      </main>
 
       {/* Footer — minimized */}
-      <div
-        className="invoice-print-footer w-full mt-auto py-2 px-4 text-center text-white rounded-t-xl text-[13px] font-bold shadow-sm shrink-0"
+      <footer
+        className="invoice-print-footer w-full mt-auto py-3 px-4 text-center text-white rounded-t-xl text-[13px] font-semibold shadow-sm shrink-0"
         style={{ backgroundColor: HEADER_BG }}
+        role="contentinfo"
       >
         لا يرد العربون في حالة إلغاء الحجز
-      </div>
+      </footer>
 
       <style>{`
         @media print {
           body * { visibility: hidden; }
           .invoice-print-root, .invoice-print-root * { visibility: visible; }
-          .invoice-print-root { position: absolute; left: 0; top: 0; width: 100%; padding: 0; box-sizing: border-box; page-break-inside: avoid; }
-          .invoice-print-header, .invoice-print-footer { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          .invoice-print-root { 
+            position: absolute; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            padding: 0; 
+            box-sizing: border-box; 
+            page-break-inside: avoid;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+          .invoice-print-header, .invoice-print-footer { 
+            -webkit-print-color-adjust: exact; 
+            print-color-adjust: exact; 
+          }
+          /* Ensure proper font rendering */
+          * {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+          }
+          /* Hide screen-only elements */
+          .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+          }
         }
       `}</style>
-    </div>
+    </article>
   );
 }
  

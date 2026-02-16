@@ -102,59 +102,75 @@ export function OrderInvoicePrint({
       : formatDate(new Date().toISOString());
 
   return (
-    <div
+    <article
       dir="rtl"
-      className="invoice-print-root w-full min-h-screen flex flex-col bg-white text-gray-800 text-[13px] leading-snug"
+      lang="ar"
+      className="invoice-print-root w-full min-h-screen flex flex-col bg-white text-gray-800 text-[13px] leading-relaxed"
       style={{ fontFamily: "'Segoe UI', 'Cairo', Arial, sans-serif" }}
+      itemScope
+      itemType="https://schema.org/Invoice"
     >
+      <meta itemProp="name" content={`فاتورة - طلب رقم ${order.id}`} />
+      <meta itemProp="dateCreated" content={order.created_at} />
+      
       <header
         className="invoice-print-header w-full py-3 mb-3 text-white rounded-b-lg shadow-md"
         style={{ backgroundColor: HEADER_BG }}
+        role="banner"
       >
-        <div className="invoice-print-header-inner flex items-center justify-between gap-4 w-full px-4 min-h-[4.5rem]">
+        <div className="invoice-print-header-inner flex items-center justify-between gap-4 w-full px-4 min-h-18">
           <div className="invoice-print-header-right text-right shrink-0 space-y-1">
             <div className="flex items-baseline justify-end gap-2 flex-wrap">
-              <span className="invoice-header-label text-sm font-semibold text-white/95">رقم الفاتورة: </span>
-              <span className="invoice-header-label text-sm font-semibold text-white/95">{order.id}</span>
+              <span className="invoice-header-label text-sm font-medium text-white/95">رقم الفاتورة: </span>
+              <span className="invoice-header-label text-sm font-bold text-white" itemProp="identifier">{order.id}</span>
             </div>
-            <div className="invoice-header-line text-xs font-medium text-white/95">
+            <div className="invoice-header-line text-xs font-normal text-white/95">
               اسم الموظف:{" "}
-              <OrderEmployeeName order={order} className="inline-block" />
+              <span className="font-semibold">
+                <OrderEmployeeName order={order} className="inline-block" />
+              </span>
             </div>
-            <div className="invoice-header-line text-xs font-medium text-white/95">التاريخ: {invoiceDate}</div>
+            <div className="invoice-header-line text-xs font-normal text-white/95">
+              التاريخ: <span className="font-semibold">{invoiceDate}</span>
+            </div>
           </div>
-          <div className="invoice-print-header-logo shrink-0 h-[4.5rem] flex items-center justify-center bg-white/10 rounded-lg p-1.5">
-            <img src={logoUrl} alt="الشعار" className="invoice-logo-img max-h-full max-w-[140px] w-auto object-contain" />
+          <div className="invoice-print-header-logo shrink-0 h-18 flex items-center justify-center bg-white/10 rounded-lg p-1.5">
+            <img 
+              src={logoUrl} 
+              alt="شعار الشركة" 
+              className="invoice-logo-img max-h-full max-w-[140px] w-auto object-contain"
+              itemProp="image"
+            />
           </div>
         </div>
       </header>
 
-      <div className="invoice-print-content flex-1 flex flex-col w-full px-4 pb-4">
+      <main className="invoice-print-content flex-1 flex flex-col w-full px-4 pb-4">
 
-        <div className="invoice-print-info-block mb-3">
-          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 pb-1 border-b border-gray-200">بيانات الطلب</h2>
+        <section className="invoice-print-info-block mb-4" itemScope itemType="https://schema.org/Order">
+          <h2 className="text-xs font-bold text-gray-600 uppercase tracking-wider mb-2 pb-1.5 border-b-2 border-gray-300">بيانات الطلب</h2>
           <table className="invoice-print-table invoice-print-table-info w-full border-collapse overflow-hidden rounded-lg border border-gray-200" style={{ tableLayout: "fixed" }}>
             <tbody>
               {INFO_ROWS.map(({ label }, i) => (
                 <tr key={i} className={i % 2 === 0 ? "invoice-print-row-even bg-gray-50/80" : "bg-white"}>
-                  <td className="invoice-print-td border-b border-gray-100 py-2 px-3 text-gray-600 font-medium text-sm" style={{ width: "32%" }}>{label}</td>
-                  <td className="invoice-print-td border-b border-gray-100 py-2 px-3 text-gray-500 text-sm" style={{ width: "68%" }}>{infoValues[i] ?? "-"}</td>
+                  <th scope="row" className="invoice-print-td border-b border-gray-100 py-2.5 px-3 text-gray-700 font-semibold text-sm text-right" style={{ width: "32%" }}>{label}</th>
+                  <td className="invoice-print-td border-b border-gray-100 py-2.5 px-3 text-gray-900 font-normal text-sm" style={{ width: "68%" }}>{infoValues[i] ?? "-"}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </div>
+        </section>
 
-        <div className="mb-3">
-          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 pb-1 border-b border-gray-200">تفاصيل الأصناف</h2>
+        <section className="mb-4">
+          <h2 className="text-xs font-bold text-gray-600 uppercase tracking-wider mb-2 pb-1.5 border-b-2 border-gray-300">تفاصيل الأصناف</h2>
           <table className="invoice-print-table invoice-print-table-items w-full border-collapse overflow-hidden rounded-lg border border-gray-200" style={{ tableLayout: "fixed" }}>
             <thead>
               <tr className="invoice-print-thead-row" style={{ backgroundColor: HEADER_DARK }}>
-                <th className="invoice-print-th py-2 px-3 text-center font-semibold text-white text-sm" style={{ width: "10%" }}>رقم</th>
-                <th className="invoice-print-th py-2 px-3 text-center font-semibold text-white text-sm">الكود</th>
-                <th className="invoice-print-th py-2 px-3 text-center font-semibold text-white text-sm" style={{ width: "18%" }}>سعر القطعة</th>
-                <th className="invoice-print-th py-2 px-3 text-center font-semibold text-white text-sm" style={{ width: "18%" }}>العربون</th>
-                <th className="invoice-print-th py-2 px-3 text-center font-semibold text-white text-sm" style={{ width: "18%" }}>الباقي</th>
+                <th scope="col" className="invoice-print-th py-2.5 px-3 text-center font-bold text-white text-sm" style={{ width: "10%" }}>رقم</th>
+                <th scope="col" className="invoice-print-th py-2.5 px-3 text-center font-bold text-white text-sm">الكود</th>
+                <th scope="col" className="invoice-print-th py-2.5 px-3 text-center font-bold text-white text-sm" style={{ width: "18%" }}>سعر القطعة</th>
+                <th scope="col" className="invoice-print-th py-2.5 px-3 text-center font-bold text-white text-sm" style={{ width: "18%" }}>العربون</th>
+                <th scope="col" className="invoice-print-th py-2.5 px-3 text-center font-bold text-white text-sm" style={{ width: "18%" }}>الباقي</th>
               </tr>
             </thead>
             <tbody>
@@ -176,96 +192,156 @@ export function OrderInvoicePrint({
                       ? formatNumber(String((item as { item_remaining: string }).item_remaining))
                       : EMPTY_PRICE;
                   return (
-                    <tr key={item.id} className={index % 2 === 0 ? "invoice-print-row-even bg-gray-50/50" : "bg-white"}>
-                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-2 px-3 text-center text-sm">{index + 1}</td>
-                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-2 px-3 text-center text-sm">{item.code || "-"}</td>
-                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-2 px-3 text-center text-sm">{showPrices ? price : EMPTY_PRICE}</td>
-                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-2 px-3 text-center text-sm">{showPrices ? itemPaidVal : EMPTY_PRICE}</td>
-                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-2 px-3 text-center text-sm">{showPrices ? itemRemainingVal : EMPTY_PRICE}</td>
+                    <tr key={item.id} className={index % 2 === 0 ? "invoice-print-row-even bg-gray-50/50" : "bg-white"} itemScope itemType="https://schema.org/Product">
+                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-2.5 px-3 text-center text-sm font-medium">{index + 1}</td>
+                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-2.5 px-3 text-center text-sm font-normal">{item.code || "-"}</td>
+                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-2.5 px-3 text-center text-sm font-semibold">{showPrices ? price : EMPTY_PRICE}</td>
+                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-2.5 px-3 text-center text-sm font-semibold">{showPrices ? itemPaidVal : EMPTY_PRICE}</td>
+                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-2.5 px-3 text-center text-sm font-semibold">{showPrices ? itemRemainingVal : EMPTY_PRICE}</td>
                     </tr>
                   );
                 })
               ) : (
                 <tr>
-                  <td colSpan={5} className="invoice-print-td invoice-print-td-center py-4 px-3 text-center text-gray-400 text-sm">
+                  <td colSpan={5} className="invoice-print-td invoice-print-td-center py-4 px-3 text-center text-gray-500 text-sm font-normal">
                     لا توجد عناصر
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
-        </div>
+        </section>
 
-        <div className="invoice-print-block mb-3">
-          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 pb-1 border-b border-gray-200">ملاحظات العميل</h2>
-          <div className="invoice-print-notes-box rounded-lg border border-gray-200 bg-gray-50/50 py-2 px-3 min-h-[40px] text-gray-700 text-sm">
+        <section className="invoice-print-block mb-4">
+          <h2 className="text-xs font-bold text-gray-600 uppercase tracking-wider mb-2 pb-1.5 border-b-2 border-gray-300">ملاحظات العميل</h2>
+          <div className="invoice-print-notes-box rounded-lg border border-gray-200 bg-gray-50/50 py-3 px-4 min-h-[40px] text-gray-800 text-sm font-normal">
             {order.order_notes?.trim() || "—"}
           </div>
-        </div>
+        </section>
 
-        <div className="invoice-print-rules-row flex gap-4 mb-3 flex-wrap">
-          <div className="invoice-print-rules-text flex-1 min-w-[200px]">
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 pb-1 border-b border-gray-200">القواعد والتعليمات</h2>
-            <p className="invoice-print-rules-p text-gray-600 text-xs leading-relaxed">{RULES_TEXT}</p>
-          </div>
+        <section className="invoice-print-rules-row flex gap-4 mb-4 flex-wrap">
+          <aside className="invoice-print-rules-text flex-1 min-w-[200px]">
+            <h2 className="text-xs font-bold text-gray-600 uppercase tracking-wider mb-2 pb-1.5 border-b-2 border-gray-300">القواعد والتعليمات</h2>
+            <p className="invoice-print-rules-p text-gray-700 text-xs leading-relaxed font-normal">{RULES_TEXT}</p>
+          </aside>
           <div className="invoice-print-totals-wrap shrink-0 w-44 rounded-lg overflow-hidden shadow-md border border-gray-200">
-            <div className="invoice-print-totals-title py-2 px-3 text-center text-white text-sm font-bold uppercase tracking-wider" style={{ backgroundColor: HEADER_BG }}>
+            <header className="invoice-print-totals-title py-2.5 px-3 text-center text-white text-sm font-bold uppercase tracking-wider" style={{ backgroundColor: HEADER_BG }}>
               ملخص المبالغ
-            </div>
+            </header>
             <table className="invoice-print-totals-table w-full border-collapse">
               <tbody>
                 <tr className="invoice-print-totals-row border-b border-gray-100">
-                  <td className="invoice-print-totals-label py-2 px-3 text-sm font-semibold text-gray-600 bg-gray-50/80">المجموع</td>
-                  <td className="invoice-print-totals-value py-2 px-3 text-right text-sm font-bold tabular-nums text-gray-900">{hideItemPrices ? EMPTY_PRICE : formatNumber(totalPrice)}</td>
+                  <th scope="row" className="invoice-print-totals-label py-2.5 px-3 text-sm font-semibold text-gray-700 bg-gray-50/80 text-right">المجموع</th>
+                  <td className="invoice-print-totals-value py-2.5 px-3 text-right text-sm font-bold tabular-nums text-gray-900" itemProp="totalPaymentDue">{hideItemPrices ? EMPTY_PRICE : formatNumber(totalPrice)}</td>
                 </tr>
                 <tr className="invoice-print-totals-row border-b border-gray-100">
-                  <td className="invoice-print-totals-label py-2 px-3 text-sm font-semibold text-gray-600 bg-gray-50/80">العربون</td>
-                  <td className="invoice-print-totals-value py-2 px-3 text-right text-sm font-semibold tabular-nums text-gray-800">{hideItemPrices ? EMPTY_PRICE : formatNumber(paid)}</td>
+                  <th scope="row" className="invoice-print-totals-label py-2.5 px-3 text-sm font-semibold text-gray-700 bg-gray-50/80 text-right">العربون</th>
+                  <td className="invoice-print-totals-value py-2.5 px-3 text-right text-sm font-semibold tabular-nums text-gray-800">{hideItemPrices ? EMPTY_PRICE : formatNumber(paid)}</td>
                 </tr>
                 <tr className="invoice-print-totals-row">
-                  <td className="invoice-print-totals-label py-2 px-3 text-sm font-semibold text-gray-600 bg-gray-50/80">المتبقي</td>
-                  <td className="invoice-print-totals-value py-2 px-3 text-right text-sm font-semibold tabular-nums text-gray-800">{hideItemPrices ? EMPTY_PRICE : formatNumber(remaining)}</td>
+                  <th scope="row" className="invoice-print-totals-label py-2.5 px-3 text-sm font-semibold text-gray-700 bg-gray-50/80 text-right">المتبقي</th>
+                  <td className="invoice-print-totals-value py-2.5 px-3 text-right text-sm font-semibold tabular-nums text-gray-800">{hideItemPrices ? EMPTY_PRICE : formatNumber(remaining)}</td>
                 </tr>
               </tbody>
             </table>
           </div>
-        </div>
+        </section>
 
-        <div className="invoice-print-signature flex justify-end mt-4 pt-4 border-t border-gray-200">
+        <section className="invoice-print-signature flex justify-end mt-5 pt-5 border-t-2 border-gray-300">
           <div className="invoice-print-signature-box text-left min-w-[160px]">
-            <span className="font-semibold text-gray-700 block mb-1 text-sm">التوقيع</span>
-            <div className="invoice-print-signature-line border-b-2 border-gray-400 h-6 mt-0" />
+            <span className="font-semibold text-gray-700 block mb-2 text-sm">التوقيع</span>
+            <div className="invoice-print-signature-line border-b-2 border-gray-400 h-7 mt-0" />
           </div>
-        </div>
-      </div>
+        </section>
+      </main>
 
-      <div
-        className="invoice-print-footer w-full mt-auto py-3 px-4 text-center text-white rounded-t-lg text-sm font-medium shadow-md shrink-0"
+      <footer
+        className="invoice-print-footer w-full mt-auto py-3 px-4 text-center text-white rounded-t-lg text-sm font-semibold shadow-md shrink-0"
         style={{ backgroundColor: HEADER_BG }}
+        role="contentinfo"
       >
         لا يرد العربون في حالة الغاء الحجز
-      </div>
+      </footer>
 
       <style>{`
         @media print {
           body * { visibility: hidden; }
           .invoice-print-root, .invoice-print-root * { visibility: visible; }
           .invoice-print-root {
-            position: absolute; left: 0; top: 0; width: 100%; max-width: 100%; padding: 0; box-sizing: border-box;
-            page-break-inside: avoid; page-break-after: avoid;
+            position: absolute; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            max-width: 100%; 
+            padding: 0; 
+            box-sizing: border-box;
+            page-break-inside: avoid; 
+            page-break-after: avoid;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+          /* Ensure proper font rendering */
+          * {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
           }
           /* Header when printing: logo at same height as header and clearer size */
-          .invoice-print-header { padding-top: 0.4rem !important; padding-bottom: 0.4rem !important; margin-bottom: 0.35rem !important; }
-          .invoice-print-header-inner { padding-left: 0.5rem !important; padding-right: 0.5rem !important; gap: 0.5rem !important; min-height: 4rem !important; }
-          .invoice-print-header .invoice-header-label, .invoice-print-header .invoice-header-line { font-size: 9px !important; }
-          .invoice-print-header-logo { padding: 0.25rem !important; height: 4rem !important; min-height: 4rem !important; max-height: 4rem !important; }
-          .invoice-logo-img { max-height: 100% !important; height: 100% !important; width: auto !important; max-width: 160px !important; object-fit: contain !important; object-position: center !important; }
+          .invoice-print-header { 
+            padding-top: 0.4rem !important; 
+            padding-bottom: 0.4rem !important; 
+            margin-bottom: 0.35rem !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+          .invoice-print-header-inner { 
+            padding-left: 0.5rem !important; 
+            padding-right: 0.5rem !important; 
+            gap: 0.5rem !important; 
+            min-height: 4rem !important; 
+          }
+          .invoice-print-header .invoice-header-label, 
+          .invoice-print-header .invoice-header-line { 
+            font-size: 9px !important; 
+          }
+          .invoice-print-header-logo { 
+            padding: 0.25rem !important; 
+            height: 4rem !important; 
+            min-height: 4rem !important; 
+            max-height: 4rem !important; 
+          }
+          .invoice-logo-img { 
+            max-height: 100% !important; 
+            height: 100% !important; 
+            width: auto !important; 
+            max-width: 160px !important; 
+            object-fit: contain !important; 
+            object-position: center !important; 
+          }
           /* Shrink order data table only when printing */
           .invoice-print-info-block { margin-bottom: 0.5rem !important; }
-          .invoice-print-info-block h2 { font-size: 9px !important; margin-bottom: 0.25rem !important; padding-bottom: 0.25rem !important; }
-          .invoice-print-table-info .invoice-print-td { padding: 0.2rem 0.4rem !important; font-size: 9px !important; }
+          .invoice-print-info-block h2 { 
+            font-size: 9px !important; 
+            margin-bottom: 0.25rem !important; 
+            padding-bottom: 0.25rem !important; 
+          }
+          .invoice-print-table-info .invoice-print-td { 
+            padding: 0.2rem 0.4rem !important; 
+            font-size: 9px !important; 
+          }
+          /* Hide screen-only elements */
+          .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+          }
         }
       `}</style>
-    </div>
+    </article>
   );
 }
