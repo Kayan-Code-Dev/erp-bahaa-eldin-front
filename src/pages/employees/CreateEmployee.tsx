@@ -329,7 +329,7 @@ function CreateEmployee() {
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                          className="absolute right-0 top-0 h-11 w-10 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
                           aria-label={
                             showPassword
                               ? "إخفاء كلمة المرور"
@@ -345,8 +345,8 @@ function CreateEmployee() {
                       </div>
                     </FormControl>
                     <FormMessage />
-                    <p className="text-xs text-muted-foreground mt-1">يجب أن تكون 6 أحرف على الأقل</p>
                   </FormItem>
+                  
                 )}
               />
 
