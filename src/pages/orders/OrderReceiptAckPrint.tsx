@@ -35,6 +35,13 @@ export function OrderReceiptAckPrint({
   const addressStr = c?.address
     ? [c.address.street, c.address.building].filter(Boolean).join(" - ") || "-"
     : "-";
+  const phones = c?.phones?.filter(p => p.phone?.trim()) || [];
+  const phoneStr = phones.length > 0
+    ? phones.map(p => {
+        const phoneType = p.type === 'mobile' ? 'موبايل' : p.type === 'whatsapp' ? 'واتساب' : p.type || 'هاتف';
+        return `${p.phone} (${phoneType})`;
+      }).join(" - ")
+    : null;
   const items = order.items ?? [];
   const startDate = order.visit_datetime ? formatDate(order.visit_datetime) : "-";
   const endDate = order.delivery_date
@@ -46,30 +53,46 @@ export function OrderReceiptAckPrint({
   const invoiceDate = order.created_at ? formatDate(order.created_at) : "-";
 
   return (
-    <div
+    <article
       dir="rtl"
-      className="invoice-print-root w-full min-h-screen flex flex-col bg-white text-gray-900 font-semibold text-[14px] leading-snug"
+      lang="ar"
+      className="invoice-print-root w-full min-h-screen flex flex-col bg-white text-gray-900 text-[14px] leading-relaxed"
       style={{ fontFamily: "'Cairo', 'Segoe UI', Arial, sans-serif" }}
+      itemScope
+      itemType="https://schema.org/Receipt"
     >
+      <meta itemProp="name" content={`إقرار استلام - طلب رقم ${order.id}`} />
+      <meta itemProp="dateCreated" content={order.created_at} />
+      
       {/* Header — minimized */}
       <header
-        className="invoice-print-header w-full py-3 mb-3 text-white rounded-b-xl shadow-sm font-semibold"
+        className="invoice-print-header w-full py-3 mb-3 text-white rounded-b-xl shadow-sm"
         style={{ backgroundColor: HEADER_BG }}
+        role="banner"
       >
         <div className="invoice-print-header-inner flex items-center justify-between gap-6 max-w-[210mm] mx-auto px-6">
-          <div className="invoice-print-header-right text-right shrink-0 space-y-0.5 text-[14px] font-semibold">
+          <div className="invoice-print-header-right text-right shrink-0 space-y-0.5 text-[14px]">
             <div className="flex items-baseline justify-end gap-2 flex-wrap">
-              <span className="text-white/95 font-bold">رقم الفاتورة:</span>
-              <span className="font-bold text-white">{order.id}</span>
+              <span className="text-white/95 font-medium">رقم الفاتورة:</span>
+              <span className="font-bold text-white" itemProp="identifier">{order.id}</span>
             </div>
-            <div className="font-bold text-white/95">
+            <div className="text-white/95 font-medium">
               اسم الموظف:{" "}
-              <OrderEmployeeName order={order} className="inline-block" />
+              <span className="font-semibold">
+                <OrderEmployeeName order={order} className="inline-block" />
+              </span>
             </div>
-            <div className="font-bold text-white/95">التاريخ: {invoiceDate}</div>
+            <div className="text-white/95 font-medium">
+              التاريخ: <span className="font-semibold">{invoiceDate}</span>
+            </div>
           </div>
           <div className="invoice-print-header-logo shrink-0 bg-white/10 rounded-lg p-2 flex items-center justify-center">
-            <img src={logoUrl} alt="الشعار" className="invoice-logo-img max-h-14 w-auto object-contain" />
+            <img 
+              src={logoUrl} 
+              alt="شعار الشركة" 
+              className="invoice-logo-img max-h-14 w-auto object-contain"
+              itemProp="image"
+            />
           </div>
         </div>
       </header>
@@ -85,7 +108,7 @@ export function OrderReceiptAckPrint({
           <span className="invoice-print-title-line mt-1 block h-0.5 w-24 rounded-full bg-gray-400" aria-hidden />
         </div>
 
-        {/* 2. I received / National ID / Resident in — from the right */}
+        {/* 2. I received / National ID / Resident in / Phone — from the right */}
         <div className="invoice-print-recipient text-right mb-3 space-y-1 text-[14px] font-semibold">
           <p className="text-gray-900">
             <span className="font-bold text-gray-700">استلمت أنا :</span>{" "}
@@ -99,6 +122,12 @@ export function OrderReceiptAckPrint({
             <span className="font-bold text-gray-700">المقيم في :</span>{" "}
             <span className="font-bold text-gray-900">{addressStr}</span>
           </p>
+          {phoneStr && (
+            <p className="text-gray-900">
+              <span className="font-bold text-gray-700">رقم الهاتف :</span>{" "}
+              <span className="font-bold text-gray-900">{phoneStr}</span>
+            </p>
+          )}
         </div>
 
         {/* 3. Numbered products list */}
