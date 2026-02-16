@@ -22,6 +22,7 @@ import { suppliersRoutes } from "./routes/suppliers.routes";
 import { overduereturnsRoutes } from "./routes/overdureturns.routes";
 import { returnsRoutes } from "./routes/returns.routes";
 import { deliveriesRoutes } from "./routes/deliveries.routes";
+import Notifications from "./pages/notifications/Notifications";
 
 
 function App() {
@@ -49,6 +50,7 @@ function App() {
           {overduereturnsRoutes()}
           {deliveriesRoutes()}
           {returnsRoutes()}
+          <Route path="/notifications" element={<Notifications />} />
 
         </Route>
         <Route

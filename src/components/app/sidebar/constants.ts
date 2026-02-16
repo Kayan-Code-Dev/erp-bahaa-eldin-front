@@ -37,6 +37,7 @@ import {
   Briefcase,
   Layers,
   ShoppingCart,
+  Bell,
 } from "lucide-react";
 
 const iconSize = 20;
@@ -62,7 +63,15 @@ export const sidebarLabels: SidebarLabel[] = [
     level: 1,
     iconComponent: createIcon(LayoutDashboard),
   },
-  // 2. Cashbox and accounting
+  // 2. Notifications
+  {
+    icon: null,
+    label: "الإشعارات",
+    path: "/notifications",
+    level: 1,
+    iconComponent: createIcon(Bell),
+  },
+  // 3. Cashbox and accounting
   {
     icon: null,
     label: "الخزنة و المحاسبة",
@@ -86,7 +95,7 @@ export const sidebarLabels: SidebarLabel[] = [
       },
     ],
   },
-  // 3. Invoices
+  // 4. Invoices
   {
     icon: null,
     label: "الفواتير",
@@ -110,7 +119,7 @@ export const sidebarLabels: SidebarLabel[] = [
       },
     ],
   },
-  // 4. Deliveries and returns
+  // 5. Deliveries and returns
   {
     icon: null,
     label: "التسليم والارجاع",
@@ -141,7 +150,7 @@ export const sidebarLabels: SidebarLabel[] = [
       },
     ],
   },
-  // 5. Cashbox
+  // 6. Cashbox
   {
     icon: null,
     label: "الخزنة",
@@ -149,7 +158,7 @@ export const sidebarLabels: SidebarLabel[] = [
     level: 1,
     iconComponent: createIcon(Banknote),
   },
-  // 6. Clients
+  // 7. Clients
   {
     icon: null,
     label: "العملاء",
@@ -157,7 +166,7 @@ export const sidebarLabels: SidebarLabel[] = [
     level: 1,
     iconComponent: createIcon(Users),
   },
-  // 7. Employees
+  // 8. Employees
   {
     icon: null,
     label: "الموظفين",
@@ -202,7 +211,7 @@ export const sidebarLabels: SidebarLabel[] = [
       },
     ],
   },
-  // 8. Permissions and Roles
+  // 9. Permissions and Roles
   {
     icon: null,
     label: "الصلاحيات والأذونات",
@@ -274,7 +283,7 @@ export const sidebarLabels: SidebarLabel[] = [
       },
     ],
   },
-  // 9. Branches
+  // 10. Branches
   {
     icon: null,
     label: "الفروع",
@@ -282,7 +291,7 @@ export const sidebarLabels: SidebarLabel[] = [
     level: 1,
     iconComponent: createIcon(Building2),
   },
-  // 10. Workshop management
+  // 11. Workshop management
   {
     icon: null,
     label: "إدارة الورشة",
@@ -290,7 +299,7 @@ export const sidebarLabels: SidebarLabel[] = [
     level: 1,
     iconComponent: createIcon(Wrench),
   },
-  // 11. Factory management (page /factory) below workshop management
+  // 12. Factory management (page /factory) below workshop management
   {
     icon: null,
     label: "إدارة المصنع",
@@ -298,7 +307,7 @@ export const sidebarLabels: SidebarLabel[] = [
     level: 1,
     iconComponent: createIcon(Factory),
   },
-  // 12. Reports
+  // 13. Reports
   {
     icon: null,
     label: "التقارير",

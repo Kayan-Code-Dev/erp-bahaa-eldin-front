@@ -3,6 +3,7 @@ import { useAuthStore } from "@/zustand-stores/auth.store";
 import { Link, Outlet } from "react-router";
 import { SidebarProvider, useSidebar } from "../ui/sidebar";
 import { AppSidebar } from "../app/new-sidebar/AppSideBar";
+import { useNotifications } from "@/hooks/useNotifications";
 
 const SIDEBAR_WIDTH_OPEN = "20rem";  /* w-80 in AppSidebar */
 const SIDEBAR_WIDTH_ICON = "4rem";
@@ -26,6 +27,9 @@ function MainContent() {
 
 function AppLayout() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  
+  // Initialize WebSocket notifications
+  useNotifications();
 
   if (!isAuthenticated) {
     return (

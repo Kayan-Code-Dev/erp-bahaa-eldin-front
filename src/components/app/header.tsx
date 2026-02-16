@@ -1,12 +1,13 @@
-import { Bell, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { useSidebar } from "@/components/ui/sidebar";
 import MobileSidebar from "./sidebar/mobile-sidebar";
 import { useAuthStore } from "@/zustand-stores/auth.store";
 import { useLogoutMutationOptions } from "@/api/v2/auth/auth.hooks";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 function Header() {
   const logout = useAuthStore((s) => s.logout);
@@ -52,6 +53,8 @@ function Header() {
             </Button>
           </SheetTrigger>
           <SheetContent side="right" className="p-0 w-64">
+            <SheetTitle className="sr-only">القائمة الجانبية</SheetTitle>
+            <SheetDescription className="sr-only">القائمة الجانبية للتنقل</SheetDescription>
             <MobileSidebar />
           </SheetContent>
         </Sheet>
@@ -65,10 +68,7 @@ function Header() {
             className="h-full w-full object-cover"
           />
         </div>
-        <div className="relative">
-          <Bell className="h-5 w-5 text-[#7a7a7a]" />
-          <span className="absolute -top-1 -right-1 bg-[#cf0c0c] rounded-full w-2 h-2"></span>
-        </div>
+        <NotificationBell />
       </div>
     </header>
   );
