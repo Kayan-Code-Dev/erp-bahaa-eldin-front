@@ -5,9 +5,9 @@ const HEADER_BG = "#907457";
 
 /** Receipt acknowledgment rules and instructions — at the bottom of the page */
 const RULES_ITEMS = [
-  "ميعاد استلام المنتج من 1 ظهراً حتى 7 مساءً وإحضار التأمينات اللازمة.",
-  "لا يمكن استرجاع أو استبدال المنتج بعد مرور 3 أيام من تاريخ الشراء إلا في حالة وجود عيب مصنعي.",
-  "يجب إحضار الفاتورة الأصلية مع البطاقة الشخصية عند الاسترجاع أو الاستبدال أو الاستلام.",
+  "• ميعاد استلام الفستان من 1 ظهراً حتى 7 مساءً وإحضار 2000 جنيه تأمين للزفاف و 500 للسواريه.",
+  "• لا يمكن استرجاع أو استبدال الفساتين بعد مرور 3 أيام من تاريخ الشراء إلا في حالة وجود عيب مصنعي.",
+  "• يجب إحضار الفاتورة الأصلية مع البطاقة الشخصية عند الإرجاع أو الاستلام أو الاستبدال.",
 ];
 
 type Props = {
@@ -19,7 +19,12 @@ function formatDate(s: string): string {
   if (!s) return "-";
   try {
     const d = new Date(s);
-    return isNaN(d.getTime()) ? s : d.toLocaleDateString("ar-EG");
+    if (isNaN(d.getTime())) return s;
+    // Format as YYYY-MM-DD (English numbers)
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   } catch {
     return s;
   }
@@ -49,7 +54,7 @@ export function OrderReceiptAckPrint({
     : (items[0] as { delivery_date?: string })?.delivery_date
       ? formatDate((items[0] as { delivery_date: string }).delivery_date)
       : "-";
-  const paid = String(order.paid ?? "-");
+  const paid = order.paid != null ? String(order.paid) : "-";
   const invoiceDate = order.created_at ? formatDate(order.created_at) : "-";
 
   return (
@@ -74,7 +79,7 @@ export function OrderReceiptAckPrint({
           <div className="invoice-print-header-right text-right shrink-0 space-y-0.5 text-[14px]">
             <div className="flex items-baseline justify-end gap-2 flex-wrap">
               <span className="text-white/95 font-medium">رقم الفاتورة:</span>
-              <span className="font-bold text-white" itemProp="identifier">{order.id}</span>
+              <span className="font-bold text-white" itemProp="identifier" style={{ fontVariantNumeric: "tabular-nums", fontFamily: "'Segoe UI', Arial, sans-serif" }}>{order.id}</span>
             </div>
             <div className="text-white/95 font-medium">
               اسم الموظف:{" "}
@@ -116,7 +121,7 @@ export function OrderReceiptAckPrint({
           </p>
           <p className="text-gray-900">
             <span className="font-semibold text-gray-700">الرقم القومي :</span>{" "}
-            <span className="font-normal text-gray-900">{nationalId}</span>
+            <span className="font-normal text-gray-900" style={{ fontVariantNumeric: "tabular-nums", fontFamily: "'Segoe UI', Arial, sans-serif" }}>{nationalId}</span>
           </p>
           <p className="text-gray-900">
             <span className="font-semibold text-gray-700">المقيم في :</span>{" "}
@@ -125,7 +130,7 @@ export function OrderReceiptAckPrint({
           {phoneStr && (
             <p className="text-gray-900">
               <span className="font-semibold text-gray-700">رقم الهاتف :</span>{" "}
-              <span className="font-normal text-gray-900" itemProp="telephone">{phoneStr}</span>
+              <span className="font-normal text-gray-900" itemProp="telephone" style={{ fontVariantNumeric: "tabular-nums", fontFamily: "'Segoe UI', Arial, sans-serif" }}>{phoneStr}</span>
             </p>
           )}
         </section>
@@ -159,19 +164,19 @@ export function OrderReceiptAckPrint({
         {/* 5. Receipt acknowledgment and deposit payment */}
         <p className="invoice-print-deposit text-[14px] text-gray-900 mb-5">
           وذلك إقرار مني بالاستلام ودفع عربون وقدره :{" "}
-          <span className="font-bold text-gray-900" itemProp="totalPaymentDue">{paid} ج.م</span>
+          <span className="font-bold text-gray-900" itemProp="totalPaymentDue" style={{ fontVariantNumeric: "tabular-nums", fontFamily: "'Segoe UI', Arial, sans-serif" }}>{paid} ج.م</span>
         </p>
 
         {/* 6. Recipient and signature */}
         <section className="invoice-print-signature flex justify-end mt-4 pt-4 border-t-2 border-gray-300">
           <div className="invoice-print-signature-box text-right min-w-[220px] space-y-3 text-[14px] text-gray-900">
-            <p>
-              <span className="font-semibold text-gray-700">المستلم :</span>{" "}
-              <span className="inline-block border-b-2 border-gray-500 min-w-[120px] align-bottom h-6">&nbsp;</span>
+            <p className="flex items-center justify-end gap-4">
+              <span className="font-semibold text-gray-700">المستلم:</span>
+              <span className="inline-block min-w-[200px] h-6">&nbsp;</span>
             </p>
-            <p>
-              <span className="font-semibold text-gray-700">التوقيع :</span>{" "}
-              <span className="inline-block border-b-2 border-gray-500 min-w-[120px] align-bottom h-6">&nbsp;</span>
+            <p className="flex items-center justify-end gap-4">
+              <span className="font-semibold text-gray-700">التوقيع:</span>
+              <span className="inline-block min-w-[200px] h-6">&nbsp;</span>
             </p>
           </div>
         </section>
@@ -183,11 +188,10 @@ export function OrderReceiptAckPrint({
             القواعد والتعليمات
           </h2>
           <div className="invoice-print-notes-box rounded-lg border-2 border-gray-200 bg-gray-50 py-3 px-4">
-            <ul className="list-none space-y-1 text-[13px] text-gray-800 leading-relaxed">
+            <ul className="list-none space-y-2 text-[13px] text-gray-800 leading-relaxed">
               {RULES_ITEMS.map((text, i) => (
-                <li key={i} className="flex gap-2">
-                  <span className="font-bold text-gray-700 shrink-0">{i + 1}.</span>
-                  <span className="font-normal">{text}</span>
+                <li key={i} className="font-normal">
+                  {text}
                 </li>
               ))}
             </ul>
@@ -239,6 +243,29 @@ export function OrderReceiptAckPrint({
             clip: rect(0, 0, 0, 0);
             white-space: nowrap;
             border-width: 0;
+          }
+          /* Improve rules spacing when printing */
+          .invoice-print-notes-box ul {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 8px !important;
+          }
+          .invoice-print-notes-box li {
+            display: block !important;
+            margin-bottom: 8px !important;
+            page-break-inside: avoid;
+          }
+          /* Ensure signature spacing is preserved when printing */
+          .invoice-print-signature-box p {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-end !important;
+            gap: 16px !important;
+          }
+          .invoice-print-signature-box span[class*="min-w"] {
+            min-width: 200px !important;
+            height: 24px !important;
+            display: inline-block !important;
           }
         }
       `}</style>

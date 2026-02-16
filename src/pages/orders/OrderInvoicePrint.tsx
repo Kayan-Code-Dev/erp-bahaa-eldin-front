@@ -12,7 +12,9 @@ type Props = {
   hideItemPrices?: boolean;
 };
 
-const RULES_TEXT = `إقرار من المستفيد: أقر بأنني استلمت الفاتورة من 1 إلى 7 أسماء ظاهرة وأوضح أنني مسؤول عن التأخير. 2000 جنيه لإيجار السروال و 500 للجلب. لا يجوز استبدال أو إرجاع الفواتير إلا بعد 3 أشهر. لا يسمح بإخراج المنتجات من المحل في حالة غير مكتملة البيع. يلزم إحضار الفواتير الشخصية مع الفاتورة عند الاستبدال أو الإرجاع.`;
+const RULES_TEXT = `• ميعاد استلام الفستان من 1 ظهراً حتى 7 مساءً وإحضار 2000 جنيه تأمين للزفاف و 500 للسواريه.
+• لا يمكن استرجاع أو استبدال الفساتين بعد مرور 3 أيام من تاريخ الشراء إلا في حالة وجود عيب مصنعي.
+• يجب إحضار الفاتورة الأصلية مع البطاقة الشخصية عند الإرجاع أو الاستلام أو الاستبدال.`;
 
 /* First table: label only (no item column) */
 const INFO_ROWS: { label: string }[] = [
@@ -66,7 +68,12 @@ function formatDate(s: string): string {
   if (!s) return "-";
   try {
     const d = new Date(s);
-    return isNaN(d.getTime()) ? s : d.toLocaleDateString("ar-EG");
+    if (isNaN(d.getTime())) return s;
+    // Format as YYYY-MM-DD (English numbers)
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   } catch {
     return s;
   }
@@ -75,7 +82,7 @@ function formatDate(s: string): string {
 function formatNumber(value: string | number): string {
   const n = typeof value === "string" ? parseFloat(value) : value;
   if (Number.isNaN(n)) return "—";
-  return n.toLocaleString("ar-EG", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 const EMPTY_PRICE = "";
@@ -122,7 +129,7 @@ export function OrderInvoicePrint({
           <div className="invoice-print-header-right text-right shrink-0 space-y-1">
             <div className="flex items-baseline justify-end gap-2 flex-wrap">
               <span className="invoice-header-label text-sm font-medium text-white/95">رقم الفاتورة: </span>
-              <span className="invoice-header-label text-sm font-bold text-white" itemProp="identifier">{order.id}</span>
+              <span className="invoice-header-label text-sm font-bold text-white" itemProp="identifier" style={{ fontVariantNumeric: "tabular-nums", fontFamily: "'Segoe UI', Arial, sans-serif" }}>{order.id}</span>
             </div>
             <div className="invoice-header-line text-xs font-normal text-white/95">
               اسم الموظف:{" "}
@@ -154,7 +161,7 @@ export function OrderInvoicePrint({
               {INFO_ROWS.map(({ label }, i) => (
                 <tr key={i} className={i % 2 === 0 ? "invoice-print-row-even bg-gray-50/80" : "bg-white"}>
                   <th scope="row" className="invoice-print-td border-b border-gray-100 py-2.5 px-3 text-gray-700 font-semibold text-sm text-right" style={{ width: "32%" }}>{label}</th>
-                  <td className="invoice-print-td border-b border-gray-100 py-2.5 px-3 text-gray-900 font-normal text-sm" style={{ width: "68%" }}>{infoValues[i] ?? "-"}</td>
+                  <td className="invoice-print-td border-b border-gray-100 py-2.5 px-3 text-gray-900 font-normal text-sm" style={{ width: "68%", fontVariantNumeric: "tabular-nums", fontFamily: "'Segoe UI', Arial, sans-serif" }}>{infoValues[i] ?? "-"}</td>
                 </tr>
               ))}
             </tbody>
@@ -193,11 +200,11 @@ export function OrderInvoicePrint({
                       : EMPTY_PRICE;
                   return (
                     <tr key={item.id} className={index % 2 === 0 ? "invoice-print-row-even bg-gray-50/50" : "bg-white"} itemScope itemType="https://schema.org/Product">
-                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-2.5 px-3 text-center text-sm font-medium">{index + 1}</td>
-                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-2.5 px-3 text-center text-sm font-normal">{item.code || "-"}</td>
-                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-2.5 px-3 text-center text-sm font-semibold">{showPrices ? price : EMPTY_PRICE}</td>
-                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-2.5 px-3 text-center text-sm font-semibold">{showPrices ? itemPaidVal : EMPTY_PRICE}</td>
-                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-2.5 px-3 text-center text-sm font-semibold">{showPrices ? itemRemainingVal : EMPTY_PRICE}</td>
+                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-2.5 px-3 text-center text-sm font-medium" style={{ fontVariantNumeric: "tabular-nums", fontFamily: "'Segoe UI', Arial, sans-serif" }}>{index + 1}</td>
+                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-2.5 px-3 text-center text-sm font-normal" style={{ fontVariantNumeric: "tabular-nums", fontFamily: "'Segoe UI', Arial, sans-serif" }}>{item.code || "-"}</td>
+                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-2.5 px-3 text-center text-sm font-semibold" style={{ fontVariantNumeric: "tabular-nums", fontFamily: "'Segoe UI', Arial, sans-serif" }}>{showPrices ? price : EMPTY_PRICE}</td>
+                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-2.5 px-3 text-center text-sm font-semibold" style={{ fontVariantNumeric: "tabular-nums", fontFamily: "'Segoe UI', Arial, sans-serif" }}>{showPrices ? itemPaidVal : EMPTY_PRICE}</td>
+                      <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-2.5 px-3 text-center text-sm font-semibold" style={{ fontVariantNumeric: "tabular-nums", fontFamily: "'Segoe UI', Arial, sans-serif" }}>{showPrices ? itemRemainingVal : EMPTY_PRICE}</td>
                     </tr>
                   );
                 })
@@ -222,7 +229,7 @@ export function OrderInvoicePrint({
         <section className="invoice-print-rules-row flex gap-4 mb-4 flex-wrap">
           <aside className="invoice-print-rules-text flex-1 min-w-[200px]">
             <h2 className="text-xs font-bold text-gray-600 uppercase tracking-wider mb-2 pb-1.5 border-b-2 border-gray-300">القواعد والتعليمات</h2>
-            <p className="invoice-print-rules-p text-gray-700 text-xs leading-relaxed font-normal">{RULES_TEXT}</p>
+            <div className="invoice-print-rules-p text-gray-700 text-xs leading-relaxed font-normal whitespace-pre-line">{RULES_TEXT}</div>
           </aside>
           <div className="invoice-print-totals-wrap shrink-0 w-44 rounded-lg overflow-hidden shadow-md border border-gray-200">
             <header className="invoice-print-totals-title py-2.5 px-3 text-center text-white text-sm font-bold uppercase tracking-wider" style={{ backgroundColor: HEADER_BG }}>
@@ -249,8 +256,10 @@ export function OrderInvoicePrint({
 
         <section className="invoice-print-signature flex justify-end mt-5 pt-5 border-t-2 border-gray-300">
           <div className="invoice-print-signature-box text-left min-w-[160px]">
-            <span className="font-semibold text-gray-700 block mb-2 text-sm">التوقيع</span>
-            <div className="invoice-print-signature-line border-b-2 border-gray-400 h-7 mt-0" />
+            <div className="flex items-center gap-4">
+              <span className="font-semibold text-gray-700 text-sm">التوقيع:</span>
+              <span className="inline-block min-w-[200px] h-6">&nbsp;</span>
+            </div>
           </div>
         </section>
       </main>
@@ -339,6 +348,22 @@ export function OrderInvoicePrint({
             clip: rect(0, 0, 0, 0);
             white-space: nowrap;
             border-width: 0;
+          }
+          /* Improve rules text spacing when printing */
+          .invoice-print-rules-p {
+            white-space: pre-line !important;
+            line-height: 1.8 !important;
+          }
+          /* Ensure signature spacing is preserved when printing */
+          .invoice-print-signature-box > div {
+            display: flex !important;
+            align-items: center !important;
+            gap: 16px !important;
+          }
+          .invoice-print-signature-box span[class*="min-w"] {
+            min-width: 200px !important;
+            height: 24px !important;
+            display: inline-block !important;
           }
         }
       `}</style>
