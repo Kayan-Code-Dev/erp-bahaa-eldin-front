@@ -67,12 +67,12 @@ function PaginationLink({
 
 function PaginationPrevious({
   className,
-  label = "Previous",
+  label = "السابق",
   ...props
 }: React.ComponentProps<typeof PaginationLink> & { label?: string }) {
   return (
     <PaginationLink
-      aria-label="Go to previous page"
+      aria-label="الانتقال إلى الصفحة السابقة"
       size="default"
       className={cn("gap-1 px-2.5 sm:pl-2.5", className)}
       {...props}
@@ -85,12 +85,12 @@ function PaginationPrevious({
 
 function PaginationNext({
   className,
-  label = "Next",
+  label = "التالي",
   ...props
 }: React.ComponentProps<typeof PaginationLink> & { label?: string }) {
   return (
     <PaginationLink
-      aria-label="Go to next page"
+      aria-label="الانتقال إلى الصفحة التالية"
       size="default"
       className={cn("gap-1 px-2.5 sm:pr-2.5", className)}
       {...props}
