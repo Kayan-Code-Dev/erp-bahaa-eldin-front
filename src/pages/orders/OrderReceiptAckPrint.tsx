@@ -135,7 +135,7 @@ export function OrderReceiptAckPrint({
           <h2 className="sr-only">قائمة المنتجات</h2>
           {items.length > 0 ? (
             <ol className="list-decimal list-inside space-y-1" itemProp="itemListElement" itemScope itemType="https://schema.org/ItemList">
-              {items.map((item, index) => (
+              {items.map((item) => (
                 <li key={item.id} className="font-medium" itemProp="itemListElement" itemScope itemType="https://schema.org/Product">
                   <span itemProp="name">{item.name || "-"}</span>
                   {item.code && (
