@@ -60,6 +60,39 @@ const getNotificationTypeLabel = (type: string): string => {
   return typeMap[type] || type;
 };
 
+const getStatusLabel = (status: string): string => {
+  const statusMap: Record<string, string> = {
+    'created': 'تم إنشاء الطلب',
+    'paid': 'مدفوع',
+    'partially_paid': 'مدفوع جزئياً',
+    'canceled': 'ملغي',
+    'delivered': 'تم تسليم الطلب',
+    'returned': 'مرتجع',
+    'overdue': 'متأخر',
+    'pending': 'قيد الانتظار',
+  };
+  return statusMap[status] || status;
+};
+
+const getStatusVariant = (status: string): string => {
+  switch (status) {
+    case 'paid':
+      return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
+    case 'partially_paid':
+      return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400';
+    case 'canceled':
+      return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
+    case 'returned':
+      return 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400';
+    case 'overdue':
+      return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400';
+    case 'created':
+    case 'delivered':
+    default:
+      return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
+  }
+};
+
 const NotificationListItem = memo(function NotificationListItem({
   notification,
   onMarkAsRead,
@@ -80,10 +113,14 @@ const NotificationListItem = memo(function NotificationListItem({
     });
   }, [notification.created_at]);
 
+  const orderStatus = useMemo(() => {
+    return notification.metadata?.status || null;
+  }, [notification.metadata]);
+
   const metadataEntries = useMemo(() => {
     if (!notification.metadata) return [];
     return Object.entries(notification.metadata)
-      .filter(([key]) => key !== 'order_id' && key !== 'client_id');
+      .filter(([key]) => key !== 'order_id' && key !== 'client_id' && key !== 'status');
   }, [notification.metadata]);
 
   const typeLabel = useMemo(() => {
@@ -165,7 +202,6 @@ const NotificationListItem = memo(function NotificationListItem({
               {metadataEntries.map(([key, value]) => {
                 // Translate common metadata keys to Arabic
                 const keyLabels: Record<string, string> = {
-                  status: 'الحالة',
                   total_price: 'المبلغ الإجمالي',
                   amount: 'المبلغ',
                   reference_id: 'رقم المرجع',
@@ -202,6 +238,18 @@ const NotificationListItem = memo(function NotificationListItem({
 
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 flex-wrap">
+              {/* Order Status Badge */}
+              {orderStatus && (
+                <span
+                  className={cn(
+                    'text-xs px-2 py-0.5 rounded-full font-medium',
+                    getStatusVariant(orderStatus)
+                  )}
+                >
+                  {getStatusLabel(orderStatus)}
+                </span>
+              )}
+
               {/* Priority Badge */}
               {priority && (
                 <span

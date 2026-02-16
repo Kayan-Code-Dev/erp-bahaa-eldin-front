@@ -17,7 +17,7 @@ export function useNotifications() {
 
   useEffect(() => {
     if (!isAuthenticated || !loginData?.token || !loginData?.user?.id) {
-      // Disconnect if not authenticated
+      console.log('🔌 WebSocket: المستخدم غير مسجل دخول - إيقاف الاتصال');
       if (channelRef.current) {
         try {
           channelRef.current.stopListening('.admin.notification');
@@ -33,8 +33,8 @@ export function useNotifications() {
       return;
     }
 
-    // Prevent multiple setups
     if (setupRef.current) {
+      console.log('🔌 WebSocket: الإعداد قيد التنفيذ بالفعل - تخطي');
       return;
     }
 
@@ -43,150 +43,205 @@ export function useNotifications() {
 
     const setupNotifications = async () => {
       try {
-        // Small delay to prevent rapid re-initialization
+        console.log('🚀 WebSocket: بدء إعداد الاتصال...');
+        
         await new Promise(resolve => setTimeout(resolve, 100));
         
-        if (!mounted) return;
-
-        // Check if WebSocket is enabled (optional - can be disabled if no backend)
-        const enableWebSocket = import.meta.env.VITE_ENABLE_WEBSOCKET !== 'false';
-        
-        if (!enableWebSocket) {
-          // WebSocket is disabled - app works normally without real-time notifications
+        if (!mounted) {
+          console.log('🔌 WebSocket: تم إلغاء الإعداد - المكون غير مثبت');
           return;
         }
 
-        // Initialize Echo connection
-        // Wrap in try-catch to handle connection errors gracefully
+        const enableWebSocket = import.meta.env.VITE_ENABLE_WEBSOCKET !== 'false';
+        console.log(`🔌 WebSocket: حالة التفعيل = ${enableWebSocket ? 'مفعل' : 'معطل'}`);
+        
+        if (!enableWebSocket) {
+          console.warn('⚠️ WebSocket: معطل في الإعدادات - الإشعارات الفورية غير متاحة');
+          return;
+        }
+
         let echo;
         try {
+          console.log('🔌 WebSocket: محاولة تهيئة الاتصال...');
           echo = initializeEcho(loginData.token);
-        } catch (initError) {
-          // If initialization fails, continue without WebSocket
+          console.log('✅ WebSocket: تم تهيئة Echo بنجاح');
+        } catch (initError: any) {
+          console.error('❌ WebSocket: فشل تهيئة الاتصال:', initError?.message || initError);
           if (import.meta.env.DEV) {
-            console.warn('WebSocket initialization skipped - app will work normally');
+            console.warn('⚠️ WebSocket: سيتم المتابعة بدون إشعارات فورية');
           }
           return;
         }
         
         echoRef.current = echo;
         const adminId = loginData.user.id;
+        console.log(`🔌 WebSocket: معرف المستخدم = ${adminId}`);
 
-        // Handle connection events BEFORE subscribing
         const pusher = echo.connector.pusher;
+        console.log('🔌 WebSocket: ربط أحداث الاتصال...');
         
         pusher.connection.bind('connected', () => {
           requestAnimationFrame(() => {
             if (!mounted) return;
-            // WebSocket connected - notifications will work now
+            console.log('✅ WebSocket: تم الاتصال بنجاح - الإشعارات الفورية مفعلة');
+            console.log('📡 WebSocket: حالة الاتصال = متصل');
           });
         });
 
         pusher.connection.bind('disconnected', () => {
           requestAnimationFrame(() => {
             if (!mounted) return;
-            // WebSocket disconnected - app continues to work normally
+            console.warn('⚠️ WebSocket: تم قطع الاتصال - الإشعارات الفورية غير متاحة');
+            console.log('📡 WebSocket: حالة الاتصال = منقطع');
           });
         });
 
-        pusher.connection.bind('error', () => {
+        pusher.connection.bind('error', (error: any) => {
           requestAnimationFrame(() => {
             if (!mounted) return;
-            // Silently handle connection errors - WebSocket is optional
-            // The app will work fine without it, just without real-time notifications
+            console.error('❌ WebSocket: خطأ في الاتصال:', error);
+            console.error('❌ WebSocket: تفاصيل الخطأ:', {
+              error: error?.error || error,
+              type: error?.type || 'unknown',
+              data: error?.data || null,
+            });
           });
         });
 
         pusher.connection.bind('state_change', (states: any) => {
           requestAnimationFrame(() => {
             if (!mounted) return;
-            
-            // Reset warning flag when connected successfully
+            console.log('🔄 WebSocket: تغيير حالة الاتصال:', {
+              previous: states.previous,
+              current: states.current,
+            });
             if (states.current === 'connected') {
               warningShownRef.current = false;
             }
           });
         });
 
-        // Subscribe to admin channel
-        const channel = echo.private(`private-admin.${adminId}`);
+        const channelName = `private-admin.${adminId}`;
+        console.log(`🔌 WebSocket: محاولة الاشتراك في القناة: ${channelName}`);
+        
+        const channel = echo.private(channelName);
 
-        // Wait for subscription to be ready
         channel
           .subscribed(() => {
             requestAnimationFrame(() => {
               if (!mounted) return;
-              // Successfully subscribed to notifications channel
+              console.log(`✅ WebSocket: تم الاشتراك في قناة الإشعارات بنجاح: ${channelName}`);
+              console.log('📡 WebSocket: جاهز لاستقبال الإشعارات');
             });
           })
-          .error(() => {
+          .error((error: any) => {
             requestAnimationFrame(() => {
               if (!mounted) return;
-              // Silently handle subscription errors - WebSocket is optional
-              // The app will continue to work without real-time notifications
+              console.error(`❌ WebSocket: فشل الاشتراك في القناة: ${channelName}`);
+              console.error('❌ WebSocket: تفاصيل خطأ الاشتراك:', {
+                type: error?.type || 'unknown',
+                error: error?.error || error,
+                status: error?.status || 'unknown',
+                message: error?.message || error?.error || 'خطأ غير معروف',
+                fullError: error,
+              });
+              
+              const echo = echoRef.current;
+              if (echo) {
+                const pusher = echo.connector.pusher;
+                const config = (pusher as any).config || {};
+                console.error('❌ WebSocket: معلومات المصادقة:', {
+                  authEndpoint: config.authEndpoint || config.auth?.endpoint || 'غير محدد',
+                  wsHost: config.wsHost,
+                  wsPort: config.wsPort,
+                  wsPath: config.wsPath,
+                  enabledTransports: config.enabledTransports,
+                });
+                
+                const channelAuthorizer = (pusher as any).channelAuthorizer;
+                if (channelAuthorizer) {
+                  console.error('❌ WebSocket: معلومات Channel Authorizer:', {
+                    endpoint: channelAuthorizer.endpoint || 'غير محدد',
+                    headers: channelAuthorizer.headers || {},
+                  });
+                }
+              }
+              
+              console.error('❌ WebSocket: ملاحظات:', {
+                note1: '404 يعني أن الـ endpoint غير موجود في الباك اند',
+                note2: 'الـ endpoint الافتراضي: /broadcasting/auth (ليس تحت /api/v1)',
+                note3: 'تأكد من تفعيل BroadcastServiceProvider في Laravel',
+                note4: 'إذا كان لديك endpoint مخصص، قم بتحديثه في echo.ts',
+              });
             });
           });
 
-        // Listen for notifications
         channel.listen('.admin.notification', (data: any) => {
-          // Use requestAnimationFrame to ensure async handling doesn't cause issues
           requestAnimationFrame(() => {
             if (!mounted) return;
             
             try {
-              // Add to local store immediately (lightweight operation)
+              const notificationTitle = data.title || 'إشعار جديد';
+              const notificationMessage = data.message || '';
+              
+              console.log('🔔 إشعار جديد:', {
+                title: notificationTitle,
+                message: notificationMessage,
+                type: data.type || 'system',
+                timestamp: data.timestamp || new Date().toISOString(),
+                data: data.data || {},
+              });
+              
               addNotification({
-                title: data.title || 'إشعار جديد',
-                message: data.message || '',
+                title: notificationTitle,
+                message: notificationMessage,
                 type: data.type || 'system',
                 data: data.data || {},
                 timestamp: data.timestamp || new Date().toISOString(),
               });
 
-              // Debounce API invalidation to avoid multiple rapid calls
-              // Clear existing timeout if there is one
               if (invalidationTimeoutRef.current) {
                 clearTimeout(invalidationTimeoutRef.current);
               }
 
-              // Schedule invalidation with debounce (wait 300ms for more notifications)
               invalidationTimeoutRef.current = setTimeout(() => {
                 if (!mounted) return;
                 try {
-                  // Batch invalidations together
                   queryClient.invalidateQueries({ queryKey: [NOTIFICATIONS_KEY] });
                   queryClient.invalidateQueries({ queryKey: [UNREAD_COUNT_KEY] });
-                } catch (error) {
-                  // Silently handle invalidation errors
+                } catch {
+                  // Ignore invalidation errors
                 } finally {
                   invalidationTimeoutRef.current = null;
                 }
               }, 300);
-            } catch (error) {
-              // Silently handle notification processing errors
+            } catch {
+              // Ignore notification processing errors
             }
           });
         });
 
         channelRef.current = channel;
+        console.log('✅ WebSocket: اكتمل الإعداد بنجاح');
       } catch (error: any) {
-        // Silently handle setup errors - WebSocket is optional
-        // The app will continue to work without real-time notifications
-        // Only log in development mode for debugging
+        console.error('❌ WebSocket: خطأ أثناء إعداد الاتصال:', error);
+        console.error('❌ WebSocket: تفاصيل الخطأ:', {
+          message: error?.message || 'خطأ غير معروف',
+          stack: error?.stack || null,
+          error: error,
+        });
         if (import.meta.env.DEV) {
-          console.warn('WebSocket notifications unavailable - app will work normally without real-time notifications');
+          console.warn('⚠️ WebSocket: سيتم المتابعة بدون إشعارات فورية');
         }
       }
     };
 
     setupNotifications();
 
-    // Cleanup on unmount
     return () => {
       mounted = false;
       setupRef.current = false;
       
-      // Clear any pending invalidation timeout
       if (invalidationTimeoutRef.current) {
         clearTimeout(invalidationTimeoutRef.current);
         invalidationTimeoutRef.current = null;
@@ -200,17 +255,13 @@ export function useNotifications() {
         }
         channelRef.current = null;
       }
-      // Don't disconnect Echo here as it might be used elsewhere
-      // The disconnect will happen when user logs out
     };
-  }, [isAuthenticated, loginData?.token, loginData?.user?.id, addNotification]);
+  }, [isAuthenticated, loginData?.token, loginData?.user?.id, addNotification, queryClient]);
 
-  // Cleanup on logout
   useEffect(() => {
     if (!isAuthenticated) {
       setupRef.current = false;
       
-      // Clear any pending invalidation timeout
       if (invalidationTimeoutRef.current) {
         clearTimeout(invalidationTimeoutRef.current);
         invalidationTimeoutRef.current = null;

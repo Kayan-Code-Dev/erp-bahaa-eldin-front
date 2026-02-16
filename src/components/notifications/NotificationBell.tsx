@@ -21,7 +21,6 @@ import { toast } from 'sonner';
 export function NotificationBell() {
   const navigate = useNavigate();
 
-  // Fetch recent notifications from API
   const { data: apiNotifications } = useQuery(
     useGetNotificationsQueryOptions({
       page: 1,
@@ -30,7 +29,6 @@ export function NotificationBell() {
     })
   );
 
-  // Fetch unread count from API
   const { data: unreadCountData } = useQuery(
     useGetUnreadCountQueryOptions()
   );
@@ -39,8 +37,6 @@ export function NotificationBell() {
     useMarkAllNotificationsAsReadMutationOptions()
   );
 
-  // Combine WebSocket notifications (recent) with API notifications
-  // WebSocket notifications are temporary and will be replaced by API data
   const allNotifications = useMemo(() => apiNotifications?.data || [], [apiNotifications?.data]);
   const unreadCount = useMemo(() => unreadCountData?.unread_count || 0, [unreadCountData?.unread_count]);
 
@@ -84,7 +80,6 @@ export function NotificationBell() {
         className="w-[380px] sm:w-[420px] p-0"
         sideOffset={8}
       >
-        {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b">
           <h3 className="font-semibold text-sm">الإشعارات</h3>
           {unreadCount > 0 && (
@@ -99,7 +94,6 @@ export function NotificationBell() {
           )}
         </div>
 
-        {/* Notifications List */}
         <ScrollArea className="h-[400px]">
           {allNotifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
@@ -110,7 +104,6 @@ export function NotificationBell() {
             </div>
           ) : (
             <div className="py-2">
-              {/* Unread Notifications */}
               {unreadNotifications.length > 0 && (
                 <>
                   {unreadNotifications.map((notification) => (
@@ -144,7 +137,6 @@ export function NotificationBell() {
                 </>
               )}
 
-              {/* Read Notifications */}
               {readNotifications.map((notification) => (
                 <NotificationItem
                   key={notification.id}
@@ -174,7 +166,6 @@ export function NotificationBell() {
           )}
         </ScrollArea>
 
-        {/* Footer */}
         {allNotifications.length > 0 && (
           <div className="border-t px-4 py-2">
             <Button

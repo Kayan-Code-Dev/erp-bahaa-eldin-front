@@ -1,7 +1,7 @@
 import { memo, useMemo, useCallback } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import { CheckCircle2, Circle, ExternalLink, X } from 'lucide-react';
+import { CheckCircle2, Circle, ExternalLink } from 'lucide-react';
 import { useNotificationsStore } from '@/zustand-stores/notifications.store';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -32,7 +32,6 @@ const priorityColors = {
   urgent: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
 };
 
-// Translate notification types to Arabic
 const getNotificationTypeLabel = (type: string): string => {
   const typeMap: Record<string, string> = {
     'order_status': 'حالة الطلب',
@@ -51,21 +50,49 @@ const getNotificationTypeLabel = (type: string): string => {
   return typeMap[type] || type;
 };
 
+const getStatusLabel = (status: string): string => {
+  const statusMap: Record<string, string> = {
+    'created': 'تم إنشاء الطلب',
+    'paid': 'مدفوع',
+    'partially_paid': 'مدفوع جزئياً',
+    'canceled': 'ملغي',
+    'delivered': 'تم تسليم الطلب',
+    'returned': 'مرتجع',
+    'overdue': 'متأخر',
+    'pending': 'قيد الانتظار',
+  };
+  return statusMap[status] || status;
+};
+
+const getStatusVariant = (status: string): string => {
+  switch (status) {
+    case 'paid':
+      return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
+    case 'partially_paid':
+      return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400';
+    case 'canceled':
+      return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
+    case 'returned':
+      return 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400';
+    case 'overdue':
+      return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400';
+    case 'created':
+    case 'delivered':
+    default:
+      return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
+  }
+};
+
 export const NotificationItem = memo(function NotificationItem({
   notification,
   onActionClick,
 }: NotificationItemProps) {
-  const { markAsRead, removeNotification } = useNotificationsStore();
+  const { markAsRead } = useNotificationsStore();
 
   const handleMarkAsRead = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     markAsRead(notification.id);
   }, [notification.id, markAsRead]);
-
-  const handleRemove = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    removeNotification(notification.id);
-  }, [notification.id, removeNotification]);
 
   const handleClick = useCallback(() => {
     if (!notification.read) {
@@ -85,10 +112,15 @@ export const NotificationItem = memo(function NotificationItem({
     });
   }, [notification.timestamp]);
 
+  const orderStatus = useMemo(() => {
+    return notification.data?.metadata?.status || null;
+  }, [notification.data?.metadata]);
+
   const metadataEntries = useMemo(() => {
     if (!notification.data?.metadata) return [];
-    return Object.entries(notification.data.metadata)
-      .filter(([key]) => key !== 'order_id' && key !== 'client_id');
+    const filtered = Object.entries(notification.data.metadata)
+      .filter(([key]) => key !== 'order_id' && key !== 'client_id' && key !== 'status');
+    return filtered;
   }, [notification.data?.metadata]);
 
   const typeLabel = useMemo(() => {
@@ -108,7 +140,6 @@ export const NotificationItem = memo(function NotificationItem({
       onClick={handleClick}
     >
       <div className="flex items-start gap-3">
-        {/* Read/Unread Indicator */}
         <button
           onClick={handleMarkAsRead}
           className="mt-1 shrink-0"
@@ -121,7 +152,6 @@ export const NotificationItem = memo(function NotificationItem({
           )}
         </button>
 
-        {/* Content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2 mb-1">
             <h4
@@ -132,26 +162,16 @@ export const NotificationItem = memo(function NotificationItem({
             >
               {notification.title}
             </h4>
-            <button
-              onClick={handleRemove}
-              className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0 p-1 hover:bg-destructive/10 rounded"
-              aria-label="حذف الإشعار"
-            >
-              <X className="h-3 w-3 text-muted-foreground" />
-            </button>
           </div>
 
           <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
             {notification.message}
           </p>
 
-          {/* Metadata Display */}
           {metadataEntries.length > 0 && (
             <div className="mb-2 flex flex-wrap gap-1.5">
               {metadataEntries.map(([key, value]) => {
-                // Translate common metadata keys to Arabic
                 const keyLabels: Record<string, string> = {
-                  status: 'الحالة',
                   total_price: 'المبلغ الإجمالي',
                   amount: 'المبلغ',
                   reference_id: 'رقم المرجع',
@@ -172,7 +192,6 @@ export const NotificationItem = memo(function NotificationItem({
             </div>
           )}
 
-          {/* Reference Info */}
           {(notification.data?.reference_type || notification.data?.reference_id) && (
             <div className="mb-2 text-xs text-muted-foreground">
               {referenceTypeDisplay && (
@@ -188,7 +207,17 @@ export const NotificationItem = memo(function NotificationItem({
 
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 flex-wrap">
-              {/* Priority Badge */}
+              {orderStatus && (
+                <span
+                  className={cn(
+                    'text-xs px-2 py-0.5 rounded-full font-medium',
+                    getStatusVariant(orderStatus)
+                  )}
+                >
+                  {getStatusLabel(orderStatus)}
+                </span>
+              )}
+
               {priority && (
                 <span
                   className={cn(
@@ -206,20 +235,17 @@ export const NotificationItem = memo(function NotificationItem({
                 </span>
               )}
 
-              {/* Type Badge */}
               {notification.type && (
                 <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">
                   {typeLabel}
                 </span>
               )}
 
-              {/* Time */}
               <span className="text-xs text-muted-foreground" title={new Date(notification.timestamp).toLocaleString('ar-SA')}>
                 {timeAgo}
               </span>
             </div>
 
-            {/* Action Button */}
             {notification.data?.action_url && (
               <Button
                 variant="ghost"
