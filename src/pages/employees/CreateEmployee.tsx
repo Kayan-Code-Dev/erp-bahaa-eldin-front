@@ -4,7 +4,20 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Eye, EyeOff } from "lucide-react";
+import { 
+  Eye, 
+  EyeOff, 
+  User, 
+  Briefcase, 
+  DollarSign, 
+  Clock, 
+  Building2, 
+  Phone, 
+  MapPin, 
+  FileText,
+  CheckCircle2,
+  AlertCircle
+} from "lucide-react";
 import { format, parse } from "date-fns";
 import {
   Form,
@@ -24,6 +37,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { DepartmentsSelect } from "@/components/custom/departments-select";
 import { JobTitlesSelect } from "@/components/custom/JobTitlesSelect";
 import { RolesSelect } from "@/components/custom/roles-select";
@@ -222,26 +237,57 @@ function CreateEmployee() {
   };
 
   return (
-    <div className="container mx-auto py-6" dir="rtl">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">إنشاء موظف جديد</h1>
-        <p className="text-muted-foreground">املأ البيانات لإضافة موظف جديد للنظام.</p>
+    <div className="container mx-auto py-8 max-w-7xl" dir="rtl">
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
+            <User className="h-6 w-6 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold mb-1 text-foreground">إنشاء موظف جديد</h1>
+            <p className="text-muted-foreground text-base">املأ البيانات المطلوبة لإضافة موظف جديد للنظام.</p>
+          </div>
+        </div>
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          {/* Basic Information Section */}
-          <div className="space-y-4 border rounded-lg p-6">
-            <h2 className="text-lg font-semibold">المعلومات الأساسية</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          {/* Required Fields Section */}
+          <Card className="border-2 border-primary/30 shadow-xl bg-gradient-to-br from-primary/5 via-background to-background">
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-xl bg-primary/20 flex items-center justify-center shadow-md">
+                    <AlertCircle className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl font-bold text-primary flex items-center gap-2">
+                      البيانات المطلوبة
+                    </CardTitle>
+                    <CardDescription className="mt-1.5 text-sm">
+                      يرجى ملء جميع الحقول التالية لإتمام عملية الإنشاء
+                    </CardDescription>
+                  </div>
+                </div>
+                <span className="text-xs bg-primary text-primary-foreground px-4 py-2 rounded-full font-bold shadow-md flex items-center gap-1.5">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  مطلوب
+                </span>
+              </div>
+            </CardHeader>
+            <Separator className="bg-primary/20" />
+            <CardContent className="pt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <FormField
                 control={form.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>الاسم *</FormLabel>
+                    <FormLabel className="text-base font-semibold">
+                      الاسم <span className="text-destructive">*</span>
+                    </FormLabel>
                     <FormControl>
-                      <Input placeholder="اسم الموظف" {...field} />
+                      <Input placeholder="اسم الموظف" {...field} className="h-11" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -253,9 +299,11 @@ function CreateEmployee() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>البريد الإلكتروني *</FormLabel>
+                    <FormLabel className="text-base font-semibold">
+                      البريد الإلكتروني <span className="text-destructive">*</span>
+                    </FormLabel>
                     <FormControl>
-                      <Input type="email" placeholder="example@email.com" {...field} />
+                      <Input type="email" placeholder="example@email.com" {...field} className="h-11" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -267,19 +315,21 @@ function CreateEmployee() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>كلمة المرور *</FormLabel>
+                    <FormLabel className="text-base font-semibold">
+                      كلمة المرور <span className="text-destructive">*</span>
+                    </FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Input
                           type={showPassword ? "text" : "password"}
                           placeholder="••••••••"
-                          className="pr-10"
+                          className="pr-10 h-11"
                           {...field}
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                           aria-label={
                             showPassword
                               ? "إخفاء كلمة المرور"
@@ -295,6 +345,7 @@ function CreateEmployee() {
                       </div>
                     </FormControl>
                     <FormMessage />
+                    <p className="text-xs text-muted-foreground mt-1">يجب أن تكون 6 أحرف على الأقل</p>
                   </FormItem>
                 )}
               />
@@ -304,7 +355,9 @@ function CreateEmployee() {
                 name="hire_date"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>تاريخ التوظيف *</FormLabel>
+                    <FormLabel className="text-base font-semibold">
+                      تاريخ التوظيف <span className="text-destructive">*</span>
+                    </FormLabel>
                     <FormControl>
                       <DatePicker
                         value={field.value ? new Date(field.value) : undefined}
@@ -320,7 +373,7 @@ function CreateEmployee() {
                         disabled={isPending}
                         allowFutureDates={true}
                         allowPastDates={true}
-                        buttonClassName="w-full"
+                        buttonClassName="w-full h-11"
                       />
                     </FormControl>
                     <FormMessage />
@@ -328,12 +381,39 @@ function CreateEmployee() {
                 )}
               />
             </div>
-          </div>
+            </CardContent>
+          </Card>
+
+          {/* Optional Fields Section */}
+          <div className="space-y-6">
+            <div className="mb-6 p-4 rounded-lg bg-muted/30 border border-dashed">
+              <div className="flex items-center gap-4">
+                <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
+                  <FileText className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-2xl font-bold text-foreground mb-1">البيانات الاختيارية</h2>
+                  <p className="text-sm text-muted-foreground">يمكنك ملء هذه البيانات لاحقاً أو تركها فارغة</p>
+                </div>
+                <span className="text-xs text-muted-foreground bg-muted px-4 py-2 rounded-full font-medium border">
+                  اختياري
+                </span>
+              </div>
+            </div>
 
           {/* Job Information Section */}
-          <div className="space-y-4 border rounded-lg p-6">
-            <h2 className="text-lg font-semibold">معلومات الوظيفة</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card className="shadow-md hover:shadow-lg transition-shadow duration-200">
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                  <Briefcase className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <CardTitle className="text-lg font-semibold">معلومات الوظيفة</CardTitle>
+              </div>
+            </CardHeader>
+            <Separator />
+            <CardContent className="pt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <FormField
                 control={form.control}
                 name="department_id"
@@ -456,12 +536,22 @@ function CreateEmployee() {
                 )}
               />
             </div>
-          </div>
+            </CardContent>
+          </Card>
 
           {/* Salary Information Section */}
-          <div className="space-y-4 border rounded-lg p-6">
-            <h2 className="text-lg font-semibold">معلومات الراتب</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card className="shadow-md hover:shadow-lg transition-shadow duration-200">
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                  <DollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />
+                </div>
+                <CardTitle className="text-lg font-semibold">معلومات الراتب</CardTitle>
+              </div>
+            </CardHeader>
+            <Separator />
+            <CardContent className="pt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <FormField
                 control={form.control}
                 name="base_salary"
@@ -588,12 +678,22 @@ function CreateEmployee() {
                 )}
               />
             </div>
-          </div>
+            </CardContent>
+          </Card>
 
           {/* Work Schedule Section */}
-          <div className="space-y-4 border rounded-lg p-6">
-            <h2 className="text-lg font-semibold">جدول العمل</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card className="shadow-md hover:shadow-lg transition-shadow duration-200">
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                  <Clock className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                </div>
+                <CardTitle className="text-lg font-semibold">جدول العمل</CardTitle>
+              </div>
+            </CardHeader>
+            <Separator />
+            <CardContent className="pt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <FormField
                 control={form.control}
                 name="work_start_time"
@@ -816,12 +916,22 @@ function CreateEmployee() {
                 )}
               />
             </div>
-          </div>
+            </CardContent>
+          </Card>
 
           {/* Bank Information Section */}
-          <div className="space-y-4 border rounded-lg p-6">
-            <h2 className="text-lg font-semibold">معلومات البنك</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card className="shadow-md hover:shadow-lg transition-shadow duration-200">
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                  <Building2 className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                </div>
+                <CardTitle className="text-lg font-semibold">معلومات البنك</CardTitle>
+              </div>
+            </CardHeader>
+            <Separator />
+            <CardContent className="pt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <FormField
                 control={form.control}
                 name="bank_name"
@@ -864,12 +974,22 @@ function CreateEmployee() {
                 )}
               />
             </div>
-          </div>
+            </CardContent>
+          </Card>
 
           {/* Emergency Contact Section */}
-          <div className="space-y-4 border rounded-lg p-6">
-            <h2 className="text-lg font-semibold">جهة الاتصال في حالات الطوارئ</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card className="shadow-md hover:shadow-lg transition-shadow duration-200">
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                  <Phone className="h-5 w-5 text-red-600 dark:text-red-400" />
+                </div>
+                <CardTitle className="text-lg font-semibold">جهة الاتصال في حالات الطوارئ</CardTitle>
+              </div>
+            </CardHeader>
+            <Separator />
+            <CardContent className="pt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <FormField
                 control={form.control}
                 name="emergency_contact_name"
@@ -912,11 +1032,21 @@ function CreateEmployee() {
                 )}
               />
             </div>
-          </div>
+            </CardContent>
+          </Card>
 
           {/* Entity Assignments Section */}
-          <div className="space-y-4 border rounded-lg p-6">
-            <h2 className="text-lg font-semibold">التعيينات</h2>
+          <Card className="shadow-md hover:shadow-lg transition-shadow duration-200">
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                  <MapPin className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                </div>
+                <CardTitle className="text-lg font-semibold">التعيينات</CardTitle>
+              </div>
+            </CardHeader>
+            <Separator />
+            <CardContent className="pt-6">
             
             <div className="space-y-6">
               {/* Factories */}
@@ -985,43 +1115,77 @@ function CreateEmployee() {
                 />
               </div>
             </div>
-          </div>
+            </CardContent>
+          </Card>
 
           {/* Notes Section */}
-          <div className="space-y-4 border rounded-lg p-6">
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>ملاحظات</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="ملاحظات إضافية..."
-                      className="min-h-[100px]"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <Card className="shadow-md hover:shadow-lg transition-shadow duration-200">
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                  <FileText className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                </div>
+                <CardTitle className="text-lg font-semibold">ملاحظات إضافية</CardTitle>
+              </div>
+            </CardHeader>
+            <Separator />
+            <CardContent className="pt-6">
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>ملاحظات</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="ملاحظات إضافية..."
+                        className="min-h-[100px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
           </div>
 
           {/* Submit Button */}
-          <div className="flex justify-end gap-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => form.reset()}
-              disabled={isPending}
-            >
-              إعادة تعيين
-            </Button>
-            <Button type="submit" disabled={isPending}>
-              {isPending ? "جاري الإنشاء..." : "إنشاء موظف"}
-            </Button>
-          </div>
+          <Card className="shadow-xl border-2 border-primary/20 bg-gradient-to-r from-primary/5 to-background">
+            <CardContent className="pt-6">
+              <div className="flex justify-end gap-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => form.reset()}
+                  disabled={isPending}
+                  size="lg"
+                  className="min-w-[160px] h-12 font-semibold"
+                >
+                  إعادة تعيين
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={isPending} 
+                  size="lg" 
+                  className="min-w-[160px] h-12 font-semibold shadow-md hover:shadow-lg transition-all duration-200"
+                >
+                  {isPending ? (
+                    <span className="flex items-center gap-2">
+                      <span className="animate-spin">⏳</span>
+                      جاري الإنشاء...
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4" />
+                      إنشاء موظف
+                    </span>
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </form>
       </Form>
     </div>
