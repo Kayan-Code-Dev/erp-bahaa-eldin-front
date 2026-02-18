@@ -121,10 +121,22 @@ export function useNotifications() {
           });
         });
 
-        const channelName = `private-admin.${adminId}`;
+        // Channel name should be 'admin.{userId}' without 'private-' prefix
+        // because echo.private() automatically adds 'private-' prefix
+        const channelName = `admin.${adminId}`;
         console.log(`🔌 WebSocket: محاولة الاشتراك في القناة: ${channelName}`);
+        console.log(`🔌 WebSocket: القناة الفعلية ستكون: private-${channelName}`);
         
         const channel = echo.private(channelName);
+
+        // Listen to all events for debugging
+        channel.listenToAll((eventName: string, data: any) => {
+          console.log('🔍 WebSocket: حدث عام:', {
+            eventName,
+            data,
+            channel: channelName,
+          });
+        });
 
         channel
           .subscribed(() => {
@@ -132,6 +144,15 @@ export function useNotifications() {
               if (!mounted) return;
               console.log(`✅ WebSocket: تم الاشتراك في قناة الإشعارات بنجاح: ${channelName}`);
               console.log('📡 WebSocket: جاهز لاستقبال الإشعارات');
+              
+              // Verify channel subscription status
+              const pusher = echo.connector.pusher;
+              const subscribedChannels = pusher?.channels?.channels || {};
+              console.log('🔍 WebSocket: القنوات المشترك فيها:', {
+                channels: Object.keys(subscribedChannels),
+                currentChannel: channelName,
+                isSubscribed: !!subscribedChannels[channelName],
+              });
             });
           })
           .error((error: any) => {
@@ -176,6 +197,7 @@ export function useNotifications() {
             });
           });
 
+        // Listen to both event name formats (with and without dot prefix)
         channel.listen('.admin.notification', (data: any) => {
           requestAnimationFrame(() => {
             if (!mounted) return;
@@ -184,7 +206,53 @@ export function useNotifications() {
               const notificationTitle = data.title || 'إشعار جديد';
               const notificationMessage = data.message || '';
               
-              console.log('🔔 إشعار جديد:', {
+              console.log('🔔 إشعار جديد (.admin.notification):', {
+                title: notificationTitle,
+                message: notificationMessage,
+                type: data.type || 'system',
+                timestamp: data.timestamp || new Date().toISOString(),
+                data: data.data || {},
+              });
+              
+              addNotification({
+                title: notificationTitle,
+                message: notificationMessage,
+                type: data.type || 'system',
+                data: data.data || {},
+                timestamp: data.timestamp || new Date().toISOString(),
+              });
+
+              if (invalidationTimeoutRef.current) {
+                clearTimeout(invalidationTimeoutRef.current);
+              }
+
+              invalidationTimeoutRef.current = setTimeout(() => {
+                if (!mounted) return;
+                try {
+                  queryClient.invalidateQueries({ queryKey: [NOTIFICATIONS_KEY] });
+                  queryClient.invalidateQueries({ queryKey: [UNREAD_COUNT_KEY] });
+                } catch {
+                  // Ignore invalidation errors
+                } finally {
+                  invalidationTimeoutRef.current = null;
+                }
+              }, 300);
+            } catch {
+              // Ignore notification processing errors
+            }
+          });
+        });
+
+        // Also listen to 'admin.notification' (without dot prefix)
+        channel.listen('admin.notification', (data: any) => {
+          requestAnimationFrame(() => {
+            if (!mounted) return;
+            
+            try {
+              const notificationTitle = data.title || 'إشعار جديد';
+              const notificationMessage = data.message || '';
+              
+              console.log('🔔 إشعار جديد (admin.notification):', {
                 title: notificationTitle,
                 message: notificationMessage,
                 type: data.type || 'system',

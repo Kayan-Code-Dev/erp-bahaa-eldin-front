@@ -18,6 +18,15 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    proxy: {
+      '/broadcasting': {
+        target: 'https://api.dressnmore.it.com',
+        changeOrigin: true,
+        secure: true,
+      },
+    },
+  },
   build: {
     // Production build optimizations
     minify: 'esbuild',

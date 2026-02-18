@@ -5,14 +5,9 @@ import Pusher from 'pusher-js';
 
 let echoInstance: Echo<any> | null = null;
 let currentToken: string | null = null;
-let isConnecting = false;
 
 export const initializeEcho = (token: string): Echo<any> => {
-  if (echoInstance && currentToken === token && !isConnecting) {
-    return echoInstance;
-  }
-
-  if (isConnecting && echoInstance) {
+  if (echoInstance && currentToken === token) {
     return echoInstance;
   }
 
@@ -26,145 +21,59 @@ export const initializeEcho = (token: string): Echo<any> => {
   }
 
   const appKey = import.meta.env.VITE_REVERB_APP_KEY;
-  const backendURL = import.meta.env.VITE_BACKEND_URL || '';
-  const baseURL = backendURL.replace(/\/api\/v\d+$/, '') || '';
-  
-  let scheme = import.meta.env.VITE_REVERB_SCHEME;
-  if (backendURL) {
-    try {
-      const url = new URL(backendURL);
-      if (url.protocol === 'https:') {
-        scheme = 'https';
-      } else if (!scheme) {
-        scheme = 'http';
-      }
-    } catch {
-      scheme = scheme || 'http';
-    }
+  if (!appKey) {
+    throw new Error('VITE_REVERB_APP_KEY is not defined.');
   }
-  scheme = scheme || 'http';
+
+  const wsHost = import.meta.env.VITE_REVERB_HOST || 'api.dressnmore.it.com';
+  const wsPort = Number(import.meta.env.VITE_REVERB_PORT) || 443;
+  const scheme = import.meta.env.VITE_REVERB_SCHEME || 'https';
   const isSecure = scheme === 'https';
-  const authEndpoint = `${baseURL}/broadcasting/auth`;
+  // In development, use relative path (proxied by Vite to avoid CORS)
+  // In production, use the full URL
+  const customAuthEndpoint = import.meta.env.VITE_REVERB_AUTH_ENDPOINT
+    || 'https://api.dressnmore.it.com/broadcasting/custom-auth';
+  const authEndpoint = import.meta.env.DEV
+    ? '/broadcasting/custom-auth'
+    : customAuthEndpoint;
 
   console.log('🔌 WebSocket Config:', {
-    backendURL,
-    baseURL,
-    scheme,
+    wsHost,
+    wsPort,
+    wssPort: wsPort,
     isSecure,
+    forceTLS: isSecure,
     authEndpoint,
+    enabledTransports: isSecure ? ['wss', 'ws'] : ['ws', 'wss'],
+    appKey: appKey.substring(0, 10) + '...',
   });
 
-  if (!appKey) {
-    throw new Error('VITE_REVERB_APP_KEY is not defined. Please add it to your .env file.');
-  }
-
-  let wsHost: string;
-  let wsPort: number;
-
-  if (baseURL) {
-    try {
-      const url = new URL(baseURL);
-      wsHost = url.hostname;
-      wsPort = isSecure ? 8443 : 8080;
-    } catch {
-      wsHost = 'localhost';
-      wsPort = 8080;
-    }
-  } else {
-    wsHost = 'localhost';
-    wsPort = 8080;
-  }
-  
-  isConnecting = true;
   currentToken = token;
-  
-  try {
-    const originalError = console.error;
-    const originalWarn = console.warn;
-    const originalLog = console.log;
-    
-    console.error = (...args: any[]) => {
-      const message = args[0]?.toString() || '';
-      if (
-        message.includes('WebSocket connection') ||
-        message.includes('ws://localhost:8080') ||
-        message.includes('wss://localhost:8080') ||
-        message.includes('pusher') ||
-        message.includes('failed:')
-      ) {
-        return;
-      }
-      originalError.apply(console, args);
-    };
-    
-    console.warn = (...args: any[]) => {
-      const message = args[0]?.toString() || '';
-      if (
-        message.includes('WebSocket') ||
-        message.includes('ws://') ||
-        message.includes('wss://')
-      ) {
-        return;
-      }
-      originalWarn.apply(console, args);
-    };
-    
-    console.log = (...args: any[]) => {
-      const message = args[0]?.toString() || '';
-      if (
-        message.includes('WebSocket connection') ||
-        message.includes('ws://localhost:8080') ||
-        message.includes('pusher')
-      ) {
-        return;
-      }
-      originalLog.apply(console, args);
-    };
-    
-    console.log('🔌 WebSocket: إعدادات الاتصال:', {
-      wsHost,
-      wsPort,
-      isSecure,
-      authEndpoint,
-      appKey: appKey.substring(0, 10) + '...',
-      tokenLength: token.length,
-      tokenPrefix: token.substring(0, 20) + '...',
-    });
 
-    echoInstance = new Echo({
-      broadcaster: 'reverb',
-      key: appKey,
-      wsHost: wsHost,
-      wsPort: wsPort,
-      wssPort: wsPort,
-      forceTLS: isSecure,
-      enabledTransports: isSecure ? ['wss'] : ['ws'],
-      disableStats: true,
-      authEndpoint: authEndpoint,
-      auth: {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/json',
-        },
-      },
-    });
-
-    setTimeout(() => {
-      console.error = originalError;
-      console.warn = originalWarn;
-      console.log = originalLog;
-      isConnecting = false;
-    }, 3000);
-
-    return echoInstance;
-  } catch (error) {
-    console.error = console.error || (() => {});
-    console.warn = console.warn || (() => {});
-    console.log = console.log || (() => {});
-    isConnecting = false;
-    currentToken = null;
-    throw error;
+  // Enable Pusher logging in development for debugging
+  if (import.meta.env.DEV) {
+    Pusher.logToConsole = true;
   }
+
+  echoInstance = new Echo({
+    broadcaster: 'reverb',
+    key: appKey,
+    wsHost: wsHost,
+    wsPort: wsPort,
+    wssPort: wsPort,
+    forceTLS: isSecure,
+    enabledTransports: isSecure ? ['wss', 'ws'] : ['ws', 'wss'],
+    disableStats: true,
+    authEndpoint: authEndpoint,
+    auth: {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
+    },
+  });
+
+  return echoInstance;
 };
 
 export const getEcho = (): Echo<any> | null => {
@@ -181,5 +90,4 @@ export const disconnectEcho = (): void => {
     echoInstance = null;
   }
   currentToken = null;
-  isConnecting = false;
 };
