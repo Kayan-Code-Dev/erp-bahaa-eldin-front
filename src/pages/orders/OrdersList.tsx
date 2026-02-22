@@ -56,11 +56,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { CustomCalendar } from "@/components/custom/CustomCalendar";
 import { ClientsSelect } from "@/components/custom/ClientsSelect";
+import { EmployeesSelect } from "@/components/custom/EmployeesSelect";
 import useDebounce from "@/hooks/useDebounce";
 
 const ordersFilterSchema = z.object({
   order_id: z.string().optional(),
   client_id: z.string().optional(),
+  employee_id: z.string().optional(),
   cloth_name: z.string().optional(),
   cloth_code: z.string().optional(),
   invoice_date_from: z.string().optional(),
@@ -116,6 +118,7 @@ function OrdersList() {
     defaultValues: {
       order_id: "",
       client_id: "",
+      employee_id: "",
       cloth_name: "",
       cloth_code: "",
       invoice_date_from: "",
@@ -140,6 +143,7 @@ function OrdersList() {
     return {
       order_id: v.order_id && v.order_id.trim() !== "" ? v.order_id : undefined,
       client_id: v.client_id && v.client_id.trim() !== "" ? v.client_id : undefined,
+      employee_id: v.employee_id && v.employee_id.trim() !== "" ? v.employee_id : undefined,
       cloth_name: v.cloth_name && v.cloth_name.trim() !== "" ? v.cloth_name : undefined,
       cloth_code: v.cloth_code && v.cloth_code.trim() !== "" ? v.cloth_code : undefined,
       invoice_date_from: v.invoice_date_from || undefined,
@@ -342,6 +346,28 @@ function OrdersList() {
                       )}
                     />
 
+                    {/* Employee */}
+                    <FormField
+                      control={form.control}
+                      name="employee_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>الموظف</FormLabel>
+                          <FormControl>
+                            <EmployeesSelect
+                              params={{ per_page: 20 }}
+                              value={field.value ?? ""}
+                              onChange={field.onChange}
+                              placeholder="اختر الموظف..."
+                              searchPlaceholder="ابحث عن موظف..."
+                              allowClear
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
                     {/* Item name */}
                     <FormField
                       control={form.control}
@@ -530,6 +556,7 @@ function OrdersList() {
                         form.reset({
                           order_id: "",
                           client_id: "",
+                          employee_id: "",
                           cloth_name: "",
                           cloth_code: "",
                           invoice_date_from: "",

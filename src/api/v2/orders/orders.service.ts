@@ -53,6 +53,8 @@ export const getOrders = async (
     /** Filter by return/occasion date (occasion_datetime) */
     return_date_from?: string;
     return_date_to?: string;
+    /** Filter by employee (who created the order) */
+    employee_id?: string | number;
   },
 ) => {
   try {
@@ -108,6 +110,11 @@ export const getOrders = async (
     // Return/Occasion dates
     if (filters?.return_date_from) params.return_date_from = filters.return_date_from;
     if (filters?.return_date_to) params.return_date_to = filters.return_date_to;
+
+    // Employee (who created the order)
+    if (filters?.employee_id !== undefined && filters.employee_id !== "" && filters.employee_id != null) {
+      params.employee_id = typeof filters.employee_id === "string" ? Number(filters.employee_id) : filters.employee_id;
+    }
 
     const { data: responseData } = await api.get<TPaginationResponse<TOrder>>(
       `/orders`,
