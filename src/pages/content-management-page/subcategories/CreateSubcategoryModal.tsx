@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Form,
   FormControl,
@@ -29,7 +28,6 @@ import { toast } from "sonner";
 // Schema
 const formSchema = z.object({
   name: z.string().min(2, { message: "الاسم مطلوب (حرفين على الأقل)" }),
-  description: z.string().min(1, { message: "الوصف مطلوب" }),
   category_id: z.string({ required_error: "يجب اختيار قسم المنتجات" }),
 });
 
@@ -47,7 +45,6 @@ export function CreateSubcategoryModal({ open, onOpenChange }: Props) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      description: "",
       category_id: "",
     },
   });
@@ -55,7 +52,7 @@ export function CreateSubcategoryModal({ open, onOpenChange }: Props) {
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     const requestData: TCreateSubcategoryRequest = {
       name: values.name,
-      description: values.description || "",
+      description: "",
       category_id: Number(values.category_id),
     };
 
@@ -115,19 +112,6 @@ export function CreateSubcategoryModal({ open, onOpenChange }: Props) {
                   <FormLabel>اسم قسم المنتجات الفرعي</FormLabel>
                   <FormControl>
                     <Input placeholder="اسم قسم المنتجات الفرعي..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>الوصف</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="وصف قصير..." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

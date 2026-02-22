@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Form,
   FormControl,
@@ -28,7 +27,6 @@ import { toast } from "sonner";
 // Schema
 const formSchema = z.object({
   name: z.string().min(2, { message: "الاسم مطلوب (حرفين على الأقل)" }),
-  description: z.string().min(1, { message: "الوصف مطلوب" }),
 });
 
 type Props = {
@@ -45,14 +43,13 @@ export function CreateCategoryModal({ open, onOpenChange }: Props) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      description: "",
     },
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     const requestData: TCreateCategoryRequest = {
       name: values.name,
-      description: values.description || "",
+      description: "",
     };
 
     createCategory(requestData, {
@@ -93,19 +90,6 @@ export function CreateCategoryModal({ open, onOpenChange }: Props) {
                   <FormLabel>اسم قسم المنتجات</FormLabel>
                   <FormControl>
                     <Input placeholder="اسم قسم المنتجات..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>الوصف</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="وصف قصير للفئة..." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
