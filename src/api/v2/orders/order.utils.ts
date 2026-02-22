@@ -4,7 +4,8 @@ export const getOrderTypeLabel = (order_type: TOrder["order_type"]) => {
   if (order_type === "rent") return "إيجار";
   if (order_type === "buy") return "شراء";
   if (order_type === "tailoring") return "تفصيل";
-  return order_type;
+  if (order_type === "mixed") return "مختلط";
+  return order_type ?? "—";
 };
 
 export const getStatusVariant = (status: TOrder["status"] | string) => {

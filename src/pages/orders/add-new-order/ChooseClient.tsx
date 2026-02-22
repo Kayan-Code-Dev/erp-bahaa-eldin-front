@@ -40,6 +40,7 @@ import {
   CLIENT_SOURCE_LABELS,
 } from "@/api/v2/clients/clients.types";
 import { useGetClientQueryOptions } from "@/api/v2/clients/clients.hooks";
+import { formatPhone } from "@/utils/formatPhone";
 import { useGetClothesQueryOptions } from "@/api/v2/clothes/clothes.hooks";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useCreateOrderMutationOptions } from "@/api/v2/orders/orders.hooks";
@@ -920,9 +921,13 @@ function ChooseClient() {
                               </p>
                               <p className="text-sm text-gray-600">
                                 الهاتف:{" "}
-                                {selectedClientFromList?.phones?.[0]?.phone ||
-                                  selectedClient?.phones?.[0]?.phone ||
-                                  "-"}
+                                <span dir="ltr">
+                                  {formatPhone(
+                                    selectedClientFromList?.phones?.[0]?.phone ||
+                                      selectedClient?.phones?.[0]?.phone,
+                                    "-"
+                                  )}
+                                </span>
                               </p>
                             </div>
                             <Badge className="bg-green-100 text-green-800 border-green-200">

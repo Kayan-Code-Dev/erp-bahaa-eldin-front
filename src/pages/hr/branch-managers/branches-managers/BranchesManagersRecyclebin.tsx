@@ -26,6 +26,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { formatPhone } from "@/utils/formatPhone";
 
 const headerText = [
     "المدير",
@@ -112,7 +113,7 @@ export default function BranchesManagersRecyclebin() {
                                                     </div>
                                                 </div>
                                             </TableCell>
-                                            <TableCell className="[direction:ltr] text-right">{manager.phone}</TableCell>
+                                            <TableCell className="[direction:ltr] text-right">{formatPhone(manager.phone, "-")}</TableCell>
                                             <TableCell className="text-start">{manager.id_number}</TableCell>
                                             <TableCell className="text-start">
                                                 {manager.location}

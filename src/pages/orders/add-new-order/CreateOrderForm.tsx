@@ -53,6 +53,7 @@ import { SimpleDateTimePicker } from "@/components/custom/SimpleDateTimePicker";
 import { useCreateOrderMutationOptions } from "@/api/v2/orders/orders.hooks";
 import { TCreateOrderRequest } from "@/api/v2/orders/orders.types";
 import { useMutation } from "@tanstack/react-query";
+import { formatPhone } from "@/utils/formatPhone";
 
 type SelectedCloth = {
   id: number;
@@ -466,7 +467,7 @@ function CreateOrderForm() {
                           أرقام الهاتف
                         </p>
                         <p className="text-sm font-semibold text-foreground">
-                          {client.phones?.map((p) => p.phone).join("، ") || "—"}
+                          <span dir="ltr">{client.phones?.map((p) => formatPhone(p.phone, "")).filter(Boolean).join("، ") || "—"}</span>
                         </p>
                       </div>
                     </div>

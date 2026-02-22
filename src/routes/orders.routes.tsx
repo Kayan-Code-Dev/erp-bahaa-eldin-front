@@ -3,7 +3,7 @@ import ChooseClothes from "@/pages/orders/add-new-order/ChooseClothes";
 import CreateOrderForm from "@/pages/orders/add-new-order/CreateOrderForm";
 import OrderDetails from "@/pages/orders/OrderDetails";
 import OrderItemDetails from "@/pages/orders/OrderItemDetails";
-import OrdersList from "@/pages/orders/OrdersList";
+import { OrdersList } from "@/pages/orders/OrdersList";
 import UpdateClothesInOrder from "@/pages/orders/update-order/UpdateClothesInOrder";
 import UpdateOrder from "@/pages/orders/update-order/UpdateOrder";
 import { Route } from "react-router";

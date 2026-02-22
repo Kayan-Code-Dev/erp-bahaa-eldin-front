@@ -29,6 +29,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { formatPhone } from "@/utils/formatPhone";
 import EditBranchesManagerModal from "./EditBranchesManagerModal";
 import CreateBranchesManagerModal from "./CreateBranchesManagerModal";
 
@@ -134,7 +135,7 @@ export default function BranchesManagers() {
                                                     </div>
                                                 </div>
                                             </TableCell>
-                                            <TableCell className="[direction:ltr] text-right">{manager.phone}</TableCell>
+                                            <TableCell className="[direction:ltr] text-right">{formatPhone(manager.phone, "-")}</TableCell>
                                             <TableCell className="text-start">{manager.id_number}</TableCell>
                                             <TableCell className="text-start">
                                                 {manager.location}

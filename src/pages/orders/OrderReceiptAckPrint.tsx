@@ -1,5 +1,6 @@
 import { TOrder } from "@/api/v2/orders/orders.types";
 import { OrderEmployeeName } from "@/components/custom/OrderEmployeeName";
+import { formatPhone } from "@/utils/formatPhone";
 
 const HEADER_BG = "#907457";
 
@@ -20,7 +21,6 @@ function formatDate(s: string): string {
   try {
     const d = new Date(s);
     if (isNaN(d.getTime())) return s;
-    // Format as YYYY-MM-DD (English numbers)
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, "0");
     const day = String(d.getDate()).padStart(2, "0");
@@ -29,6 +29,7 @@ function formatDate(s: string): string {
     return s;
   }
 }
+
 
 export function OrderReceiptAckPrint({
   order,
@@ -44,8 +45,9 @@ export function OrderReceiptAckPrint({
   const phoneStr = phones.length > 0
     ? phones.map(p => {
         const phoneType = p.type === 'mobile' ? 'موبايل' : p.type === 'whatsapp' ? 'واتساب' : p.type || 'هاتف';
-        return `${p.phone} (${phoneType})`;
-      }).join(" - ")
+        const num = formatPhone(p.phone, "");
+        return num ? `${num} (${phoneType})` : "";
+      }).filter(Boolean).join(" - ")
     : null;
   const items = order.items ?? [];
   const startDate = order.visit_datetime ? formatDate(order.visit_datetime) : "-";
@@ -130,7 +132,7 @@ export function OrderReceiptAckPrint({
           {phoneStr && (
             <p className="text-gray-900">
               <span className="font-semibold text-gray-700">رقم الهاتف :</span>{" "}
-              <span className="font-normal text-gray-900" itemProp="telephone" style={{ fontVariantNumeric: "tabular-nums", fontFamily: "'Segoe UI', Arial, sans-serif" }}>{phoneStr}</span>
+              <span dir="ltr" className="font-normal text-gray-900 inline-block text-right" itemProp="telephone" style={{ fontVariantNumeric: "tabular-nums", fontFamily: "'Segoe UI', Arial, sans-serif" }}>{phoneStr}</span>
             </p>
           )}
         </section>

@@ -28,6 +28,7 @@ import {
   useGetClientsQueryOptions,
 } from "@/api/v2/clients/clients.hooks";
 import { TClientResponse } from "@/api/v2/clients/clients.types";
+import { formatPhone } from "@/utils/formatPhone";
 import CustomPagination from "@/components/custom/CustomPagination";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router";
@@ -156,10 +157,10 @@ function Clients() {
                         <TableCell className="text-center">
                           {client?.national_id ? client.national_id : "—"}
                         </TableCell>
-                        <TableCell className="text-center">
+                        <TableCell className="text-center" dir="ltr">
                           {client.phones?.map((p, idx) => (
-                            <span key={idx} className="block">
-                              {p.phone}
+                            <span key={idx} className="block" dir="ltr">
+                              {formatPhone(p.phone, "-")}
                             </span>
                           )) || "-"}
                         </TableCell>

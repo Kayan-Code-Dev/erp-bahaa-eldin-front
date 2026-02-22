@@ -34,6 +34,7 @@ import {
 } from "@/api/v2/orders/orders.hooks";
 import { TOrder } from "@/api/v2/orders/orders.types";
 import { formatDate } from "@/utils/formatDate";
+import { formatPhone } from "@/utils/formatPhone";
 import { OrdersTableSkeleton } from "@/pages/orders/OrdersTableSkeleton";
 import { OrderDetailsModal } from "@/pages/orders/OrderDetailsModal";
 import { getOrderTypeLabel, getStatusVariant, getStatusLabel } from "@/api/v2/orders/order.utils";
@@ -384,17 +385,17 @@ function OverdueReturnsList() {
                             </p>
                             <p className="font-semibold text-gray-900">
                               الهاتف:{" "}
-                              <span className="font-normal text-gray-700">
+                              <span className="font-normal text-gray-700" dir="ltr">
                                 {order.client && (order.client as any).phones && (order.client as any).phones.length > 0
-                                  ? (order.client as any).phones[0]?.phone
+                                  ? formatPhone((order.client as any).phones[0]?.phone, "-")
                                   : "-"}
                               </span>
                             </p>
                             <p className="font-semibold text-gray-900">
                               هاتف الواتساب:{" "}
-                              <span className="font-normal text-gray-700">
+                              <span className="font-normal text-gray-700" dir="ltr">
                                 {order.client && (order.client as any).phones && (order.client as any).phones.length > 1
-                                  ? (order.client as any).phones[1]?.phone
+                                  ? formatPhone((order.client as any).phones[1]?.phone, "-")
                                   : "-"}
                               </span>
                             </p>

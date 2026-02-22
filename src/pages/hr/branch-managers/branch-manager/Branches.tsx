@@ -38,6 +38,7 @@ import {
 } from "@/lib/permissions.helper";
 import CustomPagination from "@/components/custom/CustomPagination";
 import { useSearchParams } from "react-router";
+import { formatPhone } from "@/utils/formatPhone";
 
 function Branches() {
   const [searchParams] = useSearchParams();
@@ -126,8 +127,8 @@ function Branches() {
                       <TableCell className="text-center">
                         {manager.email}
                       </TableCell>
-                      <TableCell className="text-center">
-                        {manager.phone}
+                      <TableCell className="text-center" dir="ltr">
+                        {formatPhone(manager.phone, "-")}
                       </TableCell>
                       <TableCell className="text-center">
                         {manager.location}

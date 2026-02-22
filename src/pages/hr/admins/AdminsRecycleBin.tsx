@@ -25,6 +25,7 @@ import { toast } from "sonner";
 import CustomPagination from "@/components/custom/CustomPagination";
 import { useSearchParams } from "react-router";
 import { useMyPermissions } from "@/api/auth/auth.hooks";
+import { formatPhone } from "@/utils/formatPhone";
 
 const headerText = [
     "المشرف",
@@ -109,7 +110,7 @@ const AdminsRecycleBin = () => {
                                                     </div>
                                                 </div>
                                             </TableCell>
-                                            <TableCell className="[direction:ltr] text-right">{admin.phone}</TableCell>
+                                            <TableCell className="[direction:ltr] text-right">{formatPhone(admin.phone, "-")}</TableCell>
                                             <TableCell className="text-start">{admin.id_number}</TableCell>
                                             <TableCell className="text-start">
                                                 {admin.city}, {admin.country}

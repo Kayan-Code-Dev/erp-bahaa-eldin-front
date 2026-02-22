@@ -30,6 +30,7 @@ import CustomPagination from "@/components/custom/CustomPagination";
 import { useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { ConfirmationModal } from "@/components/custom/ConfirmationModal";
+import { formatPhone } from "@/utils/formatPhone";
 
 const headerText = [
   "المشرف",
@@ -134,7 +135,7 @@ function ListAdmins() {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="[direction:ltr] text-right">{admin.phone}</TableCell>
+                      <TableCell className="[direction:ltr] text-right">{formatPhone(admin.phone, "-")}</TableCell>
                       <TableCell className="text-start">{admin.id_number}</TableCell>
                       <TableCell className="text-start">
                         {admin.city}, {admin.country}

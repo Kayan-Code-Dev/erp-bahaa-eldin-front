@@ -36,6 +36,7 @@ import {
 } from "@/lib/permissions.helper";
 import { useSearchParams } from "react-router";
 import CustomPagination from "@/components/custom/CustomPagination";
+import { formatPhone } from "@/utils/formatPhone";
 
 function DeletedBranchManagers() {
   const [searchParams] = useSearchParams();
@@ -128,8 +129,8 @@ function DeletedBranchManagers() {
                       <TableCell className="text-center">
                         {manager.email}
                       </TableCell>
-                      <TableCell className="text-center">
-                        {manager.phone}
+                      <TableCell className="text-center" dir="ltr">
+                        {formatPhone(manager.phone, "-")}
                       </TableCell>
                       <TableCell className="text-center">
                         {manager.location}

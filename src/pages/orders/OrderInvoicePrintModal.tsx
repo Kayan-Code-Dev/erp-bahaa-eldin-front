@@ -175,6 +175,38 @@ const INVOICE_PRINT_STYLES = `
     margin-bottom: 24px; 
     page-break-inside: avoid; 
   }
+  .invoice-print-measurements-wrap {
+    overflow: hidden;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    page-break-inside: avoid;
+  }
+  .invoice-print-table-measurements {
+    table-layout: auto;
+    width: 100%;
+    page-break-inside: avoid;
+  }
+  .invoice-print-measurements-thead th {
+    background: #7a6349 !important;
+    color: #fff;
+    padding: 10px 8px;
+    font-size: 11px;
+    border-left: 1px solid rgba(255,255,255,0.2);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .invoice-print-mth-item { border-left: none !important; }
+  .invoice-print-mtd, .invoice-print-mth {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+  .invoice-print-mtd-item {
+    font-weight: 600;
+    min-width: 90px;
+  }
+  .invoice-print-mrow td {
+    border-bottom: 1px solid #e5e7eb;
+  }
   .invoice-print-notes-box { 
     font-size: 14px; 
     font-weight: 400;
@@ -324,9 +356,29 @@ const INVOICE_PRINT_STYLES = `
     /* Prevent page breaks inside important sections */
     .invoice-print-info-block,
     .invoice-print-signature,
-    .invoice-print-rules-row {
+    .invoice-print-rules-row,
+    .invoice-print-block {
       page-break-inside: avoid;
     }
+    /* Measurements table: professional print */
+    .invoice-print-measurements-section { page-break-inside: avoid; }
+    .invoice-print-measurements-wrap {
+      border: 1px solid #d1d5db !important;
+      border-radius: 6px !important;
+    }
+    .invoice-print-measurements-thead th {
+      background: #7a6349 !important;
+      color: #fff !important;
+      padding: 4px 6px !important;
+      font-size: 9px !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .invoice-print-mtd, .invoice-print-mth {
+      padding: 4px 6px !important;
+      font-size: 9px !important;
+    }
+    .invoice-print-mtd-item { min-width: 70px; }
     /* Ensure proper color printing */
     * {
       -webkit-print-color-adjust: exact;

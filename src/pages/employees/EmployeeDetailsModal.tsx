@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/utils/formatDate";
+import { formatPhone } from "@/utils/formatPhone";
 import { useQuery } from "@tanstack/react-query";
 
 type Props = {
@@ -255,7 +256,7 @@ export function EmployeeDetailsModal({ employee, open, onOpenChange }: Props) {
                     {employeeData.emergency_contact_phone && (
                       <div>
                         <p className="text-sm font-medium text-muted-foreground">رقم الهاتف</p>
-                        <p className="text-base">{employeeData.emergency_contact_phone}</p>
+                        <p className="text-base" dir="ltr">{formatPhone(employeeData.emergency_contact_phone, "-")}</p>
                       </div>
                     )}
                     {employeeData.emergency_contact_relation && (

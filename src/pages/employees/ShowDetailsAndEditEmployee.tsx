@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/utils/formatDate";
+import { formatPhone } from "@/utils/formatPhone";
 import { Edit, UserX } from "lucide-react";
 import { useState } from "react";
 import EditEmployee from "./EditEmployee";
@@ -398,8 +399,8 @@ function ShowDetailsAndEditEmployee() {
                       <p className="text-sm font-medium text-muted-foreground">
                         رقم الهاتف
                       </p>
-                      <p className="text-base">
-                        {employee.emergency_contact_phone}
+                      <p className="text-base" dir="ltr">
+                        {formatPhone(employee.emergency_contact_phone, "-")}
                       </p>
                     </div>
                   )}

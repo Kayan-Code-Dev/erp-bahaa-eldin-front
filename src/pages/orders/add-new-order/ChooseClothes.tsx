@@ -1,4 +1,5 @@
 import { TClientResponse } from "@/api/v2/clients/clients.types";
+import { formatPhone } from "@/utils/formatPhone";
 import { useEffect, useState, useMemo } from "react";
 import { useLocation, useNavigate, Link } from "react-router";
 import { toast } from "sonner";
@@ -163,8 +164,8 @@ function ChooseClothes() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">أرقام الهاتف</p>
-                <p className="font-medium">
-                  {client.phones?.map((p) => p.phone).join(", ") || "-"}
+                <p className="font-medium" dir="ltr">
+                  {client.phones?.map((p) => formatPhone(p.phone, "")).filter(Boolean).join(", ") || "-"}
                 </p>
               </div>
             </div>
