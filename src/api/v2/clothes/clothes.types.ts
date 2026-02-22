@@ -65,6 +65,8 @@ export type TGetClothesRequestParams = {
   per_page?: number;
   /** بحث بالكود أو النص - الـ API قد يستقبل name للبحث */
   name?: string;
+  /** بحث حسب الكود */
+  code?: string;
   category_id?: number;
   subcat_id?: number[];
   status?: TClothesStatus;

@@ -194,7 +194,7 @@ function ChooseClient() {
       per_page: 10,
       status: "ready_for_rent",
     };
-    if (debouncedProductCodeFilter) params.name = debouncedProductCodeFilter;
+    if (debouncedProductCodeFilter) params.code = debouncedProductCodeFilter;
     if (debouncedCategoryId) params.category_id = Number(debouncedCategoryId);
     if (debouncedSubcategoryIds.length > 0) {
       params.subcat_id = debouncedSubcategoryIds.map(Number);
@@ -1345,7 +1345,7 @@ function ChooseClient() {
                           فلترة المنتجات
                         </h2>
                         <p className="text-xs text-gray-600 mt-1">
-                          ابحث عن المنتجات المتاحة حسب الاسم، قسم المنتجات وأقسام المنتجات الفرعية
+                          ابحث عن المنتجات المتاحة حسب الكود، قسم المنتجات وأقسام المنتجات الفرعية
                         </p>
                       </div>
                     </div>
