@@ -204,14 +204,22 @@ export function OrderInvoicePrint({
         <section className="invoice-print-section mb-5">
           <h2 className="invoice-print-section-title text-xs font-bold text-gray-600 uppercase tracking-wider mb-2.5 pb-2 border-b-2 border-gray-200">تفاصيل الأصناف</h2>
           <table className="invoice-print-table invoice-print-table-items w-full border-collapse overflow-hidden rounded-xl border border-gray-200 shadow-sm" style={{ tableLayout: "fixed" }}>
+            <colgroup>
+              <col style={{ width: "6%" }} />
+              <col style={{ width: "12%" }} />
+              <col style={{ width: "14%" }} />
+              <col style={{ width: "22%" }} />
+              <col style={{ width: "23%" }} />
+              <col style={{ width: "23%" }} />
+            </colgroup>
             <thead>
               <tr className="invoice-print-thead-row" style={{ backgroundColor: HEADER_DARK }}>
-                <th scope="col" className="invoice-print-th py-3 px-3 text-center font-bold text-white text-sm" style={{ width: "8%" }}>الرقم</th>
-                <th scope="col" className="invoice-print-th py-3 px-3 text-center font-bold text-white text-sm" style={{ width: "14%" }}>نوع المنتج</th>
-                <th scope="col" className="invoice-print-th py-3 px-3 text-center font-bold text-white text-sm" style={{ width: "18%" }}>كود المنتج</th>
-                <th scope="col" className="invoice-print-th py-3 px-3 text-center font-bold text-white text-sm" style={{ width: "18%" }}>سعر القطعة</th>
-                <th scope="col" className="invoice-print-th py-3 px-3 text-center font-bold text-white text-sm" style={{ width: "18%" }}>المدفوع</th>
-                <th scope="col" className="invoice-print-th py-3 px-3 text-center font-bold text-white text-sm" style={{ width: "18%" }}>المتبقي</th>
+                <th scope="col" className="invoice-print-th py-3 px-2 text-center font-bold text-white text-sm">الرقم</th>
+                <th scope="col" className="invoice-print-th py-3 px-2 text-center font-bold text-white text-sm">نوع المنتج</th>
+                <th scope="col" className="invoice-print-th py-3 px-2 text-center font-bold text-white text-sm">كود المنتج</th>
+                <th scope="col" className="invoice-print-th py-3 px-2 text-center font-bold text-white text-sm">سعر القطعة</th>
+                <th scope="col" className="invoice-print-th py-3 px-2 text-center font-bold text-white text-sm">المدفوع</th>
+                <th scope="col" className="invoice-print-th py-3 px-2 text-center font-bold text-white text-sm">المتبقي</th>
               </tr>
             </thead>
             <tbody>
@@ -254,30 +262,36 @@ export function OrderInvoicePrint({
           </table>
         </section>
 
-        {hasAnyMeasurements(items) && (
+        {hasAnyMeasurements(items) && (() => {
+          const activeMeasurementKeys = MEASUREMENT_LABELS.filter(({ key }) =>
+            items.some(item => (item as Record<string, any>)[key] != null && String((item as Record<string, any>)[key]).trim() !== "")
+          );
+          const itemColWidth = 38;
+          const measureColWidth = activeMeasurementKeys.length > 0 ? (100 - itemColWidth) / activeMeasurementKeys.length : 0;
+          return (
           <section className="invoice-print-section invoice-print-block invoice-print-measurements-section mb-5">
             <h2 className="invoice-print-section-title text-xs font-bold text-gray-600 uppercase tracking-wider mb-2.5 pb-2 border-b-2 border-gray-200">جدول المقاسات</h2>
             <div className="invoice-print-measurements-wrap overflow-hidden rounded-xl border border-gray-200 shadow-sm">
-              <table className="invoice-print-table invoice-print-table-measurements w-full border-collapse" style={{ tableLayout: "auto", minWidth: "100%" }}>
+              <table className="invoice-print-table invoice-print-table-measurements w-full border-collapse" style={{ tableLayout: "fixed" }}>
+                <colgroup>
+                  <col style={{ width: `${itemColWidth}%` }} />
+                  {activeMeasurementKeys.map(({ key }) => (
+                    <col key={key} style={{ width: `${measureColWidth}%` }} />
+                  ))}
+                </colgroup>
                 <thead>
                   <tr className="invoice-print-thead-row invoice-print-measurements-thead" style={{ backgroundColor: HEADER_DARK }}>
                     <th scope="col" className="invoice-print-th invoice-print-mth invoice-print-mth-item py-2.5 px-3 text-center font-bold text-white text-xs border-b border-white/20">الصنف / الكود</th>
-                    {MEASUREMENT_LABELS.filter(({ key }) =>
-                      items.some(item => (item as Record<string, any>)[key] != null && String((item as Record<string, any>)[key]).trim() !== "")
-                    ).map(({ key, label }) => (
-                      <th key={key} scope="col" className="invoice-print-th invoice-print-mth py-2.5 px-2 text-center font-bold text-white text-xs border-b border-l border-white/20">{label}</th>
+                    {activeMeasurementKeys.map(({ key, label }) => (
+                      <th key={key} scope="col" className="invoice-print-th invoice-print-mth py-2 px-1.5 text-center font-bold text-white text-xs border-b border-l border-white/20 whitespace-nowrap">{label}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {items.map((item, index) => {
-                    const activeCols = MEASUREMENT_LABELS.filter(({ key }) =>
-                      items.some(it => (it as Record<string, any>)[key] != null && String((it as Record<string, any>)[key]).trim() !== "")
-                    );
-                    return (
+                  {items.map((item, index) => (
                       <tr key={item.id} className={index % 2 === 0 ? "invoice-print-row-even invoice-print-mrow bg-gray-50/80" : "invoice-print-mrow bg-white"}>
                         <td className="invoice-print-td invoice-print-mtd invoice-print-mtd-item border-b border-gray-200 py-2 px-3 text-center text-xs font-semibold text-gray-800">{item.name || item.code || "-"}{item.code && item.name ? ` (${item.code})` : ""}</td>
-                        {activeCols.map(({ key }) => (
+                        {activeMeasurementKeys.map(({ key }) => (
                           <td key={key} className="invoice-print-td invoice-print-mtd border-b border-l border-gray-100 py-2 px-2 text-center text-xs font-normal" style={{ fontVariantNumeric: "tabular-nums", fontFamily: "'Segoe UI', Arial, sans-serif" }}>
                             {(item as Record<string, any>)[key] != null && String((item as Record<string, any>)[key]).trim() !== ""
                               ? String((item as Record<string, any>)[key]).trim()
@@ -285,13 +299,12 @@ export function OrderInvoicePrint({
                           </td>
                         ))}
                       </tr>
-                    );
-                  })}
+                  ))}
                 </tbody>
               </table>
             </div>
           </section>
-        )}
+          ); })() }
 
         {order.order_notes?.trim() && (
           <section className="invoice-print-section invoice-print-block mb-5">
@@ -450,12 +463,14 @@ export function OrderInvoicePrint({
           }
           .invoice-print-mth-item { border-left: none !important; }
           .invoice-print-mtd, .invoice-print-mth {
-            padding: 4px 6px !important;
+            padding: 3px 4px !important;
             font-size: 9px !important;
           }
           .invoice-print-mtd-item {
             font-weight: 600 !important;
-            min-width: 80px;
+          }
+          .invoice-print-table-measurements {
+            width: 100% !important;
           }
           .invoice-print-mrow td {
             border-bottom: 1px solid #e5e7eb !important;
