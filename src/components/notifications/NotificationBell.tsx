@@ -11,6 +11,7 @@ import { NotificationItem } from './NotificationItem';
 import { Separator } from '@/components/ui/separator';
 import { useNavigate } from 'react-router';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { normalizeNotificationActionUrl } from '@/utils/notificationActionUrl';
 import {
   useGetNotificationsQueryOptions,
   useGetUnreadCountQueryOptions,
@@ -126,7 +127,7 @@ export function NotificationBell() {
                       }}
                       onActionClick={() => {
                         if (notification.action_url) {
-                          navigate(notification.action_url);
+                          navigate(normalizeNotificationActionUrl(notification.action_url));
                         }
                       }}
                     />
@@ -157,7 +158,7 @@ export function NotificationBell() {
                   }}
                   onActionClick={() => {
                     if (notification.action_url) {
-                      navigate(notification.action_url);
+                      navigate(normalizeNotificationActionUrl(notification.action_url));
                     }
                   }}
                 />

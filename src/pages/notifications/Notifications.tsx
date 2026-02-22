@@ -31,6 +31,7 @@ import { ar } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
+import { normalizeNotificationActionUrl } from '@/utils/notificationActionUrl';
 
 const PER_PAGE = 15;
 
@@ -136,7 +137,7 @@ const NotificationListItem = memo(function NotificationListItem({
       onMarkAsRead(notification.id);
     }
     if (notification.action_url) {
-      navigate(notification.action_url);
+      navigate(normalizeNotificationActionUrl(notification.action_url));
     }
   }, [isRead, notification.id, notification.action_url, onMarkAsRead, navigate]);
 
@@ -289,7 +290,7 @@ const NotificationListItem = memo(function NotificationListItem({
                 className="h-6 px-2 text-xs shrink-0"
                 onClick={(e) => {
                   e.stopPropagation();
-                  navigate(notification.action_url!);
+                  navigate(normalizeNotificationActionUrl(notification.action_url));
                 }}
               >
                 عرض
