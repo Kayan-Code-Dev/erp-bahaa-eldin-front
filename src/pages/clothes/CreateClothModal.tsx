@@ -36,14 +36,12 @@ import {
 import { EntitySelect } from "@/components/custom/EntitySelect";
 import { toast } from "sonner";
 
-// Schema for the form
+// Schema: كود المنتج، المقاسات (كلها اختيارية)، الحالة، المكان، ملاحظات (اختياري)
 const formSchema = z.object({
-  code: z.string().min(1, { message: "الكود مطلوب" }),
-  name: z.string().min(1, { message: "الاسم مطلوب" }),
-  description: z.string().min(1, { message: "الوصف مطلوب" }),
-  breast_size: z.string().min(1, { message: "مقاس الصدر مطلوب" }),
-  waist_size: z.string().min(1, { message: "مقاس الخصر مطلوب" }),
-  sleeve_size: z.string().min(1, { message: "مقاس الكم مطلوب" }),
+  code: z.string().min(1, { message: "كود المنتج مطلوب" }),
+  breast_size: z.string().optional(),
+  waist_size: z.string().optional(),
+  sleeve_size: z.string().optional(),
   status: z.enum(
     [
       "damaged",
@@ -56,11 +54,11 @@ const formSchema = z.object({
     ],
     { required_error: "الحالة مطلوبة" }
   ),
-  notes: z.string().optional(),
   entity_type: z.enum(["branch", "factory", "workshop"], {
     required_error: "نوع المكان مطلوب",
   }),
   entity_id: z.string({ required_error: "المكان مطلوب" }),
+  notes: z.string().optional(),
 });
 
 type Props = {
@@ -87,30 +85,27 @@ export function CreateClothModal({ open, onOpenChange }: Props) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       code: "",
-      name: "",
-      description: "",
       breast_size: "",
       waist_size: "",
       sleeve_size: "",
       status: "ready_for_rent",
-      notes: "",
       entity_type: undefined,
       entity_id: "",
+      notes: "",
     },
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     const requestData: TCreateClothesRequest = {
       code: values.code,
-      name: values.name,
-      description: values.description,
-      breast_size: values.breast_size,
-      waist_size: values.waist_size,
-      sleeve_size: values.sleeve_size,
       status: values.status,
-      notes: values.notes || "",
       entity_type: values.entity_type,
       entity_id: Number(values.entity_id),
+      notes: values.notes || undefined,
+      description: "",
+      breast_size: values.breast_size || "",
+      waist_size: values.waist_size || "",
+      sleeve_size: values.sleeve_size || "",
     };
 
     createCloth(requestData, {
@@ -144,63 +139,29 @@ export function CreateClothModal({ open, onOpenChange }: Props) {
             className="space-y-4"
             dir="rtl"
           >
-            {/* Basic Information */}
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="code"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>الكود</FormLabel>
-                    <FormControl>
-                      <Input placeholder="كود المنتج..." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>الاسم</FormLabel>
-                    <FormControl>
-                      <Input placeholder="اسم المنتج..." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
+            {/* كود المنتج */}
             <FormField
               control={form.control}
-              name="description"
+              name="code"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>الوصف</FormLabel>
+                  <FormLabel>كود المنتج</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="وصف المنتج..."
-                      className="min-h-[80px]"
-                      {...field}
-                    />
+                    <Input placeholder="كود المنتج..." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* Sizes */}
-            <div className="grid grid-cols-3 gap-4">
+            {/* المقاسات (كلها اختيارية) */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <FormField
                 control={form.control}
                 name="breast_size"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>مقاس الصدر</FormLabel>
+                    <FormLabel>مقاس الصدر (اختياري)</FormLabel>
                     <FormControl>
                       <Input placeholder="مقاس الصدر..." {...field} />
                     </FormControl>
@@ -208,13 +169,12 @@ export function CreateClothModal({ open, onOpenChange }: Props) {
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="waist_size"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>مقاس الخصر</FormLabel>
+                    <FormLabel>مقاس الخصر (اختياري)</FormLabel>
                     <FormControl>
                       <Input placeholder="مقاس الخصر..." {...field} />
                     </FormControl>
@@ -222,13 +182,12 @@ export function CreateClothModal({ open, onOpenChange }: Props) {
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="sleeve_size"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>مقاس الكم</FormLabel>
+                    <FormLabel>مقاس الكم (اختياري)</FormLabel>
                     <FormControl>
                       <Input placeholder="مقاس الكم..." {...field} />
                     </FormControl>
@@ -238,39 +197,37 @@ export function CreateClothModal({ open, onOpenChange }: Props) {
               />
             </div>
 
-            {/* Status */}
-            <div className="flex gap-4">
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>الحالة</FormLabel>
-                    <FormControl>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        disabled={isPending}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="اختر الحالة..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {STATUS_OPTIONS.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            {/* الحالة */}
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>الحالة</FormLabel>
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      disabled={isPending}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="اختر الحالة..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {STATUS_OPTIONS.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-            {/* Entity Selection */}
+            {/* المكان */}
             <EntitySelect
               mode="form"
               control={form.control}
@@ -281,7 +238,7 @@ export function CreateClothModal({ open, onOpenChange }: Props) {
               disabled={isPending}
             />
 
-            {/* Notes */}
+            {/* ملاحظات (اختياري) */}
             <FormField
               control={form.control}
               name="notes"

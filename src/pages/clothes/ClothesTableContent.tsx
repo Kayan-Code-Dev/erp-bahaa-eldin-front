@@ -33,7 +33,11 @@ import {
 import useDebounce from "@/hooks/useDebounce";
 import { TEntity } from "@/lib/types/entity.types";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Pencil, Trash2, RotateCcw } from "lucide-react";
+import { useMemo } from "react";
+import { useGetBranchesQueryOptions } from "@/api/v2/branches/branches.hooks";
+import { useGetFactoriesQueryOptions } from "@/api/v2/factories/factories.hooks";
+import { useGetWorkshopsQueryOptions } from "@/api/v2/workshop/workshops.hooks";
+import { Pencil, Trash2, RotateCcw, Filter } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router";
 import { ClothesTableSkeleton } from "./ClothesTableSkeleton";
@@ -53,7 +57,7 @@ function ClothesTableContent() {
   );
 
   // Filter states - initialize from URL params
-  const [name, setName] = useState(() => searchParams.get("name") || "");
+  const [codeFilter, setCodeFilter] = useState(() => searchParams.get("code") || "");
   const [categoryId, setCategoryId] = useState(
     () => searchParams.get("category_id") || ""
   );
@@ -68,9 +72,10 @@ function ClothesTableContent() {
   const [entityId, setEntityId] = useState(
     () => searchParams.get("entity_id") || ""
   );
+  const [showFilters, setShowFilters] = useState(false);
 
   // Debounce filter values
-  const debouncedName = useDebounce({ value: name, delay: 500 });
+  const debouncedCodeFilter = useDebounce({ value: codeFilter, delay: 500 });
   const debouncedCategoryId = useDebounce({ value: categoryId, delay: 300 });
   const debouncedSubcategoryIds = useDebounce({
     value: subcategoryIds,
@@ -83,7 +88,7 @@ function ClothesTableContent() {
   const queryParams: TGetClothesRequestParams = {
     page,
     per_page,
-    ...(debouncedName && { name: debouncedName }),
+    ...(debouncedCodeFilter && { name: debouncedCodeFilter }),
     ...(debouncedCategoryId && { category_id: Number(debouncedCategoryId) }),
     ...(debouncedSubcategoryIds.length > 0 && {
       subcat_id: debouncedSubcategoryIds.map(Number),
@@ -95,6 +100,19 @@ function ClothesTableContent() {
   const { data, isPending, isError, error } = useQuery(
     useGetClothesQueryOptions(queryParams)
   );
+
+  // جلب أسماء الأماكن (فروع، مصانع، ورش) لعرضها بدل الرقم
+  const { data: branchesData } = useQuery(useGetBranchesQueryOptions(1, 500));
+  const { data: factoriesData } = useQuery(useGetFactoriesQueryOptions(1, 500));
+  const { data: workshopsData } = useQuery(useGetWorkshopsQueryOptions(1, 500));
+
+  const entityNamesMap = useMemo(() => {
+    const map = new Map<string, string>();
+    branchesData?.data?.forEach((b) => map.set(`branch-${b.id}`, b.name));
+    factoriesData?.data?.forEach((f) => map.set(`factory-${f.id}`, f.name));
+    workshopsData?.data?.forEach((w) => map.set(`workshop-${w.id}`, w.name));
+    return map;
+  }, [branchesData?.data, factoriesData?.data, workshopsData?.data]);
 
   // Delete mutation
   const { mutate: deleteCloth, isPending: isDeleting } = useMutation(
@@ -132,7 +150,7 @@ function ClothesTableContent() {
 
   // Reset all filters
   const handleResetFilters = () => {
-    setName("");
+    setCodeFilter("");
     setCategoryId("");
     setSubcategoryIds([]);
     setEntityType(undefined);
@@ -144,7 +162,7 @@ function ClothesTableContent() {
   // Update URL params when debounced values change
   useEffect(() => {
     const params = new URLSearchParams();
-    if (debouncedName) params.set("name", debouncedName);
+    if (debouncedCodeFilter) params.set("code", debouncedCodeFilter);
     if (debouncedCategoryId) params.set("category_id", debouncedCategoryId);
     if (debouncedSubcategoryIds.length > 0)
       params.set("subcat_id", debouncedSubcategoryIds.join(","));
@@ -154,7 +172,7 @@ function ClothesTableContent() {
     // Only update if params have changed
     const currentParams = new URLSearchParams(searchParams);
     const paramsChanged =
-      currentParams.get("name") !== (debouncedName || null) ||
+      currentParams.get("code") !== (debouncedCodeFilter || null) ||
       currentParams.get("category_id") !== (debouncedCategoryId || null) ||
       currentParams.get("subcat_id") !==
         (debouncedSubcategoryIds.length > 0
@@ -169,7 +187,7 @@ function ClothesTableContent() {
       setSearchParams(params);
     }
   }, [
-    debouncedName,
+    debouncedCodeFilter,
     debouncedCategoryId,
     debouncedSubcategoryIds,
     debouncedEntityType,
@@ -211,105 +229,134 @@ function ClothesTableContent() {
     return labels[status] || status;
   };
 
+  /** عرض المقاسات من الحقل الموحد أو من الحقول المنفصلة */
+  const getMeasurementsDisplay = (cloth: TClothResponse) => {
+    if (cloth.measurements) return cloth.measurements;
+    const parts = [
+      cloth.breast_size,
+      cloth.waist_size,
+      cloth.sleeve_size,
+    ].filter(Boolean);
+    return parts.length ? parts.join(" / ") : "-";
+  };
+
+  /** عرض اسم المكان: من الـ API أو من خريطة الفروع/المصانع/الورش، وإلا نوع المكان (الرقم) */
+  const getEntityDisplay = (cloth: TClothResponse) => {
+    if (cloth.entity_name?.trim()) return cloth.entity_name.trim();
+    const key = `${cloth.entity_type}-${cloth.entity_id}`;
+    const name = entityNamesMap.get(key);
+    if (name) return name;
+    const typeLabel =
+      cloth.entity_type === "branch"
+        ? "فرع"
+        : cloth.entity_type === "factory"
+          ? "مصنع"
+          : "ورشة";
+    return `${typeLabel} (${cloth.entity_id})`;
+  };
+
   return (
     <>
-      {/* Filters */}
-      <Card className="mb-6">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>تصفية البحث</CardTitle>
-            <CardDescription>
-              استخدم الفلاتر التالية للبحث عن المنتجات
-            </CardDescription>
-          </div>
-          <Button
-            variant="outline"
-            onClick={handleResetFilters}
-            className="gap-2"
-          >
-            <RotateCcw className="h-4 w-4" />
-            إعادة تعيين
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">اسم المنتج</label>
-                <Input
-                  placeholder="ابحث بالاسم..."
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
-              </div>
-
-              <div className="flex items-center gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">الفئة</label>
-                  <CategoriesSelect
-                    value={categoryId}
-                    onChange={(id) => {
-                      setCategoryId(id);
-                      setSubcategoryIds([]);
-                    }}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">الفئات الفرعية</label>
-                  <SubcategoriesSelect
-                    multiple
-                    value={subcategoryIds}
-                    onChange={(ids) => setSubcategoryIds(ids)}
-                    category_id={categoryId ? Number(categoryId) : undefined}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <EntitySelect
-                mode="standalone"
-                entityType={entityType}
-                entityId={entityId}
-                onEntityTypeChange={(type) => {
-                  setEntityType(type);
-                  setEntityId("");
-                }}
-                onEntityIdChange={setEntityId}
-                entityTypeLabel="نوع المكان"
-                entityIdLabel="المكان"
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Table */}
-
       {isError && <div className="text-red-500">{error.message}</div>}
 
-      <>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle>المنتجات</CardTitle>
-              <CardDescription>
-                عرض وإدارة جميع المنتجات في النظام
-              </CardDescription>
-            </div>
-          </CardHeader>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>المنتجات</CardTitle>
+            <CardDescription>
+              عرض وإدارة جميع المنتجات في النظام
+            </CardDescription>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-1"
+              onClick={() => setShowFilters((prev) => !prev)}
+            >
+              <Filter className="ml-1 h-4 w-4" />
+              {showFilters ? "إخفاء الفلاتر" : "الفلاتر"}
+            </Button>
+            {showFilters && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="flex items-center gap-1"
+                onClick={handleResetFilters}
+              >
+                <RotateCcw className="ml-1 h-4 w-4" />
+                إعادة تعيين
+              </Button>
+            )}
+          </div>
+        </CardHeader>
 
-          <CardContent>
+        <CardContent>
+          {/* Filters - مثل صفحة الفواتير */}
+          {showFilters && (
+            <div className="mb-4 rounded-lg border bg-muted/30 p-4">
+              <h3 className="mb-3 text-sm font-semibold text-foreground">الفلاتر</h3>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">كود المنتج</label>
+                    <Input
+                      placeholder="ابحث بالكود..."
+                      value={codeFilter}
+                      onChange={(e) => setCodeFilter(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">الفئة</label>
+                    <CategoriesSelect
+                      value={categoryId}
+                      onChange={(id) => {
+                        setCategoryId(id);
+                        setSubcategoryIds([]);
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">الفئات الفرعية</label>
+                    <SubcategoriesSelect
+                      multiple
+                      value={subcategoryIds}
+                      onChange={(ids) => setSubcategoryIds(ids)}
+                      category_id={categoryId ? Number(categoryId) : undefined}
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-wrap items-end gap-4">
+                  <EntitySelect
+                    mode="standalone"
+                    entityType={entityType}
+                    entityId={entityId}
+                    onEntityTypeChange={(type) => {
+                      setEntityType(type);
+                      setEntityId("");
+                    }}
+                    onEntityIdChange={setEntityId}
+                    entityTypeLabel="نوع المكان"
+                    entityIdLabel="المكان"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Table */}
             <div className="overflow-hidden rounded-md border">
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead className="text-center">#</TableHead>
                     <TableHead className="text-center">الكود</TableHead>
-                    <TableHead className="text-center">الاسم</TableHead>
+                    <TableHead className="text-center">المقاسات</TableHead>
                     <TableHead className="text-center">الحالة</TableHead>
-                    <TableHead className="text-center">المكان</TableHead>
+                    <TableHead className="text-center">نوع المكان (المكان)</TableHead>
+                    <TableHead className="text-center">ملاحظات</TableHead>
                     <TableHead className="text-center">إجراءات</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -324,8 +371,8 @@ function ClothesTableContent() {
                         <TableCell className="text-center font-medium">
                           {cloth.code}
                         </TableCell>
-                        <TableCell className="text-center">
-                          {cloth.name}
+                        <TableCell className="text-center text-muted-foreground">
+                          {getMeasurementsDisplay(cloth)}
                         </TableCell>
                         <TableCell className="text-center">
                           <Badge variant={getStatusBadgeVariant(cloth.status)}>
@@ -333,12 +380,10 @@ function ClothesTableContent() {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-center">
-                          {cloth.entity_type === "branch"
-                            ? "فرع"
-                            : cloth.entity_type === "factory"
-                            ? "مصنع"
-                            : "ورشة"}{" "}
-                          #{cloth.entity_id}
+                          {getEntityDisplay(cloth)}
+                        </TableCell>
+                        <TableCell className="text-center max-w-[180px] truncate" title={cloth.notes || undefined}>
+                          {cloth.notes || "-"}
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2 justify-center">
@@ -365,7 +410,7 @@ function ClothesTableContent() {
                   ) : (
                     <TableRow>
                       <TableCell
-                        colSpan={8}
+                        colSpan={7}
                         className="py-10 text-center text-muted-foreground"
                       >
                         لا توجد منتجات لعرضها.
@@ -386,7 +431,6 @@ function ClothesTableContent() {
             />
           </CardFooter>
         </Card>
-      </>
 
       {/* Modals */}
       <EditClothModal
@@ -401,7 +445,7 @@ function ClothesTableContent() {
         alertMessage={
           <>
             هل أنت متأكد أنك تريد حذف المنتج{" "}
-            <strong>{selectedCloth?.name}</strong>؟
+            <strong>{selectedCloth?.code}</strong>؟
           </>
         }
         handleConfirmation={handleDelete}

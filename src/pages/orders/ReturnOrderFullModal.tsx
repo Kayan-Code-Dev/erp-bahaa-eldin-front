@@ -167,7 +167,7 @@ export function ReturnOrderFullModal({
                   className="rounded-lg border p-3 space-y-3 bg-muted/30"
                 >
                   <p className="font-medium text-sm">
-                    {item.name} — كود: {item.code}
+                    {(item as { name?: string }).name ?? item.code} — كود: {item.code}
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <FormField

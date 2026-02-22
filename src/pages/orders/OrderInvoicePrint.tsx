@@ -290,7 +290,7 @@ export function OrderInvoicePrint({
                 <tbody>
                   {items.map((item, index) => (
                       <tr key={item.id} className={index % 2 === 0 ? "invoice-print-row-even invoice-print-mrow bg-gray-50/80" : "invoice-print-mrow bg-white"}>
-                        <td className="invoice-print-td invoice-print-mtd invoice-print-mtd-item border-b border-gray-200 py-2 px-3 text-center text-xs font-semibold text-gray-800">{item.name || item.code || "-"}{item.code && item.name ? ` (${item.code})` : ""}</td>
+                        <td className="invoice-print-td invoice-print-mtd invoice-print-mtd-item border-b border-gray-200 py-2 px-3 text-center text-xs font-semibold text-gray-800">{item.code || (item as { name?: string }).name || "-"}</td>
                         {activeMeasurementKeys.map(({ key }) => (
                           <td key={key} className="invoice-print-td invoice-print-mtd border-b border-l border-gray-100 py-2 px-2 text-center text-xs font-normal" style={{ fontVariantNumeric: "tabular-nums", fontFamily: "'Segoe UI', Arial, sans-serif" }}>
                             {(item as Record<string, any>)[key] != null && String((item as Record<string, any>)[key]).trim() !== ""

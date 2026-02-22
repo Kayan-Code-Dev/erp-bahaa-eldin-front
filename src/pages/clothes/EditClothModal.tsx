@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Form,
   FormControl,
@@ -37,10 +38,12 @@ import {
 import { EntitySelect } from "@/components/custom/EntitySelect";
 import { toast } from "sonner";
 
-// Schema for the form (based on TUpdateClothesRequest)
+// Schema: كود المنتج، المقاسات (كلها اختيارية)، الحالة، المكان، ملاحظات (اختياري)
 const formSchema = z.object({
-  code: z.string().min(1, { message: "الكود مطلوب" }),
-  name: z.string().min(1, { message: "الاسم مطلوب" }),
+  code: z.string().min(1, { message: "كود المنتج مطلوب" }),
+  breast_size: z.string().optional(),
+  waist_size: z.string().optional(),
+  sleeve_size: z.string().optional(),
   status: z.enum(
     [
       "damaged",
@@ -57,6 +60,7 @@ const formSchema = z.object({
     required_error: "نوع المكان مطلوب",
   }),
   entity_id: z.string({ required_error: "المكان مطلوب" }),
+  notes: z.string().optional(),
 });
 
 type Props = {
@@ -84,10 +88,13 @@ export function EditClothModal({ cloth, open, onOpenChange }: Props) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       code: "",
-      name: "",
+      breast_size: "",
+      waist_size: "",
+      sleeve_size: "",
       status: "ready_for_rent",
       entity_type: undefined,
       entity_id: "",
+      notes: "",
     },
   });
 
@@ -96,10 +103,13 @@ export function EditClothModal({ cloth, open, onOpenChange }: Props) {
     if (cloth && open) {
       form.reset({
         code: cloth.code,
-        name: cloth.name,
+        breast_size: cloth.breast_size || "",
+        waist_size: cloth.waist_size || "",
+        sleeve_size: cloth.sleeve_size || "",
         status: cloth.status,
         entity_type: cloth.entity_type,
         entity_id: cloth.entity_id.toString(),
+        notes: cloth.notes || "",
       });
     }
   }, [cloth, open, form]);
@@ -109,10 +119,13 @@ export function EditClothModal({ cloth, open, onOpenChange }: Props) {
 
     const requestData: TUpdateClothesRequest = {
       code: values.code,
-      name: values.name,
       status: values.status,
       entity_type: values.entity_type,
       entity_id: Number(values.entity_id),
+      notes: values.notes || undefined,
+      breast_size: values.breast_size || undefined,
+      waist_size: values.waist_size || undefined,
+      sleeve_size: values.sleeve_size || undefined,
     };
 
     updateCloth(
@@ -138,7 +151,7 @@ export function EditClothModal({ cloth, open, onOpenChange }: Props) {
       <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle className="text-center">
-            تعديل المنتج: {cloth?.name}
+            تعديل المنتج: {cloth?.code}
           </DialogTitle>
           <DialogDescription className="text-center">
             قم بتعديل البيانات وانقر "حفظ" لحفظ التغييرات.
@@ -150,62 +163,56 @@ export function EditClothModal({ cloth, open, onOpenChange }: Props) {
             className="space-y-4"
             dir="rtl"
           >
-            {/* Basic Information */}
-            <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="code"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>كود المنتج</FormLabel>
+                  <FormControl>
+                    <Input placeholder="كود المنتج..." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* المقاسات (كلها اختيارية) */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <FormField
                 control={form.control}
-                name="code"
+                name="breast_size"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>الكود</FormLabel>
+                    <FormLabel>مقاس الصدر (اختياري)</FormLabel>
                     <FormControl>
-                      <Input placeholder="كود المنتج..." {...field} />
+                      <Input placeholder="مقاس الصدر..." {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
-                name="name"
+                name="waist_size"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>الاسم</FormLabel>
+                    <FormLabel>مقاس الخصر (اختياري)</FormLabel>
                     <FormControl>
-                      <Input placeholder="اسم المنتج..." {...field} />
+                      <Input placeholder="مقاس الخصر..." {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-            </div>
-
-            {/* Status */}
-            <div className="flex gap-4">
               <FormField
                 control={form.control}
-                name="status"
+                name="sleeve_size"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>الحالة</FormLabel>
+                    <FormLabel>مقاس الكم (اختياري)</FormLabel>
                     <FormControl>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        disabled={isPending}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="اختر الحالة..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {STATUS_OPTIONS.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Input placeholder="مقاس الكم..." {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -213,7 +220,35 @@ export function EditClothModal({ cloth, open, onOpenChange }: Props) {
               />
             </div>
 
-            {/* Entity Selection */}
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>الحالة</FormLabel>
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      disabled={isPending}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="اختر الحالة..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {STATUS_OPTIONS.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <EntitySelect
               mode="form"
               control={form.control}
@@ -222,6 +257,24 @@ export function EditClothModal({ cloth, open, onOpenChange }: Props) {
               entityTypeLabel="نوع المكان"
               entityIdLabel="المكان"
               disabled={isPending}
+            />
+
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>ملاحظات (اختياري)</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="ملاحظات إضافية..."
+                      className="min-h-[80px]"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
 
             <DialogFooter className="gap-2">

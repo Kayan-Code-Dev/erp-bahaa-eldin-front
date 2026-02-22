@@ -230,7 +230,7 @@ function WorkshopDetails() {
                           {cloth.code}
                         </TableCell>
                         <TableCell className="text-center">
-                          {cloth.name}
+                          {cloth.name ?? cloth.code}
                         </TableCell>
                         <TableCell className="text-center">
                           <Badge

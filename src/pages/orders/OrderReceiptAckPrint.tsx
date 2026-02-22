@@ -144,7 +144,7 @@ export function OrderReceiptAckPrint({
             <ol className="list-decimal list-inside space-y-1" itemProp="itemListElement" itemScope itemType="https://schema.org/ItemList">
               {items.map((item) => (
                 <li key={item.id} className="font-medium" itemProp="itemListElement" itemScope itemType="https://schema.org/Product">
-                  <span itemProp="name">{item.name || "-"}</span>
+                  <span itemProp="name">{(item as { name?: string }).name ?? item.code ?? "-"}</span>
                   {item.code && (
                     <span className="text-gray-600 font-normal"> ({item.code})</span>
                   )}

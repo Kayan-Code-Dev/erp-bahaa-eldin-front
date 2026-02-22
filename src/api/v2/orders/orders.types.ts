@@ -67,7 +67,7 @@ export type TOrderItem = {
   /** Cloth/inventory id — required for return API; may equal id on some backends */
   cloth_id?: number;
   code: string;
-  name: string;
+  name?: string;
   description: string | null;
   cloth_type_id?: number;
   breast_size: string | null;

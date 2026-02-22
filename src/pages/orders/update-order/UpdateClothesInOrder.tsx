@@ -34,7 +34,7 @@ import OrderDetailsSkeleton from "../OrderDetailsSkeleton";
 type SelectedCloth = {
   id: number;
   code: string;
-  name: string;
+  name?: string;
   price?: number; // Price for new items
 };
 
@@ -42,7 +42,7 @@ type OrderItemWithPrice = {
   id: number;
   cloth_id: number;
   code: string;
-  name: string;
+  name?: string;
   description: string;
   price: number; // Original price from order
 };
@@ -86,11 +86,11 @@ function UpdateClothesInOrder() {
     // Initialize original items with prices from order
     const items: OrderItemWithPrice[] = (fullOrder.items || []).map((item) => ({
       id: item.id,
-      cloth_id: item.id, // Assuming cloth_id is the same as item id for now
+      cloth_id: item.id,
       code: item.code,
-      name: item.name,
+      name: item.name ?? item.code,
       description: item.description || "",
-      price: (item as any).price || 0, // Get price from order item
+      price: (item as any).price || 0,
     }));
     setOriginalItems(items);
   }, [fullOrder]);
@@ -277,7 +277,7 @@ function UpdateClothesInOrder() {
       clothesMap.set(item.cloth_id, {
         id: item.cloth_id,
         code: item.code,
-        name: item.name,
+        name: item.name ?? item.code,
         price: itemPrice,
       });
     });
@@ -293,8 +293,8 @@ function UpdateClothesInOrder() {
           clothesMap.set(replacementCloth.id, {
             id: replacementCloth.id,
             code: replacementCloth.code,
-            name: replacementCloth.name,
-            price: r.originalItem.price, // Use original price for replacement
+            name: replacementCloth.name ?? replacementCloth.code,
+            price: r.originalItem.price,
           });
         }
       });
@@ -444,7 +444,7 @@ function UpdateClothesInOrder() {
                       <TableCell className="text-center font-medium">
                         {item.code}
                       </TableCell>
-                      <TableCell className="text-center">{item.name}</TableCell>
+                      <TableCell className="text-center">{item.name ?? item.code}</TableCell>
                       <TableCell className="text-center">
                         {item.description || "-"}
                       </TableCell>
@@ -487,8 +487,7 @@ function UpdateClothesInOrder() {
               <Card key={removedItem.originalItem.id} className="border-2">
                 <CardHeader>
                   <CardTitle className="text-base">
-                    {removedItem.originalItem.code} -{" "}
-                    {removedItem.originalItem.name}
+                    {removedItem.originalItem.code}
                   </CardTitle>
                   <CardDescription>
                     السعر الأصلي: {removedItem.originalItem.price} ج.م
@@ -570,7 +569,7 @@ function UpdateClothesInOrder() {
                                     {cloth.code}
                                   </TableCell>
                                   <TableCell className="text-center">
-                                    {cloth.name}
+                                    {cloth.name ?? cloth.code}
                                   </TableCell>
                                   <TableCell className="text-center">
                                     {cloth.description || "-"}
@@ -618,7 +617,7 @@ function UpdateClothesInOrder() {
                   className="text-sm px-3 py-1.5 flex items-center gap-2"
                 >
                   <span>
-                    {cloth.code} - {cloth.name}
+                    {cloth.code}
                   </span>
                   <button
                     onClick={() => handleRemoveCloth(cloth.id)}
@@ -707,7 +706,7 @@ function UpdateClothesInOrder() {
                     const clothData = {
                       id: cloth.id,
                       code: cloth.code,
-                      name: cloth.name,
+                      name: cloth.name ?? cloth.code,
                     };
                     return (
                       <TableRow
@@ -727,7 +726,7 @@ function UpdateClothesInOrder() {
                           {cloth.code}
                         </TableCell>
                         <TableCell className="text-center">
-                          {cloth.name}
+                          {cloth.name ?? cloth.code}
                         </TableCell>
                         <TableCell className="text-center">
                           {cloth.description || "-"}

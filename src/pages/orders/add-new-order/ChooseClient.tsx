@@ -143,7 +143,7 @@ function ChooseClient() {
   const [branchDate, setBranchDate] = useState<Date | undefined>(); // Occasion/wedding date
   const [employeeId, setEmployeeId] = useState<string>(""); // Employee who created the invoice
 
-  const [nameFilter, setNameFilter] = useState("");
+  const [productCodeFilter, setProductCodeFilter] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [subcategoryIds, setSubcategoryIds] = useState<string[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
@@ -179,7 +179,7 @@ function ChooseClient() {
     value: number;
   }>({ type: "none", value: 0 });
 
-  const debouncedNameFilter = useDebounce({ value: nameFilter, delay: 500 });
+  const debouncedProductCodeFilter = useDebounce({ value: productCodeFilter, delay: 500 });
   const debouncedCategoryId = useDebounce({ value: categoryId, delay: 300 });
   const debouncedSubcategoryIds = useDebounce({
     value: subcategoryIds,
@@ -194,7 +194,7 @@ function ChooseClient() {
       per_page: 10,
       status: "ready_for_rent",
     };
-    if (debouncedNameFilter) params.name = debouncedNameFilter;
+    if (debouncedProductCodeFilter) params.name = debouncedProductCodeFilter;
     if (debouncedCategoryId) params.category_id = Number(debouncedCategoryId);
     if (debouncedSubcategoryIds.length > 0) {
       params.subcat_id = debouncedSubcategoryIds.map(Number);
@@ -203,7 +203,7 @@ function ChooseClient() {
     if (debouncedEntityId) params.entity_id = Number(debouncedEntityId);
     return params;
   }, [
-    debouncedNameFilter,
+    debouncedProductCodeFilter,
     debouncedCategoryId,
     debouncedSubcategoryIds,
     debouncedEntityType,
@@ -339,7 +339,7 @@ function ChooseClient() {
     const newProduct: any = {
       id: selectedProduct.id,
       cloth_id: selectedProduct.id,
-      name: selectedProduct.name,
+      name: selectedProduct.code,
       code: selectedProduct.code,
       quantity: parseInt(productDetails.quantity),
       price: parseFloat(productDetails.price),
@@ -398,7 +398,7 @@ function ChooseClient() {
   };
 
   const resetFilters = () => {
-    setNameFilter("");
+    setProductCodeFilter("");
     setCategoryId("");
     setSubcategoryIds([]);
     setEntityType(undefined);
@@ -1264,7 +1264,7 @@ function ChooseClient() {
                             className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
                           >
                             <div className="min-w-0 flex-1">
-                              <p className="font-medium text-gray-900">{cloth.name}</p>
+                              <p className="font-medium text-gray-900">{cloth.name ?? cloth.code}</p>
                               <div className="flex items-center gap-2 mt-1 flex-wrap">
                                 <Badge variant="outline" className="text-xs">
                                   {cloth.code}
@@ -1369,11 +1369,11 @@ function ChooseClient() {
                     <div className="pt-4 space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label className="text-gray-700 font-medium">اسم المنتج</Label>
+                          <Label className="text-gray-700 font-medium">كود المنتج</Label>
                           <Input
-                            placeholder="ابحث بالاسم..."
-                            value={nameFilter}
-                            onChange={(e) => setNameFilter(e.target.value)}
+                            placeholder="ابحث بالكود..."
+                            value={productCodeFilter}
+                            onChange={(e) => setProductCodeFilter(e.target.value)}
                             className="h-10"
                           />
                         </div>
@@ -1475,7 +1475,7 @@ function ChooseClient() {
                                     {cloth.code}
                                   </TableCell>
                                   <TableCell className="text-center">
-                                    {cloth.name}
+                                    {cloth.name ?? cloth.code}
                                   </TableCell>
                                   <TableCell className="text-center">
                                     <Badge variant={getStatusBadgeVariant(cloth.status)}>
@@ -1527,7 +1527,7 @@ function ChooseClient() {
                       </h2>
                       {selectedProduct ? (
                         <p className="text-xs text-gray-600 mt-1">
-                          {selectedProduct.code} — {selectedProduct.name}
+                          {selectedProduct.code}
                         </p>
                       ) : (
                         <p className="text-xs text-gray-600 mt-1">

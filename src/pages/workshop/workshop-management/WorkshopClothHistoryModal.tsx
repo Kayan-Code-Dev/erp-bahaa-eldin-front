@@ -83,7 +83,7 @@ export function WorkshopClothHistoryModal({
           <DialogTitle className="text-center">تاريخ المنتج</DialogTitle>
           <DialogDescription className="text-center">
             {cloth
-              ? `تاريخ المنتج: ${cloth.name} (${cloth.code})`
+              ? `تاريخ المنتج: ${cloth.name ?? cloth.code} (${cloth.code})`
               : "عرض تاريخ المنتج"}
           </DialogDescription>
         </DialogHeader>
@@ -114,9 +114,9 @@ export function WorkshopClothHistoryModal({
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">
-                    الاسم:
+                    الكود / الاسم:
                   </p>
-                  <p className="text-base font-medium">{data.cloth.name}</p>
+                  <p className="text-base font-medium">{data.cloth.name ?? data.cloth.code}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">

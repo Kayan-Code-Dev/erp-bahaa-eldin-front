@@ -101,7 +101,7 @@ export function ReturnWorkshopClothModal({
           <DialogTitle className="text-center">إرجاع المنتجات</DialogTitle>
           <DialogDescription className="text-center">
             {cloth
-              ? `إرجاع المنتج: ${cloth.name} (${cloth.code})`
+              ? `إرجاع المنتج: ${cloth.name ?? cloth.code} (${cloth.code})`
               : "املأ البيانات لإرجاع المنتج."}
           </DialogDescription>
         </DialogHeader>

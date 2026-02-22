@@ -454,7 +454,7 @@ function OrderDetails() {
                           {item.code}
                         </TableCell>
                         <TableCell className="text-center">
-                          {item.name}
+                          {item.name ?? item.code}
                         </TableCell>
                         <TableCell className="text-center">
                           {getOrderTypeLabel(item.type)}

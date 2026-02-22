@@ -224,7 +224,7 @@ export function ApproveWorkshopTransferModal({
                           {item.cloth_code}
                         </TableCell>
                         <TableCell className="text-center">
-                          {item.cloth_name}
+                          {item.cloth_name ?? item.cloth_code}
                         </TableCell>
                         <TableCell className="text-center">
                           <Badge className={getStatusVariant(item.status)}>

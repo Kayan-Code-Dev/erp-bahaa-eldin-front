@@ -33,7 +33,7 @@ import { ChevronRight, X, ArrowRight } from "lucide-react";
 type SelectedCloth = {
   id: number;
   code: string;
-  name: string;
+  name?: string;
 };
 
 function ChooseClothes() {
@@ -222,7 +222,7 @@ function ChooseClothes() {
                   className="text-sm px-3 py-1.5 flex items-center gap-2"
                 >
                   <span>
-                    {cloth.code} - {cloth.name}
+                    {cloth.code}
                   </span>
                   <button
                     onClick={() => handleRemoveCloth(cloth.id)}
@@ -259,7 +259,6 @@ function ChooseClothes() {
                   <TableRow>
                     <TableHead className="w-12"></TableHead>
                     <TableHead className="text-center">الكود</TableHead>
-                    <TableHead className="text-center">الاسم</TableHead>
                     <TableHead className="text-center">الوصف</TableHead>
                     <TableHead className="text-center">الحالة</TableHead>
                   </TableRow>
@@ -272,9 +271,6 @@ function ChooseClothes() {
                       </TableCell>
                       <TableCell>
                         <Skeleton className="h-4 w-20" />
-                      </TableCell>
-                      <TableCell>
-                        <Skeleton className="h-4 w-32" />
                       </TableCell>
                       <TableCell>
                         <Skeleton className="h-4 w-40" />
@@ -298,7 +294,6 @@ function ChooseClothes() {
                   <TableRow>
                     <TableHead className="w-12"></TableHead>
                     <TableHead className="text-center">الكود</TableHead>
-                    <TableHead className="text-center">الاسم</TableHead>
                     <TableHead className="text-center">الوصف</TableHead>
                     <TableHead className="text-center">الحالة</TableHead>
                   </TableRow>
@@ -311,7 +306,6 @@ function ChooseClothes() {
                     const clothData = {
                       id: cloth.id,
                       code: cloth.code,
-                      name: cloth.name,
                     };
                     return (
                       <TableRow
@@ -329,9 +323,6 @@ function ChooseClothes() {
                         </TableCell>
                         <TableCell className="text-center font-medium">
                           {cloth.code}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {cloth.name}
                         </TableCell>
                         <TableCell className="text-center">
                           {cloth.description || "-"}

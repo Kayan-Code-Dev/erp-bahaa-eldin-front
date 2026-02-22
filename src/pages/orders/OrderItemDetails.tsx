@@ -187,7 +187,7 @@ function OrderItemDetails() {
           </Link>
           <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground/70" />
           <span className="font-medium text-foreground">
-            {item.code} — {item.name}
+            {item.code} {item.name ? `— ${item.name}` : ""}
           </span>
         </nav>
 
@@ -195,7 +195,7 @@ function OrderItemDetails() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold">
-              تفاصيل المنتج: {item.name}
+              تفاصيل المنتج: {item.name ?? item.code}
             </h1>
             <p className="text-muted-foreground">
               الكود: {item.code} • الطلب #{order.id}
@@ -224,7 +224,7 @@ function OrderItemDetails() {
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
               <FieldRow label="رقم القطعة" value={item.id} showWhenEmpty />
               <FieldRow label="الكود" value={item.code} showWhenEmpty />
-              <FieldRow label="الاسم" value={item.name} showWhenEmpty />
+              <FieldRow label="الكود/الاسم" value={item.name ?? item.code} showWhenEmpty />
               <FieldRow label="الوصف" value={item.description} />
               <FieldRow label="نوع الطلب" value={getOrderTypeLabel(item.type)} showWhenEmpty />
               <FieldRow label="الكمية" value={item.quantity} showWhenEmpty />

@@ -775,7 +775,7 @@ function UpdateOrder() {
                     <Card key={field.id} className="border-2">
                       <CardHeader>
                         <CardTitle className="text-base">
-                          {cloth?.code} - {cloth?.name}
+                          {cloth?.code}{cloth?.name ? ` - ${cloth.name}` : ""}
                           {isExisting && (
                             <Badge variant="outline" className="mr-2">
                               موجود

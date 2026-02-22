@@ -733,7 +733,7 @@ function CreateOrderForm() {
                           </span>
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-base font-semibold text-foreground">
-                              {cloth?.name}
+                              {cloth?.name ?? cloth?.code}
                             </p>
                             <p className="mt-0.5 truncate text-sm text-muted-foreground">
                               الكود: {cloth?.code}

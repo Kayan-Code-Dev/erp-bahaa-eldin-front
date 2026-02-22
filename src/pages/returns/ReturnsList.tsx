@@ -497,8 +497,8 @@ function ReturnsList() {
                                   ? order.items
                                       .map((item) =>
                                         item.code
-                                          ? `${item.name} (${item.code})`
-                                          : item.name
+                                          ? `${(item as { name?: string }).name ?? item.code} (${item.code})`
+                                          : (item as { name?: string }).name ?? item.code
                                       )
                                       .filter(Boolean)
                                       .join("، ")
