@@ -80,7 +80,6 @@ import {
   StickyNote,
 } from "lucide-react";
 import { CategoriesSelect } from "@/components/custom/CategoriesSelect";
-import { ClothModelsSelect } from "@/components/custom/ClothModelsSelect";
 import { SubcategoriesSelect } from "@/components/custom/SubcategoriesSelect";
 import useDebounce from "@/hooks/useDebounce";
 import { EmployeesSelect } from "@/components/custom/EmployeesSelect";
@@ -147,8 +146,6 @@ function ChooseClient() {
   const [nameFilter, setNameFilter] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [subcategoryIds, setSubcategoryIds] = useState<string[]>([]);
-  const [clothTypeId, setClothTypeId] = useState("");
-
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [productDetails, setProductDetails] = useState({
     quantity: "1",
@@ -188,7 +185,6 @@ function ChooseClient() {
     value: subcategoryIds,
     delay: 300,
   });
-  const debouncedClothTypeId = useDebounce({ value: clothTypeId, delay: 300 });
   const debouncedEntityType = useDebounce({ value: entityType, delay: 300 });
   const debouncedEntityId = useDebounce({ value: entityId, delay: 300 });
 
@@ -203,7 +199,6 @@ function ChooseClient() {
     if (debouncedSubcategoryIds.length > 0) {
       params.subcat_id = debouncedSubcategoryIds.map(Number);
     }
-    if (debouncedClothTypeId) params.cloth_type_id = Number(debouncedClothTypeId);
     if (debouncedEntityType) params.entity_type = debouncedEntityType;
     if (debouncedEntityId) params.entity_id = Number(debouncedEntityId);
     return params;
@@ -211,7 +206,6 @@ function ChooseClient() {
     debouncedNameFilter,
     debouncedCategoryId,
     debouncedSubcategoryIds,
-    debouncedClothTypeId,
     debouncedEntityType,
     debouncedEntityId,
   ]);
@@ -360,7 +354,6 @@ function ChooseClient() {
         productDetails.type === "rent" ? parseInt(productDetails.days_of_rent) : 0,
       discount_type: productDetails.discount_type,
       discount_value: parseFloat(productDetails.discount_value) || 0,
-      cloth_type: selectedProduct.cloth_type,
       subtotal: parseFloat(productDetails.price) * parseInt(productDetails.quantity),
     };
     // Attach measurements (if present) to each product, all fields are optional
@@ -408,7 +401,6 @@ function ChooseClient() {
     setNameFilter("");
     setCategoryId("");
     setSubcategoryIds([]);
-    setClothTypeId("");
     setEntityType(undefined);
     setEntityId("");
     setDeliveryDate(undefined);
@@ -1353,7 +1345,7 @@ function ChooseClient() {
                           فلترة المنتجات
                         </h2>
                         <p className="text-xs text-gray-600 mt-1">
-                          ابحث عن المنتجات المتاحة حسب الاسم، الفئة، الموديل والفئات الفرعية
+                          ابحث عن المنتجات المتاحة حسب الاسم، الفئة والفئات الفرعية
                         </p>
                       </div>
                     </div>
@@ -1384,10 +1376,6 @@ function ChooseClient() {
                             onChange={(e) => setNameFilter(e.target.value)}
                             className="h-10"
                           />
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-gray-700 font-medium">الموديل</Label>
-                          <ClothModelsSelect value={clothTypeId} onChange={setClothTypeId} />
                         </div>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1461,7 +1449,6 @@ function ChooseClient() {
                               <TableHead className="text-center">الاسم</TableHead>
                               <TableHead className="text-center">الحالة</TableHead>
                               <TableHead className="text-center">المكان</TableHead>
-                              <TableHead className="text-center">الموديل</TableHead>
                               <TableHead className="text-center">السعر</TableHead>
                               <TableHead className="text-center">إجراءات</TableHead>
                             </TableRow>
@@ -1502,9 +1489,6 @@ function ChooseClient() {
                                         ? "مصنع"
                                         : "ورشة"}{" "}
                                     #{cloth.entity_id}
-                                  </TableCell>
-                                  <TableCell className="text-center">
-                                    {cloth.cloth_type_name || "-"}
                                   </TableCell>
                                   <TableCell className="text-center font-bold text-blue-600">
                                     {cloth.price ? `${cloth.price} ج.م` : "-"}

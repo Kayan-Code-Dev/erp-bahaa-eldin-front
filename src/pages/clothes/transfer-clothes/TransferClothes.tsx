@@ -286,7 +286,6 @@ function TransferClothes() {
                           </TableHead>
                           <TableHead className="text-center">الكود</TableHead>
                           <TableHead className="text-center">الاسم</TableHead>
-                          <TableHead className="text-center">الموديل</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -309,10 +308,6 @@ function TransferClothes() {
                               </TableCell>
                               <TableCell className="text-center">
                                 {cloth.name}
-                              </TableCell>
-
-                              <TableCell className="text-center">
-                                {cloth.cloth_type_name}
                               </TableCell>
                             </TableRow>
                           );

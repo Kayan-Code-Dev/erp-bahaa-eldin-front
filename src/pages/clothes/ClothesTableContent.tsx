@@ -7,7 +7,6 @@ import {
   TGetClothesRequestParams,
 } from "@/api/v2/clothes/clothes.types";
 import { CategoriesSelect } from "@/components/custom/CategoriesSelect";
-import { ClothModelsSelect } from "@/components/custom/ClothModelsSelect";
 import CustomPagination from "@/components/custom/CustomPagination";
 import { EntitySelect } from "@/components/custom/EntitySelect";
 import { SubcategoriesSelect } from "@/components/custom/SubcategoriesSelect";
@@ -62,9 +61,6 @@ function ClothesTableContent() {
     const subcatParam = searchParams.get("subcat_id");
     return subcatParam ? subcatParam.split(",").filter(Boolean) : [];
   });
-  const [clothTypeId, setClothTypeId] = useState(
-    () => searchParams.get("cloth_type_id") || ""
-  );
   const [entityType, setEntityType] = useState<TEntity | undefined>(() => {
     const type = searchParams.get("entity_type");
     return (type as TEntity) || undefined;
@@ -80,7 +76,6 @@ function ClothesTableContent() {
     value: subcategoryIds,
     delay: 300,
   });
-  const debouncedClothTypeId = useDebounce({ value: clothTypeId, delay: 300 });
   const debouncedEntityType = useDebounce({ value: entityType, delay: 300 });
   const debouncedEntityId = useDebounce({ value: entityId, delay: 300 });
 
@@ -92,9 +87,6 @@ function ClothesTableContent() {
     ...(debouncedCategoryId && { category_id: Number(debouncedCategoryId) }),
     ...(debouncedSubcategoryIds.length > 0 && {
       subcat_id: debouncedSubcategoryIds.map(Number),
-    }),
-    ...(debouncedClothTypeId && {
-      cloth_type_id: Number(debouncedClothTypeId),
     }),
     ...(debouncedEntityType && { entity_type: debouncedEntityType }),
     ...(debouncedEntityId && { entity_id: Number(debouncedEntityId) }),
@@ -143,7 +135,6 @@ function ClothesTableContent() {
     setName("");
     setCategoryId("");
     setSubcategoryIds([]);
-    setClothTypeId("");
     setEntityType(undefined);
     setEntityId("");
     // Clear URL params and reset to page 1
@@ -157,7 +148,6 @@ function ClothesTableContent() {
     if (debouncedCategoryId) params.set("category_id", debouncedCategoryId);
     if (debouncedSubcategoryIds.length > 0)
       params.set("subcat_id", debouncedSubcategoryIds.join(","));
-    if (debouncedClothTypeId) params.set("cloth_type_id", debouncedClothTypeId);
     if (debouncedEntityType) params.set("entity_type", debouncedEntityType);
     if (debouncedEntityId) params.set("entity_id", debouncedEntityId);
 
@@ -170,7 +160,6 @@ function ClothesTableContent() {
         (debouncedSubcategoryIds.length > 0
           ? debouncedSubcategoryIds.join(",")
           : null) ||
-      currentParams.get("cloth_type_id") !== (debouncedClothTypeId || null) ||
       currentParams.get("entity_type") !== (debouncedEntityType || null) ||
       currentParams.get("entity_id") !== (debouncedEntityId || null);
 
@@ -183,7 +172,6 @@ function ClothesTableContent() {
     debouncedName,
     debouncedCategoryId,
     debouncedSubcategoryIds,
-    debouncedClothTypeId,
     debouncedEntityType,
     debouncedEntityId,
     searchParams,
@@ -255,14 +243,6 @@ function ClothesTableContent() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">الموديل</label>
-                <ClothModelsSelect
-                  value={clothTypeId}
-                  onChange={(id) => setClothTypeId(id)}
-                />
-              </div>
-
               <div className="flex items-center gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">الفئة</label>
@@ -330,7 +310,6 @@ function ClothesTableContent() {
                     <TableHead className="text-center">الاسم</TableHead>
                     <TableHead className="text-center">الحالة</TableHead>
                     <TableHead className="text-center">المكان</TableHead>
-                    <TableHead className="text-center">الموديل</TableHead>
                     <TableHead className="text-center">إجراءات</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -360,9 +339,6 @@ function ClothesTableContent() {
                             ? "مصنع"
                             : "ورشة"}{" "}
                           #{cloth.entity_id}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {cloth.cloth_type_name || "-"}
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2 justify-center">

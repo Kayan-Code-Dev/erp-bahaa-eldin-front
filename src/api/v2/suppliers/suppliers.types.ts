@@ -10,7 +10,7 @@ export type TCreateSupplierMinimalRequest = {
 export type TCreateSupplierClothItem = {
   code: string;
   name: string;
-  cloth_type_id: number;
+  cloth_type_id?: number;
   entity_type: "branch" | "factory" | "workshop";
   entity_id: number;
   price: number;
@@ -72,7 +72,7 @@ export type TCreateSupplierOrderClothItem = {
   code: string;
   name: string;
   description?: string;
-  cloth_type_id: number;
+  cloth_type_id?: number;
   breast_size: string;
   waist_size: string;
   sleeve_size: string;

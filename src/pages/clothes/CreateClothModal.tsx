@@ -33,7 +33,6 @@ import {
   TCreateClothesRequest,
   TClothesStatus,
 } from "@/api/v2/clothes/clothes.types";
-import { ClothModelsSelect } from "@/components/custom/ClothModelsSelect";
 import { EntitySelect } from "@/components/custom/EntitySelect";
 import { toast } from "sonner";
 
@@ -58,7 +57,6 @@ const formSchema = z.object({
     { required_error: "الحالة مطلوبة" }
   ),
   notes: z.string().optional(),
-  cloth_type_id: z.string({ required_error: "الموديل مطلوب" }),
   entity_type: z.enum(["branch", "factory", "workshop"], {
     required_error: "نوع المكان مطلوب",
   }),
@@ -96,7 +94,6 @@ export function CreateClothModal({ open, onOpenChange }: Props) {
       sleeve_size: "",
       status: "ready_for_rent",
       notes: "",
-      cloth_type_id: "",
       entity_type: undefined,
       entity_id: "",
     },
@@ -114,7 +111,6 @@ export function CreateClothModal({ open, onOpenChange }: Props) {
       notes: values.notes || "",
       entity_type: values.entity_type,
       entity_id: Number(values.entity_id),
-      cloth_type_id: Number(values.cloth_type_id),
     };
 
     createCloth(requestData, {
@@ -273,25 +269,6 @@ export function CreateClothModal({ open, onOpenChange }: Props) {
                 )}
               />
             </div>
-
-            {/* Cloth Model */}
-            <FormField
-              control={form.control}
-              name="cloth_type_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>الموديل</FormLabel>
-                  <FormControl>
-                    <ClothModelsSelect
-                      value={field.value}
-                      onChange={field.onChange}
-                      disabled={isPending}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             {/* Entity Selection */}
             <EntitySelect

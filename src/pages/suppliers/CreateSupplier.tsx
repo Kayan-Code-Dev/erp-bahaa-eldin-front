@@ -35,14 +35,12 @@ import {
 import { CustomCalendar } from "@/components/custom/CustomCalendar";
 import { CategoriesSelect } from "@/components/custom/CategoriesSelect";
 import { SubcategoriesSelect } from "@/components/custom/SubcategoriesSelect";
-import { ClothModelsSelect } from "@/components/custom/ClothModelsSelect";
 import { BranchesSelect } from "@/components/custom/BranchesSelect";
 import { EntitySelect } from "@/components/custom/EntitySelect";
 
 const clothItemSchema = z.object({
   code: z.string().min(1, "كود الصنف مطلوب"),
   name: z.string().min(1, "اسم الصنف مطلوب"),
-  cloth_type_id: z.string().min(1, "الموديل مطلوب"),
   entity_type: z.enum(["branch", "factory", "workshop"], { required_error: "نوع المكان مطلوب" }),
   entity_id: z.string().min(1, "المكان مطلوب"),
   price: z.number().min(0, "السعر يجب أن يكون ≥ 0"),
@@ -88,7 +86,6 @@ type FormValues = z.infer<typeof formSchema>;
 const defaultClothItem = {
   code: "",
   name: "",
-  cloth_type_id: "",
   entity_type: "branch" as const,
   entity_id: "",
   price: 0,
@@ -174,7 +171,6 @@ function CreateSupplier() {
     const clothes: TCreateSupplierClothItem[] = (values.clothes ?? []).map((c) => ({
       code: c.code,
       name: c.name,
-      cloth_type_id: Number(c.cloth_type_id),
       entity_type: c.entity_type as "branch" | "factory" | "workshop",
       entity_id: Number(c.entity_id),
       price: Number(c.price),
@@ -465,23 +461,6 @@ function CreateSupplier() {
                               <FormLabel>اسم الصنف</FormLabel>
                               <FormControl>
                                 <Input placeholder="اسم الصنف" {...f} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name={`clothes.${index}.cloth_type_id`}
-                          render={({ field: f }) => (
-                            <FormItem>
-                              <FormLabel>الموديل</FormLabel>
-                              <FormControl>
-                                <ClothModelsSelect
-                                  value={f.value ?? ""}
-                                  onChange={f.onChange}
-                                  disabled={isPending}
-                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>

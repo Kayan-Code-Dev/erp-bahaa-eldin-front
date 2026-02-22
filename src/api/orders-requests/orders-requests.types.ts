@@ -29,7 +29,7 @@ export type TOrder = {
   source: string | null;
   order_type: TOrderType; // e.g. tailoring
   order_number: string;
-  model_name: string;
+  model_name?: string;
   measurements: TMeasurement;
   status: TOrderStatus;
   created_at: string; // e.g. "02-11-2025"
@@ -67,7 +67,7 @@ const baseOrderSchema = z.object({
   source: z.string().optional(),
   category_id: z.string({ required_error: "الحقل مطلوب" }),
   sub_category_id: z.string({ required_error: "الحقل مطلوب" }),
-  model_name: z.string({ required_error: "اسم الموديل مطلوب" }).min(1, "اسم الموديل مطلوب"),
+  model_name: z.string().optional(),
   delivery_date: z.string({ required_error: "الحقل مطلوب" }).min(1, "تاريخ التسليم مطلوب"),
   notes: z.string().optional(),
 });

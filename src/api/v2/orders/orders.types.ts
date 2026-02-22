@@ -69,7 +69,7 @@ export type TOrderItem = {
   code: string;
   name: string;
   description: string | null;
-  cloth_type_id: number;
+  cloth_type_id?: number;
   breast_size: string | null;
   waist_size: string | null;
   sleeve_size: string | null;

@@ -34,7 +34,6 @@ import {
   TClothResponse,
   TClothesStatus,
 } from "@/api/v2/clothes/clothes.types";
-import { ClothModelsSelect } from "@/components/custom/ClothModelsSelect";
 import { EntitySelect } from "@/components/custom/EntitySelect";
 import { toast } from "sonner";
 
@@ -54,7 +53,6 @@ const formSchema = z.object({
     ],
     { required_error: "الحالة مطلوبة" }
   ),
-  cloth_type_id: z.string({ required_error: "الموديل مطلوب" }),
   entity_type: z.enum(["branch", "factory", "workshop"], {
     required_error: "نوع المكان مطلوب",
   }),
@@ -88,7 +86,6 @@ export function EditClothModal({ cloth, open, onOpenChange }: Props) {
       code: "",
       name: "",
       status: "ready_for_rent",
-      cloth_type_id: "",
       entity_type: undefined,
       entity_id: "",
     },
@@ -101,7 +98,6 @@ export function EditClothModal({ cloth, open, onOpenChange }: Props) {
         code: cloth.code,
         name: cloth.name,
         status: cloth.status,
-        cloth_type_id: cloth.cloth_type_id.toString(),
         entity_type: cloth.entity_type,
         entity_id: cloth.entity_id.toString(),
       });
@@ -117,7 +113,6 @@ export function EditClothModal({ cloth, open, onOpenChange }: Props) {
       status: values.status,
       entity_type: values.entity_type,
       entity_id: Number(values.entity_id),
-      cloth_type_id: Number(values.cloth_type_id),
     };
 
     updateCloth(
@@ -217,25 +212,6 @@ export function EditClothModal({ cloth, open, onOpenChange }: Props) {
                 )}
               />
             </div>
-
-            {/* Cloth Model */}
-            <FormField
-              control={form.control}
-              name="cloth_type_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>الموديل</FormLabel>
-                  <FormControl>
-                    <ClothModelsSelect
-                      value={field.value}
-                      onChange={field.onChange}
-                      disabled={isPending}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             {/* Entity Selection */}
             <EntitySelect

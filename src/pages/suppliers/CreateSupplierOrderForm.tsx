@@ -44,7 +44,6 @@ import {
 import { CustomCalendar } from "@/components/custom/CustomCalendar";
 import { CategoriesSelect } from "@/components/custom/CategoriesSelect";
 import { SubcategoriesSelect } from "@/components/custom/SubcategoriesSelect";
-import { ClothModelsSelect } from "@/components/custom/ClothModelsSelect";
 import { BranchesSelect } from "@/components/custom/BranchesSelect";
 import { EntitySelect } from "@/components/custom/EntitySelect";
 
@@ -62,7 +61,6 @@ const clothItemSchema = z.object({
   code: z.string().min(1, "كود الصنف مطلوب"),
   name: z.string().min(1, "اسم الصنف مطلوب"),
   description: z.string().optional(),
-  cloth_type_id: z.string().min(1, "الموديل مطلوب"),
   breast_size: z.string().min(1, "مقاس الصدر مطلوب"),
   waist_size: z.string().min(1, "مقاس الخصر مطلوب"),
   sleeve_size: z.string().min(1, "مقاس الكم مطلوب"),
@@ -108,7 +106,6 @@ const defaultClothItem = {
   code: "",
   name: "",
   description: "",
-  cloth_type_id: "",
   breast_size: "",
   waist_size: "",
   sleeve_size: "",
@@ -209,7 +206,6 @@ export function CreateSupplierOrderForm({
       code: c.code,
       name: c.name,
       description: c.description || undefined,
-      cloth_type_id: Number(c.cloth_type_id),
       breast_size: c.breast_size,
       waist_size: c.waist_size,
       sleeve_size: c.sleeve_size,
@@ -565,23 +561,6 @@ export function CreateSupplierOrderForm({
                     <FormLabel>الوصف (اختياري)</FormLabel>
                     <FormControl>
                       <Input placeholder="وصف الصنف" {...f} value={f.value ?? ""} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name={`clothes.${index}.cloth_type_id`}
-                render={({ field: f }) => (
-                  <FormItem>
-                    <FormLabel>الموديل</FormLabel>
-                    <FormControl>
-                      <ClothModelsSelect
-                        value={f.value}
-                        onChange={f.onChange}
-                        disabled={isPending}
-                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

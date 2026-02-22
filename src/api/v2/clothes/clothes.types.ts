@@ -11,7 +11,7 @@ export type TCreateClothesRequest = {
   notes: string;
   entity_type: TEntity;
   entity_id: number;
-  cloth_type_id: number;
+  cloth_type_id?: number;
 };
 
 export type TClothResponse = {
@@ -28,8 +28,8 @@ export type TClothResponse = {
   updated_at: string;
   created_at: string;
   id: number;
-  cloth_type_id: number;
-  cloth_type_name: string;
+  cloth_type_id?: number;
+  cloth_type_name?: string;
 };
 
 export type TUpdateClothesRequest = {
@@ -38,7 +38,7 @@ export type TUpdateClothesRequest = {
   status: TClothesStatus;
   entity_type: TEntity;
   entity_id: number;
-  cloth_type_id: number;
+  cloth_type_id?: number;
 };
 // damaged, burned, scratched, ready_for_rent, rented, die and repairing
 export type TClothesStatus =
@@ -56,7 +56,6 @@ export type TGetClothesRequestParams = {
   page?: number;
   per_page?: number;
   name?: string;
-  cloth_type_id?: number;
   category_id?: number;
   subcat_id?: number[];
   status?: TClothesStatus;
@@ -73,7 +72,7 @@ export type TClothesAvailableForDateResponse = {
     name: string;
     description: string;
     status: TClothesStatus;
-    cloth_type: {
+    cloth_type?: {
       id: number;
       name: string;
     };

@@ -7,7 +7,7 @@ export type TWorkshopTableElement = {
     client_name: string;
     status: TOrderStatus;
     order_type: TOrderType;
-    model_name: string;
+    model_name?: string;
     rental_duration: number;
     delivery_date: string;
     source: string | null;

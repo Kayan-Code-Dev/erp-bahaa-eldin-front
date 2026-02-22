@@ -35,7 +35,6 @@ import {
   FolderTree,
   Building,
   Briefcase,
-  Layers,
   ShoppingCart,
   Bell,
 } from "lucide-react";
@@ -550,13 +549,6 @@ export const sidebarLabels: SidebarLabel[] = [
             iconComponent: createIcon(List),
           },
         ],
-      },
-      {
-        icon: null,
-        label: "ادارة الموديلات",
-        path: "/clothes/models",
-        level: 2,
-        iconComponent: createIcon(Layers),
       },
     ],
   },
