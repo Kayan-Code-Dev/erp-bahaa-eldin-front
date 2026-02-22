@@ -154,6 +154,35 @@ export const updateSupplierOrder = async (
   }
 };
 
+/** Add payment to supplier order - POST /api/v1/supplier-orders/add-payment/{id} */
+export const addPaymentToSupplierOrder = async (
+  id: number,
+  body: { amount: number }
+) => {
+  try {
+    const { data: response } = await api.post(
+      `/supplier-orders/add-payment/${id}`,
+      body
+    );
+    return response;
+  } catch (error) {
+    populateError(error, "خطأ فى إضافة الدفعة");
+  }
+};
+
+/** Return supplier order - POST /api/v1/supplier-orders/return/{id} */
+export const returnSupplierOrder = async (id: number) => {
+  try {
+    const { data: response } = await api.post(
+      `/supplier-orders/return/${id}`,
+      {}
+    );
+    return response;
+  } catch (error) {
+    populateError(error, "خطأ فى إرجاع الطلبية");
+  }
+};
+
 /** Suppliers list for dropdown - GET /suppliers (single page) */
 export const getSuppliersList = async (): Promise<TSupplierResponse[] | undefined> => {
   try {

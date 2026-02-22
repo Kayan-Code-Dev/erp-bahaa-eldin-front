@@ -30,7 +30,7 @@ import {
   useGetOrdersQueryOptions,
 } from "@/api/v2/orders/orders.hooks";
 import { TOrder } from "@/api/v2/orders/orders.types";
-import { formatDate } from "@/utils/formatDate";
+import { formatDate, toEnglishNumerals } from "@/utils/formatDate";
 import { formatPhone } from "@/utils/formatPhone";
 import { OrdersTableSkeleton } from "./OrdersTableSkeleton";
 import { OrderDetailsModal } from "./OrderDetailsModal";
@@ -600,7 +600,7 @@ function OrdersList() {
                         className="font-medium text-center cursor-pointer align-top pt-4"
                         onClick={() => handleViewOrder(order)}
                       >
-                        <p className="underline text-sm">#{order.id}</p>
+                        <p className="underline text-sm"><span dir="ltr" className="tabular-nums">#{toEnglishNumerals(order.id)}</span></p>
                       </TableCell>
 
                       {/* Column 2: Client data */}
@@ -614,8 +614,8 @@ function OrdersList() {
                           </p>
                           <p className="font-semibold text-gray-900">
                             الرقم القومي:{" "}
-                            <span className="font-normal text-gray-700">
-                              {order.client?.national_id ?? "-"}
+                            <span className="font-normal text-gray-700" dir="ltr">
+                              {toEnglishNumerals(order.client?.national_id) || "-"}
                             </span>
                           </p>
                           <p className="font-semibold text-gray-900">
@@ -659,34 +659,32 @@ function OrdersList() {
                         <div className="flex flex-col gap-1 text-sm text-right">
                           <p className="font-semibold text-gray-900">
                             تاريخ الفاتورة:{" "}
-                            <span className="font-normal text-gray-700">
-                              {formatDate(order.created_at)}
+                            <span className="font-normal text-gray-700" dir="ltr">
+                              {toEnglishNumerals(formatDate(order.created_at)) || "-"}
                             </span>
                           </p>
 
                           <p className="font-semibold text-gray-900">
                             تسليم:{" "}
-                            <span className="font-normal text-gray-700">
+                            <span className="font-normal text-gray-700" dir="ltr">
                               {order.visit_datetime
-                                ? formatDate(order.visit_datetime)
+                                ? toEnglishNumerals(formatDate(order.visit_datetime))
                                 : "-"}
-
                             </span>
                           </p>
                           <p className="font-semibold text-gray-900">
                             الفرح:{" "}
-                            <span className="font-normal text-gray-700">
-
+                            <span className="font-normal text-gray-700" dir="ltr">
                               {order.occasion_datetime
-                                ? formatDate(order.occasion_datetime)
+                                ? toEnglishNumerals(formatDate(order.occasion_datetime))
                                 : "-"}
                             </span>
                           </p>
                           <p className="font-semibold text-gray-900">
                             استرجاع:{" "}
-                            <span className="font-normal text-gray-700">
+                            <span className="font-normal text-gray-700" dir="ltr">
                               {order.delivery_date
-                                ? formatDate(order.delivery_date)
+                                ? toEnglishNumerals(formatDate(order.delivery_date))
                                 : "-"}
                             </span>
                           </p>
@@ -798,20 +796,20 @@ function OrdersList() {
                           </p>
                           <p className="font-semibold text-gray-900">
                             السعر:{" "}
-                            <span className="font-medium">
-                              {order.total_price} ج.م
+                            <span className="font-medium tabular-nums" dir="ltr">
+                              {toEnglishNumerals(order.total_price)} ج.م
                             </span>
                           </p>
                           <p className="font-semibold text-gray-900">
                             المدفوع:{" "}
-                            <span className="font-medium text-green-700">
-                              {order.paid} ج.م
+                            <span className="font-medium text-green-700 tabular-nums" dir="ltr">
+                              {toEnglishNumerals(order.paid)} ج.م
                             </span>
                           </p>
                           <p className="font-semibold text-gray-900">
                             المتبقي:{" "}
-                            <span className="font-medium text-blue-700">
-                              {order.remaining} ج.م
+                            <span className="font-medium text-blue-700 tabular-nums" dir="ltr">
+                              {toEnglishNumerals(order.remaining)} ج.م
                             </span>
                           </p>
                           <div className="mt-1">

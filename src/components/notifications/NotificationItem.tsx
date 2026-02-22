@@ -42,6 +42,8 @@ const getNotificationTypeLabel = (type: string): string => {
     'return_processed': 'معالجة الإرجاع',
     'expense_approved': 'موافقة على مصروف',
     'expense_rejected': 'رفض مصروف',
+    'SupplierOrder': 'أمر توريد',
+    'supplier_order': 'أمر توريد',
     'system': 'نظام',
     'alert': 'تنبيه',
     'info': 'معلومة',
@@ -98,10 +100,11 @@ export const NotificationItem = memo(function NotificationItem({
     if (!notification.read) {
       markAsRead(notification.id);
     }
-    if (onActionClick && notification.data?.action_url) {
+    const hasAction = notification.data?.action_url || notification.data?.metadata?.supplier_id != null;
+    if (onActionClick && hasAction) {
       onActionClick();
     }
-  }, [notification.read, notification.id, notification.data?.action_url, markAsRead, onActionClick]);
+  }, [notification.read, notification.id, notification.data?.action_url, notification.data?.metadata?.supplier_id, markAsRead, onActionClick]);
 
   const priority = notification.data?.priority || 'normal';
   
@@ -160,7 +163,11 @@ export const NotificationItem = memo(function NotificationItem({
                 !notification.read && 'font-semibold'
               )}
             >
-              {notification.title}
+              {notification.title?.trim()
+                ? notification.title
+                : (notification.data?.reference_type?.includes('SupplierOrder') || notification.type?.toLowerCase().includes('supplier'))
+                  ? 'أمر توريد جديد'
+                  : 'إشعار'}
             </h4>
           </div>
 
@@ -175,8 +182,12 @@ export const NotificationItem = memo(function NotificationItem({
                   total_price: 'المبلغ الإجمالي',
                   amount: 'المبلغ',
                   reference_id: 'رقم المرجع',
+                  supplier_id: 'رقم المورد',
+                  total_amount: 'الإجمالي',
+                  clothes_count: 'عدد الأصناف',
+                  payment_amount: 'المدفوع',
+                  supplier_order_id: 'رقم أمر التوريد',
                 };
-                
                 const label = keyLabels[key] || key;
                 const displayValue = value !== null && value !== undefined ? String(value) : '-';
                 
@@ -196,7 +207,7 @@ export const NotificationItem = memo(function NotificationItem({
             <div className="mb-2 text-xs text-muted-foreground">
               {referenceTypeDisplay && (
                 <span className="mr-2">
-                  النوع: {referenceTypeDisplay}
+                  النوع: {getNotificationTypeLabel(referenceTypeDisplay) || referenceTypeDisplay}
                 </span>
               )}
               {notification.data.reference_id && (
@@ -246,7 +257,7 @@ export const NotificationItem = memo(function NotificationItem({
               </span>
             </div>
 
-            {notification.data?.action_url && (
+            {(notification.data?.action_url || notification.data?.metadata?.supplier_id != null) && (
               <Button
                 variant="ghost"
                 size="sm"

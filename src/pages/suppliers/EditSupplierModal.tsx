@@ -29,6 +29,8 @@ import { useEffect } from "react";
 const formSchema = z.object({
   name: z.string().min(1, { message: "اسم المورد مطلوب" }),
   code: z.string().min(1, { message: "كود المورد مطلوب" }),
+  phone: z.string().optional(),
+  address: z.string().optional(),
 });
 
 type Props = {
@@ -44,18 +46,28 @@ export function EditSupplierModal({ supplier, open, onOpenChange }: Props) {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { name: "", code: "" },
+    defaultValues: { name: "", code: "", phone: "", address: "" },
   });
 
   useEffect(() => {
     if (supplier && open) {
-      form.reset({ name: supplier.name, code: supplier.code });
+      form.reset({
+        name: supplier.name,
+        code: supplier.code,
+        phone: supplier.phone ?? "",
+        address: supplier.address ?? "",
+      });
     }
   }, [supplier, open, form]);
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     if (!supplier) return;
-    const requestData: TUpdateSupplierRequest = { name: values.name, code: values.code };
+    const requestData: TUpdateSupplierRequest = {
+      name: values.name,
+      code: values.code,
+      ...(values.phone !== undefined && { phone: values.phone?.trim() || undefined }),
+      ...(values.address !== undefined && { address: values.address?.trim() || undefined }),
+    };
     updateSupplier(
       { id: supplier.id, data: requestData },
       {
@@ -76,7 +88,7 @@ export function EditSupplierModal({ supplier, open, onOpenChange }: Props) {
         <DialogHeader>
           <DialogTitle className="text-center">تعديل مورد</DialogTitle>
           <DialogDescription className="text-center">
-            تعديل اسم وكود المورد فقط.
+            تعديل بيانات المورد (الاسم، الكود، الرقم، الموقع).
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -102,6 +114,32 @@ export function EditSupplierModal({ supplier, open, onOpenChange }: Props) {
                   <FormLabel>كود المورد</FormLabel>
                   <FormControl>
                     <Input placeholder="كود المورد" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>رقم المورد</FormLabel>
+                  <FormControl>
+                    <Input placeholder="رقم الهاتف" {...field} value={field.value ?? ""} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="address"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>الموقع</FormLabel>
+                  <FormControl>
+                    <Input placeholder="عنوان / موقع المورد" {...field} value={field.value ?? ""} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

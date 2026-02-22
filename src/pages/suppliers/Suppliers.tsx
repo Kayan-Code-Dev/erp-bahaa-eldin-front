@@ -15,13 +15,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ClipboardList, Pencil, Plus, Trash2 } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Banknote, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { SuppliersTableSkeleton } from "./SuppliersTableSkeleton";
 import { CreateSupplierModal } from "./CreateSupplierModal";
 import { CreateSupplierOrderModal } from "./CreateSupplierOrderModal";
-import { EditSupplierModal } from "./EditSupplierModal";
 import { DeleteSupplierModal } from "./DeleteSupplierModal";
 
 import {
@@ -32,7 +37,25 @@ import { TSupplierResponse } from "@/api/v2/suppliers/suppliers.types";
 import CustomPagination from "@/components/custom/CustomPagination";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useSearchParams, useNavigate } from "react-router";
-import { formatDate } from "@/utils/formatDate";
+import { toEnglishNumerals } from "@/utils/formatDate";
+
+function formatSupplierCurrency(value: string | number | null | undefined): string {
+  if (value === null || value === undefined || value === "") return "-";
+  const num = typeof value === "string" ? parseFloat(value) : value;
+  if (Number.isNaN(num)) return "-";
+  return `${num.toLocaleString("en-EG", { minimumFractionDigits: 2 })} ج.م`;
+}
+
+/** صافي الرصيد = إجمالي المشتريات - إجمالي المرتجعات */
+function getNetBalance(
+  totalPurchases: string | number | null | undefined,
+  totalRefunds: string | number | null | undefined
+): number {
+  const p = totalPurchases != null && totalPurchases !== "" ? Number(totalPurchases) : 0;
+  const r = totalRefunds != null && totalRefunds !== "" ? Number(totalRefunds) : 0;
+  if (Number.isNaN(p) || Number.isNaN(r)) return 0;
+  return p - r;
+}
 
 function Suppliers() {
   const [searchParams] = useSearchParams();
@@ -42,7 +65,6 @@ function Suppliers() {
   // Modal State
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isCreateOrderModalOpen, setIsCreateOrderModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedSupplier, setSelectedSupplier] = useState<TSupplierResponse | null>(
     null
@@ -60,10 +82,6 @@ function Suppliers() {
   );
 
   // --- Modal Action Handlers ---
-  const handleOpenEdit = (supplier: TSupplierResponse) => {
-    setSelectedSupplier(supplier);
-    setIsEditModalOpen(true);
-  };
   const handleOpenDelete = (supplier: TSupplierResponse) => {
     setSelectedSupplier(supplier);
     setIsDeleteModalOpen(true);
@@ -131,11 +149,12 @@ function Suppliers() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-center">#</TableHead>
-                    <TableHead className="text-center">اسم المورد</TableHead>
-                    <TableHead className="text-center">كود المورد</TableHead>
-                    <TableHead className="text-center">تاريخ الإنشاء</TableHead>
-                    <TableHead className="text-center">إجراءات</TableHead>
+                    <TableHead className="text-center w-16">#</TableHead>
+                    <TableHead className="text-right w-64">بيانات المورد</TableHead>
+                    <TableHead className="text-right w-48">المشتريات والمرتجعات</TableHead>
+                    <TableHead className="text-right w-48">الحساب</TableHead>
+                    <TableHead className="text-right w-40">الرصيد</TableHead>
+                    <TableHead className="text-center w-40">الإجراءات</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -144,53 +163,169 @@ function Suppliers() {
                   ) : data && data.data.length > 0 ? (
                     data.data.map((supplier) => (
                       <TableRow key={supplier.id}>
-                        <TableCell className="text-center">
-                          {supplier.id}
+                        {/* العمود الأول: الرقم */}
+                        <TableCell
+                          className="font-medium text-center cursor-pointer align-top pt-4"
+                          onClick={() => handleViewSupplierOrders(supplier)}
+                        >
+                          <p className="underline text-sm"><span dir="ltr" className="tabular-nums">#{toEnglishNumerals(supplier.id)}</span></p>
                         </TableCell>
-                        <TableCell className="font-medium text-center">
-                          {supplier.name}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {supplier.code}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {formatDate(supplier.created_at)}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2 justify-center">
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              title="عرض طلبات المورد"
-                              onClick={() => handleViewSupplierOrders(supplier)}
-                            >
-                              <ClipboardList className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              title="تعديل"
-                              onClick={() => handleOpenEdit(supplier)}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="destructive"
-                              size="icon"
-                              title="حذف"
-                              onClick={() => handleOpenDelete(supplier)}
-                              disabled={isDeleting}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+
+                        {/* العمود الثاني: بيانات المورد */}
+                        <TableCell className="align-top">
+                          <div className="flex flex-col gap-1 text-sm text-right">
+                            <p className="font-semibold text-gray-900">
+                              اسم المورد:{" "}
+                              <span className="font-normal text-gray-700">
+                                {supplier.name ?? "-"}
+                              </span>
+                            </p>
+                            <p className="font-semibold text-gray-900">
+                              كود المورد:{" "}
+                              <span className="font-normal text-gray-700">
+                                {supplier.code ?? "-"}
+                              </span>
+                            </p>
+                            <p className="font-semibold text-gray-900">
+                              رقم المورد:{" "}
+                              <span className="font-normal text-gray-700" dir="ltr">
+                                {toEnglishNumerals(supplier.phone?.trim()) || "-"}
+                              </span>
+                            </p>
+                            <p className="font-semibold text-gray-900">
+                              العنوان:{" "}
+                              <span className="font-normal text-gray-700">
+                                {supplier.address?.trim() ?? "-"}
+                              </span>
+                            </p>
                           </div>
+                        </TableCell>
+
+                        {/* العمود الثالث: المشتريات والمرتجعات (orders_count, refund_orders_count من الـ API) */}
+                        <TableCell className="align-top">
+                          <div className="flex flex-col gap-1 text-sm text-right">
+                            <p className="font-semibold text-gray-900">
+                              عدد المشتريات:{" "}
+                              <span className="font-normal text-gray-700" dir="ltr">
+                                {toEnglishNumerals(supplier.orders_count ?? supplier.purchases_count) || "-"}
+                              </span>
+                            </p>
+                            <p className="font-semibold text-gray-900">
+                              عدد المرتجعات:{" "}
+                              <span className="font-normal text-gray-700" dir="ltr">
+                                {toEnglishNumerals(supplier.refund_orders_count ?? supplier.returns_count) || "-"}
+                              </span>
+                            </p>
+                            <p className="font-semibold text-gray-900">
+                              صافي المشتريات:{" "}
+                              <span className="font-normal text-gray-700" dir="ltr">
+                                {(() => {
+                                  const o = supplier.orders_count ?? supplier.purchases_count;
+                                  const r = supplier.refund_orders_count ?? supplier.returns_count;
+                                  if (supplier.net_purchases_count != null) return toEnglishNumerals(supplier.net_purchases_count);
+                                  if (o != null && r != null) return toEnglishNumerals(Number(o) - Number(r));
+                                  return "-";
+                                })()}
+                              </span>
+                            </p>
+                          </div>
+                        </TableCell>
+
+                        {/* العمود الرابع: الحساب (total_order_amount, total_refund, total_remaining من الـ API) */}
+                        <TableCell className="align-top">
+                          <div className="flex flex-col gap-1 text-sm text-right">
+                            <p className="font-semibold text-gray-900">
+                              إجمالي المشتريات:{" "}
+                              <span className="font-normal text-gray-700 tabular-nums" dir="ltr">
+                                {toEnglishNumerals(formatSupplierCurrency(supplier.total_order_amount ?? supplier.total_purchases))}
+                              </span>
+                            </p>
+                            <p className="font-semibold text-gray-900">
+                              إجمالي المرتجعات:{" "}
+                              <span className="font-normal text-gray-700 tabular-nums" dir="ltr">
+                                {toEnglishNumerals(formatSupplierCurrency(supplier.total_refund ?? supplier.total_returns))}
+                              </span>
+                            </p>
+                            <p className="font-semibold text-gray-900">
+                              صافي الرصيد:{" "}
+                              <span className="font-normal text-gray-700 tabular-nums" dir="ltr">
+                                {toEnglishNumerals(
+                                  formatSupplierCurrency(
+                                    getNetBalance(
+                                      supplier.total_order_amount ?? supplier.total_purchases,
+                                      supplier.total_refund ?? supplier.total_returns
+                                    )
+                                  )
+                                )}
+                              </span>
+                            </p>
+                          </div>
+                        </TableCell>
+
+                        {/* العمود الخامس: الرصيد (total_payment, total_remaining من الـ API) */}
+                        <TableCell className="align-top">
+                          <div className="flex flex-col gap-1 text-sm text-right">
+                            <p className="font-semibold text-gray-900">
+                              المدفوع:{" "}
+                              <span className="font-medium text-green-700 tabular-nums" dir="ltr">
+                                {toEnglishNumerals(formatSupplierCurrency(supplier.total_payment ?? supplier.paid))}
+                              </span>
+                            </p>
+                            <p className="font-semibold text-gray-900">
+                              المتبقي:{" "}
+                              <span className="font-medium text-blue-700 tabular-nums" dir="ltr">
+                                {toEnglishNumerals(formatSupplierCurrency(supplier.total_remaining ?? supplier.remaining))}
+                              </span>
+                            </p>
+                          </div>
+                        </TableCell>
+
+                        {/* العمود السادس: الإجراءات */}
+                        <TableCell className="align-top pt-4">
+                          <TooltipProvider delayDuration={300}>
+                            <div className="flex flex-wrap items-center gap-1 justify-center">
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className="h-8 w-8 shrink-0"
+                                    onClick={() => handleViewSupplierOrders(supplier)}
+                                    title="طلبيات المورد"
+                                  >
+                                    <Banknote className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent side="top">
+                                  إضافة دفعة لطلبية
+                                </TooltipContent>
+                              </Tooltip>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="destructive"
+                                    size="icon"
+                                    className="h-8 w-8 shrink-0"
+                                    title="حذف المورد"
+                                    onClick={() => handleOpenDelete(supplier)}
+                                    disabled={isDeleting}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent side="top">
+                                  حذف المورد
+                                </TooltipContent>
+                              </Tooltip>
+                            </div>
+                          </TooltipProvider>
                         </TableCell>
                       </TableRow>
                     ))
                   ) : (
                     <TableRow>
                       <TableCell
-                        colSpan={5}
+                        colSpan={6}
                         className="py-10 text-center text-muted-foreground"
                       >
                         لا توجد موردين لعرضها.
@@ -221,11 +356,6 @@ function Suppliers() {
       <CreateSupplierOrderModal
         open={isCreateOrderModalOpen}
         onOpenChange={setIsCreateOrderModalOpen}
-      />
-      <EditSupplierModal
-        supplier={selectedSupplier}
-        open={isEditModalOpen}
-        onOpenChange={setIsEditModalOpen}
       />
       <DeleteSupplierModal
         supplier={selectedSupplier}

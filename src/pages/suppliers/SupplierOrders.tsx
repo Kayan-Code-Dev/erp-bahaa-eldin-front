@@ -16,22 +16,26 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Plus, X } from "lucide-react";
+import { Pencil, Plus, RotateCcw, Banknote, X } from "lucide-react";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useNavigate, useSearchParams } from "react-router";
+import { toast } from "sonner";
 
 import {
   useGetSupplierOrdersQueryOptions,
   useGetSupplierOrdersBySupplierIdQueryOptions,
   useGetSupplierQueryOptions,
+  useReturnSupplierOrderMutationOptions,
 } from "@/api/v2/suppliers/suppliers.hooks";
 import { TSupplierOrderResponse } from "@/api/v2/suppliers/suppliers.types";
 import CustomPagination from "@/components/custom/CustomPagination";
-import { formatDate } from "@/utils/formatDate";
+import { formatDate, toEnglishNumerals } from "@/utils/formatDate";
+import { ControlledConfirmationModal } from "@/components/custom/ControlledConfirmationModal";
 
 import { SupplierOrdersTableSkeleton } from "./SupplierOrdersTableSkeleton";
 import { EditSupplierOrderModal } from "./EditSupplierOrderModal";
+import { AddPaymentToSupplierOrderModal } from "./AddPaymentToSupplierOrderModal";
 
 function getStatusBadgeVariant(status: string): "default" | "secondary" | "success" | "warning" | "destructive" | "outline" {
   const s = (status || "").toLowerCase();
@@ -55,7 +59,7 @@ function formatCurrency(value: string | null | undefined): string {
   if (value == null || value === "") return "—";
   const num = parseFloat(String(value));
   if (Number.isNaN(num)) return "—";
-  return `${num.toLocaleString("ar-EG", { minimumFractionDigits: 2 })} ج.م`;
+  return `${num.toLocaleString("en-EG", { minimumFractionDigits: 2 })} ج.م`;
 }
 
 function SupplierOrders() {
@@ -68,6 +72,13 @@ function SupplierOrders() {
 
   const [selectedOrder, setSelectedOrder] = useState<TSupplierOrderResponse | null>(null);
   const [isEditOrderModalOpen, setIsEditOrderModalOpen] = useState(false);
+  const [orderForPayment, setOrderForPayment] = useState<TSupplierOrderResponse | null>(null);
+  const [isAddPaymentModalOpen, setIsAddPaymentModalOpen] = useState(false);
+  const [orderToReturn, setOrderToReturn] = useState<TSupplierOrderResponse | null>(null);
+
+  const { mutate: returnOrder, isPending: isReturning } = useMutation(
+    useReturnSupplierOrderMutationOptions()
+  );
 
   const allOrdersQuery = useQuery(
     useGetSupplierOrdersQueryOptions(page, per_page)
@@ -88,6 +99,25 @@ function SupplierOrders() {
   const handleOpenEditOrder = (order: TSupplierOrderResponse) => {
     setSelectedOrder(order);
     setIsEditOrderModalOpen(true);
+  };
+
+  const handleOpenAddPayment = (order: TSupplierOrderResponse) => {
+    setOrderForPayment(order);
+    setIsAddPaymentModalOpen(true);
+  };
+
+  const handleConfirmReturn = (onClose: () => void) => {
+    if (!orderToReturn) return;
+    returnOrder(orderToReturn.id, {
+      onSuccess: () => {
+        toast.success("تم إرجاع الطلبية بنجاح");
+        setOrderToReturn(null);
+        onClose();
+      },
+      onError: (error: { message?: string }) => {
+        toast.error("حدث خطأ أثناء إرجاع الطلبية", { description: error?.message });
+      },
+    });
   };
 
   const clearSupplierFilter = () => {
@@ -149,7 +179,7 @@ function SupplierOrders() {
                     <TableHead className="text-center whitespace-nowrap">المدفوع</TableHead>
                     <TableHead className="text-center whitespace-nowrap">المتبقي</TableHead>
                     <TableHead className="text-center whitespace-nowrap">الفرع</TableHead>
-                    <TableHead className="text-center whitespace-nowrap w-24">إجراءات</TableHead>
+                    <TableHead className="text-center whitespace-nowrap w-36">إجراءات</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -159,10 +189,10 @@ function SupplierOrders() {
                     data.data.map((order: TSupplierOrderResponse) => (
                       <TableRow key={order.id} className="transition-colors">
                         <TableCell className="text-center font-medium">
-                          {order.id}
+                          <span dir="ltr" className="tabular-nums">{toEnglishNumerals(order.id)}</span>
                         </TableCell>
                         <TableCell className="text-center font-medium">
-                          {order.order_number ?? "—"}
+                          <span dir="ltr">{toEnglishNumerals(order.order_number) || "—"}</span>
                         </TableCell>
                         <TableCell className="text-center">
                           <span className="font-medium">
@@ -175,7 +205,9 @@ function SupplierOrders() {
                           )}
                         </TableCell>
                         <TableCell className="text-center text-muted-foreground">
-                          {order.order_date ? formatDate(order.order_date) : "—"}
+                          <span dir="ltr">
+                            {order.order_date ? toEnglishNumerals(formatDate(order.order_date)) : "—"}
+                          </span>
                         </TableCell>
                         <TableCell className="text-center">
                           <Badge variant={getStatusBadgeVariant(order.status)}>
@@ -183,22 +215,47 @@ function SupplierOrders() {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-center font-medium tabular-nums">
-                          {formatCurrency(order.total_amount)}
+                          <span dir="ltr">
+                            {toEnglishNumerals(formatCurrency(order.total_amount))}
+                          </span>
                         </TableCell>
                         <TableCell className="text-center tabular-nums">
-                          {formatCurrency(order.payment_amount)}
+                          <span dir="ltr">
+                            {toEnglishNumerals(formatCurrency(order.payment_amount))}
+                          </span>
                         </TableCell>
                         <TableCell className="text-center tabular-nums">
-                          {formatCurrency(order.remaining_payment)}
+                          <span dir="ltr">
+                            {toEnglishNumerals(formatCurrency(order.remaining_payment))}
+                          </span>
                         </TableCell>
                         <TableCell className="text-center text-muted-foreground">
                           {order.branch?.name ?? "—"}
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center justify-center gap-1">
+                          <div className="flex items-center justify-center gap-1 flex-wrap">
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-8 w-8"
+                              title="إضافة دفعة"
+                              onClick={() => handleOpenAddPayment(order)}
+                            >
+                              <Banknote className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-8 w-8"
+                              title="إرجاع الطلبية"
+                              onClick={() => setOrderToReturn(order)}
+                            >
+                              <RotateCcw className="h-4 w-4" />
+                            </Button>
                             <Button
                               variant="ghost"
                               size="icon"
+                              className="h-8 w-8"
                               title="تحديث الطلبية"
                               onClick={() => handleOpenEditOrder(order)}
                             >
@@ -239,6 +296,34 @@ function SupplierOrders() {
           order={selectedOrder}
           open={isEditOrderModalOpen}
           onOpenChange={setIsEditOrderModalOpen}
+        />
+        <AddPaymentToSupplierOrderModal
+          order={orderForPayment}
+          open={isAddPaymentModalOpen}
+          onOpenChange={setIsAddPaymentModalOpen}
+        />
+        <ControlledConfirmationModal
+          open={!!orderToReturn}
+          onOpenChange={(open) => !open && setOrderToReturn(null)}
+          alertTitle="إرجاع الطلبية"
+          alertMessage={
+            orderToReturn ? (
+              <>
+                هل أنت متأكد من إرجاع الطلبية{" "}
+                <strong>#{orderToReturn.id}</strong>
+                {orderToReturn.order_number && (
+                  <> ({orderToReturn.order_number})</>
+                )}{" "}
+               ؟
+              </>
+            ) : null
+          }
+          handleConfirmation={(onClose) => handleConfirmReturn(onClose)}
+          isPending={isReturning}
+          pendingLabel="جاري الإرجاع..."
+          confirmLabel="إرجاع الطلبية"
+          cancelLabel="إلغاء"
+          variant="destructive"
         />
       </Card>
     </div>

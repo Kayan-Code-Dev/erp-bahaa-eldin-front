@@ -1,9 +1,13 @@
 import { TPaginationResponse } from "@/api/api-common.types";
 
-/** Create supplier (name and code only) */
+/** Create supplier (name, code, optional phone and address) */
 export type TCreateSupplierMinimalRequest = {
   name: string;
   code: string;
+  /** رقم المورد (هاتف) */
+  phone?: string;
+  /** موقع / عنوان المورد */
+  address?: string;
 };
 
 /** Create supplier (with first order) */
@@ -19,6 +23,10 @@ export type TCreateSupplierClothItem = {
 export type TCreateSupplierRequest = {
   name: string;
   code: string;
+  /** رقم المورد (هاتف) */
+  phone?: string;
+  /** موقع / عنوان المورد */
+  address?: string;
   category_id: number;
   subcategory_id: number;
   branch_id: number;
@@ -30,13 +38,45 @@ export type TCreateSupplierRequest = {
   clothes: TCreateSupplierClothItem[];
 };
 
-/** Supplier list item */
+/** Supplier list item (extended with optional stats when returned by API) */
 export type TSupplierResponse = {
   id: number;
   name: string;
   code: string;
   created_at: string;
   updated_at: string;
+  /** رقم المورد (هاتف) */
+  phone?: string | null;
+  /** عنوان المورد - إن أرجعه الـ API */
+  address?: string | null;
+  /** عدد الطلبيات (مطابق لـ orders_count من الـ API) */
+  orders_count?: number | null;
+  /** عدد مرتجعات الطلبيات (مطابق لـ refund_orders_count من الـ API) */
+  refund_orders_count?: number | null;
+  /** إجمالي مبلغ الطلبيات (مطابق لـ total_order_amount من الـ API) */
+  total_order_amount?: string | number | null;
+  /** إجمالي المدفوع (مطابق لـ total_payment من الـ API) */
+  total_payment?: string | number | null;
+  /** إجمالي المرتجع (مطابق لـ total_refund من الـ API) */
+  total_refund?: string | number | null;
+  /** المتبقي (مطابق لـ total_remaining من الـ API) */
+  total_remaining?: string | number | null;
+  /** عدد المشتريات (اسم بديل) */
+  purchases_count?: number | null;
+  /** عدد المرتجعات (اسم بديل) */
+  returns_count?: number | null;
+  /** صافي عدد المشتريات (مشتريات - مرتجعات) */
+  net_purchases_count?: number | null;
+  /** إجمالي المشتريات (اسم بديل) */
+  total_purchases?: string | number | null;
+  /** إجمالي المرتجعات (اسم بديل) */
+  total_returns?: string | number | null;
+  /** صافي الرصيد (حساب) */
+  net_balance?: string | number | null;
+  /** المدفوع (اسم بديل) */
+  paid?: string | number | null;
+  /** المتبقي (اسم بديل) */
+  remaining?: string | number | null;
 };
 
 export type TSuppliersListResponse = TPaginationResponse<TSupplierResponse>;
@@ -97,7 +137,7 @@ export type TCreateSupplierOrderRequest = {
 };
 
 /** Update supplier payload */
-export type TUpdateSupplierRequest = Partial<Pick<TCreateSupplierRequest, "name" | "code">>;
+export type TUpdateSupplierRequest = Partial<Pick<TCreateSupplierRequest, "name" | "code" | "phone" | "address">>;
 
 /** Update supplier order payload */
 export type TUpdateSupplierOrderRequest = {

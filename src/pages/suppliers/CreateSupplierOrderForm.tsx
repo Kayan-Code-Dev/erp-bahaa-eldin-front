@@ -77,6 +77,8 @@ const formSchema = z
     supplier_id: z.string().optional(),
     supplier_name: z.string().optional(),
     supplier_code: z.string().optional(),
+    supplier_phone: z.string().optional(),
+    supplier_address: z.string().optional(),
     category_id: z.string().min(1, { message: "قسم المنتجات مطلوب" }),
     subcategory_id: z.string().min(1, { message: "قسم المنتجات الفرعي مطلوب" }),
     branch_id: z.string().min(1, { message: "الفرع مطلوب" }),
@@ -153,6 +155,8 @@ export function CreateSupplierOrderForm({
       supplier_id: initialSupplierId,
       supplier_name: "",
       supplier_code: "",
+      supplier_phone: "",
+      supplier_address: "",
       category_id: "",
       subcategory_id: "",
       branch_id: "",
@@ -189,6 +193,8 @@ export function CreateSupplierOrderForm({
       supplier_id: initialSupplierId,
       supplier_name: "",
       supplier_code: "",
+      supplier_phone: "",
+      supplier_address: "",
       category_id: "",
       subcategory_id: "",
       branch_id: "",
@@ -248,7 +254,12 @@ export function CreateSupplierOrderForm({
   const onSubmit = (values: FormValues) => {
     if (values.add_new_supplier) {
       createSupplierMinimal(
-        { name: values.supplier_name!.trim(), code: values.supplier_code!.trim() },
+        {
+          name: values.supplier_name!.trim(),
+          code: values.supplier_code!.trim(),
+          ...(values.supplier_phone?.trim() && { phone: values.supplier_phone.trim() }),
+          ...(values.supplier_address?.trim() && { address: values.supplier_address.trim() }),
+        },
         {
           onSuccess: (data) => {
             const newSupplierId = data?.id;
@@ -355,6 +366,32 @@ export function CreateSupplierOrderForm({
                   <FormLabel>كود المورد</FormLabel>
                   <FormControl>
                     <Input placeholder="كود المورد" {...field} value={field.value ?? ""} disabled={isPending} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="supplier_phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>رقم المورد</FormLabel>
+                  <FormControl>
+                    <Input placeholder="رقم الهاتف" {...field} value={field.value ?? ""} disabled={isPending} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="supplier_address"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>الموقع</FormLabel>
+                  <FormControl>
+                    <Input placeholder="عنوان / موقع المورد" {...field} value={field.value ?? ""} disabled={isPending} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

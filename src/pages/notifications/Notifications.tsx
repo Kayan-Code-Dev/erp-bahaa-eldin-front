@@ -53,6 +53,8 @@ const getNotificationTypeLabel = (type: string): string => {
     'return_processed': 'معالجة الإرجاع',
     'expense_approved': 'موافقة على مصروف',
     'expense_rejected': 'رفض مصروف',
+    'SupplierOrder': 'أمر توريد',
+    'supplier_order': 'أمر توريد',
     'system': 'نظام',
     'alert': 'تنبيه',
     'info': 'معلومة',
@@ -124,6 +126,17 @@ const NotificationListItem = memo(function NotificationListItem({
       .filter(([key]) => key !== 'order_id' && key !== 'client_id' && key !== 'status');
   }, [notification.metadata]);
 
+  const metadataKeyLabels: Record<string, string> = {
+    total_price: 'المبلغ الإجمالي',
+    amount: 'المبلغ',
+    reference_id: 'رقم المرجع',
+    supplier_id: 'رقم المورد',
+    total_amount: 'الإجمالي',
+    clothes_count: 'عدد الأصناف',
+    payment_amount: 'المدفوع',
+    supplier_order_id: 'رقم أمر التوريد',
+  };
+
   const typeLabel = useMemo(() => {
     return getNotificationTypeLabel(notification.type);
   }, [notification.type]);
@@ -136,10 +149,10 @@ const NotificationListItem = memo(function NotificationListItem({
     if (!isRead) {
       onMarkAsRead(notification.id);
     }
-    if (notification.action_url) {
-      navigate(normalizeNotificationActionUrl(notification.action_url));
+    if (notification.action_url || notification.metadata?.supplier_id != null) {
+      navigate(normalizeNotificationActionUrl(notification.action_url, notification.metadata));
     }
-  }, [isRead, notification.id, notification.action_url, onMarkAsRead, navigate]);
+  }, [isRead, notification.id, notification.action_url, notification.metadata, onMarkAsRead, navigate]);
 
   const handleMarkAsReadClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -182,7 +195,11 @@ const NotificationListItem = memo(function NotificationListItem({
                 !isRead && 'font-semibold'
               )}
             >
-              {notification.title}
+              {notification.title?.trim()
+                ? notification.title
+                : (notification.reference_type?.includes('SupplierOrder') || notification.type?.toLowerCase().includes('supplier'))
+                  ? 'أمر توريد جديد'
+                  : 'إشعار'}
             </h4>
             <button
               onClick={handleDeleteClick}
@@ -201,14 +218,7 @@ const NotificationListItem = memo(function NotificationListItem({
           {metadataEntries.length > 0 && (
             <div className="mb-2 flex flex-wrap gap-1.5">
               {metadataEntries.map(([key, value]) => {
-                // Translate common metadata keys to Arabic
-                const keyLabels: Record<string, string> = {
-                  total_price: 'المبلغ الإجمالي',
-                  amount: 'المبلغ',
-                  reference_id: 'رقم المرجع',
-                };
-                
-                const label = keyLabels[key] || key;
+                const label = metadataKeyLabels[key] || key;
                 const displayValue = value !== null && value !== undefined ? String(value) : '-';
                 
                 return (
@@ -228,7 +238,7 @@ const NotificationListItem = memo(function NotificationListItem({
             <div className="mb-2 text-xs text-muted-foreground">
               {referenceTypeDisplay && (
                 <span className="mr-2">
-                  النوع: {referenceTypeDisplay}
+                  النوع: {getNotificationTypeLabel(referenceTypeDisplay) || referenceTypeDisplay}
                 </span>
               )}
               {notification.reference_id && (
@@ -283,14 +293,14 @@ const NotificationListItem = memo(function NotificationListItem({
             </div>
 
             {/* Action Button */}
-            {notification.action_url && (
+            {(notification.action_url || notification.metadata?.supplier_id != null) && (
               <Button
                 variant="ghost"
                 size="sm"
                 className="h-6 px-2 text-xs shrink-0"
                 onClick={(e) => {
                   e.stopPropagation();
-                  navigate(normalizeNotificationActionUrl(notification.action_url));
+                  navigate(normalizeNotificationActionUrl(notification.action_url, notification.metadata));
                 }}
               >
                 عرض

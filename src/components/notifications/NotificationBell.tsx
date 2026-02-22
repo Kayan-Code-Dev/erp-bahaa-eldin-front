@@ -126,8 +126,8 @@ export function NotificationBell() {
                         read: !!notification.read_at,
                       }}
                       onActionClick={() => {
-                        if (notification.action_url) {
-                          navigate(normalizeNotificationActionUrl(notification.action_url));
+                        if (notification.action_url || notification.metadata?.supplier_id != null) {
+                          navigate(normalizeNotificationActionUrl(notification.action_url, notification.metadata));
                         }
                       }}
                     />
@@ -157,8 +157,8 @@ export function NotificationBell() {
                     read: !!notification.read_at,
                   }}
                   onActionClick={() => {
-                    if (notification.action_url) {
-                      navigate(normalizeNotificationActionUrl(notification.action_url));
+                    if (notification.action_url || notification.metadata?.supplier_id != null) {
+                      navigate(normalizeNotificationActionUrl(notification.action_url, notification.metadata));
                     }
                   }}
                 />

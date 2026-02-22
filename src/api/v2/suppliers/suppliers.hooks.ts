@@ -15,6 +15,8 @@ import {
   getSuppliersList,
   getSupplierOrders,
   getSupplierOrdersBySupplierId,
+  addPaymentToSupplierOrder,
+  returnSupplierOrder,
 } from "./suppliers.service";
 import { TUpdateSupplierRequest, TUpdateSupplierOrderRequest } from "./suppliers.types";
 
@@ -119,6 +121,29 @@ export const useUpdateSupplierOrderMutationOptions = () => {
       updateSupplierOrder(payload.id, payload.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [SUPPLIER_ORDERS_KEY] });
+    },
+  });
+};
+
+export const useAddPaymentToSupplierOrderMutationOptions = () => {
+  const queryClient = useQueryClient();
+  return mutationOptions({
+    mutationFn: (payload: { id: number; amount: number }) =>
+      addPaymentToSupplierOrder(payload.id, { amount: payload.amount }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [SUPPLIER_ORDERS_KEY] });
+      queryClient.invalidateQueries({ queryKey: [SUPPLIERS_KEY] });
+    },
+  });
+};
+
+export const useReturnSupplierOrderMutationOptions = () => {
+  const queryClient = useQueryClient();
+  return mutationOptions({
+    mutationFn: returnSupplierOrder,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [SUPPLIER_ORDERS_KEY] });
+      queryClient.invalidateQueries({ queryKey: [SUPPLIERS_KEY] });
     },
   });
 };

@@ -51,6 +51,8 @@ const formSchema = z
   .object({
     name: z.string().min(1, { message: "اسم المورد مطلوب" }),
     code: z.string().min(1, { message: "كود المورد مطلوب" }),
+    phone: z.string().optional(),
+    address: z.string().optional(),
     add_order: z.boolean().default(false),
     category_id: z.string().optional(),
     subcategory_id: z.string().optional(),
@@ -107,6 +109,8 @@ export function CreateSupplierModal({ open, onOpenChange }: Props) {
     defaultValues: {
       name: "",
       code: "",
+      phone: "",
+      address: "",
       add_order: false,
       category_id: "",
       subcategory_id: "",
@@ -146,6 +150,8 @@ export function CreateSupplierModal({ open, onOpenChange }: Props) {
       form.reset({
         name: "",
         code: "",
+        phone: "",
+        address: "",
         add_order: false,
         category_id: "",
         subcategory_id: "",
@@ -164,7 +170,12 @@ export function CreateSupplierModal({ open, onOpenChange }: Props) {
   const onSubmit = (values: FormValues) => {
     if (!values.add_order) {
       mutateMinimal.mutate(
-        { name: values.name, code: values.code },
+        {
+          name: values.name,
+          code: values.code,
+          ...(values.phone?.trim() && { phone: values.phone.trim() }),
+          ...(values.address?.trim() && { address: values.address.trim() }),
+        },
         {
           onSuccess: () => {
             toast.success("تم إنشاء المورد بنجاح");
@@ -189,6 +200,8 @@ export function CreateSupplierModal({ open, onOpenChange }: Props) {
     const requestData: TCreateSupplierRequest = {
       name: values.name,
       code: values.code,
+      ...(values.phone?.trim() && { phone: values.phone.trim() }),
+      ...(values.address?.trim() && { address: values.address.trim() }),
       category_id: Number(values.category_id),
       subcategory_id: Number(values.subcategory_id),
       branch_id: Number(values.branch_id),
@@ -244,6 +257,32 @@ export function CreateSupplierModal({ open, onOpenChange }: Props) {
                     <FormLabel>كود المورد</FormLabel>
                     <FormControl>
                       <Input placeholder="كود المورد" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>رقم المورد</FormLabel>
+                    <FormControl>
+                      <Input placeholder="رقم الهاتف" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>الموقع</FormLabel>
+                    <FormControl>
+                      <Input placeholder="عنوان / موقع المورد" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
