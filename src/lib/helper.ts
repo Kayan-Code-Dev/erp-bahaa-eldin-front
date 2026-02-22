@@ -15,7 +15,7 @@ export const includeRoute = (
   
   // Exact match: return true, unless this item has subItems (parent group).
   // Then we don't highlight the parent when URL exactly matches path, so only
-  // the sibling leaf item with the same path gets highlighted (e.g. "الخزنة" not "الخزنة و المحاسبة").
+  // the sibling leaf item with the same path gets highlighted (e.g. "إدارة الحسابات" leaf not parent).
   if (pathname === path) {
     return !hasSubItems;
   }

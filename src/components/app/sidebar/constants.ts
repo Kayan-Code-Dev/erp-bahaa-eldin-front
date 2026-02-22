@@ -73,7 +73,7 @@ export const sidebarLabels: SidebarLabel[] = [
   // 3. Cashbox and accounting
   {
     icon: null,
-    label: "الخزنة و المحاسبة",
+    label: "إدارة الحسابات",
     path: "/cashboxes",
     level: 1,
     iconComponent: createIcon(Wallet),
@@ -153,7 +153,7 @@ export const sidebarLabels: SidebarLabel[] = [
   {
     icon: null,
     label: "الخزنة",
-    path: "/cashboxes",
+   path: "/cashboxes",
     level: 1,
     iconComponent: createIcon(Banknote),
   },
