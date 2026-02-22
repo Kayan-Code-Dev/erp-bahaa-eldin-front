@@ -43,8 +43,8 @@ import { useEffect } from "react";
 const formSchema = z.object({
   from_branch_id: z.string({ required_error: "يجب اختيار فرع الإرسال" }),
   to_branch_id: z.string({ required_error: "يجب اختيار فرع الاستقبال" }),
-  category_id: z.string({ required_error: "يجب اختيار الفئة" }),
-  subCategories_id: z.string({ required_error: "يجب اختيار الفئة الفرعية" }),
+  category_id: z.string({ required_error: "يجب اختيار قسم المنتجات" }),
+  subCategories_id: z.string({ required_error: "يجب اختيار قسم المنتجات الفرعي" }),
   quantity: z.string().min(1, { message: "الكمية مطلوبة" }),
   notes: z.string().optional(),
 });
@@ -191,7 +191,7 @@ export function CreateTransferModal({ open, onOpenChange }: Props) {
                   name="category_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>الفئة</FormLabel>
+                      <FormLabel>قسم المنتجات</FormLabel>
                       <Select
                         onValueChange={(value) => {
                           field.onChange(value);
@@ -202,7 +202,7 @@ export function CreateTransferModal({ open, onOpenChange }: Props) {
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="اختر الفئة..." />
+                            <SelectValue placeholder="اختر قسم المنتجات..." />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -229,7 +229,7 @@ export function CreateTransferModal({ open, onOpenChange }: Props) {
                   name="subCategories_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>الفئة الفرعية (الصنف)</FormLabel>
+                      <FormLabel>قسم المنتجات الفرعي (الصنف)</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
@@ -237,7 +237,7 @@ export function CreateTransferModal({ open, onOpenChange }: Props) {
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="اختر الصنف..." />
+                            <SelectValue placeholder="اختر قسم المنتجات الفرعي..." />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>

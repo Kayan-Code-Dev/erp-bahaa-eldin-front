@@ -16,7 +16,7 @@ export const getCategories = async (page: number) => {
     data.data.total_pages = Math.ceil(data.data.total / 10);
     return data.data;
   } catch (error) {
-    populateError(error, "خطأ في تحميل الفئات");
+    populateError(error, "خطأ في تحميل أقسام المنتجات");
   }
 };
 
@@ -30,7 +30,7 @@ export const createCategory = async (data: TCreateCategory) => {
     const { data: response } = await api.post("/employees/categories", data);
     return response.data;
   } catch (error) {
-    populateError(error, "خطأ في إنشاء الفئة");
+    populateError(error, "خطأ في إنشاء قسم المنتجات");
   }
 };
 
@@ -48,7 +48,7 @@ export const updateCategory = async (id: number, data: TUpdateCategory) => {
     );
     return response.data;
   } catch (error) {
-    populateError(error, "خطأ في تحديث الفئة");
+    populateError(error, "خطأ في تحديث قسم المنتجات");
   }
 };
 
@@ -56,6 +56,6 @@ export const deleteCategory = async (id: number) => {
   try {
     await api.delete(`/employees/categories/${id}`);
   } catch (error) {
-    populateError(error, "خطأ في حذف الفئة");
+    populateError(error, "خطأ في حذف قسم المنتجات");
   }
 };

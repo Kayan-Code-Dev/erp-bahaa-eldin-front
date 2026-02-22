@@ -668,7 +668,7 @@ export const sidebarLabels: SidebarLabel[] = [
       },
       {
         icon: null,
-        label: "الفئات",
+        label: "أقسام المنتجات",
         path: "/content/categories",
         level: 2,
         permission: READ_CATEGORIES,
@@ -676,7 +676,7 @@ export const sidebarLabels: SidebarLabel[] = [
       },
       {
         icon: null,
-        label: "الفئات الفرعية",
+        label: "أقسام المنتجات الفرعية",
         path: "/content/sub-categories",
         level: 2,
         permission: READ_SUBCATEGORIES,

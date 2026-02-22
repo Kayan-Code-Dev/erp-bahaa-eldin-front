@@ -59,8 +59,8 @@ function Inventory() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="text-center">اسم الصنف</TableHead>
-                  <TableHead className="text-center">الفئة</TableHead>
-                  <TableHead className="text-center">الفئة الفرعية</TableHead>
+                  <TableHead className="text-center">قسم المنتجات</TableHead>
+                  <TableHead className="text-center">قسم المنتجات الفرعي</TableHead>
                   <TableHead className="text-center">الكمية</TableHead>
                   <TableHead className="text-center">الفرع</TableHead>
                   <TableHead className="text-center">الحالة</TableHead>

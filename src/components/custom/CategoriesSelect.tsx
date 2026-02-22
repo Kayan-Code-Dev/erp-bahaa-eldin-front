@@ -25,7 +25,7 @@ function CategoriesSelectContent({ value, onChange, disabled }: Props) {
   return (
     <Select onValueChange={onChange} value={value} disabled={disabled}>
       <SelectTrigger className="w-full">
-        <SelectValue placeholder="اختر الفئة..." />
+        <SelectValue placeholder="اختر قسم المنتجات..." />
       </SelectTrigger>
       <SelectContent>
         <ScrollArea className="h-[250px]">

@@ -48,8 +48,8 @@ const ITEM_TYPES: TInventoryItemType[] = ["raw", "product"];
 const formSchema = z.object({
   code: z.string().min(1, { message: "الكود مطلوب" }), // Required for update
   name: z.string().min(2, { message: "الاسم مطلوب" }),
-  category_id: z.coerce.number({ required_error: "الفئة مطلوبة" }),
-  subCategories_id: z.coerce.number({ required_error: "الفئة الفرعية مطلوبة" }),
+  category_id: z.coerce.number({ required_error: "قسم المنتجات مطلوب" }),
+  subCategories_id: z.coerce.number({ required_error: "قسم المنتجات الفرعي مطلوب" }),
   price: z.coerce.number().min(1, { message: "السعر مطلوب" }),
   quantity: z.coerce.number().min(1, { message: "الكمية مطلوبة" }),
   type: z.string({ required_error: "النوع مطلوب" }),
@@ -176,7 +176,7 @@ export function EditBranchesInventoryModal({
                   name="category_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>الفئة</FormLabel>
+                      <FormLabel>قسم المنتجات</FormLabel>
                       <Select
                         onValueChange={(value) => {
                           field.onChange(Number(value));
@@ -187,7 +187,7 @@ export function EditBranchesInventoryModal({
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="اختر الفئة..." />
+                            <SelectValue placeholder="اختر قسم المنتجات..." />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -209,7 +209,7 @@ export function EditBranchesInventoryModal({
                   name="subCategories_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>الفئة الفرعية (الصنف)</FormLabel>
+                      <FormLabel>قسم المنتجات الفرعي (الصنف)</FormLabel>
                       <Select
                         onValueChange={(value) => field.onChange(Number(value))}
                         value={String(field.value)}
@@ -217,7 +217,7 @@ export function EditBranchesInventoryModal({
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="اختر الصنف..." />
+                            <SelectValue placeholder="اختر قسم المنتجات الفرعي..." />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>

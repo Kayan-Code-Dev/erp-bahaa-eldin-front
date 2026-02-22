@@ -1345,7 +1345,7 @@ function ChooseClient() {
                           فلترة المنتجات
                         </h2>
                         <p className="text-xs text-gray-600 mt-1">
-                          ابحث عن المنتجات المتاحة حسب الاسم، الفئة والفئات الفرعية
+                          ابحث عن المنتجات المتاحة حسب الاسم، قسم المنتجات وأقسام المنتجات الفرعية
                         </p>
                       </div>
                     </div>
@@ -1380,7 +1380,7 @@ function ChooseClient() {
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label className="text-gray-700 font-medium">الفئة</Label>
+                          <Label className="text-gray-700 font-medium">قسم المنتجات</Label>
                           <CategoriesSelect
                             value={categoryId}
                             onChange={(id) => {
@@ -1390,7 +1390,7 @@ function ChooseClient() {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-gray-700 font-medium">الفئات الفرعية</Label>
+                          <Label className="text-gray-700 font-medium">أقسام المنتجات الفرعية</Label>
                           <SubcategoriesSelect
                             multiple
                             value={subcategoryIds}

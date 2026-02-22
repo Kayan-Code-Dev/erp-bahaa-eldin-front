@@ -73,11 +73,11 @@ function Categories() {
     if (selectedCategory) {
       deleteCategory(selectedCategory.id, {
         onSuccess: () => {
-          toast.success("تم حذف الفئة بنجاح");
+          toast.success("تم حذف قسم المنتجات بنجاح");
           onCloseModal();
         },
         onError: (error: any) => {
-          toast.error("خطأ أثناء حذف الفئة. الرجاء المحاولة مرة أخرى.", {
+          toast.error("خطأ أثناء حذف قسم المنتجات. الرجاء المحاولة مرة أخرى.", {
             description: error.message,
           });
         },
@@ -97,10 +97,10 @@ function Categories() {
         link.click();
         link.remove();
         window.URL.revokeObjectURL(url);
-        toast.success("تم تصدير الفئات بنجاح");
+        toast.success("تم تصدير أقسام المنتجات بنجاح");
       },
       onError: (error: any) => {
-        toast.error("خطأ أثناء تصدير الفئات. الرجاء المحاولة مرة أخرى.", {
+        toast.error("خطأ أثناء تصدير أقسام المنتجات. الرجاء المحاولة مرة أخرى.", {
           description: error.message,
         });
       },
@@ -112,9 +112,9 @@ function Categories() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle>إدارة الفئات</CardTitle>
+            <CardTitle>إدارة أقسام المنتجات</CardTitle>
             <CardDescription>
-              عرض وتعديل وإنشاء الفئات في النظام.
+              عرض وتعديل وإنشاء أقسام المنتجات في النظام.
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
@@ -211,7 +211,7 @@ function Categories() {
 
         <CardFooter className="flex items-center justify-between">
           <CustomPagination
-            totalElementsLabel="إجمالي الفئات"
+            totalElementsLabel="إجمالي أقسام المنتجات"
             totalElements={data?.total}
             totalPages={data?.total_pages}
             isLoading={isPending}
@@ -232,10 +232,10 @@ function Categories() {
       <ControlledConfirmationModal
         open={isDeleteModalOpen}
         onOpenChange={setIsDeleteModalOpen}
-        alertTitle="حذف الفئة"
+        alertTitle="حذف قسم المنتجات"
         alertMessage={
           <>
-            هل أنت متأكد أنك تريد حذف الفئة{" "}
+            هل أنت متأكد أنك تريد حذف قسم المنتجات{" "}
             <strong>{selectedCategory?.name}</strong>؟
           </>
         }

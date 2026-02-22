@@ -63,8 +63,8 @@ const formSchema = z
   })
   .superRefine((data, ctx) => {
     if (!data.add_order) return;
-    if (!data.category_id?.length) ctx.addIssue({ code: "custom", message: "الفئة مطلوبة", path: ["category_id"] });
-    if (!data.subcategory_id?.length) ctx.addIssue({ code: "custom", message: "الفئة الفرعية مطلوبة", path: ["subcategory_id"] });
+    if (!data.category_id?.length) ctx.addIssue({ code: "custom", message: "قسم المنتجات مطلوب", path: ["category_id"] });
+    if (!data.subcategory_id?.length) ctx.addIssue({ code: "custom", message: "قسم المنتجات الفرعي مطلوب", path: ["subcategory_id"] });
     if (!data.branch_id?.length) ctx.addIssue({ code: "custom", message: "الفرع مطلوب", path: ["branch_id"] });
     if (!data.order_date?.length) ctx.addIssue({ code: "custom", message: "تاريخ الطلبية مطلوب", path: ["order_date"] });
     if (data.total_amount == null || data.total_amount < 0) ctx.addIssue({ code: "custom", message: "الإجمالي ≥ 0", path: ["total_amount"] });
@@ -282,7 +282,7 @@ function CreateSupplier() {
                       name="category_id"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>الفئة</FormLabel>
+                          <FormLabel>قسم المنتجات</FormLabel>
                           <FormControl>
                             <CategoriesSelect
                               value={field.value ?? ""}
@@ -302,7 +302,7 @@ function CreateSupplier() {
                       name="subcategory_id"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>الفئة الفرعية</FormLabel>
+                          <FormLabel>قسم المنتجات الفرعي</FormLabel>
                           <FormControl>
                             <SubcategoriesSelect
                               value={field.value ?? ""}

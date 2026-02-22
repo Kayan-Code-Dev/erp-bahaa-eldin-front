@@ -51,7 +51,7 @@ function SingleSubcategoriesSelectContent({
   return (
     <Select onValueChange={onChange} value={value} disabled={disabled}>
       <SelectTrigger className="w-full">
-        <SelectValue placeholder="اختر الفئة الفرعية..." />
+        <SelectValue placeholder="اختر قسم المنتجات الفرعي..." />
       </SelectTrigger>
       <SelectContent>
         <ScrollArea className="h-[250px]">
@@ -143,7 +143,7 @@ function MultipleSubcategoriesSelectContent({
           <div className="flex flex-wrap gap-1 flex-1">
             {selectedSubcategories.length === 0 ? (
               <span className="text-muted-foreground">
-                اختر الفئات الفرعية...
+                اختر أقسام المنتجات الفرعية...
               </span>
             ) : (
               selectedSubcategories.map((sub) => (

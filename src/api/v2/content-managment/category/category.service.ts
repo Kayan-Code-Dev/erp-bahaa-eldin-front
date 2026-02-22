@@ -16,7 +16,7 @@ export const createCategoryApi = async (req: TCreateCategoryRequest) => {
     );
     return data;
   } catch (error: any) {
-    populateError(error, "خطأ فى إنشاء الفئة");
+    populateError(error, "خطأ فى إنشاء قسم المنتجات");
   }
 };
 
@@ -28,7 +28,7 @@ export const getCategoriesApi = async (page: number, per_page: number) => {
     );
     return data;
   } catch (error: any) {
-    populateError(error, "خطأ فى جلب الفئات");
+    populateError(error, "خطأ فى جلب أقسام المنتجات");
   }
 };
 
@@ -37,7 +37,7 @@ export const getCategoryByIdApi = async (id: number) => {
     const { data } = await api.get<TCategory>(`/categories/${id}`);
     return data;
   } catch (error: any) {
-    populateError(error, "خطأ فى جلب الفئة");
+    populateError(error, "خطأ فى جلب قسم المنتجات");
   }
 };
 
@@ -52,7 +52,7 @@ export const updateCategoryApi = async (
     );
     return data;
   } catch (error: any) {
-    populateError(error, "خطأ فى تحديث الفئة");
+    populateError(error, "خطأ فى تحديث قسم المنتجات");
   }
 };
 
@@ -61,7 +61,7 @@ export const deleteCategoryApi = async (id: number) => {
     await api.delete(`/categories/${id}`);
     return true;
   } catch (error: any) {
-    populateError(error, "خطأ فى حذف الفئة");
+    populateError(error, "خطأ فى حذف قسم المنتجات");
   }
 };
 
@@ -70,6 +70,6 @@ export const exportCategoriesToCSV = async () => {
     const { data } = await api.get(`/categories/export`, { responseType: "blob" });
     return data;
   } catch (error) {
-    populateError(error, "خطأ فى تصدير الفئات");
+    populateError(error, "خطأ فى تصدير أقسام المنتجات");
   }
 };

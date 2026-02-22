@@ -12,7 +12,7 @@ export const getBranchSubCategories = async (page: number) => {
         data.data.total_pages = Math.ceil(data.data.total / 10);
         return data.data;
     } catch (error) {
-        populateError(error, "خطأ فى جلب الفئات الفرعية");
+        populateError(error, "خطأ فى جلب أقسام المنتجات الفرعية");
     }
 };
 
@@ -20,7 +20,7 @@ export const createBranchSubCategory = async (data: TBranchSubCategory) => {
     try {
         await api.post(`/branches/sub_categories`, data);
     } catch (error) {
-        populateError(error, "خطأ فى إضافة الفئة الفرعية");
+        populateError(error, "خطأ فى إضافة قسم المنتجات الفرعي");
     }
 };
 
@@ -28,7 +28,7 @@ export const updateBranchSubCategory = async (id: string, data: TBranchSubCatego
     try {
         await api.post(`/branches/sub_categories/${id}`, data);
     } catch (error) {
-        populateError(error, "خطأ فى تعديل الفئة الفرعية");
+        populateError(error, "خطأ فى تعديل قسم المنتجات الفرعي");
     }
 };
 
@@ -36,6 +36,6 @@ export const deleteBranchSubCategory = async (id: string) => {
     try {
         await api.delete(`/branches/sub_categories/${id}`);
     } catch (error) {
-        populateError(error, "خطأ فى حذف الفئة الفرعية");
+        populateError(error, "خطأ فى حذف قسم المنتجات الفرعي");
     }
 };

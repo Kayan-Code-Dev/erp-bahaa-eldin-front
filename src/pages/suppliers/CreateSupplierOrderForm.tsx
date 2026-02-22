@@ -77,8 +77,8 @@ const formSchema = z
     supplier_id: z.string().optional(),
     supplier_name: z.string().optional(),
     supplier_code: z.string().optional(),
-    category_id: z.string().min(1, { message: "الفئة مطلوبة" }),
-    subcategory_id: z.string().min(1, { message: "الفئة الفرعية مطلوبة" }),
+    category_id: z.string().min(1, { message: "قسم المنتجات مطلوب" }),
+    subcategory_id: z.string().min(1, { message: "قسم المنتجات الفرعي مطلوب" }),
     branch_id: z.string().min(1, { message: "الفرع مطلوب" }),
     order_date: z.string().min(1, { message: "تاريخ الطلبية مطلوب" }),
     total_amount: z.number().min(0, { message: "الإجمالي ≥ 0" }),
@@ -369,7 +369,7 @@ export function CreateSupplierOrderForm({
             name="category_id"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>الفئة</FormLabel>
+                <FormLabel>قسم المنتجات</FormLabel>
                 <FormControl>
                   <CategoriesSelect
                     value={field.value}
@@ -389,7 +389,7 @@ export function CreateSupplierOrderForm({
             name="subcategory_id"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>الفئة الفرعية</FormLabel>
+                <FormLabel>قسم المنتجات الفرعي</FormLabel>
                 <FormControl>
                   <SubcategoriesSelect
                     value={field.value}

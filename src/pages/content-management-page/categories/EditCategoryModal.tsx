@@ -74,12 +74,12 @@ export function EditCategoryModal({ category, open, onOpenChange }: Props) {
       { id: category.id, req: requestData },
       {
         onSuccess: () => {
-          toast.success("تم تحديث الفئة بنجاح");
+          toast.success("تم تحديث قسم المنتجات بنجاح");
           form.reset();
           onOpenChange(false);
         },
         onError: (error) => {
-          toast.error("حدث خطأ أثناء تحديث الفئة. الرجاء المحاولة مرة أخرى.", {
+          toast.error("حدث خطأ أثناء تحديث قسم المنتجات. الرجاء المحاولة مرة أخرى.", {
             description: error.message,
           });
         },
@@ -92,7 +92,7 @@ export function EditCategoryModal({ category, open, onOpenChange }: Props) {
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-center">
-            تعديل الفئة: {category?.name}
+            تعديل قسم المنتجات: {category?.name}
           </DialogTitle>
           <DialogDescription className="text-center">
             قم بتعديل البيانات وانقر "حفظ" لحفظ التغييرات.
@@ -109,9 +109,9 @@ export function EditCategoryModal({ category, open, onOpenChange }: Props) {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>اسم الفئة</FormLabel>
+                  <FormLabel>اسم قسم المنتجات</FormLabel>
                   <FormControl>
-                    <Input placeholder="اسم الفئة..." {...field} />
+                    <Input placeholder="اسم قسم المنتجات..." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

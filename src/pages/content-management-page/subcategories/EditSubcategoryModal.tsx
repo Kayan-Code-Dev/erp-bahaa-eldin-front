@@ -32,7 +32,7 @@ import { toast } from "sonner";
 const formSchema = z.object({
   name: z.string().min(2, { message: "الاسم مطلوب (حرفين على الأقل)" }),
   description: z.string().min(1, { message: "الوصف مطلوب" }),
-  category_id: z.string({ required_error: "يجب اختيار الفئة" }),
+  category_id: z.string({ required_error: "يجب اختيار قسم المنتجات" }),
 });
 
 type Props = {
@@ -83,7 +83,7 @@ export function EditSubcategoryModal({
       { id: subcategory.id, req: requestData },
       {
         onSuccess: () => {
-          toast.success("تم تعديل الفئة بنجاح");
+          toast.success("تم تعديل قسم المنتجات الفرعي بنجاح");
           onOpenChange(false);
         },
         onError: (error) => {
@@ -100,7 +100,7 @@ export function EditSubcategoryModal({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-center">
-            تعديل الفئة الفرعية: {subcategory?.name}
+            تعديل قسم المنتجات الفرعي: {subcategory?.name}
           </DialogTitle>
           <DialogDescription className="text-center">
             قم بتعديل البيانات وانقر "حفظ" لحفظ التغييرات.
@@ -117,7 +117,7 @@ export function EditSubcategoryModal({
               name="category_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>الفئة الرئيسية</FormLabel>
+                  <FormLabel>قسم المنتجات الرئيسي</FormLabel>
                   <FormControl>
                     <CategoriesSelect
                       value={field.value}
@@ -134,9 +134,9 @@ export function EditSubcategoryModal({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>اسم الفئة الفرعية</FormLabel>
+                  <FormLabel>اسم قسم المنتجات الفرعي</FormLabel>
                   <FormControl>
-                    <Input placeholder="اسم الفئة الفرعية..." {...field} />
+                    <Input placeholder="اسم قسم المنتجات الفرعي..." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

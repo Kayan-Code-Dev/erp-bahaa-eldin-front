@@ -309,7 +309,7 @@ function ClothesTableContent() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">الفئة</label>
+                    <label className="text-sm font-medium">قسم المنتجات</label>
                     <CategoriesSelect
                       value={categoryId}
                       onChange={(id) => {
@@ -319,7 +319,7 @@ function ClothesTableContent() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">الفئات الفرعية</label>
+                    <label className="text-sm font-medium">أقسام المنتجات الفرعية</label>
                     <SubcategoriesSelect
                       multiple
                       value={subcategoryIds}

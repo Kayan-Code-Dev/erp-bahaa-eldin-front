@@ -39,8 +39,8 @@ const ITEM_TYPES: TInventoryItemType[] = ["product", "raw"];
 // Schema for the form
 const formSchema = z.object({
     name: z.string().min(2, { message: "الاسم مطلوب" }),
-    category_id: z.coerce.string({ required_error: "الفئة مطلوبة" }),
-    subCategories_id: z.coerce.string({ required_error: "الفئة الفرعية مطلوبة" }),
+    category_id: z.coerce.string({ required_error: "قسم المنتجات مطلوب" }),
+    subCategories_id: z.coerce.string({ required_error: "قسم المنتجات الفرعي مطلوب" }),
     price: z.coerce.number().min(1, { message: "السعر مطلوب" }),
     quantity: z.coerce.number().min(1, { message: "الكمية مطلوبة" }),
     type: z.string({ required_error: "النوع مطلوب" }),
@@ -113,7 +113,7 @@ export function CreateEmployeesInventoryModal({ open, onOpenChange }: Props) {
                                     name="category_id"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>الفئة</FormLabel>
+                                            <FormLabel>قسم المنتجات</FormLabel>
                                             <CustomSelectList
                                                 onChange={(value) => {
                                                     field.onChange(value);
@@ -121,7 +121,7 @@ export function CreateEmployeesInventoryModal({ open, onOpenChange }: Props) {
                                                 }}
                                                 value={field.value}
                                                 switchKey="employees-inventories-categories-list"
-                                                placeholder="اختر الفئة"
+                                                placeholder="اختر قسم المنتجات"
                                             />
                                             <FormMessage />
                                         </FormItem>
@@ -134,14 +134,14 @@ export function CreateEmployeesInventoryModal({ open, onOpenChange }: Props) {
                                     name="subCategories_id"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>الفئة الفرعية (الصنف)</FormLabel>
+                                            <FormLabel>قسم المنتجات الفرعي (الصنف)</FormLabel>
                                             <CustomSelectList
                                                 onChange={field.onChange}
                                                 value={field.value}
                                                 switchKey="employees-inventories-sub-categories-list"
                                                 selectedId={Number(categoryId)}
                                                 disabled={!categoryId}
-                                                placeholder="اختر الفئة الفرعية"
+                                                placeholder="اختر قسم المنتجات الفرعي"
                                             />
                                             <FormMessage />
                                         </FormItem>

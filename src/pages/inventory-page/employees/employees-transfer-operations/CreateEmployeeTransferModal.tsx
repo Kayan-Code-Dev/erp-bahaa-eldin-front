@@ -26,9 +26,9 @@ import { CustomSelectList } from "@/components/custom/CustomSelectList";
 
 const formSchema = z.object({
     to_branch_id: z.coerce.string({ required_error: "يجب اختيار فرع الاستقبال" }),
-    category_id: z.coerce.string({ required_error: "يجب اختيار الفئة" }),
+    category_id: z.coerce.string({ required_error: "يجب اختيار قسم المنتجات" }),
     subCategories_id: z.coerce.string({
-        required_error: "يجب اختيار الفئة الفرعية",
+        required_error: "يجب اختيار قسم المنتجات الفرعي",
     }),
     quantity: z.coerce.number().min(1, { message: "الكمية مطلوبة" }),
     notes: z.string().optional(),
@@ -96,7 +96,7 @@ export default function CreateEmployeeTransferModal({ open, onOpenChange }: Prop
                                     name="category_id"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>الفئة</FormLabel>
+                                            <FormLabel>قسم المنتجات</FormLabel>
                                             <CustomSelectList
                                                 onChange={(value) => {
                                                     field.onChange(value);
@@ -104,7 +104,7 @@ export default function CreateEmployeeTransferModal({ open, onOpenChange }: Prop
                                                 }}
                                                 value={field.value}
                                                 switchKey="employees-inventories-categories-list"
-                                                placeholder="اختر الفئة"
+                                                placeholder="اختر قسم المنتجات"
                                             />
                                             <FormMessage />
                                         </FormItem>
@@ -117,14 +117,14 @@ export default function CreateEmployeeTransferModal({ open, onOpenChange }: Prop
                                     name="subCategories_id"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>الفئة الفرعية (الصنف)</FormLabel>
+                                            <FormLabel>قسم المنتجات الفرعي (الصنف)</FormLabel>
                                             <CustomSelectList
                                                 onChange={field.onChange}
                                                 value={field.value}
                                                 switchKey="employees-inventories-sub-categories-list"
                                                 selectedId={Number(categoryId)}
                                                 disabled={!categoryId}
-                                                placeholder="اختر الفئة الفرعية"
+                                                placeholder="اختر قسم المنتجات الفرعي"
                                             />
                                             <FormMessage />
                                         </FormItem>

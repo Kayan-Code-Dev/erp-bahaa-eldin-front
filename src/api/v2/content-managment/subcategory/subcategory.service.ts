@@ -16,7 +16,7 @@ export const createSubcategoryApi = async (req: TCreateSubcategoryRequest) => {
     );
     return data;
   } catch (error: any) {
-    populateError(error, "خطأ فى إنشاء الفئة الفرعية");
+    populateError(error, "خطأ فى إنشاء قسم المنتجات الفرعي");
   }
 };
 
@@ -28,7 +28,7 @@ export const getSubcategoriesApi = async (page: number, per_page: number, catego
     );
     return data;
   } catch (error: any) {
-    populateError(error, "خطأ فى جلب الفئات الفرعية");
+    populateError(error, "خطأ فى جلب أقسام المنتجات الفرعية");
   }
 };
 
@@ -37,7 +37,7 @@ export const getSubcategoryByIdApi = async (id: number) => {
     const { data } = await api.get<TSubcategory>(`/subcategories/${id}`);
     return data;
   } catch (error: any) {
-    populateError(error, "خطأ فى جلب الفئة الفرعية");
+    populateError(error, "خطأ فى جلب قسم المنتجات الفرعي");
   }
 };
 
@@ -49,7 +49,7 @@ export const updateSubcategoryApi = async (
     const { data } = await api.put<TSubcategory>(`/subcategories/${id}`, req);
     return data;
   } catch (error: any) {
-    populateError(error, "خطأ فى تحديث الفئة الفرعية");
+    populateError(error, "خطأ فى تحديث قسم المنتجات الفرعي");
   }
 };
 
@@ -58,7 +58,7 @@ export const deleteSubcategoryApi = async (id: number) => {
     await api.delete(`/subcategories/${id}`);
     return true;
   } catch (error: any) {
-    populateError(error, "خطأ فى حذف الفئة الفرعية");
+    populateError(error, "خطأ فى حذف قسم المنتجات الفرعي");
   }
 };
 
@@ -68,6 +68,6 @@ export const exportSubcategoriesToCSV = async () => {
     const { data } = await api.get(`/subcategories/export`, { responseType: "blob" });
     return data;
   } catch (error) {
-    populateError(error, "خطأ فى تصدير الفئات الفرعية");
+    populateError(error, "خطأ فى تصدير أقسام المنتجات الفرعية");
   }
 };

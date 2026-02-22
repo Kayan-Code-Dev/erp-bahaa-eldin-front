@@ -11,6 +11,6 @@ export type TBranchCategory = {
 
 export const branchCategorySchema = z.object({
     name: z.string().min(2, { message: "الاسم مطلوب" }),
-    description: z.string().min(10, { message: " وصف الفئة مطلوب" }),
+    description: z.string().min(10, { message: " وصف قسم المنتجات مطلوب" }),
     active: z.boolean().nullable(),
 });

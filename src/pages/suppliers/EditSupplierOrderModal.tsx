@@ -40,8 +40,8 @@ import { CustomCalendar } from "@/components/custom/CustomCalendar";
 
 const formSchema = z.object({
   supplier_id: z.string().min(1, { message: "المورد مطلوب" }),
-  category_id: z.string().min(1, { message: "الفئة مطلوبة" }),
-  subcategory_id: z.string().min(1, { message: "الفئة الفرعية مطلوبة" }),
+  category_id: z.string().min(1, { message: "قسم المنتجات مطلوب" }),
+  subcategory_id: z.string().min(1, { message: "قسم المنتجات الفرعي مطلوب" }),
   branch_id: z.string().min(1, { message: "الفرع مطلوب" }),
   order_number: z.string().min(1, { message: "رقم الطلبية مطلوب" }),
   order_date: z.string().min(1, { message: "تاريخ الطلبية مطلوب" }),
@@ -127,7 +127,7 @@ export function EditSupplierOrderModal({ order, open, onOpenChange }: Props) {
         <DialogHeader>
           <DialogTitle className="text-center">تحديث طلبية مورد</DialogTitle>
           <DialogDescription className="text-center">
-            تعديل بيانات الطلبية (المورد، الفئة، الفرع، رقم الطلبية، التاريخ، المدفوع، الملاحظات).
+            تعديل بيانات الطلبية (المورد، قسم المنتجات، الفرع، رقم الطلبية، التاريخ، المدفوع، الملاحظات).
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -173,7 +173,7 @@ export function EditSupplierOrderModal({ order, open, onOpenChange }: Props) {
                 name="category_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>الفئة</FormLabel>
+                    <FormLabel>قسم المنتجات</FormLabel>
                     <FormControl>
                       <CategoriesSelect
                         value={field.value}
@@ -193,7 +193,7 @@ export function EditSupplierOrderModal({ order, open, onOpenChange }: Props) {
                 name="subcategory_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>الفئة الفرعية</FormLabel>
+                    <FormLabel>قسم المنتجات الفرعي</FormLabel>
                     <FormControl>
                       <SubcategoriesSelect
                         value={field.value}

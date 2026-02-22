@@ -33,8 +33,8 @@ const getStatusVariant = (status: TEmployeeInvantoryItem["status"]) => {
 
 const headerText = [
     "اسم الصنف",
-    "الفئة",
-    "الفئة الفرعية",
+    "قسم المنتجات",
+    "قسم المنتجات الفرعي",
     "الكمية",
     "الحالة",
     "آخر تحديث",

@@ -58,11 +58,11 @@ export function CreateCategoryModal({ open, onOpenChange }: Props) {
     createCategory(requestData, {
       onSuccess: () => {
         form.reset();
-        toast.success("تم إنشاء الفئة بنجاح");
+        toast.success("تم إنشاء قسم المنتجات بنجاح");
         onOpenChange(false);
       },
       onError: (error) => {
-        toast.error("حدث خطأ أثناء إنشاء الفئة. الرجاء المحاولة مرة أخرى.", {
+        toast.error("حدث خطأ أثناء إنشاء قسم المنتجات. الرجاء المحاولة مرة أخرى.", {
           description: error.message,
         });
     
@@ -90,9 +90,9 @@ export function CreateCategoryModal({ open, onOpenChange }: Props) {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>اسم الفئة</FormLabel>
+                  <FormLabel>اسم قسم المنتجات</FormLabel>
                   <FormControl>
-                    <Input placeholder="اسم الفئة..." {...field} />
+                    <Input placeholder="اسم قسم المنتجات..." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

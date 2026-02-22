@@ -17,7 +17,7 @@ export const getSubcategories = async (page: number) => {
     data.data.total_pages = Math.ceil(data.data.total / 10);
     return data.data;
   } catch (error) {
-    populateError(error, "خطأ في تحميل الفئات الفرعية");
+    populateError(error, "خطأ في تحميل أقسام المنتجات الفرعية");
   }
 };
 
@@ -35,7 +35,7 @@ export const createSubcategory = async (data: TCreateSubcategory) => {
     );
     return response.data;
   } catch (error) {
-    populateError(error, "خطأ في إنشاء الفئة الفرعية");
+    populateError(error, "خطأ في إنشاء قسم المنتجات الفرعي");
   }
 };
 
@@ -57,7 +57,7 @@ export const updateSubcategory = async (
     );
     return response.data;
   } catch (error) {
-    populateError(error, "خطأ في تحديث الفئة الفرعية");
+    populateError(error, "خطأ في تحديث قسم المنتجات الفرعي");
   }
 };
 
@@ -65,7 +65,7 @@ export const deleteSubcategory = async (id: number) => {
   try {
     await api.delete(`/employees/sub_categories/${id}`);
   } catch (error) {
-    populateError(error, "خطأ في حذف الفئة الفرعية");
+    populateError(error, "خطأ في حذف قسم المنتجات الفرعي");
   }
 };
 
@@ -76,6 +76,6 @@ export const getCategoriesForSubcategories = async () => {
     );
     return data.data;
   } catch (error) {
-    populateError(error, "خطأ في تحميل الفئات");
+    populateError(error, "خطأ في تحميل أقسام المنتجات");
   }
 };

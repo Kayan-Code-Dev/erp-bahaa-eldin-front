@@ -39,9 +39,9 @@ import { toast } from "sonner";
 
 const formSchema = z.object({
   to_branch_id: z.coerce.number({ required_error: "يجب اختيار فرع الاستقبال" }),
-  category_id: z.coerce.number({ required_error: "يجب اختيار الفئة" }),
+  category_id: z.coerce.number({ required_error: "يجب اختيار قسم المنتجات" }),
   subCategories_id: z.coerce.number({
-    required_error: "يجب اختيار الفئة الفرعية",
+    required_error: "يجب اختيار قسم المنتجات الفرعي",
   }),
   quantity: z.coerce.number().min(1, { message: "الكمية مطلوبة" }),
   notes: z.string().optional(),
@@ -137,7 +137,7 @@ export function CreateBranchTransferModal({ open, onOpenChange }: Props) {
                   name="category_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>الفئة</FormLabel>
+                      <FormLabel>قسم المنتجات</FormLabel>
                       <Select
                         onValueChange={(value) => {
                           field.onChange(Number(value));
@@ -148,7 +148,7 @@ export function CreateBranchTransferModal({ open, onOpenChange }: Props) {
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="اختر الفئة..." />
+                            <SelectValue placeholder="اختر قسم المنتجات..." />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -170,7 +170,7 @@ export function CreateBranchTransferModal({ open, onOpenChange }: Props) {
                   name="subCategories_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>الفئة الفرعية (الصنف)</FormLabel>
+                      <FormLabel>قسم المنتجات الفرعي (الصنف)</FormLabel>
                       <Select
                         onValueChange={(value) => field.onChange(Number(value))}
                         value={String(field.value)}
@@ -178,7 +178,7 @@ export function CreateBranchTransferModal({ open, onOpenChange }: Props) {
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="اختر الصنف..." />
+                            <SelectValue placeholder="اختر قسم المنتجات الفرعي..." />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>

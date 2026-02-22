@@ -88,10 +88,10 @@ function Subcategories() {
         link.click();
         link.remove();
         window.URL.revokeObjectURL(url);
-        toast.success("تم تصدير الفئات الفرعية بنجاح");
+        toast.success("تم تصدير أقسام المنتجات الفرعية بنجاح");
       },
       onError: (error: any) => {
-        toast.error("خطأ أثناء تصدير الفئات الفرعية. الرجاء المحاولة مرة أخرى.", {
+        toast.error("خطأ أثناء تصدير أقسام المنتجات الفرعية. الرجاء المحاولة مرة أخرى.", {
           description: error.message,
         });
       },
@@ -103,9 +103,9 @@ function Subcategories() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle>إدارة الفئات الفرعية</CardTitle>
+            <CardTitle>إدارة أقسام المنتجات الفرعية</CardTitle>
             <CardDescription>
-              عرض وتعديل وإنشاء الفئات الفرعية في النظام.
+              عرض وتعديل وإنشاء أقسام المنتجات الفرعية في النظام.
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
@@ -143,7 +143,7 @@ function Subcategories() {
                     <TableHead className="text-center">#</TableHead>
                     <TableHead className="text-center">الاسم</TableHead>
                     <TableHead className="text-center">
-                      الفئة الرئيسية
+                      قسم المنتجات الرئيسي
                     </TableHead>
                     <TableHead className="text-center">الوصف</TableHead>
                     <TableHead className="text-center">إجراءات</TableHead>
@@ -207,7 +207,7 @@ function Subcategories() {
 
         <CardFooter className="flex items-center justify-between">
           <CustomPagination
-            totalElementsLabel="إجمالي الفئات الفرعية"
+            totalElementsLabel="إجمالي أقسام المنتجات الفرعية"
             totalElements={data?.total}
             totalPages={data?.total_pages}
             isLoading={isPending}
@@ -228,10 +228,10 @@ function Subcategories() {
       <ControlledConfirmationModal
         open={isDeleteModalOpen}
         onOpenChange={setIsDeleteModalOpen}
-        alertTitle="حذف الفئة الفرعية"
+        alertTitle="حذف قسم المنتجات الفرعي"
         alertMessage={
           <>
-            هل أنت متأكد أنك تريد حذف الفئة الفرعية{" "}
+            هل أنت متأكد أنك تريد حذف قسم المنتجات الفرعي{" "}
             <strong>{selectedSubcategory?.name}</strong>؟
           </>
         }
