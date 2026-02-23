@@ -50,7 +50,7 @@ import {
 } from "@/components/ui/form";
 import { ClientsSelect } from "@/components/custom/ClientsSelect";
 import useDebounce from "@/hooks/useDebounce";
-import { ReturnOrderFullModal } from "@/pages/orders/ReturnOrderFullModal";
+import { ReturnOrderSelectItemsModal } from "@/pages/returns/ReturnOrderSelectItemsModal";
 import { OrderEmployeeName } from "@/components/custom/OrderEmployeeName";
 import {
   DEFAULT_PER_PAGE,
@@ -87,7 +87,6 @@ function OverdueReturnsList() {
   // Modal state
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<TOrder | null>(null);
-  // Return entire order
   const [orderToReturn, setOrderToReturn] = useState<TOrder | null>(null);
 
   // Watch form values
@@ -435,7 +434,7 @@ function OverdueReturnsList() {
                                         </Button>
                                       </TooltipTrigger>
                                       <TooltipContent side="top">
-                                        إرجاع الطلب
+                                        اختيار القطع للإرجاع
                                       </TooltipContent>
                                     </Tooltip>
                                   )}
@@ -544,8 +543,8 @@ function OverdueReturnsList() {
         onOpenChange={setIsViewModalOpen}
       />
 
-      {/* Return entire order */}
-      <ReturnOrderFullModal
+      {/* Modal: select items to return (same as returns page) */}
+      <ReturnOrderSelectItemsModal
         open={!!orderToReturn}
         onOpenChange={(open) => !open && setOrderToReturn(null)}
         order={orderToReturn}
