@@ -48,7 +48,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { CustomCalendar } from "@/components/custom/CustomCalendar";
 import { ClientsSelect } from "@/components/custom/ClientsSelect";
 import useDebounce from "@/hooks/useDebounce";
 import { ReturnOrderFullModal } from "@/pages/orders/ReturnOrderFullModal";
@@ -69,17 +68,17 @@ function OverdueReturnsList() {
   const page = Number(searchParams.get("page")) || 1;
   const per_page = Number(searchParams.get("per_page")) || DEFAULT_PER_PAGE;
 
-  // Today's date to display overdue returns for today by default
-  const today = new Date().toISOString().split("T")[0];
-  const initialDateFrom = searchParams.get("date_from") || today;
-  const initialDateTo = searchParams.get("date_to") || today;
+  const initialClientId = (() => {
+    const v = searchParams.get("client_id");
+    if (!v || v.trim() === "") return undefined;
+    const num = Number(v.trim());
+    return Number.isFinite(num) ? v.trim() : undefined;
+  })();
 
   const form = useForm<OverduereturnsFilterFormValues>({
     resolver: zodResolver(overduereturnsFilterSchema),
     defaultValues: {
-      date_from: initialDateFrom,
-      date_to: initialDateTo,
-      client_id: searchParams.get("client_id") || undefined,
+      client_id: initialClientId,
     },
   });
 
@@ -129,25 +128,21 @@ function OverdueReturnsList() {
 
   const filters = useMemo(() => {
     const values = debouncedFormValues;
+    const raw = values.client_id;
+    const clientId =
+      raw != null && String(raw).trim() !== ""
+        ? Number(String(raw).trim())
+        : undefined;
     return {
       ...OVERDUE_RETURNS_FILTER,
-      // Filtering is by return date but using parameter names date_from / date_to as required by API
-      date_from: values.date_from || undefined,
-      date_to: values.date_to || undefined,
       client_id:
-        values.client_id && values.client_id.trim() !== ""
-          ? values.client_id
-          : undefined,
+        clientId !== undefined && Number.isFinite(clientId) ? clientId : undefined,
     };
   }, [debouncedFormValues]);
 
   // Update URL params when filters change (synchronize form values)
   useEffect(() => {
     const params = new URLSearchParams(searchParams);
-    if (debouncedFormValues.date_from) params.set("date_from", debouncedFormValues.date_from);
-    else params.delete("date_from");
-    if (debouncedFormValues.date_to) params.set("date_to", debouncedFormValues.date_to);
-    else params.delete("date_to");
     if (filters.client_id) params.set("client_id", String(filters.client_id));
     else params.delete("client_id");
     params.set("page", page.toString());
@@ -160,16 +155,7 @@ function OverdueReturnsList() {
     useGetOrdersQueryOptions(page, per_page, filters)
   );
 
-  // Client-side filter: show only overdue orders (fallback if API returns all)
-  const displayedOrders = useMemo(() => {
-    if (!data?.data) return [];
-    const list = data.data;
-    return list.filter((order) => {
-      if (order.is_overdue === true) return true;
-      const statusStr = (order as unknown as { status?: string }).status;
-      return statusStr === "overdue";
-    });
-  }, [data?.data]);
+  const displayedOrders = useMemo(() => data?.data ?? [], [data?.data]);
 
   // Export Mutation
   const { mutate: exportOrdersToCSV, isPending: isExporting } = useMutation(
@@ -216,11 +202,7 @@ function OverdueReturnsList() {
   };
 
   const handleResetFilters = () => {
-    form.reset({
-      date_from: undefined,
-      date_to: undefined,
-      client_id: undefined,
-    });
+    form.reset({ client_id: undefined });
     setSearchParams({ page: "1", per_page: per_page.toString() });
   };
 
@@ -266,42 +248,6 @@ function OverdueReturnsList() {
               <Form {...form}>
                 <form className="space-y-4">
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    <FormField
-                      control={form.control}
-                      name="date_from"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>تاريخ من</FormLabel>
-                          <FormControl>
-                            <CustomCalendar
-                              value={field.value}
-                              onChange={field.onChange}
-                              placeholder="اختر التاريخ من"
-                              disabled={isPending}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="date_to"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>تاريخ إلى</FormLabel>
-                          <FormControl>
-                            <CustomCalendar
-                              value={field.value}
-                              onChange={field.onChange}
-                              placeholder="اختر التاريخ إلى"
-                              disabled={isPending}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
                     <FormField
                       control={form.control}
                       name="client_id"

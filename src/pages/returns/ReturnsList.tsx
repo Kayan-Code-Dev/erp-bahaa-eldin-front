@@ -37,7 +37,11 @@ import { formatDate } from "@/utils/formatDate";
 import { formatPhone } from "@/utils/formatPhone";
 import { OrdersTableSkeleton } from "@/pages/orders/OrdersTableSkeleton";
 import { OrderDetailsModal } from "@/pages/orders/OrderDetailsModal";
-import { getOrderTypeLabel, getStatusVariant, getStatusLabel } from "@/api/v2/orders/order.utils";
+import {
+  getOrderTypeLabel,
+  getStatusVariant,
+  getStatusLabel,
+} from "@/api/v2/orders/order.utils";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -51,8 +55,8 @@ import {
 import { CustomCalendar } from "@/components/custom/CustomCalendar";
 import { ClientsSelect } from "@/components/custom/ClientsSelect";
 import useDebounce from "@/hooks/useDebounce";
-import { ReturnOrderFullModal } from "@/pages/orders/ReturnOrderFullModal";
 import { OrderEmployeeName } from "@/components/custom/OrderEmployeeName";
+import { ReturnOrderSelectItemsModal } from "./ReturnOrderSelectItemsModal";
 import { DEFAULT_PER_PAGE, FILTER_DEBOUNCE_MS, RETURNS_FILTER } from "./constants";
 import {
   returnsFilterSchema,
@@ -70,12 +74,19 @@ function ReturnsList() {
   const initialDateFrom = searchParams.get("date_from") || today;
   const initialDateTo = searchParams.get("date_to") || today;
 
+  const initialClientId = (() => {
+    const v = searchParams.get("client_id");
+    if (!v || v.trim() === "") return undefined;
+    const num = Number(v.trim());
+    return Number.isFinite(num) ? v.trim() : undefined;
+  })();
+
   const form = useForm<ReturnsFilterFormValues>({
     resolver: zodResolver(returnsFilterSchema),
     defaultValues: {
       date_from: initialDateFrom,
       date_to: initialDateTo,
-      client_id: searchParams.get("client_id") || undefined,
+      client_id: initialClientId,
     },
   });
 
@@ -84,8 +95,6 @@ function ReturnsList() {
   // Modal state
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<TOrder | null>(null);
-  
-  // Return entire order
   const [orderToReturn, setOrderToReturn] = useState<TOrder | null>(null);
 
   // Watch form values
@@ -126,15 +135,17 @@ function ReturnsList() {
 
   const filters = useMemo(() => {
     const values = debouncedFormValues;
+    const raw = values.client_id;
+    const clientId =
+      raw != null && String(raw).trim() !== ""
+        ? Number(String(raw).trim())
+        : undefined;
     return {
       ...RETURNS_FILTER,
-      // Filtering is by return date but using parameter names date_from / date_to as required by API
       date_from: values.date_from || undefined,
       date_to: values.date_to || undefined,
       client_id:
-        values.client_id && values.client_id.trim() !== ""
-          ? values.client_id
-          : undefined,
+        clientId !== undefined && Number.isFinite(clientId) ? clientId : undefined,
     };
   }, [debouncedFormValues]);
 
@@ -462,7 +473,7 @@ function ReturnsList() {
                                     </TooltipContent>
                                   </Tooltip>
 
-                                  {/* Return entire order */}
+                                  {/* Open modal to select items to return */}
                                   {canReturnOrder(order) && (
                                     <Tooltip>
                                       <TooltipTrigger asChild>
@@ -476,7 +487,7 @@ function ReturnsList() {
                                         </Button>
                                       </TooltipTrigger>
                                       <TooltipContent side="top">
-                                        إرجاع الطلب
+                                        اختيار القطع للإرجاع
                                       </TooltipContent>
                                     </Tooltip>
                                   )}
@@ -581,8 +592,8 @@ function ReturnsList() {
         onOpenChange={setIsViewModalOpen}
       />
 
-      {/* Return entire order */}
-      <ReturnOrderFullModal
+      {/* Modal: select items to return */}
+      <ReturnOrderSelectItemsModal
         open={!!orderToReturn}
         onOpenChange={(open) => !open && setOrderToReturn(null)}
         order={orderToReturn}

@@ -65,8 +65,6 @@ const ordersFilterSchema = z.object({
   employee_id: z.string().optional(),
   cloth_name: z.string().optional(),
   cloth_code: z.string().optional(),
-  invoice_date_from: z.string().optional(),
-  invoice_date_to: z.string().optional(),
   visit_date_from: z.string().optional(),
   visit_date_to: z.string().optional(),
   delivery_date_from: z.string().optional(),
@@ -121,8 +119,6 @@ function OrdersList() {
       employee_id: "",
       cloth_name: "",
       cloth_code: "",
-      invoice_date_from: "",
-      invoice_date_to: "",
       visit_date_from: "",
       visit_date_to: "",
       delivery_date_from: "",
@@ -146,8 +142,6 @@ function OrdersList() {
       employee_id: v.employee_id && v.employee_id.trim() !== "" ? v.employee_id : undefined,
       cloth_name: v.cloth_name && v.cloth_name.trim() !== "" ? v.cloth_name : undefined,
       cloth_code: v.cloth_code && v.cloth_code.trim() !== "" ? v.cloth_code : undefined,
-      invoice_date_from: v.invoice_date_from || undefined,
-      invoice_date_to: v.invoice_date_to || undefined,
       visit_date_from: v.visit_date_from || undefined,
       visit_date_to: v.visit_date_to || undefined,
       delivery_date_from: v.delivery_date_from || undefined,
@@ -404,42 +398,6 @@ function OrdersList() {
                       )}
                     />
 
-                    {/* Invoice date from / to */}
-                    <FormField
-                      control={form.control}
-                      name="invoice_date_from"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>تاريخ الفاتورة من</FormLabel>
-                          <FormControl>
-                            <CustomCalendar
-                              value={field.value}
-                              onChange={field.onChange}
-                              placeholder="اختر التاريخ"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="invoice_date_to"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>تاريخ الفاتورة إلى</FormLabel>
-                          <FormControl>
-                            <CustomCalendar
-                              value={field.value}
-                              onChange={field.onChange}
-                              placeholder="اختر التاريخ"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
                     {/* Rental date from / to */}
                     <FormField
                       control={form.control}
@@ -559,8 +517,6 @@ function OrdersList() {
                           employee_id: "",
                           cloth_name: "",
                           cloth_code: "",
-                          invoice_date_from: "",
-                          invoice_date_to: "",
                           visit_date_from: "",
                           visit_date_to: "",
                           delivery_date_from: "",

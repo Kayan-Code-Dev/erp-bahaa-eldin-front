@@ -1,9 +1,7 @@
 import * as z from "zod";
 
-/** Zod schema for overdue returns list filter form */
+/** Zod schema for overdue returns list filter form (no date filter) */
 export const overduereturnsFilterSchema = z.object({
-  date_from: z.string().optional(),
-  date_to: z.string().optional(),
   client_id: z.string().optional(),
 });
 

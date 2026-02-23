@@ -61,8 +61,6 @@ export const useGetOrdersQueryOptions = (
     client_id?: string | number;
     cloth_name?: string;
     cloth_code?: string;
-    invoice_date_from?: string;
-    invoice_date_to?: string;
     visit_date_from?: string;
     visit_date_to?: string;
     delivery_date_from?: string;

@@ -55,6 +55,8 @@ const getNotificationTypeLabel = (type: string): string => {
     'expense_rejected': 'رفض مصروف',
     'SupplierOrder': 'أمر توريد',
     'supplier_order': 'أمر توريد',
+    'Order': 'الطلب',
+    'order': 'الطلب',
     'system': 'نظام',
     'alert': 'تنبيه',
     'info': 'معلومة',
@@ -117,13 +119,21 @@ const NotificationListItem = memo(function NotificationListItem({
   }, [notification.created_at]);
 
   const orderStatus = useMemo(() => {
-    return notification.metadata?.status || null;
+    const metadata = notification.metadata as Record<string, any> | undefined;
+    if (!metadata) return null;
+    return (metadata.status || metadata.new_status || metadata.newStatus || null) as string | null;
   }, [notification.metadata]);
 
   const metadataEntries = useMemo(() => {
     if (!notification.metadata) return [];
-    return Object.entries(notification.metadata)
-      .filter(([key]) => key !== 'order_id' && key !== 'client_id' && key !== 'status');
+    return Object.entries(notification.metadata).filter(
+      ([key]) =>
+        key !== 'order_id' &&
+        key !== 'client_id' &&
+        key !== 'status' &&
+        key !== 'new_status' &&
+        key !== 'old_status'
+    );
   }, [notification.metadata]);
 
   const metadataKeyLabels: Record<string, string> = {

@@ -41,9 +41,6 @@ export const getOrders = async (
     cloth_name?: string;
     /** Filter by item/cloth type code */
     cloth_code?: string;
-    /** Filter by invoice creation date */
-    invoice_date_from?: string;
-    invoice_date_to?: string;
     /** Filter by rental date (visit_datetime) */
     visit_date_from?: string;
     visit_date_to?: string;
@@ -80,9 +77,15 @@ export const getOrders = async (
       }
     }
 
-    // Client
-    if (filters?.client_id !== undefined && filters.client_id !== "" && filters.client_id != null) {
-      params.client_id = typeof filters.client_id === "string" ? Number(filters.client_id) : filters.client_id;
+    // Client — only send when valid number (avoid client_id=NaN)
+    const clientId =
+      filters?.client_id !== undefined && filters?.client_id !== "" && filters?.client_id != null
+        ? typeof filters.client_id === "string"
+          ? Number(filters.client_id)
+          : filters.client_id
+        : undefined;
+    if (clientId != null && Number.isFinite(clientId)) {
+      params.client_id = clientId;
     }
 
     // Item name
@@ -94,10 +97,6 @@ export const getOrders = async (
     if (filters?.cloth_code && filters.cloth_code.trim() !== "") {
       params.cloth_code = filters.cloth_code.trim();
     }
-
-    // Invoice dates -> sent as date_from / date_to as per API
-    if (filters?.invoice_date_from) params.date_from = filters.invoice_date_from;
-    if (filters?.invoice_date_to) params.date_to = filters.invoice_date_to;
 
     // Rental dates
     if (filters?.visit_date_from) params.visit_date_from = filters.visit_date_from;

@@ -28,7 +28,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DatePicker } from "@/components/custom/DatePicker";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { EntitySelect } from "@/components/custom/EntitySelect";
+import { BranchesSelect } from "@/components/custom/BranchesSelect";
 import { ClientsSelect } from "@/components/custom/ClientsSelect";
 import { CitiesSelect } from "@/components/custom/CitiesSelect";
 import { PhoneInput } from "@/components/ui/phone-input";
@@ -136,7 +136,7 @@ function ChooseClient() {
   const [selectedClientFromList, setSelectedClientFromList] =
     useState<TClientResponse | null>(selectedClient);
 
-  const [entityType, setEntityType] = useState<TEntity | undefined>();
+  const [entityType, setEntityType] = useState<TEntity | undefined>("branch");
   const [entityId, setEntityId] = useState<string>("");
   const [deliveryDate, setDeliveryDate] = useState<Date | undefined>(); // Return date
   const [receiveDate, setReceiveDate] = useState<Date | undefined>(); // visit_datetime = Receive date
@@ -277,7 +277,7 @@ function ChooseClient() {
         newClientFormValues?: NewClientFormValues;
         selectedProducts?: any[];
       };
-      if (draft.entityType) setEntityType(draft.entityType);
+      setEntityType("branch");
       if (draft.entityId) setEntityId(draft.entityId);
       if (draft.deliveryDate) setDeliveryDate(new Date(draft.deliveryDate));
       if (draft.activeTab) setActiveTab(draft.activeTab);
@@ -401,7 +401,7 @@ function ChooseClient() {
     setProductCodeFilter("");
     setCategoryId("");
     setSubcategoryIds([]);
-    setEntityType(undefined);
+    setEntityType("branch");
     setEntityId("");
     setDeliveryDate(undefined);
   };
@@ -719,16 +719,6 @@ function ChooseClient() {
     });
   };
 
-  // Prevent changing location after adding products, but allow selecting other products from the same location
-  const handleEntityTypeChangeStandalone = (value: TEntity | undefined) => {
-    if (selectedProducts.length > 0) {
-      toast.error("لا يمكن تغيير نوع المكان بعد إضافة منتجات للطلب");
-      return;
-    }
-    setEntityType(value);
-    setEntityId("");
-  };
-
   const handleEntityIdChangeStandalone = (value: string) => {
     if (selectedProducts.length > 0) {
       toast.error("لا يمكن تغيير المكان بعد إضافة منتجات للطلب");
@@ -786,16 +776,24 @@ function ChooseClient() {
                     </div>
                   </div>
                   <div className="space-y-4 w-full">
-                    <EntitySelect
-                      mode="standalone"
-                      entityType={entityType}
-                      entityId={entityId}
-                      onEntityTypeChange={handleEntityTypeChangeStandalone}
-                      onEntityIdChange={handleEntityIdChangeStandalone}
-                      entityTypeLabel="نوع المكان"
-                      entityIdLabel="المكان"
-                      required
-                    />
+                    {/* نوع المكان ثابت على "فرع" ولا يمكن تغييره */}
+                    <div className="space-y-2 w-full">
+                      <Label className="text-sm font-medium">نوع المكان</Label>
+                      <div className="flex h-10 w-full items-center rounded-md border border-input bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
+                        فرع
+                      </div>
+                    </div>
+                    <div className="space-y-2 w-full">
+                      <Label className="text-sm font-medium">
+                        المكان <span className="text-destructive">*</span>
+                      </Label>
+                      <BranchesSelect
+                        value={entityId}
+                        onChange={handleEntityIdChangeStandalone}
+                        disabled={false}
+                        className="w-full"
+                      />
+                    </div>
                     {/* Select employee who created the invoice */}
                     <div className="space-y-2">
                       <Label className="text-gray-700 font-medium">
