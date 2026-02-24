@@ -34,7 +34,6 @@ import {
   Tags,
   FolderTree,
   Building,
-  Briefcase,
   ShoppingCart,
   Bell,
 } from "lucide-react";

@@ -14,7 +14,6 @@ import { ordersRoutes } from "./routes/orders.routes";
 import { permissionsRoutes } from "./routes/permissions.routes";
 import { workshopRoutes } from "./routes/workshop.routes";
 import { paymentsRoutes } from "./routes/payments.route";
-import { jobTitlesRoutes } from "./routes/job-titles.routes";
 import { employeesRoutes } from "./routes/employees.routes";
 import { cashboxesRoutes } from "./routes/cashboxes.routes";
 import { expensesRoutes } from "./routes/expenses.routes";
@@ -43,7 +42,6 @@ function App() {
           {workshopRoutes()}
           {permissionsRoutes()}
           {contentManagementRouts()}
-          {jobTitlesRoutes()}
           {employeesRoutes()}
           {cashboxesRoutes()}
           {expensesRoutes()}

@@ -227,7 +227,7 @@ function CreateEmployee() {
 
   // ---- render ----
   return (
-    <div className="container mx-auto py-8 max-w-4xl" dir="rtl">
+    <div className="container mx-auto py-8" dir="rtl">
       {/* Page header */}
       <div className="mb-8 flex items-center gap-3">
         <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
