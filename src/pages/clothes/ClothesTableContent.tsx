@@ -255,6 +255,13 @@ function ClothesTableContent() {
     return `${typeLabel} (${cloth.entity_id})`;
   };
 
+  const getSubcategoryDisplay = (cloth: TClothResponse) => {
+    if (cloth.subcategory_names?.length) return cloth.subcategory_names.join("، ");
+    const subcategories = (cloth as { subcategories?: { name?: string }[] }).subcategories;
+    if (subcategories?.length) return subcategories.map((s) => s.name ?? "").filter(Boolean).join("، ");
+    return "";
+  };
+
   return (
     <>
       {isError && <div className="text-red-500">{error.message}</div>}
@@ -356,6 +363,8 @@ function ClothesTableContent() {
                     <TableHead className="text-center">المقاسات</TableHead>
                     <TableHead className="text-center">الحالة</TableHead>
                     <TableHead className="text-center">نوع المكان (المكان)</TableHead>
+                    <TableHead className="text-center">قسم المنتجات</TableHead>
+                    <TableHead className="text-center">أقسام فرعية</TableHead>
                     <TableHead className="text-center">ملاحظات</TableHead>
                     <TableHead className="text-center">إجراءات</TableHead>
                   </TableRow>
@@ -381,6 +390,12 @@ function ClothesTableContent() {
                         </TableCell>
                         <TableCell className="text-center">
                           {getEntityDisplay(cloth)}
+                        </TableCell>
+                        <TableCell className="text-center text-muted-foreground">
+                          {cloth.category_name ?? (cloth as { category?: { name?: string } }).category?.name ?? "-"}
+                        </TableCell>
+                        <TableCell className="text-center text-muted-foreground max-w-[160px] truncate" title={getSubcategoryDisplay(cloth)}>
+                          {getSubcategoryDisplay(cloth) || "-"}
                         </TableCell>
                         <TableCell className="text-center max-w-[180px] truncate" title={cloth.notes || undefined}>
                           {cloth.notes || "-"}
@@ -410,7 +425,7 @@ function ClothesTableContent() {
                   ) : (
                     <TableRow>
                       <TableCell
-                        colSpan={7}
+                        colSpan={9}
                         className="py-10 text-center text-muted-foreground"
                       >
                         لا توجد منتجات لعرضها.

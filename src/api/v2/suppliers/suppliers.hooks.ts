@@ -15,6 +15,7 @@ import {
   getSuppliersList,
   getSupplierOrders,
   getSupplierOrdersBySupplierId,
+  getSupplierOrder,
   addPaymentToSupplierOrder,
   returnSupplierOrder,
 } from "./suppliers.service";
@@ -23,140 +24,164 @@ import { TUpdateSupplierRequest, TUpdateSupplierOrderRequest } from "./suppliers
 export const SUPPLIERS_KEY = "suppliers";
 export const SUPPLIER_ORDERS_KEY = "supplier-orders";
 
+const FIVE_MINUTES = 1000 * 60 * 5;
+const TWO_MINUTES = 1000 * 60 * 2;
+
+// ---------------------------------------------------------------------------
+// Supplier queries
+// ---------------------------------------------------------------------------
+
+export const useGetSuppliersQueryOptions = (page: number, per_page: number) =>
+  queryOptions({
+    queryKey: [SUPPLIERS_KEY, page, per_page],
+    queryFn: () => getSuppliers(page, per_page),
+    staleTime: FIVE_MINUTES,
+  });
+
+export const useGetSupplierQueryOptions = (id: number) =>
+  queryOptions({
+    queryKey: [SUPPLIERS_KEY, id],
+    queryFn: () => getSupplier(id),
+    staleTime: FIVE_MINUTES,
+  });
+
+export const useGetSuppliersListQueryOptions = () =>
+  queryOptions({
+    queryKey: [SUPPLIERS_KEY, "list"],
+    queryFn: getSuppliersList,
+    staleTime: FIVE_MINUTES,
+  });
+
+// ---------------------------------------------------------------------------
+// Supplier mutations
+// ---------------------------------------------------------------------------
+
 export const useCreateSupplierMinimalMutationOptions = () => {
-  const queryClient = useQueryClient();
+  const qc = useQueryClient();
   return mutationOptions({
     mutationFn: createSupplierMinimal,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [SUPPLIERS_KEY] });
-      queryClient.invalidateQueries({ queryKey: [SUPPLIERS_KEY, "list"] });
+      qc.invalidateQueries({ queryKey: [SUPPLIERS_KEY] });
     },
   });
 };
 
 export const useCreateSupplierMutationOptions = () => {
-  const queryClient = useQueryClient();
+  const qc = useQueryClient();
   return mutationOptions({
     mutationFn: createSupplier,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [SUPPLIERS_KEY] });
+      qc.invalidateQueries({ queryKey: [SUPPLIERS_KEY] });
     },
   });
 };
 
 export const useUpdateSupplierMutationOptions = () => {
-  const queryClient = useQueryClient();
+  const qc = useQueryClient();
   return mutationOptions({
     mutationFn: (payload: { id: number; data: TUpdateSupplierRequest }) =>
       updateSupplier(payload.id, payload.data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [SUPPLIERS_KEY] });
+      qc.invalidateQueries({ queryKey: [SUPPLIERS_KEY] });
     },
-  });
-};
-
-export const useGetSuppliersQueryOptions = (page: number, per_page: number) => {
-  return queryOptions({
-    queryKey: [SUPPLIERS_KEY, page, per_page],
-    queryFn: () => getSuppliers(page, per_page),
-    staleTime: 1000 * 60 * 5,
-  });
-};
-
-export const useGetSupplierQueryOptions = (id: number) => {
-  return queryOptions({
-    queryKey: [SUPPLIERS_KEY, id],
-    queryFn: () => getSupplier(id),
-    staleTime: 1000 * 60 * 5,
   });
 };
 
 export const useDeleteSupplierMutationOptions = () => {
-  const queryClient = useQueryClient();
+  const qc = useQueryClient();
   return mutationOptions({
     mutationFn: deleteSupplier,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [SUPPLIERS_KEY] });
+      qc.invalidateQueries({ queryKey: [SUPPLIERS_KEY] });
     },
   });
 };
 
-export const useCreateSupplierOrderMutationOptions = () => {
-  const queryClient = useQueryClient();
-  return mutationOptions({
-    mutationFn: createSupplierOrder,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [SUPPLIERS_KEY] });
-      queryClient.invalidateQueries({ queryKey: [SUPPLIER_ORDERS_KEY] });
-    },
-  });
-};
+// ---------------------------------------------------------------------------
+// Supplier Order queries
+// ---------------------------------------------------------------------------
 
-export const useGetSupplierOrdersQueryOptions = (page: number, per_page: number) => {
-  return queryOptions({
+export const useGetSupplierOrdersQueryOptions = (
+  page: number,
+  per_page: number,
+) =>
+  queryOptions({
     queryKey: [SUPPLIER_ORDERS_KEY, page, per_page],
     queryFn: () => getSupplierOrders(page, per_page),
-    staleTime: 1000 * 60 * 5,
+    staleTime: FIVE_MINUTES,
   });
-};
 
-/** Supplier orders by supplier_id - GET /supplier-orders?supplier_id= */
 export const useGetSupplierOrdersBySupplierIdQueryOptions = (
   supplierId: number,
   page: number,
-  per_page: number
-) => {
-  return queryOptions({
+  per_page: number,
+) =>
+  queryOptions({
     queryKey: [SUPPLIER_ORDERS_KEY, "by-supplier", supplierId, page, per_page],
     queryFn: () => getSupplierOrdersBySupplierId(supplierId, page, per_page),
     enabled: supplierId > 0,
-    staleTime: 1000 * 60 * 5,
+    staleTime: FIVE_MINUTES,
+  });
+
+export const useGetSupplierOrderQueryOptions = (
+  supplierId: number,
+  orderId: number,
+  options?: { enabled?: boolean },
+) =>
+  queryOptions({
+    queryKey: [SUPPLIER_ORDERS_KEY, "detail", supplierId, orderId],
+    queryFn: () => getSupplierOrder(supplierId, orderId),
+    enabled: (options?.enabled ?? true) && supplierId > 0 && orderId > 0,
+    staleTime: TWO_MINUTES,
+  });
+
+// ---------------------------------------------------------------------------
+// Supplier Order mutations
+// ---------------------------------------------------------------------------
+
+export const useCreateSupplierOrderMutationOptions = () => {
+  const qc = useQueryClient();
+  return mutationOptions({
+    mutationFn: createSupplierOrder,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [SUPPLIERS_KEY] });
+      qc.invalidateQueries({ queryKey: [SUPPLIER_ORDERS_KEY] });
+    },
   });
 };
 
 export const useUpdateSupplierOrderMutationOptions = () => {
-  const queryClient = useQueryClient();
+  const qc = useQueryClient();
   return mutationOptions({
     mutationFn: (payload: { id: number; data: TUpdateSupplierOrderRequest }) =>
       updateSupplierOrder(payload.id, payload.data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [SUPPLIER_ORDERS_KEY] });
+      qc.invalidateQueries({ queryKey: [SUPPLIER_ORDERS_KEY] });
     },
   });
 };
 
 export const useAddPaymentToSupplierOrderMutationOptions = () => {
-  const queryClient = useQueryClient();
+  const qc = useQueryClient();
   return mutationOptions({
-    mutationFn: (payload: { id: number; amount: number }) =>
-      addPaymentToSupplierOrder(payload.id, { amount: payload.amount }),
+    mutationFn: (payload: {
+      id: number;
+      clothes: { cloth_id: number; amount: number }[];
+    }) => addPaymentToSupplierOrder(payload.id, { clothes: payload.clothes }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [SUPPLIER_ORDERS_KEY] });
-      queryClient.invalidateQueries({ queryKey: [SUPPLIERS_KEY] });
+      qc.invalidateQueries({ queryKey: [SUPPLIER_ORDERS_KEY] });
+      qc.invalidateQueries({ queryKey: [SUPPLIERS_KEY] });
     },
   });
 };
 
 export const useReturnSupplierOrderMutationOptions = () => {
-  const queryClient = useQueryClient();
+  const qc = useQueryClient();
   return mutationOptions({
     mutationFn: returnSupplierOrder,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [SUPPLIER_ORDERS_KEY] });
-      queryClient.invalidateQueries({ queryKey: [SUPPLIERS_KEY] });
+      qc.invalidateQueries({ queryKey: [SUPPLIER_ORDERS_KEY] });
+      qc.invalidateQueries({ queryKey: [SUPPLIERS_KEY] });
     },
   });
 };
-
-export const useGetSuppliersListQueryOptions = () => {
-  return queryOptions({
-    queryKey: [SUPPLIERS_KEY, "list"],
-    queryFn: () => getSuppliersList(),
-    staleTime: 1000 * 60 * 5,
-  });
-};
-
-
-
-
-

@@ -3,6 +3,7 @@ import {
   TCreateSupplierMinimalRequest,
   TCreateSupplierOrderRequest,
   TSupplierResponse,
+  TSupplierOrderDetailResponse,
   TUpdateSupplierRequest,
   TUpdateSupplierOrderRequest,
   TSuppliersListResponse,
@@ -11,18 +12,32 @@ import {
 import { api } from "@/api/api-contants";
 import { populateError } from "@/api/api.utils";
 
-/** Response from POST /suppliers/store */
+// ---------------------------------------------------------------------------
+// Internal helpers
+// ---------------------------------------------------------------------------
+
 type TCreateSupplierStoreResponse = {
   message?: string;
   supplier: TSupplierResponse;
 };
 
-/** Create supplier (name and code only) - POST /api/v1/suppliers/store */
-export const createSupplierMinimal = async (data: TCreateSupplierMinimalRequest) => {
+function isAxios404(error: unknown): boolean {
+  return (
+    (error as { response?: { status?: number } })?.response?.status === 404
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Suppliers
+// ---------------------------------------------------------------------------
+
+export const createSupplierMinimal = async (
+  data: TCreateSupplierMinimalRequest,
+) => {
   try {
     const { data: response } = await api.post<TCreateSupplierStoreResponse>(
       "/suppliers/store",
-      data
+      data,
     );
     return response?.supplier;
   } catch (error) {
@@ -30,12 +45,11 @@ export const createSupplierMinimal = async (data: TCreateSupplierMinimalRequest)
   }
 };
 
-/** Create supplier with first order - POST /api/v1/suppliers/store */
 export const createSupplier = async (data: TCreateSupplierRequest) => {
   try {
     const { data: response } = await api.post<TCreateSupplierStoreResponse>(
       "/suppliers/store",
-      data
+      data,
     );
     return response?.supplier;
   } catch (error) {
@@ -43,15 +57,14 @@ export const createSupplier = async (data: TCreateSupplierRequest) => {
   }
 };
 
-/** Update supplier - PUT /api/v1/suppliers/update/{id} */
 export const updateSupplier = async (
   id: number,
-  data: TUpdateSupplierRequest
+  data: TUpdateSupplierRequest,
 ) => {
   try {
     const { data: response } = await api.put<TSupplierResponse>(
       `/suppliers/update/${id}`,
-      data
+      data,
     );
     return response;
   } catch (error) {
@@ -59,12 +72,11 @@ export const updateSupplier = async (
   }
 };
 
-/** List suppliers (paginated) - GET /api/v1/suppliers */
 export const getSuppliers = async (page: number, per_page: number) => {
   try {
     const { data: response } = await api.get<TSuppliersListResponse>(
       "/suppliers",
-      { params: { page, per_page } }
+      { params: { page, per_page } },
     );
     return response;
   } catch (error) {
@@ -72,22 +84,24 @@ export const getSuppliers = async (page: number, per_page: number) => {
   }
 };
 
-export const getSupplier = async (id: number) => {
+export const getSupplier = async (
+  id: number,
+): Promise<TSupplierResponse | undefined> => {
   try {
     const { data: response } = await api.get<TSupplierResponse>(
-      `/suppliers/${id}`
+      `/suppliers/${id}`,
     );
     return response;
-  } catch (error) {
+  } catch (error: unknown) {
+    if (isAxios404(error)) return undefined;
     populateError(error, "خطأ فى جلب المورد");
   }
 };
 
-/** Delete supplier - DELETE /api/v1/suppliers/delete/{id} */
 export const deleteSupplier = async (id: number) => {
   try {
     const { data: response } = await api.delete<TSupplierResponse>(
-      `/suppliers/delete/${id}`
+      `/suppliers/delete/${id}`,
     );
     return response;
   } catch (error) {
@@ -95,12 +109,29 @@ export const deleteSupplier = async (id: number) => {
   }
 };
 
-/** List supplier orders - GET /api/v1/supplier-orders */
+export const getSuppliersList = async (): Promise<
+  TSupplierResponse[] | undefined
+> => {
+  try {
+    const { data: response } = await api.get<TSuppliersListResponse>(
+      "/suppliers",
+      { params: { page: 1, per_page: 500 } },
+    );
+    return response?.data ?? [];
+  } catch (error) {
+    populateError(error, "خطأ فى جلب قائمة الموردين");
+  }
+};
+
+// ---------------------------------------------------------------------------
+// Supplier Orders
+// ---------------------------------------------------------------------------
+
 export const getSupplierOrders = async (page: number, per_page: number) => {
   try {
     const { data: response } = await api.get<TSupplierOrdersListResponse>(
       "/supplier-orders",
-      { params: { page, per_page } }
+      { params: { page, per_page } },
     );
     return response;
   } catch (error) {
@@ -108,16 +139,15 @@ export const getSupplierOrders = async (page: number, per_page: number) => {
   }
 };
 
-/** Supplier orders by supplier_id - GET /api/v1/supplier-orders?supplier_id={id} */
 export const getSupplierOrdersBySupplierId = async (
   supplierId: number,
   page: number,
-  per_page: number
+  per_page: number,
 ) => {
   try {
     const { data: response } = await api.get<TSupplierOrdersListResponse>(
       "/supplier-orders",
-      { params: { supplier_id: supplierId, page, per_page } }
+      { params: { supplier_id: supplierId, page, per_page } },
     );
     return response;
   } catch (error) {
@@ -125,12 +155,32 @@ export const getSupplierOrdersBySupplierId = async (
   }
 };
 
-/** Create supplier order - POST /api/v1/supplier-orders/store */
-export const createSupplierOrder = async (data: TCreateSupplierOrderRequest) => {
+/**
+ * Fetches all orders for a supplier then returns the one matching `orderId`.
+ * Falls back to `undefined` when the order is not found.
+ */
+export const getSupplierOrder = async (
+  supplierId: number,
+  orderId: number,
+): Promise<TSupplierOrderDetailResponse | undefined> => {
+  try {
+    const { data: response } = await api.get<TSupplierOrdersListResponse>(
+      "/supplier-orders",
+      { params: { supplier_id: supplierId, page: 1, per_page: 500 } },
+    );
+    return response?.data?.find((o) => o.id === orderId);
+  } catch (error) {
+    populateError(error, "خطأ فى جلب تفاصيل الطلبية");
+  }
+};
+
+export const createSupplierOrder = async (
+  data: TCreateSupplierOrderRequest,
+) => {
   try {
     const { data: response } = await api.post(
       "/supplier-orders/store",
-      data
+      data,
     );
     return response;
   } catch (error) {
@@ -138,15 +188,14 @@ export const createSupplierOrder = async (data: TCreateSupplierOrderRequest) => 
   }
 };
 
-/** Update supplier order - PUT /api/v1/supplier-orders/update/{id} */
 export const updateSupplierOrder = async (
   id: number,
-  data: TUpdateSupplierOrderRequest
+  data: TUpdateSupplierOrderRequest,
 ) => {
   try {
     const { data: response } = await api.put(
       `/supplier-orders/update/${id}`,
-      data
+      data,
     );
     return response;
   } catch (error) {
@@ -154,15 +203,14 @@ export const updateSupplierOrder = async (
   }
 };
 
-/** Add payment to supplier order - POST /api/v1/supplier-orders/add-payment/{id} */
 export const addPaymentToSupplierOrder = async (
   id: number,
-  body: { amount: number }
+  body: { clothes: { cloth_id: number; amount: number }[] },
 ) => {
   try {
     const { data: response } = await api.post(
       `/supplier-orders/add-payment/${id}`,
-      body
+      body,
     );
     return response;
   } catch (error) {
@@ -170,28 +218,14 @@ export const addPaymentToSupplierOrder = async (
   }
 };
 
-/** Return supplier order - POST /api/v1/supplier-orders/return/{id} */
 export const returnSupplierOrder = async (id: number) => {
   try {
     const { data: response } = await api.post(
       `/supplier-orders/return/${id}`,
-      {}
+      {},
     );
     return response;
   } catch (error) {
     populateError(error, "خطأ فى إرجاع الطلبية");
-  }
-};
-
-/** Suppliers list for dropdown - GET /suppliers (single page) */
-export const getSuppliersList = async (): Promise<TSupplierResponse[] | undefined> => {
-  try {
-    const { data: response } = await api.get<TSuppliersListResponse>(
-      "/suppliers",
-      { params: { page: 1, per_page: 500 } }
-    );
-    return response?.data ?? [];
-  } catch (error) {
-    populateError(error, "خطأ فى جلب قائمة الموردين");
   }
 };

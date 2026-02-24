@@ -36,14 +36,18 @@ import {
   TClothesStatus,
 } from "@/api/v2/clothes/clothes.types";
 import { EntitySelect } from "@/components/custom/EntitySelect";
+import { CategoriesSelect } from "@/components/custom/CategoriesSelect";
+import { SubcategoriesSelect } from "@/components/custom/SubcategoriesSelect";
 import { toast } from "sonner";
 
-// Schema: كود المنتج، المقاسات (كلها اختيارية)، الحالة، المكان، ملاحظات (اختياري)
+// Schema: كود المنتج، المقاسات (اختيارية)، الحالة، المكان، قسم المنتجات (اختياري)، ملاحظات (اختياري)
 const formSchema = z.object({
   code: z.string().min(1, { message: "كود المنتج مطلوب" }),
   breast_size: z.string().optional(),
   waist_size: z.string().optional(),
   sleeve_size: z.string().optional(),
+  category_id: z.string().optional(),
+  subcategory_ids: z.array(z.string()).optional(),
   status: z.enum(
     [
       "damaged",
@@ -91,6 +95,8 @@ export function EditClothModal({ cloth, open, onOpenChange }: Props) {
       breast_size: "",
       waist_size: "",
       sleeve_size: "",
+      category_id: "",
+      subcategory_ids: [],
       status: "ready_for_rent",
       entity_type: undefined,
       entity_id: "",
@@ -106,6 +112,8 @@ export function EditClothModal({ cloth, open, onOpenChange }: Props) {
         breast_size: cloth.breast_size || "",
         waist_size: cloth.waist_size || "",
         sleeve_size: cloth.sleeve_size || "",
+        category_id: cloth.category_id != null ? String(cloth.category_id) : "",
+        subcategory_ids: (cloth.subcategory_ids ?? []).map(String),
         status: cloth.status,
         entity_type: cloth.entity_type,
         entity_id: cloth.entity_id.toString(),
@@ -126,6 +134,11 @@ export function EditClothModal({ cloth, open, onOpenChange }: Props) {
       breast_size: values.breast_size || undefined,
       waist_size: values.waist_size || undefined,
       sleeve_size: values.sleeve_size || undefined,
+      category_id: values.category_id ? Number(values.category_id) : undefined,
+      subcategory_ids:
+        values.subcategory_ids?.length
+          ? values.subcategory_ids.map((id) => Number(id))
+          : undefined,
     };
 
     updateCloth(
@@ -219,6 +232,51 @@ export function EditClothModal({ cloth, open, onOpenChange }: Props) {
                 )}
               />
             </div>
+
+            {/* قسم المنتجات (اختياري) */}
+            <FormField
+              control={form.control}
+              name="category_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>قسم المنتجات (اختياري)</FormLabel>
+                  <FormControl>
+                    <CategoriesSelect
+                      value={field.value ?? ""}
+                      onChange={(id) => {
+                        field.onChange(id);
+                        form.setValue("subcategory_ids", []);
+                      }}
+                      disabled={isPending}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="subcategory_ids"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>أقسام المنتجات الفرعية (اختياري)</FormLabel>
+                  <FormControl>
+                    <SubcategoriesSelect
+                      multiple
+                      value={field.value ?? []}
+                      onChange={field.onChange}
+                      category_id={
+                        form.watch("category_id")
+                          ? Number(form.watch("category_id"))
+                          : undefined
+                      }
+                      disabled={isPending}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}

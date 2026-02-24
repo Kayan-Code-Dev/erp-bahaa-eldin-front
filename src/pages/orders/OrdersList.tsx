@@ -1,8 +1,21 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useSearchParams, useNavigate } from "react-router";
-import { Download, Eye, Pencil, FileText, FileUser, FileCheck, Filter } from "lucide-react";
+import {
+  Download,
+  Eye,
+  Pencil,
+  FileText,
+  FileUser,
+  FileCheck,
+  Filter,
+  CreditCard,
+  Trash2,
+  Ban,
+  CheckCircle,
+  ShieldPlus,
+} from "lucide-react";
 import {
   Table,
   TableHeader,
@@ -28,6 +41,9 @@ import CustomPagination from "@/components/custom/CustomPagination";
 import {
   useExportOrdersToCSVMutationOptions,
   useGetOrdersQueryOptions,
+  useCancelOrderMutationOptions,
+  useDeleteOrderMutationOptions,
+  useDeliverOrderMutationOptions,
 } from "@/api/v2/orders/orders.hooks";
 import { TOrder } from "@/api/v2/orders/orders.types";
 import { formatDate, toEnglishNumerals } from "@/utils/formatDate";
@@ -36,9 +52,21 @@ import { OrdersTableSkeleton } from "./OrdersTableSkeleton";
 import { OrderDetailsModal } from "./OrderDetailsModal";
 import { OrderInvoicePrintModal } from "./OrderInvoicePrintModal";
 import { OrderReceiptAckPrintModal } from "./OrderReceiptAckPrintModal";
+import { CreateCustodyModal } from "./CreateCustodyModal";
+import { CreatePaymentModal } from "./CreatePaymentModal";
 import { getOrderTypeLabel } from "@/api/v2/orders/order.utils";
 import { OrderEmployeeName } from "@/components/custom/OrderEmployeeName";
-// dropdown menu imports removed after replacing menu with direct buttons
+import { getAllCustodies } from "@/api/v2/custody/custody.service";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Tooltip,
   TooltipContent,
@@ -110,7 +138,6 @@ function OrdersList() {
   const per_page = 10;
   const [showFilters, setShowFilters] = useState(false);
 
-  // Filters form
   const form = useForm<OrdersFilterFormValues>({
     resolver: zodResolver(ordersFilterSchema),
     defaultValues: {
@@ -151,7 +178,6 @@ function OrdersList() {
     };
   }, [debouncedFormValues]);
 
-  // Modal state
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<TOrder | null>(null);
   const [printModalOpen, setPrintModalOpen] = useState(false);
@@ -161,10 +187,16 @@ function OrdersList() {
   const [selectedOrderForAck, setSelectedOrderForAck] = useState<TOrder | null>(null);
   const [orderTypeFilter, setOrderTypeFilter] = useState<TOrder["order_type"] | "all">("all");
 
-  // Data fetching
-  const { data, isPending } = useQuery(
+  const { data, isPending, refetch } = useQuery(
     useGetOrdersQueryOptions(page, per_page, filters)
   );
+
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [orderToAction, setOrderToAction] = useState<TOrder | null>(null);
+  const [custodyModalOrder, setCustodyModalOrder] = useState<TOrder | null>(null);
+  const [paymentModalOrder, setPaymentModalOrder] = useState<TOrder | null>(null);
+  const [hasCustodyByOrderId, setHasCustodyByOrderId] = useState<Record<number, boolean>>({});
 
   const displayedOrders = useMemo(() => {
     if (!data?.data) return [];
@@ -172,36 +204,157 @@ function OrdersList() {
     return data.data.filter((order) => order.order_type === orderTypeFilter);
   }, [data?.data, orderTypeFilter]);
 
-  // Export Mutation
+  const orderIdsKey = useMemo(
+    () => displayedOrders.map((o) => o.id).join(","),
+    [displayedOrders],
+  );
+  const lastCustodyKey = useRef("");
+
+  useEffect(() => {
+    if (!displayedOrders.length || orderIdsKey === lastCustodyKey.current) {
+      if (!displayedOrders.length) setHasCustodyByOrderId({});
+      return;
+    }
+    lastCustodyKey.current = orderIdsKey;
+
+    let cancelled = false;
+    const load = async () => {
+      const entries = await Promise.all(
+        displayedOrders.map(async (order) => {
+          try {
+            const res = await getAllCustodies({
+              order_id: order.id,
+              client_id: order.client_id,
+              page: 1,
+              per_page: 1,
+            });
+            const hasAny =
+              !!res &&
+              Array.isArray((res as { data?: unknown }).data) &&
+              (res as { data: unknown[] }).data.length > 0;
+            return [order.id, hasAny] as const;
+          } catch {
+            return [order.id, false] as const;
+          }
+        }),
+      );
+      if (cancelled) return;
+      const map: Record<number, boolean> = {};
+      for (const [id, has] of entries) map[id] = has;
+      setHasCustodyByOrderId(map);
+    };
+    load();
+    return () => { cancelled = true; };
+  }, [displayedOrders, orderIdsKey]);
+
   const { mutate: exportOrdersToCSV, isPending: isExporting } = useMutation(
     useExportOrdersToCSVMutationOptions()
   );
 
-  // Modal handlers
-  const handleOpenView = (order: TOrder) => {
+  const handleOpenView = useCallback((order: TOrder) => {
     setSelectedOrder(order);
     setIsViewModalOpen(true);
-  };
+  }, []);
 
-  // Navigation handlers
-  const handleEditOrder = (order: TOrder) => {
-    navigate("/orders/update-clothes-in-order", { state: { order } });
-  };
+  const handleEditOrder = useCallback(
+    (order: TOrder) => navigate("/orders/update-clothes-in-order", { state: { order } }),
+    [navigate],
+  );
 
-  const handleViewOrder = (order: TOrder) => {
-    navigate(`/orders/${order.id}`);
-  };
+  const handleViewOrder = useCallback(
+    (order: TOrder) => navigate(`/orders/${order.id}`),
+    [navigate],
+  );
 
-  const handlePrintInvoice = (order: TOrder, copyLabel?: string) => {
+  const handlePrintInvoice = useCallback((order: TOrder, copyLabel?: string) => {
     setSelectedOrderForPrint(order);
     setPrintCopyLabel(copyLabel);
     setPrintModalOpen(true);
-  };
+  }, []);
 
-  const handlePrintAck = (order: TOrder) => {
+  const handlePrintAck = useCallback((order: TOrder) => {
     setSelectedOrderForAck(order);
     setAckModalOpen(true);
+  }, []);
+
+  const { mutate: deliverOrder, isPending: isDelivering } = useMutation(
+    useDeliverOrderMutationOptions()
+  );
+  const { mutate: cancelOrder, isPending: isCanceling } = useMutation(
+    useCancelOrderMutationOptions()
+  );
+  const { mutate: deleteOrder, isPending: isDeleting } = useMutation(
+    useDeleteOrderMutationOptions()
+  );
+
+  const handleMarkAsDelivered = (order: TOrder) => {
+    deliverOrder(order.id, {
+      onSuccess: () => {
+        toast.success(`تم تسليم الطلب #${order.id} بنجاح`);
+        refetch();
+      },
+      onError: (error: { message?: string }) => {
+        toast.error("خطأ أثناء تسليم الطلب", { description: error.message });
+      },
+    });
   };
+
+  const handleAddPayment = useCallback((order: TOrder) => {
+    setPaymentModalOrder(order);
+  }, []);
+
+  const handleOpenCancelDialog = useCallback((order: TOrder) => {
+    setOrderToAction(order);
+    setShowCancelDialog(true);
+  }, []);
+
+  const handleOpenDeleteDialog = useCallback((order: TOrder) => {
+    setOrderToAction(order);
+    setShowDeleteDialog(true);
+  }, []);
+
+  const handleCancelOrder = () => {
+    if (!orderToAction) return;
+    cancelOrder(orderToAction.id, {
+      onSuccess: () => {
+        toast.success(`تم إلغاء الطلب #${orderToAction.id} بنجاح`);
+        setShowCancelDialog(false);
+        setOrderToAction(null);
+        refetch();
+      },
+      onError: (error: { message?: string }) => {
+        toast.error("خطأ أثناء إلغاء الطلب", { description: error.message });
+      },
+    });
+  };
+
+  const handleDeleteOrder = () => {
+    if (!orderToAction) return;
+    deleteOrder(orderToAction.id, {
+      onSuccess: () => {
+        toast.success(`تم حذف الطلب #${orderToAction.id} بنجاح`);
+        setShowDeleteDialog(false);
+        setOrderToAction(null);
+        refetch();
+      },
+      onError: (error: { message?: string }) => {
+        toast.error("خطأ أثناء حذف الطلب", { description: error.message });
+      },
+    });
+  };
+
+  const isActive = (o: TOrder) =>
+    o.status !== "canceled" && o.status !== "delivered";
+  const canMarkAsDelivered = (o: TOrder) => isActive(o);
+  const canCancelOrder = (o: TOrder) => isActive(o);
+  const canEditOrder = (o: TOrder) => isActive(o);
+  const canPrintOrder = (o: TOrder) => o.status !== "canceled";
+  const canAddPayment = (o: TOrder) =>
+    o.status !== "paid" && o.status !== "canceled";
+  const canCreateCustodyForOrder = (o: TOrder) =>
+    o.order_type === "rent" && !hasCustodyByOrderId[o.id] && isActive(o);
+  const canDeleteOrder = (o: TOrder) =>
+    o.status === "canceled" || o.status === "created";
 
   // --- Export Handler ---
   const handleExport = () => {
@@ -217,9 +370,9 @@ function OrdersList() {
         window.URL.revokeObjectURL(url);
         toast.success("تم تصدير الطلبات بنجاح");
       },
-      onError: (error: any) => {
+      onError: (error: { message?: string }) => {
         toast.error("خطأ أثناء تصدير الطلبات. الرجاء المحاولة مرة أخرى.", {
-          description: error.message,
+          description: error?.message,
         });
       },
     });
@@ -662,71 +815,163 @@ function OrdersList() {
                                     عرض التفاصيل
                                   </TooltipContent>
                                 </Tooltip>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      variant="outline"
-                                      size="icon"
-                                      className="h-8 w-8 shrink-0"
-                                      onClick={() => handleEditOrder(order)}
-                                    >
-                                      <Pencil className="h-4 w-4" />
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent side="top">
-                                    تعديل
-                                  </TooltipContent>
-                                </Tooltip>
-                                {/* Management copy */}
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      variant="outline"
-                                      size="icon"
-                                      className="h-8 w-8 shrink-0"
-                                      onClick={() => handlePrintInvoice(order)}
-                                    >
-                                      <FileText className="h-4 w-4" />
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent side="top">
-                                    نسخة إدارة
-                                  </TooltipContent>
-                                </Tooltip>
-                                {/* Client copy */}
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      variant="outline"
-                                      size="icon"
-                                      className="h-8 w-8 shrink-0"
-                                      onClick={() =>
-                                        handlePrintInvoice(order, "نسخة العميل")
-                                      }
-                                    >
-                                      <FileUser className="h-4 w-4" />
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent side="top">
-                                    نسخة عميل
-                                  </TooltipContent>
-                                </Tooltip>
-                                {/* Receipt acknowledgment */}
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      variant="outline"
-                                      size="icon"
-                                      className="h-8 w-8 shrink-0"
-                                      onClick={() => handlePrintAck(order)}
-                                    >
-                                      <FileCheck className="h-4 w-4" />
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent side="top">
-                                    إقرار استلام
-                                  </TooltipContent>
-                                </Tooltip>
+                                {canEditOrder(order) && (
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        variant="outline"
+                                        size="icon"
+                                        className="h-8 w-8 shrink-0"
+                                        onClick={() => handleEditOrder(order)}
+                                      >
+                                        <Pencil className="h-4 w-4" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top">
+                                      تعديل
+                                    </TooltipContent>
+                                  </Tooltip>
+                                )}
+                                {canPrintOrder(order) && (
+                                  <>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button
+                                          variant="outline"
+                                          size="icon"
+                                          className="h-8 w-8 shrink-0"
+                                          onClick={() => handlePrintInvoice(order)}
+                                        >
+                                          <FileText className="h-4 w-4" />
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent side="top">
+                                        نسخة إدارة
+                                      </TooltipContent>
+                                    </Tooltip>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button
+                                          variant="outline"
+                                          size="icon"
+                                          className="h-8 w-8 shrink-0"
+                                          onClick={() =>
+                                            handlePrintInvoice(order, "نسخة العميل")
+                                          }
+                                        >
+                                          <FileUser className="h-4 w-4" />
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent side="top">
+                                        نسخة عميل
+                                      </TooltipContent>
+                                    </Tooltip>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button
+                                          variant="outline"
+                                          size="icon"
+                                          className="h-8 w-8 shrink-0"
+                                          onClick={() => handlePrintAck(order)}
+                                        >
+                                          <FileCheck className="h-4 w-4" />
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent side="top">
+                                        إقرار استلام
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </>
+                                )}
+                                {canMarkAsDelivered(order) && (
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        variant="outline"
+                                        size="icon"
+                                        className="h-8 w-8 shrink-0"
+                                        onClick={() => handleMarkAsDelivered(order)}
+                                        disabled={isDelivering}
+                                      >
+                                        <CheckCircle className="h-4 w-4 text-emerald-600" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top">
+                                      تعليم كـ تم التسليم
+                                    </TooltipContent>
+                                  </Tooltip>
+                                )}
+                                {canAddPayment(order) && (
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        variant="outline"
+                                        size="icon"
+                                        className="h-8 w-8 shrink-0"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleAddPayment(order);
+                                        }}
+                                      >
+                                        <CreditCard className="h-4 w-4 text-blue-600" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top">
+                                      إضافة دفعة
+                                    </TooltipContent>
+                                  </Tooltip>
+                                )}
+                                {canCreateCustodyForOrder(order) && (
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button
+                                          variant="outline"
+                                          size="icon"
+                                          className="h-8 w-8 shrink-0"
+                                          onClick={() => setCustodyModalOrder(order)}
+                                        >
+                                          <ShieldPlus className="h-4 w-4 text-purple-600" />
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent side="top">
+                                        إنشاء ضمان
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  )}
+                                {canCancelOrder(order) && (
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        variant="outline"
+                                        size="icon"
+                                        className="h-8 w-8 shrink-0"
+                                        onClick={() => handleOpenCancelDialog(order)}
+                                      >
+                                        <Ban className="h-4 w-4 text-yellow-700" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top">
+                                      إلغاء الحجز
+                                    </TooltipContent>
+                                  </Tooltip>
+                                )}
+                                {canDeleteOrder(order) && (
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        variant="outline"
+                                        size="icon"
+                                        className="h-8 w-8 shrink-0"
+                                        onClick={() => handleOpenDeleteDialog(order)}
+                                      >
+                                        <Trash2 className="h-4 w-4 text-red-600" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top">
+                                      حذف الطلب
+                                    </TooltipContent>
+                                  </Tooltip>
+                                )}
                               </div>
                             </TooltipProvider>
                           </div>
@@ -836,6 +1081,90 @@ function OrdersList() {
         open={ackModalOpen}
         onOpenChange={setAckModalOpen}
       />
+
+      {/* Cancel Order Dialog */}
+      <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>إلغاء الطلب #{orderToAction?.id}</AlertDialogTitle>
+            <AlertDialogDescription>
+              هل أنت متأكد من إلغاء هذا الطلب؟ هذا الإجراء لا يمكن التراجع عنه.
+              {Number(orderToAction?.paid ?? 0) > 0 && (
+                <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded">
+                  ⚠️ هذا الطلب لديه مدفوعات. تأكد من معالجة المدفوعات قبل الإلغاء.
+                </div>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleCancelOrder}
+              className="bg-red-600 hover:bg-red-700"
+              disabled={isCanceling}
+            >
+              {isCanceling ? "جاري الإلغاء..." : "تأكيد الإلغاء"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Order Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>حذف الطلب #{orderToAction?.id}</AlertDialogTitle>
+            <AlertDialogDescription>
+              ⚠️ هذا الإجراء لا يمكن التراجع عنه.
+              <br />
+              سيتم حذف الطلب بشكل نهائي من قاعدة البيانات.
+              {Number(orderToAction?.paid ?? 0) > 0 && (
+                <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded">
+                  ⚠️ تنبيه: هذا الطلب لديه مدفوعات. الحذف قد يؤثر على السجلات المالية.
+                </div>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteOrder}
+              className="bg-red-600 hover:bg-red-700"
+              disabled={isDeleting}
+            >
+              {isDeleting ? "جاري الحذف..." : "تأكيد الحذف"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Create Custody Modal */}
+      {custodyModalOrder && (
+        <CreateCustodyModal
+          open={!!custodyModalOrder}
+          onOpenChange={(open) => !open && setCustodyModalOrder(null)}
+          orderId={custodyModalOrder.id}
+          onSuccess={() => {
+            refetch();
+            setCustodyModalOrder(null);
+          }}
+        />
+      )}
+
+      {/* Add Payment Modal */}
+      {paymentModalOrder && (
+        <CreatePaymentModal
+          open={!!paymentModalOrder}
+          onOpenChange={(open) => {
+            if (!open) setPaymentModalOrder(null);
+          }}
+          order={paymentModalOrder}
+          onSuccess={() => {
+            refetch();
+            setPaymentModalOrder(null);
+          }}
+        />
+      )}
     </div>
   );
 }

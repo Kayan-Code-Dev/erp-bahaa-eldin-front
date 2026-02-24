@@ -8,27 +8,43 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useCallback, useEffect, useState } from "react";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { useMutation } from "@tanstack/react-query";
-import { useAddPaymentToSupplierOrderMutationOptions } from "@/api/v2/suppliers/suppliers.hooks";
-import { TSupplierOrderResponse } from "@/api/v2/suppliers/suppliers.types";
+  useAddPaymentToSupplierOrderMutationOptions,
+  useGetSupplierOrderQueryOptions,
+} from "@/api/v2/suppliers/suppliers.hooks";
+import {
+  TSupplierOrderResponse,
+  TSupplierOrderClothItem,
+  resolveClothId,
+} from "@/api/v2/suppliers/suppliers.types";
+import { toEnglishNumerals } from "@/utils/formatDate";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
-const formSchema = z.object({
-  amount: z.number().min(0.01, { message: "المبلغ يجب أن يكون أكبر من صفر" }),
-});
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
 
-type FormValues = z.infer<typeof formSchema>;
+function formatCurrency(value: string | number | null | undefined): string {
+  if (value == null || value === "") return "—";
+  const num = typeof value === "number" ? value : parseFloat(String(value));
+  if (Number.isNaN(num)) return "—";
+  return `${toEnglishNumerals(num.toLocaleString("en-US", { minimumFractionDigits: 2 }))} ج.م`;
+}
+
+function clothDisplayName(cloth: TSupplierOrderClothItem): string {
+  return (
+    [cloth.name, cloth.code].filter(Boolean).join(" — ") ||
+    `قطعة #${resolveClothId(cloth)}`
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
 
 type Props = {
   order: TSupplierOrderResponse | null;
@@ -36,115 +52,175 @@ type Props = {
   onOpenChange: (open: boolean) => void;
 };
 
-function formatCurrency(value: string | null | undefined): string {
-  if (value == null || value === "") return "—";
-  const num = parseFloat(String(value));
-  if (Number.isNaN(num)) return "—";
-  return `${num.toLocaleString("ar-EG", { minimumFractionDigits: 2 })} ج.م`;
-}
-
 export function AddPaymentToSupplierOrderModal({
   order,
   open,
   onOpenChange,
 }: Props) {
-  const { mutate: addPayment, isPending } = useMutation(
-    useAddPaymentToSupplierOrderMutationOptions()
+  const orderId = order?.id ?? 0;
+  const supplierId = order?.supplier_id ?? 0;
+
+  // ---- data fetching ----
+  const { data: orderDetail, isLoading } = useQuery(
+    useGetSupplierOrderQueryOptions(supplierId, orderId, {
+      enabled: open && orderId > 0 && supplierId > 0,
+    }),
   );
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: { amount: 0 },
-  });
+  const { mutate: addPayment, isPending } = useMutation(
+    useAddPaymentToSupplierOrderMutationOptions(),
+  );
 
-  const handleOpenChange = (next: boolean) => {
-    if (!next) {
-      form.reset({ amount: 0 });
+  const orderClothes = orderDetail?.clothes ?? [];
+
+  // ---- local state: amount string per index ----
+  const [amounts, setAmounts] = useState<Record<number, string>>({});
+
+  useEffect(() => {
+    if (!open) return;
+    if (orderClothes.length > 0) {
+      const init: Record<number, string> = {};
+      orderClothes.forEach((_, i) => {
+        init[i] = "";
+      });
+      setAmounts(init);
     }
-    onOpenChange(next);
-  };
+  }, [open, orderClothes.length]);
 
-  const onSubmit = (values: FormValues) => {
+  // ---- handlers ----
+  const handleClose = useCallback(() => {
+    setAmounts({});
+    onOpenChange(false);
+  }, [onOpenChange]);
+
+  const handleAmountChange = useCallback((index: number, value: string) => {
+    setAmounts((prev) => ({ ...prev, [index]: value }));
+  }, []);
+
+  const handleSubmit = () => {
     if (!order) return;
+
+    const clothes = orderClothes
+      .map((c, i) => ({
+        cloth_id: resolveClothId(c),
+        amount: parseFloat(amounts[i] ?? "") || 0,
+      }))
+      .filter((c) => c.cloth_id > 0 && c.amount > 0);
+
+    if (clothes.length === 0) {
+      toast.error("أدخل مبلغاً أكبر من صفر لقطعة واحدة على الأقل");
+      return;
+    }
+
     addPayment(
-      { id: order.id, amount: values.amount },
+      { id: order.id, clothes },
       {
         onSuccess: () => {
           toast.success("تم إضافة الدفعة بنجاح");
-          handleOpenChange(false);
+          handleClose();
         },
-        onError: (error: { message?: string }) => {
+        onError: (err: { message?: string }) => {
           toast.error("حدث خطأ أثناء إضافة الدفعة", {
-            description: error?.message,
+            description: err?.message,
           });
         },
-      }
+      },
     );
   };
 
+  // ---- derived ----
   const remaining = order
     ? parseFloat(String(order.remaining_payment || 0))
     : 0;
 
+  // ---- render ----
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-md" dir="rtl">
+    <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
+      <DialogContent className="sm:max-w-lg" dir="rtl">
         <DialogHeader>
           <DialogTitle className="text-center">إضافة دفعة لطلبية</DialogTitle>
           <DialogDescription className="text-center">
             {order && (
               <span>
-                الطلبية #{order.id}
+                الطلبية #{toEnglishNumerals(order.id)}
                 {order.order_number && ` (${order.order_number})`} — المتبقي:{" "}
                 {formatCurrency(order.remaining_payment)}
               </span>
             )}
           </DialogDescription>
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="amount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>المبلغ (ج.م)</FormLabel>
-                  <FormControl>
+
+        {isLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
+        ) : orderClothes.length === 0 ? (
+          <p className="py-4 text-center text-muted-foreground">
+            لا توجد قطع في هذه الطلبية.
+          </p>
+        ) : (
+          <div className="space-y-4">
+            <Label>المبلغ لكل قطعة</Label>
+
+            <div className="rounded-md border divide-y max-h-[320px] overflow-y-auto">
+              {orderClothes.map((cloth, index) => (
+                <div
+                  key={`cloth-${index}-${resolveClothId(cloth)}`}
+                  className="p-3 space-y-2 even:bg-muted/20"
+                >
+                  <div className="text-sm font-medium">
+                    {clothDisplayName(cloth)}
+                  </div>
+
+                  <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                    <span>المدفوع: {formatCurrency(cloth.payment)}</span>
+                    <span>الباقي: {formatCurrency(cloth.remaining)}</span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Label className="text-xs shrink-0">مبلغ الدفعة:</Label>
                     <Input
                       type="number"
                       min={0}
                       step={0.01}
                       placeholder="0.00"
-                      value={field.value === 0 ? "" : field.value}
-                      onChange={(e) => {
-                        const v = e.target.value;
-                        field.onChange(v === "" ? 0 : parseFloat(v) || 0);
-                      }}
+                      className="max-w-[140px]"
+                      value={amounts[index] ?? ""}
+                      onChange={(e) =>
+                        handleAmountChange(index, e.target.value)
+                      }
                     />
-                  </FormControl>
-                  <FormMessage />
-                  {remaining > 0 && (
-                    <p className="text-xs text-muted-foreground">
-                      المتبقي على الطلبية: {remaining.toLocaleString("ar-EG", { minimumFractionDigits: 2 })} ج.م
-                    </p>
-                  )}
-                </FormItem>
-              )}
-            />
+                    <span className="text-xs text-muted-foreground">ج.م</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {remaining > 0 && (
+              <p className="text-xs text-muted-foreground">
+                المتبقي على الطلبية: {formatCurrency(remaining)}
+              </p>
+            )}
+
             <DialogFooter className="gap-2">
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => handleOpenChange(false)}
+                onClick={handleClose}
+                disabled={isPending}
               >
                 إلغاء
               </Button>
-              <Button type="submit" disabled={isPending}>
+              <Button
+                type="button"
+                onClick={handleSubmit}
+                disabled={isPending}
+              >
                 {isPending ? "جاري الإضافة..." : "إضافة الدفعة"}
               </Button>
             </DialogFooter>
-          </form>
-        </Form>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

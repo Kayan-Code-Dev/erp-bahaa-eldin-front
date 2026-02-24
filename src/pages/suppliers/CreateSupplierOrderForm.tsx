@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Loader2 } from "lucide-react";
-import * as React from "react";
+import { useEffect } from "react";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -45,9 +45,13 @@ import { CustomCalendar } from "@/components/custom/CustomCalendar";
 import { CategoriesSelect } from "@/components/custom/CategoriesSelect";
 import { SubcategoriesSelect } from "@/components/custom/SubcategoriesSelect";
 import { BranchesSelect } from "@/components/custom/BranchesSelect";
-import { EntitySelect } from "@/components/custom/EntitySelect";
+import { toEnglishNumerals } from "@/utils/formatDate";
 
-const STATUS_OPTIONS: { value: string; label: string }[] = [
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+const STATUS_OPTIONS = [
   { value: "ready_for_rent", label: "جاهز للإيجار" },
   { value: "rented", label: "مؤجر" },
   { value: "damaged", label: "تالف" },
@@ -55,20 +59,42 @@ const STATUS_OPTIONS: { value: string; label: string }[] = [
   { value: "scratched", label: "مخدوش" },
   { value: "repairing", label: "قيد الإصلاح" },
   { value: "die", label: "ميت" },
-];
+] as const;
+
+const DEFAULT_CLOTH_ITEM = {
+  code: "",
+  breast_size: "",
+  waist_size: "",
+  sleeve_size: "",
+  notes: null as string | null,
+  status: "ready_for_rent",
+  entity_type: "branch" as const,
+  entity_id: "",
+  category_id: "",
+  subcategory_ids: [] as string[],
+  price: 0,
+  payment: 0,
+};
+
+// ---------------------------------------------------------------------------
+// Schema
+// ---------------------------------------------------------------------------
 
 const clothItemSchema = z.object({
   code: z.string().min(1, "كود الصنف مطلوب"),
-  name: z.string().min(1, "اسم الصنف مطلوب"),
-  description: z.string().optional(),
-  breast_size: z.string().min(1, "مقاس الصدر مطلوب"),
-  waist_size: z.string().min(1, "مقاس الخصر مطلوب"),
-  sleeve_size: z.string().min(1, "مقاس الكم مطلوب"),
+  breast_size: z.string().optional(),
+  waist_size: z.string().optional(),
+  sleeve_size: z.string().optional(),
   notes: z.string().optional().nullable(),
-  status: z.string().min(1, "الحالة مطلوبة"),
-  entity_type: z.enum(["branch", "factory", "workshop"], { required_error: "نوع المكان مطلوب" }),
+  status: z.string().optional(),
+  entity_type: z.enum(["branch", "factory", "workshop"], {
+    required_error: "نوع المكان مطلوب",
+  }),
   entity_id: z.string().min(1, "المكان مطلوب"),
+  category_id: z.string().optional(),
+  subcategory_ids: z.array(z.string()).optional(),
   price: z.number().min(0, "السعر يجب أن يكون ≥ 0"),
+  payment: z.number().min(0, "المدفوع يجب أن يكون ≥ 0"),
 });
 
 const formSchema = z
@@ -79,44 +105,44 @@ const formSchema = z
     supplier_code: z.string().optional(),
     supplier_phone: z.string().optional(),
     supplier_address: z.string().optional(),
-    category_id: z.string().min(1, { message: "قسم المنتجات مطلوب" }),
-    subcategory_id: z.string().min(1, { message: "قسم المنتجات الفرعي مطلوب" }),
-    branch_id: z.string().min(1, { message: "الفرع مطلوب" }),
     order_date: z.string().min(1, { message: "تاريخ الطلبية مطلوب" }),
-    total_amount: z.number().min(0, { message: "الإجمالي ≥ 0" }),
-    payment_amount: z.number().min(0, { message: "المدفوع ≥ 0" }),
-    remaining_payment: z.number().min(0, { message: "المتبقي ≥ 0" }),
+    total_amount: z.number().min(0),
+    payment_amount: z.number().min(0),
+    remaining_payment: z.number().min(0),
     notes: z.string().optional().nullable(),
-    clothes: z.array(clothItemSchema).min(1, { message: "يجب إضافة صنف واحد على الأقل" }),
-  })
-  .refine((data) => data.remaining_payment === data.total_amount - data.payment_amount, {
-    message: "المتبقي يجب أن يساوي (الإجمالي - المدفوع)",
-    path: ["remaining_payment"],
+    clothes: z
+      .array(clothItemSchema)
+      .min(1, { message: "يجب إضافة صنف واحد على الأقل" }),
   })
   .superRefine((data, ctx) => {
     if (data.add_new_supplier) {
-      if (!data.supplier_name?.trim()) ctx.addIssue({ code: "custom", message: "اسم المورد مطلوب", path: ["supplier_name"] });
-      if (!data.supplier_code?.trim()) ctx.addIssue({ code: "custom", message: "كود المورد مطلوب", path: ["supplier_code"] });
+      if (!data.supplier_name?.trim())
+        ctx.addIssue({
+          code: "custom",
+          message: "اسم المورد مطلوب",
+          path: ["supplier_name"],
+        });
+      if (!data.supplier_code?.trim())
+        ctx.addIssue({
+          code: "custom",
+          message: "كود المورد مطلوب",
+          path: ["supplier_code"],
+        });
     } else {
-      if (!data.supplier_id?.trim()) ctx.addIssue({ code: "custom", message: "المورد مطلوب", path: ["supplier_id"] });
+      if (!data.supplier_id?.trim())
+        ctx.addIssue({
+          code: "custom",
+          message: "المورد مطلوب",
+          path: ["supplier_id"],
+        });
     }
   });
 
 export type FormValues = z.infer<typeof formSchema>;
 
-const defaultClothItem = {
-  code: "",
-  name: "",
-  description: "",
-  breast_size: "",
-  waist_size: "",
-  sleeve_size: "",
-  notes: null as string | null,
-  status: "ready_for_rent",
-  entity_type: "branch" as const,
-  entity_id: "",
-  price: 0,
-};
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
 
 export type CreateSupplierOrderFormProps = {
   mode?: "page" | "modal";
@@ -133,21 +159,22 @@ export function CreateSupplierOrderForm({
 }: CreateSupplierOrderFormProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const supplierIdFromUrl = searchParams.get("supplier_id");
-  const initialSupplierId = initialSupplierIdProp ?? supplierIdFromUrl ?? "";
+  const initialSupplierId =
+    initialSupplierIdProp ?? searchParams.get("supplier_id") ?? "";
 
-  const { mutate: createSupplierMinimal, isPending: isCreatingSupplier } = useMutation(
-    useCreateSupplierMinimalMutationOptions()
-  );
-  const { mutate: createSupplierOrder, isPending: isCreatingOrder } = useMutation(
-    useCreateSupplierOrderMutationOptions()
-  );
+  // ---- mutations ----
+  const { mutate: createSupplierMinimal, isPending: isCreatingSupplier } =
+    useMutation(useCreateSupplierMinimalMutationOptions());
+  const { mutate: createSupplierOrder, isPending: isCreatingOrder } =
+    useMutation(useCreateSupplierOrderMutationOptions());
   const isPending = isCreatingSupplier || isCreatingOrder;
 
+  // ---- queries ----
   const { data: suppliersList, isLoading: isLoadingSuppliers } = useQuery(
-    useGetSuppliersListQueryOptions()
+    useGetSuppliersListQueryOptions(),
   );
 
+  // ---- form ----
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -157,36 +184,50 @@ export function CreateSupplierOrderForm({
       supplier_code: "",
       supplier_phone: "",
       supplier_address: "",
-      category_id: "",
-      subcategory_id: "",
-      branch_id: "",
       order_date: "",
       total_amount: 0,
       payment_amount: 0,
       remaining_payment: 0,
       notes: "",
-      clothes: [defaultClothItem],
+      clothes: [DEFAULT_CLOTH_ITEM],
     },
   });
 
-  const addNewSupplier = useWatch({ control: form.control, name: "add_new_supplier" });
+  const addNewSupplier = useWatch({
+    control: form.control,
+    name: "add_new_supplier",
+  });
 
-  React.useEffect(() => {
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "clothes",
+  });
+
+  const clothes = useWatch({ control: form.control, name: "clothes" });
+
+  // Sync initial supplier id from URL
+  useEffect(() => {
     if (initialSupplierId && form.getValues("supplier_id") !== initialSupplierId) {
       form.setValue("supplier_id", initialSupplierId);
     }
   }, [initialSupplierId, form]);
 
-  const { fields, append, remove } = useFieldArray({ control: form.control, name: "clothes" });
-  const categoryId = useWatch({ control: form.control, name: "category_id" });
-  const totalAmount = useWatch({ control: form.control, name: "total_amount" });
-  const paymentAmount = useWatch({ control: form.control, name: "payment_amount" });
+  // Auto-compute totals from clothes
+  useEffect(() => {
+    if (!Array.isArray(clothes) || clothes.length === 0) return;
+    const total = clothes.reduce((s, c) => s + (Number(c?.price) || 0), 0);
+    const payment = clothes.reduce((s, c) => s + (Number(c?.payment) || 0), 0);
+    const remaining = clothes.reduce(
+      (s, c) =>
+        s + Math.max(0, (Number(c?.price) || 0) - (Number(c?.payment) || 0)),
+      0,
+    );
+    form.setValue("total_amount", total);
+    form.setValue("payment_amount", payment);
+    form.setValue("remaining_payment", remaining);
+  }, [clothes, form]);
 
-  React.useEffect(() => {
-    const remaining = (totalAmount ?? 0) - (paymentAmount ?? 0);
-    form.setValue("remaining_payment", Math.max(0, remaining));
-  }, [totalAmount, paymentAmount, form]);
-
+  // ---- handlers ----
   const resetForm = () => {
     form.reset({
       add_new_supplier: false,
@@ -195,58 +236,73 @@ export function CreateSupplierOrderForm({
       supplier_code: "",
       supplier_phone: "",
       supplier_address: "",
-      category_id: "",
-      subcategory_id: "",
-      branch_id: "",
       order_date: "",
       total_amount: 0,
       payment_amount: 0,
       remaining_payment: 0,
       notes: "",
-      clothes: [defaultClothItem],
+      clothes: [DEFAULT_CLOTH_ITEM],
     });
   };
 
   const submitOrder = (supplierId: number, values: FormValues) => {
-    const clothes: TCreateSupplierOrderClothItem[] = values.clothes.map((c) => ({
-      code: c.code,
-      name: c.name,
-      description: c.description || undefined,
-      breast_size: c.breast_size,
-      waist_size: c.waist_size,
-      sleeve_size: c.sleeve_size,
-      notes: c.notes ?? undefined,
-      status: c.status,
-      entity_type: c.entity_type as "branch" | "factory" | "workshop",
-      entity_id: Number(c.entity_id),
-      price: Number(c.price),
-    }));
+    const clothesPayload: TCreateSupplierOrderClothItem[] = values.clothes.map(
+      (c) => {
+        const price = Number(c.price) || 0;
+        const payment = Number(c.payment) || 0;
+        return {
+          code: c.code,
+          breast_size: c.breast_size || undefined,
+          waist_size: c.waist_size || undefined,
+          sleeve_size: c.sleeve_size || undefined,
+          notes: c.notes ?? undefined,
+          status: c.status || undefined,
+          entity_type: "branch" as const,
+          entity_id: Number(c.entity_id),
+          category_id: c.category_id ? Number(c.category_id) : undefined,
+          subcategory_ids: c.subcategory_ids?.length
+            ? c.subcategory_ids.map(Number)
+            : undefined,
+          price,
+          payment,
+          remaining: Math.max(0, price - payment),
+        };
+      },
+    );
 
-    const requestData: TCreateSupplierOrderRequest = {
+    const firstCloth = values.clothes[0];
+    const payload: TCreateSupplierOrderRequest = {
       supplier_id: supplierId,
-      category_id: Number(values.category_id),
-      subcategory_id: Number(values.subcategory_id),
-      branch_id: Number(values.branch_id),
-      order_date: values.order_date,
-      payment_amount: Number(values.payment_amount),
-      total_amount: Number(values.total_amount),
-      remaining_payment: Number(values.remaining_payment),
+      category_id: firstCloth?.category_id ? Number(firstCloth.category_id) : 0,
+      subcategory_id: firstCloth?.subcategory_ids?.[0]
+        ? Number(firstCloth.subcategory_ids[0])
+        : 0,
+      branch_id: firstCloth?.entity_id ? Number(firstCloth.entity_id) : 0,
+      order_date: values.order_date?.slice(0, 10) ?? "",
+      total_amount: clothesPayload.reduce((s, c) => s + (c.price ?? 0), 0),
+      payment_amount: clothesPayload.reduce(
+        (s, c) => s + (c.payment ?? 0),
+        0,
+      ),
+      remaining_payment: clothesPayload.reduce(
+        (s, c) => s + (c.remaining ?? 0),
+        0,
+      ),
       notes: values.notes ?? undefined,
-      clothes,
+      clothes: clothesPayload,
     };
 
-    createSupplierOrder(requestData, {
+    createSupplierOrder(payload, {
       onSuccess: () => {
         toast.success("تم إنشاء طلبية المورد بنجاح");
         resetForm();
-        if (mode === "modal" && onSuccess) {
-          onSuccess();
-        } else {
-          navigate("/suppliers/orders");
-        }
+        if (mode === "modal" && onSuccess) onSuccess();
+        else navigate("/suppliers/orders");
       },
-      onError: (error: { message?: string }) => {
-        toast.error("حدث خطأ أثناء إنشاء طلبية المورد", { description: error?.message });
+      onError: (err: { message?: string }) => {
+        toast.error("حدث خطأ أثناء إنشاء طلبية المورد", {
+          description: err?.message,
+        });
       },
     });
   };
@@ -257,22 +313,27 @@ export function CreateSupplierOrderForm({
         {
           name: values.supplier_name!.trim(),
           code: values.supplier_code!.trim(),
-          ...(values.supplier_phone?.trim() && { phone: values.supplier_phone.trim() }),
-          ...(values.supplier_address?.trim() && { address: values.supplier_address.trim() }),
+          ...(values.supplier_phone?.trim() && {
+            phone: values.supplier_phone.trim(),
+          }),
+          ...(values.supplier_address?.trim() && {
+            address: values.supplier_address.trim(),
+          }),
         },
         {
           onSuccess: (data) => {
-            const newSupplierId = data?.id;
-            if (newSupplierId) {
-              submitOrder(newSupplierId, values);
+            if (data?.id) {
+              submitOrder(data.id, values);
             } else {
               toast.error("لم يتم الحصول على معرف المورد بعد الإنشاء");
             }
           },
-          onError: (error: { message?: string }) => {
-            toast.error("حدث خطأ أثناء إنشاء المورد", { description: error?.message });
+          onError: (err: { message?: string }) => {
+            toast.error("حدث خطأ أثناء إنشاء المورد", {
+              description: err?.message,
+            });
           },
-        }
+        },
       );
     } else {
       submitOrder(Number(values.supplier_id), values);
@@ -280,34 +341,40 @@ export function CreateSupplierOrderForm({
   };
 
   const handleCancel = () => {
-    if (mode === "modal" && onCancel) {
-      onCancel();
-    } else {
-      navigate("/suppliers/orders");
-    }
+    if (mode === "modal" && onCancel) onCancel();
+    else navigate("/suppliers/orders");
   };
 
+  // ---- render ----
   const formContent = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {/* Toggle: new / existing supplier */}
         <FormField
           control={form.control}
           name="add_new_supplier"
           render={({ field }) => (
             <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
               <div className="space-y-0.5">
-                <FormLabel className="text-base">إضافة مورد جديد لهذه الطلبية</FormLabel>
+                <FormLabel className="text-base">
+                  إضافة مورد جديد لهذه الطلبية
+                </FormLabel>
                 <p className="text-sm text-muted-foreground">
                   عند التفعيل أدخل اسم وكود المورد الجديد بدل اختيار مورد موجود
                 </p>
               </div>
               <FormControl>
-                <Switch checked={field.value} onCheckedChange={field.onChange} disabled={isPending} />
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  disabled={isPending}
+                />
               </FormControl>
             </FormItem>
           )}
         />
 
+        {/* Supplier selection / creation */}
         {!addNewSupplier ? (
           <FormField
             control={form.control}
@@ -331,9 +398,9 @@ export function CreateSupplierOrderForm({
                         <Loader2 className="h-4 w-4 animate-spin" />
                       </div>
                     ) : (
-                      suppliersList?.map((supplier) => (
-                        <SelectItem key={supplier.id} value={supplier.id.toString()}>
-                          {supplier.name}
+                      suppliersList?.map((s) => (
+                        <SelectItem key={s.id} value={String(s.id)}>
+                          {s.name}
                         </SelectItem>
                       ))
                     )}
@@ -345,120 +412,38 @@ export function CreateSupplierOrderForm({
           />
         ) : (
           <div className="grid grid-cols-2 gap-4 rounded-lg border p-4">
-            <FormField
-              control={form.control}
-              name="supplier_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>اسم المورد</FormLabel>
-                  <FormControl>
-                    <Input placeholder="اسم المورد" {...field} value={field.value ?? ""} disabled={isPending} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="supplier_code"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>كود المورد</FormLabel>
-                  <FormControl>
-                    <Input placeholder="كود المورد" {...field} value={field.value ?? ""} disabled={isPending} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="supplier_phone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>رقم المورد</FormLabel>
-                  <FormControl>
-                    <Input placeholder="رقم الهاتف" {...field} value={field.value ?? ""} disabled={isPending} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="supplier_address"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>الموقع</FormLabel>
-                  <FormControl>
-                    <Input placeholder="عنوان / موقع المورد" {...field} value={field.value ?? ""} disabled={isPending} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {(
+              [
+                ["supplier_name", "اسم المورد", "اسم المورد"],
+                ["supplier_code", "كود المورد", "كود المورد"],
+                ["supplier_phone", "رقم المورد", "رقم الهاتف"],
+                ["supplier_address", "الموقع", "عنوان / موقع المورد"],
+              ] as const
+            ).map(([name, label, placeholder]) => (
+              <FormField
+                key={name}
+                control={form.control}
+                name={name}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{label}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder={placeholder}
+                        {...field}
+                        value={field.value ?? ""}
+                        disabled={isPending}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            ))}
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="category_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>قسم المنتجات</FormLabel>
-                <FormControl>
-                  <CategoriesSelect
-                    value={field.value}
-                    onChange={(id) => {
-                      field.onChange(id);
-                      form.setValue("subcategory_id", "");
-                    }}
-                    disabled={isPending}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="subcategory_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>قسم المنتجات الفرعي</FormLabel>
-                <FormControl>
-                  <SubcategoriesSelect
-                    value={field.value}
-                    onChange={field.onChange}
-                    category_id={categoryId ? Number(categoryId) : undefined}
-                    disabled={isPending || !categoryId}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <FormField
-          control={form.control}
-          name="branch_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>الفرع</FormLabel>
-              <FormControl>
-                <BranchesSelect
-                  value={field.value}
-                  onChange={field.onChange}
-                  disabled={isPending}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
+        {/* Order date */}
         <FormField
           control={form.control}
           name="order_date"
@@ -478,60 +463,7 @@ export function CreateSupplierOrderForm({
           )}
         />
 
-        <div className="grid grid-cols-3 gap-4">
-          <FormField
-            control={form.control}
-            name="total_amount"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>الإجمالي</FormLabel>
-                <FormControl>
-                  <Input
-                    value={field.value ?? ""}
-                    onChange={(e) => {
-                      const val = e.target.value.replace(/[^0-9.]/g, "");
-                      field.onChange(val === "" ? 0 : Number(val) || 0);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="payment_amount"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>المدفوع</FormLabel>
-                <FormControl>
-                  <Input
-                    value={field.value ?? ""}
-                    onChange={(e) => {
-                      const val = e.target.value.replace(/[^0-9.]/g, "");
-                      field.onChange(val === "" ? 0 : Number(val) || 0);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="remaining_payment"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>المتبقي</FormLabel>
-                <FormControl>
-                  <Input readOnly value={field.value ?? ""} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
+        {/* Notes */}
         <FormField
           control={form.control}
           name="notes"
@@ -539,13 +471,18 @@ export function CreateSupplierOrderForm({
             <FormItem>
               <FormLabel>ملاحظات (اختياري)</FormLabel>
               <FormControl>
-                <Input placeholder="ملاحظات..." {...field} value={field.value ?? ""} />
+                <Input
+                  placeholder="ملاحظات..."
+                  {...field}
+                  value={field.value ?? ""}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
+        {/* Clothes items */}
         <div className="border-t pt-4">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-medium">أصناف الطلبية</h3>
@@ -553,12 +490,13 @@ export function CreateSupplierOrderForm({
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => append(defaultClothItem)}
+              onClick={() => append(DEFAULT_CLOTH_ITEM)}
               disabled={isPending}
             >
               إضافة صنف
             </Button>
           </div>
+
           {fields.map((field, index) => (
             <div
               key={field.id}
@@ -571,45 +509,128 @@ export function CreateSupplierOrderForm({
                   <FormItem>
                     <FormLabel>كود الصنف</FormLabel>
                     <FormControl>
-                      <Input placeholder="CLT-001" {...f} />
+                      <Input placeholder="CL-001" {...f} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
-                name={`clothes.${index}.name`}
+                name={`clothes.${index}.entity_id`}
                 render={({ field: f }) => (
                   <FormItem>
-                    <FormLabel>اسم الصنف</FormLabel>
+                    <FormLabel>الفرع</FormLabel>
                     <FormControl>
-                      <Input placeholder="اسم الصنف" {...f} />
+                      <BranchesSelect
+                        value={f.value ?? ""}
+                        onChange={f.onChange}
+                        disabled={isPending}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
-                name={`clothes.${index}.description`}
+                name={`clothes.${index}.category_id`}
                 render={({ field: f }) => (
-                  <FormItem className="col-span-2">
-                    <FormLabel>الوصف (اختياري)</FormLabel>
+                  <FormItem>
+                    <FormLabel>قسم المنتجات (اختياري)</FormLabel>
                     <FormControl>
-                      <Input placeholder="وصف الصنف" {...f} value={f.value ?? ""} />
+                      <CategoriesSelect
+                        value={f.value ?? ""}
+                        onChange={(id) => {
+                          f.onChange(id);
+                          form.setValue(`clothes.${index}.subcategory_ids`, []);
+                        }}
+                        disabled={isPending}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name={`clothes.${index}.subcategory_ids`}
+                render={({ field: f }) => {
+                  const clothCat = form.watch(`clothes.${index}.category_id`);
+                  return (
+                    <FormItem>
+                      <FormLabel>أقسام فرعية (اختياري)</FormLabel>
+                      <FormControl>
+                        <SubcategoriesSelect
+                          multiple
+                          value={f.value ?? []}
+                          onChange={f.onChange}
+                          category_id={
+                            clothCat ? Number(clothCat) : undefined
+                          }
+                          disabled={isPending}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
+
+              <FormField
+                control={form.control}
+                name={`clothes.${index}.price`}
+                render={({ field: f }) => (
+                  <FormItem>
+                    <FormLabel>السعر</FormLabel>
+                    <FormControl>
+                      <Input
+                        value={f.value ?? ""}
+                        onChange={(e) => {
+                          const v = e.target.value.replace(/[^0-9.]/g, "");
+                          f.onChange(v === "" ? 0 : Number(v) || 0);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name={`clothes.${index}.payment`}
+                render={({ field: f }) => (
+                  <FormItem>
+                    <FormLabel>المدفوع</FormLabel>
+                    <FormControl>
+                      <Input
+                        value={f.value ?? ""}
+                        onChange={(e) => {
+                          const v = e.target.value.replace(/[^0-9.]/g, "");
+                          f.onChange(v === "" ? 0 : Number(v) || 0);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <FormField
                 control={form.control}
                 name={`clothes.${index}.status`}
                 render={({ field: f }) => (
                   <FormItem>
                     <FormLabel>الحالة</FormLabel>
-                    <Select onValueChange={f.onChange} value={f.value} disabled={isPending}>
+                    <Select
+                      onValueChange={f.onChange}
+                      value={f.value}
+                      disabled={isPending}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="الحالة" />
@@ -627,88 +648,52 @@ export function CreateSupplierOrderForm({
                   </FormItem>
                 )}
               />
+
+              {(
+                [
+                  ["breast_size", "مقاس الصدر (اختياري)", "38"],
+                  ["waist_size", "مقاس الخصر (اختياري)", "32"],
+                  ["sleeve_size", "مقاس الكم (اختياري)", "34"],
+                ] as const
+              ).map(([name, label, placeholder]) => (
+                <FormField
+                  key={name}
+                  control={form.control}
+                  name={`clothes.${index}.${name}`}
+                  render={({ field: f }) => (
+                    <FormItem>
+                      <FormLabel>{label}</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder={placeholder}
+                          {...f}
+                          value={f.value ?? ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ))}
+
               <FormField
                 control={form.control}
-                name={`clothes.${index}.breast_size`}
+                name={`clothes.${index}.notes`}
                 render={({ field: f }) => (
-                  <FormItem>
-                    <FormLabel>مقاس الصدر</FormLabel>
-                    <FormControl>
-                      <Input placeholder="XL" {...f} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name={`clothes.${index}.waist_size`}
-                render={({ field: f }) => (
-                  <FormItem>
-                    <FormLabel>مقاس الخصر</FormLabel>
-                    <FormControl>
-                      <Input placeholder="32" {...f} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name={`clothes.${index}.sleeve_size`}
-                render={({ field: f }) => (
-                  <FormItem>
-                    <FormLabel>مقاس الكم</FormLabel>
-                    <FormControl>
-                      <Input placeholder="L" {...f} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name={`clothes.${index}.price`}
-                render={({ field: f }) => (
-                  <FormItem>
-                    <FormLabel>السعر</FormLabel>
+                  <FormItem className="col-span-2">
+                    <FormLabel>ملاحظات (اختياري)</FormLabel>
                     <FormControl>
                       <Input
+                        placeholder="ملاحظات على القطعة"
+                        {...f}
                         value={f.value ?? ""}
-                        onChange={(e) => {
-                          const val = e.target.value.replace(/[^0-9.]/g, "");
-                          f.onChange(val === "" ? 0 : Number(val) || 0);
-                        }}
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name={`clothes.${index}.notes`}
-                render={({ field: f }) => (
-                  <FormItem>
-                    <FormLabel>ملاحظات (اختياري)</FormLabel>
-                    <FormControl>
-                      <Input placeholder="ملاحظات" {...f} value={f.value ?? ""} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="col-span-2">
-                <EntitySelect
-                  mode="form"
-                  control={form.control}
-                  entityTypeName={`clothes.${index}.entity_type` as const}
-                  entityIdName={`clothes.${index}.entity_id` as const}
-                  entityTypeLabel="نوع المكان"
-                  entityIdLabel="المكان"
-                  disabled={isPending}
-                />
-              </div>
+
               {fields.length > 1 && (
                 <div className="col-span-2">
                   <Button
@@ -724,6 +709,7 @@ export function CreateSupplierOrderForm({
               )}
             </div>
           ))}
+
           {form.formState.errors.clothes?.message && (
             <p className="text-sm text-destructive">
               {form.formState.errors.clothes.message}
@@ -731,6 +717,38 @@ export function CreateSupplierOrderForm({
           )}
         </div>
 
+        {/* Computed totals (read-only) */}
+        <div className="grid grid-cols-3 gap-4 pt-4 border-t rounded-lg border bg-muted/20 p-3">
+          {(
+            [
+              ["total_amount", "الإجمالي (محسوب)"],
+              ["payment_amount", "المدفوع (محسوب)"],
+              ["remaining_payment", "المتبقي (محسوب)"],
+            ] as const
+          ).map(([name, label]) => (
+            <FormField
+              key={name}
+              control={form.control}
+              name={name}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-xs">{label}</FormLabel>
+                  <FormControl>
+                    <Input
+                      readOnly
+                      value={toEnglishNumerals(field.value ?? 0)}
+                      className="tabular-nums"
+                      dir="ltr"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          ))}
+        </div>
+
+        {/* Actions */}
         <div className="flex items-center gap-4 pt-4 border-t">
           <Button type="button" variant="outline" onClick={handleCancel}>
             إلغاء

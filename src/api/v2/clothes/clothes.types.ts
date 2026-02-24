@@ -13,6 +13,10 @@ export type TCreateClothesRequest = {
   waist_size?: string;
   sleeve_size?: string;
   cloth_type_id?: number;
+  /** قسم المنتجات (اختياري) */
+  category_id?: number | null;
+  /** أقسام المنتجات الفرعية (اختياري) */
+  subcategory_ids?: number[] | null;
 };
 
 export type TClothResponse = {
@@ -34,6 +38,12 @@ export type TClothResponse = {
   breast_size?: string;
   waist_size?: string;
   sleeve_size?: string;
+  /** قسم المنتجات - إن أرجعه الـ API */
+  category_id?: number | null;
+  category_name?: string | null;
+  /** أقسام المنتجات الفرعية - إن أرجعه الـ API */
+  subcategory_ids?: number[] | null;
+  subcategory_names?: string[] | null;
 };
 
 export type TUpdateClothesRequest = {
@@ -47,6 +57,10 @@ export type TUpdateClothesRequest = {
   sleeve_size?: string;
   measurements?: string;
   cloth_type_id?: number;
+  /** قسم المنتجات (اختياري) */
+  category_id?: number | null;
+  /** أقسام المنتجات الفرعية (اختياري) */
+  subcategory_ids?: number[] | null;
 };
 // damaged, burned, scratched, ready_for_rent, rented, die and repairing
 export type TClothesStatus =
