@@ -682,27 +682,6 @@ export const sidebarLabels: SidebarLabel[] = [
         permission: READ_SUBCATEGORIES,
         iconComponent: createIcon(FolderTree),
       },
-      {
-        icon: null,
-        label: "الصلاحيات",
-        path: "/content/roles",
-        level: 2,
-        iconComponent: createIcon(Shield),
-      },
-      {
-        icon: null,
-        label: "الاقسام",
-        path: "/content/departments",
-        level: 2,
-        iconComponent: createIcon(Building),
-      },
-      {
-        icon: null,
-        label: "المسميات الوظيفية",
-        path: "/content/jobs-titles",
-        level: 2,
-        iconComponent: createIcon(Briefcase),
-      },
     ],
   },
 ];
