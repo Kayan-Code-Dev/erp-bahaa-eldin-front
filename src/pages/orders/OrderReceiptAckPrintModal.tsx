@@ -8,11 +8,11 @@ import { OrderReceiptAckPrint } from "./OrderReceiptAckPrint";
 import { useRef } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
-/** Receipt acknowledgment styles for A5 print */
+/** Receipt acknowledgment styles for A5 print — واجهة مستقلة عن الفاتورة */
 const ACK_PRINT_STYLES = `
   @page { 
-    size: A5; 
-    margin: 6mm;
+    size: A5 portrait; 
+    margin: 8mm;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
@@ -21,35 +21,38 @@ const ACK_PRINT_STYLES = `
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-  body { 
+  html, body { 
     margin: 0; 
-    padding: 6px; 
+    padding: 0; 
+    width: 100%;
+    min-height: 100%;
     font-family: 'Cairo', 'Segoe UI', Arial, sans-serif; 
     direction: rtl; 
     font-size: 12px; 
     font-weight: 400;
     line-height: 1.4;
     color: #111827;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
+    background: #fff;
   }
-  .invoice-print-root { 
+  .ack-print-root { 
     display: flex; 
     flex-direction: column; 
-    min-height: 0; 
+    min-height: 198mm;
     background: #fff; 
     color: #111827; 
     font-size: 12px; 
     line-height: 1.4; 
     page-break-inside: avoid; 
     width: 100%;
-    max-width: 148mm;
-    margin: 0 auto;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  .invoice-print-header { 
+  .ack-print-content { flex: 1 1 auto; min-height: 0; }
+  .ack-print-footer { margin-top: auto; flex-shrink: 0; }
+  .ack-print-header { 
     width: 100%; 
     flex-shrink: 0; 
     padding: 8px 0; 
@@ -63,37 +66,38 @@ const ACK_PRINT_STYLES = `
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  .invoice-print-header-inner { 
+  .ack-print-header-inner { 
     display: flex; 
     align-items: center; 
     justify-content: space-between; 
     gap: 12px; 
-    max-width: 148mm; 
-    margin: 0 auto; 
-    padding: 0 12px; 
+    width: 100%;
+    max-width: 100%;
+    margin: 0; 
+    padding: 0 10px; 
   }
-  .invoice-print-content { 
+  .ack-print-content { 
     flex: 1; 
     display: flex; 
     flex-direction: column; 
     min-height: 0; 
-    max-width: 148mm; 
-    margin: 0 auto; 
-    padding: 0 12px 8px; 
-    width: 100%; 
+    width: 100%;
+    max-width: 100%;
+    margin: 0; 
+    padding: 0 10px 8px; 
   }
-  .invoice-print-body { flex-shrink: 0; }
-  .invoice-print-header-right { 
+  .ack-print-body { flex-shrink: 0; }
+  .ack-print-header-right { 
     text-align: right; 
     flex-shrink: 0; 
     font-size: 11px; 
     font-weight: 400; 
   }
-  .invoice-print-header-right > * + * { margin-top: 2px; }
-  .invoice-print-header-right .font-bold { font-weight: 700; }
-  .invoice-print-header-right .font-semibold { font-weight: 600; }
-  .invoice-print-header-right .font-medium { font-weight: 500; }
-  .invoice-print-header-logo { 
+  .ack-print-header-right > * + * { margin-top: 2px; }
+  .ack-print-header-right .font-bold { font-weight: 700; }
+  .ack-print-header-right .font-semibold { font-weight: 600; }
+  .ack-print-header-right .font-medium { font-weight: 500; }
+  .ack-print-header-logo { 
     flex-shrink: 0; 
     background: rgba(255,255,255,0.1); 
     border-radius: 6px; 
@@ -102,12 +106,12 @@ const ACK_PRINT_STYLES = `
     align-items: center; 
     justify-content: center; 
   }
-  .invoice-print-header-logo img, .invoice-logo-img { 
+  .ack-print-header-logo img, .ack-print-logo-img { 
     max-height: 40px; 
     width: auto; 
     object-fit: contain; 
   }
-  .invoice-print-title-wrap { 
+  .ack-print-title-wrap { 
     display: flex; 
     flex-direction: column; 
     align-items: center; 
@@ -116,14 +120,14 @@ const ACK_PRINT_STYLES = `
     margin-bottom: 8px; 
     padding: 0; 
   }
-  .invoice-print-title { 
+  .ack-print-title { 
     font-size: 18px; 
     font-weight: 700; 
     color: #111827; 
     letter-spacing: -0.02em; 
     margin: 0 0 4px 0; 
   }
-  .invoice-print-title-line { 
+  .ack-print-title-line { 
     display: block; 
     margin-top: 2px; 
     height: 2px; 
@@ -131,7 +135,7 @@ const ACK_PRINT_STYLES = `
     border-radius: 9999px; 
     background: #9ca3af; 
   }
-  .invoice-print-recipient { 
+  .ack-print-recipient { 
     text-align: right; 
     margin-bottom: 8px; 
     font-size: 12px; 
@@ -139,41 +143,41 @@ const ACK_PRINT_STYLES = `
     color: #111827; 
     line-height: 1.5;
   }
-  .invoice-print-recipient .font-bold { font-weight: 700; }
-  .invoice-print-recipient .font-semibold { font-weight: 600; }
-  .invoice-print-recipient .font-normal { font-weight: 400; }
-  .invoice-print-items-list { 
+  .ack-print-recipient .font-bold { font-weight: 700; }
+  .ack-print-recipient .font-semibold { font-weight: 600; }
+  .ack-print-recipient .font-normal { font-weight: 400; }
+  .ack-print-items-list { 
     margin-bottom: 8px; 
     font-size: 12px; 
     font-weight: 400; 
     color: #111827; 
   }
-  .invoice-print-items-list ol { 
+  .ack-print-items-list ol { 
     list-style-type: decimal; 
     list-style-position: inside; 
     padding: 0; 
     margin: 0; 
   }
-  .invoice-print-items-list li { 
+  .ack-print-items-list li { 
     margin-bottom: 2px; 
     font-weight: 500; 
     line-height: 1.4;
   }
-  .invoice-print-rental { 
+  .ack-print-rental { 
     font-size: 12px; 
     font-weight: 400; 
     margin-bottom: 8px; 
     color: #111827; 
     line-height: 1.5;
   }
-  .invoice-print-deposit { 
+  .ack-print-deposit { 
     font-size: 12px; 
     font-weight: 400; 
     margin-bottom: 12px; 
     color: #111827; 
     line-height: 1.5;
   }
-  .invoice-print-rules { 
+  .ack-print-rules { 
     margin-top: auto; 
     padding-top: 8px; 
     padding-bottom: 16px; 
@@ -181,13 +185,13 @@ const ACK_PRINT_STYLES = `
     flex-shrink: 0; 
     page-break-inside: avoid; 
   }
-  .invoice-print-rules-title { 
+  .ack-print-rules-title { 
     font-size: 11px; 
     font-weight: 700; 
     color: #1f2937; 
     margin-bottom: 4px;
   }
-  .invoice-print-notes-box { 
+  .ack-print-notes-box { 
     font-size: 10px; 
     font-weight: 400; 
     border: 1px solid #e5e7eb; 
@@ -200,10 +204,10 @@ const ACK_PRINT_STYLES = `
     overflow-wrap: break-word;
     min-width: 0;
   }
-  .invoice-print-notes-box ul { list-style: none; margin: 0; padding: 0; }
-  .invoice-print-notes-box li { margin-bottom: 4px; font-weight: 400; word-wrap: break-word; overflow-wrap: break-word; }
-  .invoice-print-notes-box li:last-child { margin-bottom: 0; }
-  .invoice-print-signature { 
+  .ack-print-notes-box ul { list-style: none; margin: 0; padding: 0; }
+  .ack-print-notes-box li { margin-bottom: 4px; font-weight: 400; word-wrap: break-word; overflow-wrap: break-word; }
+  .ack-print-notes-box li:last-child { margin-bottom: 0; }
+  .ack-print-signature { 
     display: flex; 
     justify-content: flex-end; 
     margin-top: 8px; 
@@ -211,15 +215,15 @@ const ACK_PRINT_STYLES = `
     border-top: 1px solid #d1d5db; 
     page-break-inside: avoid; 
   }
-  .invoice-print-signature-box { 
+  .ack-print-signature-box { 
     text-align: right; 
     min-width: 120px; 
     font-size: 12px; 
     font-weight: 400; 
     color: #111827; 
   }
-  .invoice-print-signature-box .font-semibold { font-weight: 600; }
-  .invoice-print-footer { 
+  .ack-print-signature-box .font-semibold { font-weight: 600; }
+  .ack-print-footer { 
     margin-top: auto; 
     flex-shrink: 0; 
     width: 100%; 
@@ -239,40 +243,40 @@ const ACK_PRINT_STYLES = `
     min-width: 0;
   }
   @media print {
-    @page { size: A5; margin: 6mm; }
-    .invoice-print-header, .invoice-print-footer { 
+    @page { size: A5 portrait; margin: 8mm; }
+    html, body { margin: 0 !important; padding: 0 !important; width: 100% !important; background: #fff !important; }
+    .ack-print-header, .ack-print-footer { 
       -webkit-print-color-adjust: exact !important; 
       print-color-adjust: exact !important; 
     }
-    .invoice-print-root { 
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
+    .ack-print-root { 
+      position: relative !important;
+      left: 0 !important;
+      transform: none !important;
       page-break-after: avoid; 
       page-break-inside: avoid; 
-      box-shadow: none; 
-      width: 148mm !important;
-      max-width: 148mm !important;
+      box-shadow: none !important; 
+      width: 100% !important;
+      max-width: 100% !important;
+      min-height: 198mm !important;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
-    .invoice-print-header-inner,
-    .invoice-print-content { max-width: 148mm !important; }
-    .invoice-print-root,
-    .invoice-print-content,
-    .invoice-print-notes-box,
-    .invoice-print-footer { overflow: hidden !important; }
-    .invoice-print-notes-box ul,
-    .invoice-print-notes-box li,
-    .invoice-print-footer { word-wrap: break-word !important; overflow-wrap: break-word !important; }
-    body, html { height: auto; overflow: visible; }
-    .invoice-print-title-wrap,
-    .invoice-print-recipient,
-    .invoice-print-signature { page-break-inside: avoid; }
-    * {
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
+    .ack-print-content { flex: 1 1 auto !important; min-height: 0 !important; }
+    .ack-print-footer { margin-top: auto !important; flex-shrink: 0 !important; }
+    .ack-print-header-inner,
+    .ack-print-content { width: 100% !important; max-width: 100% !important; }
+    .ack-print-root,
+    .ack-print-content,
+    .ack-print-notes-box,
+    .ack-print-footer { overflow: hidden !important; }
+    .ack-print-notes-box ul,
+    .ack-print-notes-box li,
+    .ack-print-footer { word-wrap: break-word !important; overflow-wrap: break-word !important; }
+    .ack-print-title-wrap,
+    .ack-print-recipient,
+    .ack-print-signature { page-break-inside: avoid; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   }
 `;
 
@@ -348,7 +352,7 @@ export function OrderReceiptAckPrintModal({
           </div>
         ) : orderToPrint ? (
           <>
-            <div id="ack-print-content" ref={printRef} className="print-invoice-root">
+            <div id="ack-print-content" ref={printRef} className="ack-print-wrapper max-w-[148mm] mx-auto bg-white rounded-lg border shadow-sm">
               <OrderReceiptAckPrint order={orderToPrint} />
             </div>
             <div className="flex justify-end gap-2 pt-4 border-t">

@@ -46,6 +46,8 @@ const getNotificationTypeLabel = (type: string): string => {
     'supplier_order': 'أمر توريد',
     'Order': 'الطلب',
     'order': 'الطلب',
+    'Payment': 'دفعة',
+    'payment': 'دفعة',
     'system': 'نظام',
     'alert': 'تنبيه',
     'info': 'معلومة',
@@ -53,6 +55,17 @@ const getNotificationTypeLabel = (type: string): string => {
   };
   return typeMap[type] || type;
 };
+
+const amountKeys = new Set(['amount', 'order_paid', 'order_remaining', 'total_price', 'total_amount', 'payment_amount']);
+
+function formatMetadataValue(key: string, value: unknown): string {
+  if (value === null || value === undefined) return '-';
+  if (amountKeys.has(key)) {
+    const n = Number(value);
+    if (!Number.isNaN(n)) return `${n.toLocaleString('ar-EG', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ج.م`;
+  }
+  return String(value);
+}
 
 const getStatusLabel = (status: string): string => {
   const statusMap: Record<string, string> = {
@@ -136,6 +149,11 @@ export const NotificationItem = memo(function NotificationItem({
     return filtered;
   }, [notification.data?.metadata]);
 
+  const isPaymentReference = useMemo(() => {
+    const rt = notification.data?.reference_type ?? '';
+    return rt.includes('Payment') || rt === 'payment';
+  }, [notification.data?.reference_type]);
+
   const typeLabel = useMemo(() => {
     return getNotificationTypeLabel(notification.type);
   }, [notification.type]);
@@ -191,6 +209,9 @@ export const NotificationItem = memo(function NotificationItem({
                 const keyLabels: Record<string, string> = {
                   total_price: 'المبلغ الإجمالي',
                   amount: 'المبلغ',
+                  order_paid: 'المدفوع',
+                  order_remaining: 'المتبقي',
+                  payment_id: 'رقم الدفعة',
                   reference_id: 'رقم المرجع',
                   supplier_id: 'رقم المورد',
                   total_amount: 'الإجمالي',
@@ -199,8 +220,8 @@ export const NotificationItem = memo(function NotificationItem({
                   supplier_order_id: 'رقم أمر التوريد',
                 };
                 const label = keyLabels[key] || key;
-                const displayValue = value !== null && value !== undefined ? String(value) : '-';
-                
+                const displayValue = formatMetadataValue(key, value);
+
                 return (
                   <span
                     key={key}
@@ -215,13 +236,19 @@ export const NotificationItem = memo(function NotificationItem({
 
           {(notification.data?.reference_type || notification.data?.reference_id) && (
             <div className="mb-2 text-xs text-muted-foreground">
-              {referenceTypeDisplay && (
-                <span className="mr-2">
-                  النوع: {getNotificationTypeLabel(referenceTypeDisplay) || referenceTypeDisplay}
-                </span>
-              )}
-              {notification.data.reference_id && (
-                <span>الرقم: {notification.data.reference_id}</span>
+              {isPaymentReference && notification.data?.reference_id ? (
+                <span>دفعة #{notification.data.reference_id}</span>
+              ) : (
+                <>
+                  {referenceTypeDisplay && (
+                    <span className="mr-2">
+                      النوع: {getNotificationTypeLabel(referenceTypeDisplay) || referenceTypeDisplay}
+                    </span>
+                  )}
+                  {notification.data?.reference_id != null && (
+                    <span>الرقم: {notification.data.reference_id}</span>
+                  )}
+                </>
               )}
             </div>
           )}

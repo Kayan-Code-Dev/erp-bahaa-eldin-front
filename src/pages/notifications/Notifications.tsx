@@ -57,6 +57,8 @@ const getNotificationTypeLabel = (type: string): string => {
     'supplier_order': 'أمر توريد',
     'Order': 'الطلب',
     'order': 'الطلب',
+    'Payment': 'دفعة',
+    'payment': 'دفعة',
     'system': 'نظام',
     'alert': 'تنبيه',
     'info': 'معلومة',
@@ -64,6 +66,17 @@ const getNotificationTypeLabel = (type: string): string => {
   };
   return typeMap[type] || type;
 };
+
+const amountMetadataKeys = new Set(['amount', 'order_paid', 'order_remaining', 'total_price', 'total_amount', 'payment_amount']);
+
+function formatMetadataValue(key: string, value: unknown): string {
+  if (value === null || value === undefined) return '-';
+  if (amountMetadataKeys.has(key)) {
+    const n = Number(value);
+    if (!Number.isNaN(n)) return `${n.toLocaleString('ar-EG', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ج.م`;
+  }
+  return String(value);
+}
 
 const getStatusLabel = (status: string): string => {
   const statusMap: Record<string, string> = {
