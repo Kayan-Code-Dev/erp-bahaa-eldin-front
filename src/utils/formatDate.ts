@@ -15,7 +15,20 @@ export const formatDate = (dateString?: string) => {
     if (!dateString) return "-";
     try {
         const parsedDate = parseISO(dateString);
-        return format(parsedDate, "d MMMM yyyy - h:mm a", { locale: ar });
+        // تنسيق التاريخ: يوم/شهر/سنة
+        return format(parsedDate, "yyyy/MM/dd");
+    } catch {
+        return dateString;
+    }
+};
+
+// دالة إضافية للتنسيق مع الوقت إذا احتجتها
+export const formatDateTime = (dateString?: string) => {
+    if (!dateString) return "-";
+    try {
+        const parsedDate = parseISO(dateString);
+        // تنسيق التاريخ مع الوقت: يوم/شهر/سنة - ساعة:دقيقة ص/م
+        return format(parsedDate, "yyyy/MM/dd - h:mm a", { locale: ar });
     } catch {
         return dateString;
     }
