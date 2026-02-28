@@ -25,7 +25,8 @@ function Header() {
     navigate("/login");
   };
 
-  const userInitials = (profile?.name || loginData?.user?.name || "U")
+  const displayName = profile?.name ?? loginData?.user?.name ?? "U";
+  const userInitials = displayName
     .split(" ")
     .map((n) => n[0])
     .join("")
@@ -78,7 +79,7 @@ function Header() {
           title="إعدادات الحساب"
         >
           <Avatar className="h-9 w-9 cursor-pointer">
-            <AvatarImage src={profile?.logo || undefined} alt="صورة الحساب" />
+            <AvatarImage src={profile?.avatar_url ?? profile?.avatar ?? undefined} alt="صورة الحساب" />
             <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
               {userInitials}
             </AvatarFallback>

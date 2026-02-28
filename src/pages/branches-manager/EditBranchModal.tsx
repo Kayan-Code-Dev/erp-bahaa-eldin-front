@@ -20,7 +20,7 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { TBranchResponse } from "@/api/v2/branches/branches.types";
 import { useUpdateBranchMutationOptions } from "@/api/v2/branches/branches.hooks";
@@ -37,6 +37,7 @@ const formSchema = z.object({
   city_id: z.string({ required_error: "المدينة مطلوبة" }),
   notes: z.string().optional(),
   inventory_name: z.string().min(1, { message: "اسم المخزن مطلوب" }),
+  phone: z.string().optional(),
 });
 
 type Props = {
@@ -49,6 +50,8 @@ export function EditBranchModal({ branch, open, onOpenChange }: Props) {
   const { mutate: updateBranch, isPending } = useMutation(
     useUpdateBranchMutationOptions()
   );
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -60,8 +63,12 @@ export function EditBranchModal({ branch, open, onOpenChange }: Props) {
       city_id: "",
       notes: "",
       inventory_name: "",
+      phone: "",
     },
   });
+
+  const branchImageUrl =
+    branch?.image_url ?? branch?.image ?? null;
 
   // Load branch data into form when modal opens
   useEffect(() => {
@@ -74,7 +81,10 @@ export function EditBranchModal({ branch, open, onOpenChange }: Props) {
         city_id: branch.address?.city_id?.toString() || "",
         notes: branch.address?.notes || "",
         inventory_name: branch.inventory?.name || "",
+        phone: branch.phone ?? "",
       });
+      setImageFile(null);
+      if (imageInputRef.current) imageInputRef.current.value = "";
     }
   }, [branch, open, form]);
 
@@ -91,6 +101,8 @@ export function EditBranchModal({ branch, open, onOpenChange }: Props) {
         notes: values.notes || "",
       },
       inventory_name: values.inventory_name,
+      phone: values.phone || undefined,
+      image: imageFile ?? undefined,
     };
 
     updateBranch(
@@ -158,6 +170,42 @@ export function EditBranchModal({ branch, open, onOpenChange }: Props) {
                     <FormMessage />
                   </FormItem>
                 )}
+              />
+
+              {/* Phone */}
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>الهاتف (اختياري)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="01xxxxxxxxx" type="tel" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Image */}
+            <div className="space-y-2">
+              <FormLabel>صورة الفرع (اختياري)</FormLabel>
+              {branchImageUrl && !imageFile && (
+                <div className="mb-2">
+                  <img
+                    src={branchImageUrl}
+                    alt="صورة الفرع"
+                    className="h-20 w-20 rounded-md border object-cover"
+                  />
+                </div>
+              )}
+              <input
+                ref={imageInputRef}
+                type="file"
+                accept="image/*"
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium"
+                onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
               />
             </div>
 

@@ -7,11 +7,42 @@ import {
 import { populateError } from "@/api/api.utils";
 import { TPaginationResponse } from "@/api/api-common.types";
 
+const toBranchFormData = (
+  data: TCreateBranchRequest | TUpdateBranchRequest
+): FormData => {
+  const formData = new FormData();
+  if (data.branch_code != null) formData.append("branch_code", data.branch_code);
+  if (data.name != null) formData.append("name", data.name);
+  if (data.inventory_name != null)
+    formData.append("inventory_name", data.inventory_name);
+  if (data.phone != null) formData.append("phone", data.phone);
+  if (data.address) {
+    formData.append("address[street]", data.address.street);
+    formData.append("address[building]", data.address.building);
+    formData.append("address[city_id]", String(data.address.city_id));
+    formData.append("address[notes]", data.address.notes ?? "");
+  }
+  if (data.image instanceof File) {
+    formData.append("image", data.image);
+  }
+  return formData;
+};
+
 export const createBranch = async (data: TCreateBranchRequest) => {
   try {
+    const hasFile = data.image instanceof File;
+    if (hasFile) {
+      const formData = toBranchFormData(data);
+      const { data: response } = await api.post<TBranchResponse>(
+        "/branches",
+        formData
+      );
+      return response;
+    }
+    const { image: _, ...jsonData } = data;
     const { data: response } = await api.post<TBranchResponse>(
       "/branches",
-      data
+      jsonData
     );
     return response;
   } catch (error) {
@@ -21,9 +52,20 @@ export const createBranch = async (data: TCreateBranchRequest) => {
 
 export const updateBranch = async (id: number, data: TUpdateBranchRequest) => {
   try {
+    const hasFile = data.image instanceof File;
+    if (hasFile) {
+      const formData = toBranchFormData(data);
+      formData.append("_method", "PUT");
+      const { data: response } = await api.post<TBranchResponse>(
+        `/branches/${id}`,
+        formData
+      );
+      return response;
+    }
+    const { image: _, ...jsonData } = data;
     const { data: response } = await api.put<TBranchResponse>(
       `/branches/${id}`,
-      data
+      jsonData
     );
     return response;
   } catch (error) {

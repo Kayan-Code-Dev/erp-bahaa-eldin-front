@@ -3,8 +3,6 @@ import {
   getProfileApi,
   updateProfileApi,
   changePasswordApi,
-  uploadLogoApi,
-  deleteLogoApi,
   deleteAccountApi,
 } from "./account.service";
 import { TUpdateProfileRequest, TChangePasswordRequest } from "./account.types";
@@ -36,30 +34,6 @@ export const useChangePassword = () =>
     onSuccess: () => toast.success("تم تغيير كلمة المرور بنجاح"),
     onError: (error: Error) => toast.error(error.message),
   });
-
-export const useUploadLogo = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (file: File) => uploadLogoApi(file),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [PROFILE_KEY] });
-      toast.success("تم رفع الشعار بنجاح");
-    },
-    onError: (error: Error) => toast.error(error.message),
-  });
-};
-
-export const useDeleteLogo = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: deleteLogoApi,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [PROFILE_KEY] });
-      toast.success("تم حذف الشعار بنجاح");
-    },
-    onError: (error: Error) => toast.error(error.message),
-  });
-};
 
 export const useDeleteAccount = () =>
   useMutation({

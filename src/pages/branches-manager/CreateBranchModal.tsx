@@ -20,6 +20,7 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useState, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useCreateBranchMutationOptions } from "@/api/v2/branches/branches.hooks";
 import { TCreateBranchRequest } from "@/api/v2/branches/branches.types";
@@ -35,6 +36,7 @@ const formSchema = z.object({
   city_id: z.string({ required_error: "المدينة مطلوبة" }),
   notes: z.string().optional(),
   inventory_name: z.string().min(1, { message: "اسم المخزن مطلوب" }),
+  phone: z.string().optional(),
 });
 
 type Props = {
@@ -46,6 +48,8 @@ export function CreateBranchModal({ open, onOpenChange }: Props) {
   const { mutate: createBranch, isPending } = useMutation(
     useCreateBranchMutationOptions()
   );
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -57,6 +61,7 @@ export function CreateBranchModal({ open, onOpenChange }: Props) {
       city_id: "",
       notes: "",
       inventory_name: "",
+      phone: "",
     },
   });
 
@@ -71,6 +76,8 @@ export function CreateBranchModal({ open, onOpenChange }: Props) {
         notes: values.notes || "",
       },
       inventory_name: values.inventory_name,
+      phone: values.phone || undefined,
+      image: imageFile ?? undefined,
     };
 
     createBranch(requestData, {
@@ -79,6 +86,8 @@ export function CreateBranchModal({ open, onOpenChange }: Props) {
           description: "تمت إضافة الفرع بنجاح للنظام.",
         });
         form.reset();
+        setImageFile(null);
+        if (imageInputRef.current) imageInputRef.current.value = "";
         onOpenChange(false);
       },
       onError: (error) => {
@@ -133,6 +142,33 @@ export function CreateBranchModal({ open, onOpenChange }: Props) {
                     <FormMessage />
                   </FormItem>
                 )}
+              />
+
+              {/* Phone */}
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>الهاتف (اختياري)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="01xxxxxxxxx" type="tel" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Image */}
+            <div className="space-y-2">
+              <FormLabel>صورة الفرع (اختياري)</FormLabel>
+              <input
+                ref={imageInputRef}
+                type="file"
+                accept="image/*"
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium"
+                onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
               />
             </div>
 

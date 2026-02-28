@@ -14,8 +14,6 @@ type Props = {
   hideItemPrices?: boolean;
 };
 
-const RULES_TEXT = `
-• يجب إحضار الفاتورة الأصلية مع البطاقة الشخصية عند الإرجاع أو الاستلام أو الاستبدال.`;
 
 /* First table: label only (no item column) */
 const INFO_ROWS: { label: string }[] = [
@@ -306,13 +304,7 @@ export function OrderInvoicePrint({
           </section>
         )}
 
-        <section className="invoice-print-rules-row flex gap-5 mb-5 flex-wrap">
-          <aside className="invoice-print-rules-text flex-1 min-w-[200px]">
-            <h2 className="invoice-print-section-title text-xs font-bold text-gray-600 uppercase tracking-wider mb-2.5 pb-2 border-b-2 border-gray-200">القواعد والتعليمات</h2>
-            <div className="invoice-print-rules-p text-gray-700 text-xs leading-relaxed font-normal whitespace-pre-line rounded-xl border border-gray-100 bg-gray-50/30 py-3 px-4">{RULES_TEXT}</div>
-          </aside>
-          
-        </section>
+
 
         <section className="invoice-print-signature flex justify-end mt-5 pt-5 border-t-2 border-gray-300">
           <div className="invoice-print-signature-box text-left min-w-[160px]">
@@ -335,147 +327,349 @@ export function OrderInvoicePrint({
       </footer>
 
       <style>{`
-        @media print {
-          body * { visibility: hidden; }
-          .invoice-print-root, .invoice-print-root * { visibility: visible; }
-          .invoice-print-root {
-            position: absolute; 
-            left: 0; 
-            top: 0; 
-            width: 100%; 
-            max-width: 100%; 
-            padding: 0; 
-            box-sizing: border-box;
-            page-break-inside: avoid; 
-            page-break-after: avoid;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-          }
-          /* Ensure proper font rendering */
-          * {
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-          }
-          /* Header: compact but readable */
-          .invoice-print-header { 
-            padding: 0.5rem 0 !important; 
-            margin-bottom: 0.5rem !important;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-          }
-          .invoice-print-header-inner { 
-            padding: 0 0.5rem !important; 
-            gap: 0.5rem !important; 
-            min-height: 3.5rem !important; 
-          }
-          .invoice-print-header .invoice-header-label, 
-          .invoice-print-header .invoice-header-line { 
-            font-size: 10px !important; 
-          }
-          .invoice-print-header-logo { 
-            padding: 0.25rem !important; 
-            height: 3.5rem !important; 
-            min-height: 3.5rem !important; 
-            max-height: 3.5rem !important; 
-          }
-          .invoice-logo-img { 
-            max-height: 100% !important; 
-            height: 100% !important; 
-            width: auto !important; 
-            max-width: 140px !important; 
-            object-fit: contain !important; 
-          }
-          /* Order details table */
-          .invoice-print-info-block { margin-bottom: 0.5rem !important; }
-          .invoice-print-info-block h2 { 
-            font-size: 10px !important; 
-            margin-bottom: 0.3rem !important; 
-            padding-bottom: 0.3rem !important; 
-          }
-          .invoice-print-table-info .invoice-print-td { 
-            padding: 0.35rem 0.5rem !important; 
-            font-size: 10px !important; 
-          }
-          /* Product details table */
-          .invoice-print-table-items .invoice-print-th,
-          .invoice-print-table-items .invoice-print-td {
-            padding: 0.35rem 0.5rem !important;
-            font-size: 10px !important;
-          }
-          /* Hide screen-only elements */
-          .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border-width: 0;
-          }
-          /* Measurements table: professional print layout */
-          .invoice-print-measurements-section {
-            page-break-inside: avoid;
-          }
-          .invoice-print-measurements-wrap {
-            border: 1px solid #d1d5db !important;
-            border-radius: 6px !important;
-          }
-          .invoice-print-table-measurements {
-            page-break-inside: avoid;
-          }
-          .invoice-print-measurements-thead th {
-            background: #7a6349 !important;
-            color: #fff !important;
-            padding: 4px 6px !important;
-            font-size: 9px !important;
-            border-left: 1px solid rgba(255,255,255,0.2) !important;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-          }
-          .invoice-print-mth-item { border-left: none !important; }
-          .invoice-print-mtd, .invoice-print-mth {
-            padding: 3px 4px !important;
-            font-size: 9px !important;
-          }
-          .invoice-print-mtd-item {
-            font-weight: 600 !important;
-          }
-          .invoice-print-table-measurements {
-            width: 100% !important;
-          }
-          .invoice-print-mrow td {
-            border-bottom: 1px solid #e5e7eb !important;
-          }
-          .invoice-print-mrow td.invoice-print-mtd { border-left: 1px solid #e5e7eb !important; }
-          .invoice-print-block { 
-            margin-bottom: 0.4rem !important;
-            page-break-inside: avoid;
-          }
-          .invoice-print-block h2 {
-            font-size: 9px !important;
-            margin-bottom: 0.25rem !important;
-            padding-bottom: 0.25rem !important;
-          }
-          /* Improve rules text spacing when printing */
-          .invoice-print-rules-p {
-            white-space: pre-line !important;
-            line-height: 1.8 !important;
-          }
-          /* Ensure signature spacing is preserved when printing */
-          .invoice-print-signature-box > div {
-            display: flex !important;
-            align-items: center !important;
-            gap: 16px !important;
-          }
-          .invoice-print-signature-box span[class*="min-w"] {
-            min-width: 200px !important;
-            height: 24px !important;
-            display: inline-block !important;
-          }
-        }
-      `}</style>
+  /* ===== تعريف حجم الصفحة ===== */
+  @page {
+    size: A5;
+    margin: 5mm;
+  }
+  
+  @media print {
+    /* ===== إخفاء كل شيء خارج الفاتورة ===== */
+    body * { visibility: hidden; }
+    .invoice-print-root, 
+    .invoice-print-root * { visibility: visible; }
+    
+    /* ===== الحاوية الرئيسية ===== */
+    .invoice-print-root {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      max-width: 148mm;
+      height: 210mm !important;        /* ارتفاع ثابت بدلاً من min-height */
+      min-height: 0 !important;         /* إلغاء min-height */
+      padding: 0;
+      margin: 0 auto;
+      box-sizing: border-box;
+      page-break-inside: avoid !important;
+      page-break-after: avoid !important;
+      page-break-before: avoid !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+      direction: rtl !important;
+      text-align: right !important;
+      background: white;
+      box-shadow: none;
+      overflow: hidden;                /* منع التدفق إلى صفحة جديدة */
+    }
+    
+    /* ===== المحتوى الداخلي ===== */
+    .invoice-print-header-inner,
+    .invoice-print-content {
+      max-width: 138mm;
+      margin: 0 auto;
+      padding: 0 3mm;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    
+    /* ===== جعل المحتوى يملأ الصفحة بالكامل ===== */
+    .invoice-print-root {
+      display: flex !important;
+      flex-direction: column !important;
+    }
+    
+    .invoice-print-content {
+      flex: 1 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      height: auto !important;
+      max-height: none !important;
+    }
+    
+    /* ===== تنسيقات عامة ===== */
+    * {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      direction: rtl !important;
+      text-align: right !important;
+      font-family: 'Segoe UI', 'Cairo', Arial, sans-serif !important;
+    }
+    
+    /* ===== العناصر الإنجليزية ===== */
+    [dir="ltr"], 
+    [dir="ltr"] * {
+      direction: ltr !important;
+      text-align: left !important;
+    }
+    
+    /* ===== الهيدر ===== */
+    .invoice-print-header { 
+      padding: 1.5mm 0 !important; 
+      margin-bottom: 2mm !important;
+      background-color: #907457 !important;
+      border-radius: 2mm !important;
+      flex-shrink: 0 !important;        /* منع التقلص */
+    }
+    
+    .invoice-print-header-inner { 
+      padding: 0 2mm !important; 
+      gap: 2mm !important; 
+      min-height: 12mm !important; 
+    }
+    
+    .invoice-print-header .invoice-header-label, 
+    .invoice-print-header .invoice-header-line { 
+      font-size: 9px !important; 
+      color: rgba(255,255,255,0.95) !important;
+    }
+    
+    .invoice-print-header-logo { 
+      padding: 0.5mm !important; 
+      height: 12mm !important; 
+      background: rgba(255,255,255,0.1) !important;
+      border-radius: 1.5mm !important;
+    }
+    
+    .invoice-logo-img { 
+      max-height: 100% !important; 
+      max-width: 35mm !important; 
+      object-fit: contain !important; 
+    }
+    
+    /* ===== عناوين الأقسام ===== */
+    .invoice-print-section-title {
+      font-size: 10px !important;
+      font-weight: 700 !important;
+      color: #4b5563 !important;
+      letter-spacing: 0.5px !important;
+      margin-bottom: 1mm !important;
+      padding-bottom: 0.5mm !important;
+      border-bottom: 1.5px solid #e5e7eb !important;
+    }
+    
+    /* ===== جدول البيانات ===== */
+    .invoice-print-info-block { 
+      margin-bottom: 2mm !important; 
+      flex-shrink: 0 !important;
+    }
+    
+    .invoice-print-table-info {
+      border: 1px solid #e5e7eb !important;
+      border-radius: 2mm !important;
+      overflow: hidden !important;
+    }
+    
+    .invoice-print-table-info .invoice-print-td { 
+      padding: 1mm 1.5mm !important; 
+      font-size: 9px !important; 
+      border-bottom: 1px solid #f3f4f6 !important;
+    }
+    
+    .invoice-print-table-info th {
+      background: #f9fafb !important;
+      font-weight: 600 !important;
+      color: #1f2937 !important;
+    }
+    
+    /* ===== جدول الأصناف ===== */
+    .invoice-print-section.mb-5 {
+      margin-bottom: 2mm !important;
+      flex-shrink: 0 !important;
+    }
+    
+    .invoice-print-table-items {
+      border: 1px solid #e5e7eb !important;
+      border-radius: 2mm !important;
+      overflow: hidden !important;
+    }
+    
+    .invoice-print-table-items .invoice-print-th {
+      background: #7a6349 !important;
+      color: white !important;
+      padding: 1mm 0.5mm !important;
+      font-size: 8px !important;
+      font-weight: 700 !important;
+      text-align: center !important;
+    }
+    
+    .invoice-print-table-items .invoice-print-td {
+      padding: 0.75mm 0.5mm !important;
+      font-size: 8px !important;
+      border-bottom: 1px solid #f3f4f6 !important;
+      text-align: center !important;
+    }
+    
+    .invoice-print-row-even {
+      background: #f9fafb !important;
+    }
+    
+    /* ===== جدول المقاسات ===== */
+    .invoice-print-measurements-section {
+      page-break-inside: avoid !important;
+      margin-bottom: 2mm !important;
+      flex-shrink: 0 !important;
+    }
+    
+    .invoice-print-measurements-wrap {
+      border: 1px solid #e5e7eb !important;
+      border-radius: 2mm !important;
+      overflow: hidden !important;
+    }
+    
+    .invoice-print-measurements-thead th {
+      background: #7a6349 !important;
+      color: white !important;
+      padding: 0.75mm 0.5mm !important;
+      font-size: 7px !important;
+      font-weight: 700 !important;
+      border-left: 1px solid rgba(255,255,255,0.2) !important;
+      text-align: center !important;
+    }
+    
+    .invoice-print-mth-item { 
+      border-left: none !important; 
+    }
+    
+    .invoice-print-mtd {
+      padding: 0.75mm 0.5mm !important;
+      font-size: 7px !important;
+      border-bottom: 1px solid #f3f4f6 !important;
+      text-align: center !important;
+    }
+    
+    .invoice-print-mtd-item {
+      font-weight: 600 !important;
+      background: #f9fafb !important;
+    }
+    
+    .invoice-print-mrow td.invoice-print-mtd { 
+      border-left: 1px solid #f3f4f6 !important; 
+    }
+    
+    /* ===== ملاحظات العميل ===== */
+    .invoice-print-notes-box {
+      border: 1px solid #e5e7eb !important;
+      border-radius: 2mm !important;
+      background: #f9fafb !important;
+      padding: 1.5mm 2mm !important;
+      font-size: 9px !important;
+      color: #1f2937 !important;
+      min-height: 8mm !important;
+    }
+    
+
+    
+    .invoice-print-rules-text {
+      border: 1px solid #e5e7eb !important;
+      border-radius: 2mm !important;
+      background: #f9fafb !important;
+    }
+    
+    .invoice-print-rules-p {
+      padding: 1.5mm 2mm !important;
+      font-size: 9px !important;
+      line-height: 1.5 !important;
+      color: #374151 !important;
+      white-space: pre-line !important;
+    }
+    
+    /* ===== التوقيع ===== */
+    .invoice-print-signature {
+      margin-top: 1mm !important;
+      padding-top: 1mm !important;
+      border-top: 2px solid #d1d5db !important;
+      page-break-inside: avoid !important;
+      flex-shrink: 0 !important;
+    }
+    
+    .invoice-print-signature-box > div {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: flex-end !important;
+      gap: 3mm !important;
+    }
+    
+    .invoice-print-signature-box span.font-semibold {
+      font-size: 10px !important;
+      color: #374151 !important;
+    }
+    
+    .invoice-print-signature-box span[class*="min-w"] {
+      min-width: 45mm !important;
+      height: 4mm !important;
+      display: inline-block !important;
+      border-bottom: 1px solid #9ca3af !important;
+    }
+    
+    /* ===== الفوتر ===== */
+    .invoice-print-footer {
+      background: #907457 !important;
+      color: white !important;
+      padding: 1.5mm 3mm !important;
+      font-size: 9px !important;
+      font-weight: 600 !important;
+      text-align: center !important;
+      border-radius: 2mm 2mm 0 0 !important;
+      margin-top: auto !important;       /* دفع الفوتر للأسفل */
+      page-break-inside: avoid !important;
+      line-height: 1.6 !important;
+      flex-shrink: 0 !important;
+    }
+    
+    /* ===== منع التقسيم بين الصفحات ===== */
+    .invoice-print-section,
+    .invoice-print-table,
+    .invoice-print-measurements-section,
+    .invoice-print-notes-box,
+    .invoice-print-rules-text,
+    .invoice-print-signature,
+    .invoice-print-footer {
+      page-break-inside: avoid !important;
+      page-break-after: avoid !important;
+      page-break-before: avoid !important;
+    }
+    
+    /* ===== تحسين ظهور الأرقام ===== */
+    [style*="font-variant-numeric: tabular-nums"] {
+      font-feature-settings: "tnum" !important;
+    }
+    
+    /* ===== إخفاء العناصر غير الضرورية ===== */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+    
+    /* ===== تحسين الظهور في حالة وجود أكثر من صنف ===== */
+    .invoice-print-table-items tbody tr:last-child td {
+      border-bottom: none !important;
+    }
+    
+    .invoice-print-table-measurements tbody tr:last-child td {
+      border-bottom: none !important;
+    }
+    
+    /* ===== ضمان عدم تجاوز المحتوى ===== */
+    .invoice-print-td,
+    .invoice-print-th {
+      word-wrap: break-word !important;
+      overflow-wrap: break-word !important;
+      white-space: normal !important;
+    }
+    
+    /* ===== تحسين التباعد للصفوف الفردية ===== */
+    .invoice-print-row-even {
+      background: #f9fafb !important;
+    }
+  }
+`}</style>
     </article>
   );
 }

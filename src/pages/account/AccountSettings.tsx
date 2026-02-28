@@ -1,12 +1,10 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router";
 import { useAuthStore } from "@/zustand-stores/auth.store";
 import {
   useProfile,
   useUpdateProfile,
   useChangePassword,
-  useUploadLogo,
-  useDeleteLogo,
   useDeleteAccount,
 } from "@/api/v2/account/account.hooks";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -26,42 +24,75 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { User, Lock, Image, Trash2, Upload, Loader2 } from "lucide-react";
+import { User, Lock, Trash2, Upload, Loader2 } from "lucide-react";
 
 export default function AccountSettings() {
   const navigate = useNavigate();
   const { loginData, logout } = useAuthStore();
   const { data: profile, isLoading: profileLoading } = useProfile();
 
-  const [name, setName] = useState(loginData?.user?.name || "");
-  const [email, setEmail] = useState(loginData?.user?.email || "");
+  const displayName = profile?.name ?? loginData?.user?.name ?? "";
+  const displayEmail = profile?.email ?? loginData?.user?.email ?? "";
+
+  const [name, setName] = useState(displayName);
+  const [email, setEmail] = useState(displayEmail);
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [deletePassword, setDeletePassword] = useState("");
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarRemove, setAvatarRemove] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const updateProfile = useUpdateProfile();
   const changePassword = useChangePassword();
-  const uploadLogo = useUploadLogo();
-  const deleteLogo = useDeleteLogo();
   const deleteAccount = useDeleteAccount();
 
-  const userInitials = (profile?.name || loginData?.user?.name || "U")
+  useEffect(() => {
+    if (displayName) setName(displayName);
+    if (displayEmail) setEmail(displayEmail);
+  }, [displayName, displayEmail]);
+
+
+  const userInitials = (displayName || "U")
     .split(" ")
     .map((n) => n[0])
     .join("")
     .substring(0, 2)
     .toUpperCase();
 
-  const logoUrl = profile?.logo || null;
+  const avatarUrl = profile?.avatar_url ?? profile?.avatar ?? null;
+  const avatarPreview = useMemo(
+    () => (avatarFile ? URL.createObjectURL(avatarFile) : null),
+    [avatarFile]
+  );
+  useEffect(() => {
+    return () => {
+      if (avatarPreview) URL.revokeObjectURL(avatarPreview);
+    };
+  }, [avatarPreview]);
+  const displayAvatarUrl = avatarRemove ? null : (avatarPreview ?? avatarUrl);
 
   const handleUpdateProfile = (e: React.FormEvent) => {
     e.preventDefault();
-    updateProfile.mutate({ name, email });
+    updateProfile.mutate(
+      {
+        name,
+        email,
+        avatar: avatarFile ?? undefined,
+        avatar_remove: avatarRemove || undefined,
+      },
+      {
+        onSuccess: () => {
+          setAvatarFile(null);
+          setAvatarRemove(false);
+          if (fileInputRef.current) fileInputRef.current.value = "";
+        },
+      }
+    );
   };
 
   const handleChangePassword = (e: React.FormEvent) => {
@@ -82,11 +113,10 @@ export default function AccountSettings() {
     );
   };
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      uploadLogo.mutate(file);
-    }
+    setAvatarFile(file ?? null);
+    if (file) setAvatarRemove(false);
   };
 
   const handleDeleteAccount = () => {
@@ -121,10 +151,6 @@ export default function AccountSettings() {
             <User className="h-4 w-4" />
             الملف الشخصي
           </TabsTrigger>
-          <TabsTrigger value="logo" className="gap-2">
-            <Image className="h-4 w-4" />
-            الشعار
-          </TabsTrigger>
           <TabsTrigger value="password" className="gap-2">
             <Lock className="h-4 w-4" />
             كلمة المرور
@@ -140,9 +166,55 @@ export default function AccountSettings() {
           <Card>
             <CardHeader>
               <CardTitle>معلومات الحساب</CardTitle>
-              <CardDescription>تعديل الاسم والبريد الإلكتروني</CardDescription>
+              <CardDescription>تعديل الاسم والبريد الإلكتروني والصورة الشخصية</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-6">
+              {/* الصورة الشخصية (avatar) — تُعدّل مع البروفايل بنفس النموذج */}
+              <div className="flex items-center gap-6 flex-wrap">
+                <Avatar className="h-24 w-24 border-2 border-muted shrink-0">
+                  <AvatarImage src={displayAvatarUrl ?? undefined} alt="صورة الحساب" />
+                  <AvatarFallback className="text-2xl font-semibold bg-primary/10 text-primary">
+                    {userInitials}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    يفضل استخدام صورة بحجم 256×256 بكسل أو أكبر
+                  </p>
+                  <div className="flex gap-2 flex-wrap">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarChange}
+                      className="hidden"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <Upload className="ml-2 h-4 w-4" />
+                      اختيار صورة
+                    </Button>
+                    {(avatarUrl || avatarFile) && !avatarRemove && (
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        onClick={() => {
+                          setAvatarRemove(true);
+                          setAvatarFile(null);
+                          if (fileInputRef.current) fileInputRef.current.value = "";
+                        }}
+                      >
+                        <Trash2 className="ml-2 h-4 w-4" />
+                        إزالة الصورة
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               <form onSubmit={handleUpdateProfile} className="space-y-4 max-w-md">
                 <div className="space-y-2">
                   <Label htmlFor="name">الاسم</Label>
@@ -172,69 +244,9 @@ export default function AccountSettings() {
                   {updateProfile.isPending && (
                     <Loader2 className="ml-2 h-4 w-4 animate-spin" />
                   )}
-                  حفظ التغييرات
+                  حفظ التغييرات (الاسم، البريد، والصورة)
                 </Button>
               </form>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Logo Tab */}
-        <TabsContent value="logo">
-          <Card>
-            <CardHeader>
-              <CardTitle>شعار الحساب</CardTitle>
-              <CardDescription>رفع أو تغيير شعار حسابك</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center gap-6">
-                <Avatar className="h-24 w-24 border-2 border-muted">
-                  <AvatarImage src={logoUrl || undefined} alt="شعار الحساب" />
-                  <AvatarFallback className="text-2xl font-semibold bg-primary/10 text-primary">
-                    {userInitials}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">
-                    يفضل استخدام صورة بحجم 256×256 بكسل أو أكبر
-                  </p>
-                  <div className="flex gap-2">
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleLogoUpload}
-                      className="hidden"
-                    />
-                    <Button
-                      variant="outline"
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={uploadLogo.isPending}
-                    >
-                      {uploadLogo.isPending ? (
-                        <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-                      ) : (
-                        <Upload className="ml-2 h-4 w-4" />
-                      )}
-                      رفع شعار
-                    </Button>
-                    {logoUrl && (
-                      <Button
-                        variant="destructive"
-                        onClick={() => deleteLogo.mutate()}
-                        disabled={deleteLogo.isPending}
-                      >
-                        {deleteLogo.isPending ? (
-                          <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-                        ) : (
-                          <Trash2 className="ml-2 h-4 w-4" />
-                        )}
-                        حذف الشعار
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </div>
             </CardContent>
           </Card>
         </TabsContent>

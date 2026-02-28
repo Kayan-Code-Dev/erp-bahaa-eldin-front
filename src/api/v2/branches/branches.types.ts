@@ -11,6 +11,8 @@ export type TCreateBranchRequest = {
     notes: string;
   };
   inventory_name: string;
+  phone?: string;
+  image?: File | null;
 };
 
 export type TBranchResponse = {
@@ -22,6 +24,9 @@ export type TBranchResponse = {
   id: number;
   inventory: TInventoryResponse;
   address: TAddressResponse;
+  phone?: string | null;
+  image?: string | null;
+  image_url?: string | null;
 };
 
 export type TUpdateBranchRequest = Partial<TCreateBranchRequest>;
