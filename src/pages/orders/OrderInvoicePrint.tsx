@@ -14,8 +14,7 @@ type Props = {
   hideItemPrices?: boolean;
 };
 
-const RULES_TEXT = `• ميعاد استلام الفستان من 1 ظهراً حتى 7 مساءً وإحضار 2000 جنيه تأمين للزفاف و 500 للسواريه.
-• لا يمكن استرجاع أو استبدال الفساتين بعد مرور 3 أيام من تاريخ الشراء إلا في حالة وجود عيب مصنعي.
+const RULES_TEXT = `
 • يجب إحضار الفاتورة الأصلية مع البطاقة الشخصية عند الإرجاع أو الاستلام أو الاستبدال.`;
 
 /* First table: label only (no item column) */
@@ -320,27 +319,7 @@ export function OrderInvoicePrint({
             <h2 className="invoice-print-section-title text-xs font-bold text-gray-600 uppercase tracking-wider mb-2.5 pb-2 border-b-2 border-gray-200">القواعد والتعليمات</h2>
             <div className="invoice-print-rules-p text-gray-700 text-xs leading-relaxed font-normal whitespace-pre-line rounded-xl border border-gray-100 bg-gray-50/30 py-3 px-4">{RULES_TEXT}</div>
           </aside>
-          <div className="invoice-print-totals-wrap shrink-0 w-44 rounded-xl overflow-hidden shadow-md border border-gray-200">
-            <header className="invoice-print-totals-title py-2.5 px-3 text-center text-white text-sm font-bold uppercase tracking-wider" style={{ backgroundColor: HEADER_BG }}>
-              ملخص المبالغ
-            </header>
-            <table className="invoice-print-totals-table w-full border-collapse">
-              <tbody>
-                <tr className="invoice-print-totals-row border-b border-gray-100">
-                  <th scope="row" className="invoice-print-totals-label py-2.5 px-3 text-sm font-semibold text-gray-700 bg-gray-50/80 text-right">المجموع</th>
-                  <td className="invoice-print-totals-value py-2.5 px-3 text-right text-sm font-bold tabular-nums text-gray-900" itemProp="totalPaymentDue">{hideItemPrices ? EMPTY_PRICE : formatNumber(totalPrice)}</td>
-                </tr>
-                <tr className="invoice-print-totals-row border-b border-gray-100">
-                  <th scope="row" className="invoice-print-totals-label py-2.5 px-3 text-sm font-semibold text-gray-700 bg-gray-50/80 text-right">العربون</th>
-                  <td className="invoice-print-totals-value py-2.5 px-3 text-right text-sm font-semibold tabular-nums text-gray-800">{hideItemPrices ? EMPTY_PRICE : formatNumber(paid)}</td>
-                </tr>
-                <tr className="invoice-print-totals-row">
-                  <th scope="row" className="invoice-print-totals-label py-2.5 px-3 text-sm font-semibold text-gray-700 bg-gray-50/80 text-right">المتبقي</th>
-                  <td className="invoice-print-totals-value py-2.5 px-3 text-right text-sm font-semibold tabular-nums text-gray-800">{hideItemPrices ? EMPTY_PRICE : formatNumber(remaining)}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          
         </section>
 
         <section className="invoice-print-signature flex justify-end mt-5 pt-5 border-t-2 border-gray-300">
