@@ -1,13 +1,15 @@
 export type TLoginRequest = {
-    email: string;
-    password: string;
+  email: string;
+  password: string;
 };
 
 export type TLoginResponse = {
-    token: string;
-    user: {
-        id: number;
-        name: string;
-        email: string;
-    };
+  token: string;
+  user: {
+    id: number;
+    name: string;
+    email: string;
+  };
+  roles?: string[];
+  permissions?: string[];
 };

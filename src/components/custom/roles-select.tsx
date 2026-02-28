@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Combobox, ComboboxOption } from "@/components/ui/combobox";
 import { useGetRolesInfiniteQueryOptions } from "@/api/v2/content-managment/roles/roles.hooks";
+import { getRoleLabel } from "@/lib/roleLabels";
 import { Loader2 } from "lucide-react";
 
 // Single select props
@@ -56,12 +57,12 @@ export function RolesSelect({
     return roles.filter((role) => !excludeIds.includes(role.id));
   }, [rolesData, excludeIds]);
 
-  // Convert roles to ComboboxOption format
+  // Convert roles to ComboboxOption format (Arabic label for display)
   const options: ComboboxOption[] = useMemo(
     () =>
       allRoles.map((role) => ({
         value: String(role.id),
-        label: role.name,
+        label: getRoleLabel(role.name),
       })),
     [allRoles]
   );

@@ -7,6 +7,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getRoleLabel } from "@/lib/roleLabels";
 import { formatDate } from "@/utils/formatDate";
 import { formatPhone } from "@/utils/formatPhone";
 import { Edit, UserX } from "lucide-react";
@@ -189,7 +190,7 @@ function ShowDetailsAndEditEmployee() {
                     <div className="flex flex-wrap gap-2">
                       {employee.user.roles.map((role) => (
                         <Badge key={role.id} variant="outline">
-                          {role.name}
+                          {getRoleLabel(role.name)}
                         </Badge>
                       ))}
                     </div>

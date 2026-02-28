@@ -11,10 +11,13 @@ import { Menu } from "lucide-react";
 import appLogo from "@/assets/app-logo.svg";
 import { SidebarNav } from "./SideBarNav";
 import { sidebarLabels } from "../sidebar/constants";
+import useSidebarLabel, { useSidebarPermissions } from "../sidebar/useSidebarLabel";
 
 export function AppSidebar() {
   const { open, setOpen } = useSidebar();
   const [pinned, setPinned] = useState(false);
+  const permissions = useSidebarPermissions();
+  const filteredLabels = useSidebarLabel(sidebarLabels, permissions);
 
   const handleButtonClick = () => {
     if (open) {
@@ -72,7 +75,7 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-3 group-data-[collapsible=icon]:overflow-hidden group-data-[collapsible=icon]:px-2 group-data-[collapsible=icon]:items-center scrollbar-thin scrollbar-track-sidebar-accent/50 scrollbar-thumb-sidebar-border">
-        <SidebarNav items={sidebarLabels} />
+        <SidebarNav items={filteredLabels} />
       </SidebarContent>
     </Sidebar>
   );

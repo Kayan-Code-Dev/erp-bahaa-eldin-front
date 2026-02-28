@@ -1,8 +1,12 @@
 import { sidebarLabels } from "./constants";
 import SidebarItem from "./sidebar-item";
 import appLogo from "@/assets/app-logo.svg";
+import useSidebarLabel, { useSidebarPermissions } from "./useSidebarLabel";
 
 function Sidebar() {
+  const permissions = useSidebarPermissions();
+  const filteredLabels = useSidebarLabel(sidebarLabels, permissions);
+
   return (
     <div className="hidden md:block w-64 bg-white border-l min-h-[calc(100vh-64px)]">
       <div className="flex justify-center items-center p-4">
@@ -10,9 +14,9 @@ function Sidebar() {
       </div>
       <div className="p-4">
         <div className="flex flex-col gap-4">
-          {sidebarLabels.map((item) => (
+          {filteredLabels.map((item) => (
             <SidebarItem
-              key={item.label}
+              key={item.path + item.label}
               icon={item.icon}
               iconComponent={item.iconComponent}
               label={item.label}

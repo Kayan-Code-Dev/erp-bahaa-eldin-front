@@ -9,6 +9,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getRoleLabel } from "@/lib/roleLabels";
 import { formatDate } from "@/utils/formatDate";
 import { formatPhone } from "@/utils/formatPhone";
 import { useQuery } from "@tanstack/react-query";
@@ -120,7 +121,7 @@ export function EmployeeDetailsModal({ employee, open, onOpenChange }: Props) {
                     <div className="flex flex-wrap gap-2">
                       {employeeData.user.roles.map((role) => (
                         <Badge key={role.id} variant="outline">
-                          {role.name}
+                          {getRoleLabel(role.name)}
                         </Badge>
                       ))}
                     </div>

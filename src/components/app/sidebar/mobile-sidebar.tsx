@@ -4,17 +4,21 @@ import { useLocation } from "react-router";
 import { sidebarLabels } from "./constants";
 import SidebarItem from "./sidebar-item";
 import appLogo from "@/assets/app-logo.svg";
+import useSidebarLabel, { useSidebarPermissions } from "./useSidebarLabel";
 
 function MobileSidebar() {
   const location = useLocation();
   const { pathname } = location;
-  const currentPageIndex = sidebarLabels.findIndex(
+  const permissions = useSidebarPermissions();
+  const filteredLabels = useSidebarLabel(sidebarLabels, permissions);
+
+  const currentPageIndex = filteredLabels.findIndex(
     (item) => item.path === pathname
   );
 
   useEffect(() => {
     useGeneralStore.setState({ currentPage: currentPageIndex });
-  }, [location.pathname]);
+  }, [pathname, currentPageIndex]);
 
   return (
     <div className="p-4 h-full bg-white">
@@ -22,9 +26,9 @@ function MobileSidebar() {
         <img src={appLogo} alt="App Logo" className="w-32" />
       </div>
       <div className="flex flex-col gap-4">
-        {sidebarLabels.map((item) => (
+        {filteredLabels.map((item) => (
           <SidebarItem
-            key={item.label}
+            key={item.path + item.label}
             icon={item.icon}
             iconComponent={item.iconComponent}
             label={item.label}
