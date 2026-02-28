@@ -152,6 +152,9 @@ const NotificationListItem = memo(function NotificationListItem({
   const metadataKeyLabels: Record<string, string> = {
     total_price: 'المبلغ الإجمالي',
     amount: 'المبلغ',
+    order_paid: 'المدفوع',
+    order_remaining: 'المتبقي',
+    payment_id: 'رقم الدفعة',
     reference_id: 'رقم المرجع',
     supplier_id: 'رقم المورد',
     total_amount: 'الإجمالي',
@@ -159,6 +162,11 @@ const NotificationListItem = memo(function NotificationListItem({
     payment_amount: 'المدفوع',
     supplier_order_id: 'رقم أمر التوريد',
   };
+
+  const isPaymentReference = useMemo(() => {
+    const rt = notification.reference_type ?? '';
+    return rt.includes('Payment') || rt === 'payment';
+  }, [notification.reference_type]);
 
   const typeLabel = useMemo(() => {
     return getNotificationTypeLabel(notification.type);
@@ -242,8 +250,8 @@ const NotificationListItem = memo(function NotificationListItem({
             <div className="mb-2 flex flex-wrap gap-1.5">
               {metadataEntries.map(([key, value]) => {
                 const label = metadataKeyLabels[key] || key;
-                const displayValue = value !== null && value !== undefined ? String(value) : '-';
-                
+                const displayValue = formatMetadataValue(key, value);
+
                 return (
                   <span
                     key={key}
@@ -259,13 +267,19 @@ const NotificationListItem = memo(function NotificationListItem({
           {/* Reference Info */}
           {(notification.reference_type || notification.reference_id) && (
             <div className="mb-2 text-xs text-muted-foreground">
-              {referenceTypeDisplay && (
-                <span className="mr-2">
-                  النوع: {getNotificationTypeLabel(referenceTypeDisplay) || referenceTypeDisplay}
-                </span>
-              )}
-              {notification.reference_id && (
-                <span>الرقم: {notification.reference_id}</span>
+              {isPaymentReference && notification.reference_id ? (
+                <span>دفعة #{notification.reference_id}</span>
+              ) : (
+                <>
+                  {referenceTypeDisplay && (
+                    <span className="mr-2">
+                      النوع: {getNotificationTypeLabel(referenceTypeDisplay) || referenceTypeDisplay}
+                    </span>
+                  )}
+                  {notification.reference_id != null && (
+                    <span>الرقم: {notification.reference_id}</span>
+                  )}
+                </>
               )}
             </div>
           )}
