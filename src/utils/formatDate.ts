@@ -15,14 +15,12 @@ export const formatDate = (dateString?: string) => {
     if (!dateString) return "-";
     try {
         const parsedDate = parseISO(dateString);
-        // تنسيق التاريخ: يوم/شهر/سنة
         return format(parsedDate, "yyyy/MM/dd");
     } catch {
         return dateString;
     }
 };
 
-// دالة إضافية للتنسيق مع الوقت إذا احتجتها
 export const formatDateTime = (dateString?: string) => {
     if (!dateString) return "-";
     try {

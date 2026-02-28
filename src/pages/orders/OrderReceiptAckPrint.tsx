@@ -30,7 +30,6 @@ function formatDate(s: string): string {
   }
 }
 
-
 export function OrderReceiptAckPrint({
   order,
   logoUrl = "/app-logo.svg",
@@ -63,7 +62,7 @@ export function OrderReceiptAckPrint({
     <article
       dir="rtl"
       lang="ar"
-      className="invoice-print-root w-full min-h-screen flex flex-col bg-white text-gray-900 text-[14px] leading-relaxed"
+      className="invoice-print-root w-full min-h-screen flex flex-col bg-white text-gray-900 text-[12px] leading-relaxed"
       style={{ fontFamily: "'Cairo', 'Segoe UI', Arial, sans-serif" }}
       itemScope
       itemType="https://schema.org/Receipt"
@@ -71,14 +70,14 @@ export function OrderReceiptAckPrint({
       <meta itemProp="name" content={`إقرار استلام - طلب رقم ${order.id}`} />
       <meta itemProp="dateCreated" content={order.created_at} />
 
-      {/* Header — minimized */}
+      {/* Header — minimized for A5 */}
       <header
-        className="invoice-print-header w-full py-3 mb-3 text-white rounded-b-xl shadow-sm"
+        className="invoice-print-header w-full py-2 mb-2 text-white rounded-b-lg shadow-sm"
         style={{ backgroundColor: HEADER_BG }}
         role="banner"
       >
-        <div className="invoice-print-header-inner flex items-center justify-between gap-6 max-w-[210mm] mx-auto px-6">
-          <div className="invoice-print-header-right text-right shrink-0 space-y-0.5 text-[14px]">
+        <div className="invoice-print-header-inner flex items-center justify-between gap-4 max-w-[148mm] mx-auto px-4">
+          <div className="invoice-print-header-right text-right shrink-0 space-y-0.5 text-[11px]">
             <div className="flex items-baseline justify-end gap-2 flex-wrap">
               <span className="text-white/95 font-medium">رقم الفاتورة:</span>
               <span className="font-bold text-white" itemProp="identifier" style={{ fontVariantNumeric: "tabular-nums", fontFamily: "'Segoe UI', Arial, sans-serif" }}>{order.id}</span>
@@ -93,30 +92,30 @@ export function OrderReceiptAckPrint({
               التاريخ: <span className="font-semibold">{invoiceDate}</span>
             </div>
           </div>
-          <div className="invoice-print-header-logo shrink-0 bg-white/10 rounded-lg p-2 flex items-center justify-center">
+          <div className="invoice-print-header-logo shrink-0 bg-white/10 rounded-lg p-1.5 flex items-center justify-center">
             <img
               src={logoUrl}
               alt="شعار الشركة"
-              className="invoice-logo-img max-h-14 w-auto object-contain"
+              className="invoice-logo-img max-h-10 w-auto object-contain"
               itemProp="image"
             />
           </div>
         </div>
       </header>
 
-      <main className="invoice-print-content flex-1 flex flex-col min-h-0 max-w-[210mm] mx-auto px-6 pb-3 w-full">
+      <main className="invoice-print-content flex-1 flex flex-col min-h-0 max-w-[148mm] mx-auto px-4 pb-2 w-full">
         {/* Content from title to signature */}
         <section className="invoice-print-body shrink-0">
           {/* 1. Receipt acknowledgment title — at the top */}
-          <header className="invoice-print-title-wrap flex flex-col items-center justify-center text-center mb-4">
-            <h1 className="invoice-print-title text-[24px] font-bold text-gray-900 tracking-tight mb-2">
+          <header className="invoice-print-title-wrap flex flex-col items-center justify-center text-center mb-3">
+            <h1 className="invoice-print-title text-[20px] font-bold text-gray-900 tracking-tight mb-1">
               إقرار استلام
             </h1>
-            <span className="invoice-print-title-line mt-1 block h-0.5 w-24 rounded-full bg-gray-400" aria-hidden />
+            <span className="invoice-print-title-line mt-1 block h-0.5 w-20 rounded-full bg-gray-400" aria-hidden />
           </header>
 
           {/* 2. I received / National ID / Resident in / Phone — from the right */}
-          <section className="invoice-print-recipient text-right mb-4 space-y-1.5 text-[14px]" itemScope itemType="https://schema.org/Person">
+          <section className="invoice-print-recipient text-right mb-3 space-y-1 text-[12px]" itemScope itemType="https://schema.org/Person">
             <p className="text-gray-900">
               <span className="font-semibold text-gray-700">استلمت أنا :</span>{" "}
               <span className="font-bold text-gray-900" itemProp="name">{clientName}</span>
@@ -138,10 +137,10 @@ export function OrderReceiptAckPrint({
           </section>
 
           {/* 3. Numbered products list */}
-          <section className="invoice-print-items-list mb-4 text-[14px] text-gray-900">
+          <section className="invoice-print-items-list mb-3 text-[12px] text-gray-900">
             <h2 className="sr-only">قائمة المنتجات</h2>
             {items.length > 0 ? (
-              <ol className="list-decimal list-inside space-y-1" itemProp="itemListElement" itemScope itemType="https://schema.org/ItemList">
+              <ol className="list-decimal list-inside space-y-0.5" itemProp="itemListElement" itemScope itemType="https://schema.org/ItemList">
                 {items.map((item) => (
                   <li key={item.id} className="font-medium" itemProp="itemListElement" itemScope itemType="https://schema.org/Product">
                     <span itemProp="name">{(item as { name?: string }).name ?? item.code ?? "-"}</span>
@@ -157,40 +156,40 @@ export function OrderReceiptAckPrint({
           </section>
 
           {/* 4. Rental period */}
-          <p className="invoice-print-rental text-[14px] text-gray-900 mb-3">
+          <p className="invoice-print-rental text-[12px] text-gray-900 mb-2">
             وذلك بتأجيره من تاريخ{" "}
             <time className="font-semibold" dateTime={order.visit_datetime || undefined}>{startDate}</time> حتى تاريخ{" "}
             <time className="font-semibold" dateTime={order.delivery_date || undefined}>{endDate}</time>
           </p>
 
           {/* 5. Receipt acknowledgment and deposit payment */}
-          <p className="invoice-print-deposit text-[14px] text-gray-900 mb-5">
+          <p className="invoice-print-deposit text-[12px] text-gray-900 mb-3">
             وذلك إقرار مني بالاستلام ودفع عربون وقدره :{" "}
             <span className="font-bold text-gray-900" itemProp="totalPaymentDue" style={{ fontVariantNumeric: "tabular-nums", fontFamily: "'Segoe UI', Arial, sans-serif" }}>{paid} ج.م</span>
           </p>
 
           {/* 6. Recipient and signature */}
-          <section className="invoice-print-signature flex justify-end mt-4 pt-4 border-t-2 border-gray-300">
-            <div className="invoice-print-signature-box text-right min-w-[220px] space-y-3 text-[14px] text-gray-900">
-              <p className="flex items-center justify-end gap-4">
+          <section className="invoice-print-signature flex justify-end mt-3 pt-3 border-t-2 border-gray-300">
+            <div className="invoice-print-signature-box text-right min-w-[180px] space-y-2 text-[12px] text-gray-900">
+              <p className="flex items-center justify-end gap-3">
                 <span className="font-semibold text-gray-700">المستلم:</span>
-                <span className="inline-block min-w-[200px] h-6">&nbsp;</span>
+                <span className="inline-block min-w-[150px] h-5 border-b border-gray-400">&nbsp;</span>
               </p>
-              <p className="flex items-center justify-end gap-4">
+              <p className="flex items-center justify-end gap-3">
                 <span className="font-semibold text-gray-700">التوقيع:</span>
-                <span className="inline-block min-w-[200px] h-6">&nbsp;</span>
+                <span className="inline-block min-w-[150px] h-5 border-b border-gray-400">&nbsp;</span>
               </p>
             </div>
           </section>
         </section>
 
-        {/* 7. Rules and instructions — fixed at the bottom of the page with spacing above footer */}
-        <aside className="invoice-print-rules mt-auto pt-4 pb-8 border-t-2 border-gray-200 shrink-0">
-          <h2 className="invoice-print-rules-title text-[14px] font-bold text-gray-800 mb-2 pb-1.5">
+        {/* 7. Rules and instructions — fixed at the bottom of the page */}
+        <aside className="invoice-print-rules mt-auto pt-3 pb-4 border-t-2 border-gray-200 shrink-0">
+          <h2 className="invoice-print-rules-title text-[12px] font-bold text-gray-800 mb-1 pb-1">
             القواعد والتعليمات
           </h2>
-          <div className="invoice-print-notes-box rounded-lg border-2 border-gray-200 bg-gray-50 py-3 px-4">
-            <ul className="list-none space-y-2 text-[13px] text-gray-800 leading-relaxed">
+          <div className="invoice-print-notes-box rounded-lg border border-gray-200 bg-gray-50 py-2 px-3">
+            <ul className="list-none space-y-1.5 text-[11px] text-gray-800 leading-relaxed">
               {RULES_ITEMS.map((text, i) => (
                 <li key={i} className="font-normal">
                   {text}
@@ -201,18 +200,20 @@ export function OrderReceiptAckPrint({
         </aside>
       </main>
 
-      {/* Footer — minimized */}
+      {/* Footer — minimized for A5 */}
       <footer
-        className="invoice-print-footer w-full mt-auto py-3 px-4 text-center text-white rounded-t-lg text-sm font-semibold shadow-md shrink-0"
+        className="invoice-print-footer w-full mt-auto py-2 px-3 text-center text-white rounded-t-md text-[11px] font-semibold shadow-md shrink-0"
         style={{ backgroundColor: HEADER_BG }}
         role="contentinfo"
       >
-        لا يرد العربون في حالة الغاء الحجز
-        <br />
-        يجب إحضار الفاتورة الأصلية مع البطاقة الشخصية عند الإرجاع أو الاستلام أو الاستبدال.
+        لا يرد العربون في حالة الغاء الحجز • يجب إحضار الفاتورة الأصلية مع البطاقة الشخصية
       </footer>
 
       <style>{`
+        @page {
+          size: A5;
+          margin: 5mm;
+        }
         @media print {
           body * { visibility: hidden; }
           .invoice-print-root, .invoice-print-root * { visibility: visible; }
@@ -220,8 +221,10 @@ export function OrderReceiptAckPrint({
             position: absolute; 
             left: 0; 
             top: 0; 
-            width: 100%; 
+            width: 148mm;
+            min-height: 210mm;
             padding: 0; 
+            margin: 0;
             box-sizing: border-box; 
             page-break-inside: avoid;
             -webkit-print-color-adjust: exact;
@@ -248,28 +251,15 @@ export function OrderReceiptAckPrint({
             white-space: nowrap;
             border-width: 0;
           }
-          /* Improve rules spacing when printing */
+          /* Improve spacing for A5 */
           .invoice-print-notes-box ul {
             display: flex !important;
             flex-direction: column !important;
-            gap: 8px !important;
+            gap: 4px !important;
           }
-          .invoice-print-notes-box li {
-            display: block !important;
-            margin-bottom: 8px !important;
-            page-break-inside: avoid;
-          }
-          /* Ensure signature spacing is preserved when printing */
-          .invoice-print-signature-box p {
-            display: flex !important;
-            align-items: center !important;
-            justify-content: flex-end !important;
-            gap: 16px !important;
-          }
-          .invoice-print-signature-box span[class*="min-w"] {
-            min-width: 200px !important;
-            height: 24px !important;
-            display: inline-block !important;
+          .invoice-print-signature-box span[class*="border-b"] {
+            min-width: 150px !important;
+            height: 20px !important;
           }
         }
       `}</style>
