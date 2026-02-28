@@ -105,7 +105,7 @@ export function OrderReceiptAckPrint({
       </header>
 
       <main className="ack-print-content flex-1 flex flex-col min-h-0 w-full px-3 pb-2 overflow-hidden">
-        {/* Content from title to signature */}
+        {/* Content from title to signature only */}
         <section className="ack-print-body shrink-0">
         {/* 1. Receipt acknowledgment title — at the top */}
         <header className="ack-print-title-wrap flex flex-col items-center justify-center text-center mb-2">
@@ -183,9 +183,11 @@ export function OrderReceiptAckPrint({
           </div>
         </section>
         </section>
+      </main>
 
-        {/* 7. Rules and instructions */}
-        <aside className="ack-print-rules mt-auto pt-2 pb-4 border-t border-gray-200 shrink-0 min-w-0">
+      {/* القواعد والتعليمات + الفوتر معاً أسفل الصفحة (القواعد فوق الفوتر دائماً) */}
+      <div className="ack-print-bottom mt-auto flex flex-col shrink-0 w-full">
+        <aside className="ack-print-rules pt-2 pb-2 border-t border-gray-200 shrink-0 min-w-0 px-3">
           <h2 className="ack-print-rules-title text-[12px] font-bold text-gray-800 mb-1">
             القواعد والتعليمات
           </h2>
@@ -199,17 +201,15 @@ export function OrderReceiptAckPrint({
             </ul>
           </div>
         </aside>
-      </main>
-
-      {/* Footer — سطران مع التفاف النص */}
-      <footer
-        className="ack-print-footer w-full mt-auto py-2 px-3 text-center text-white rounded-t-lg text-[11px] font-semibold shadow shrink-0 min-w-0 wrap-break-word"
-        style={{ backgroundColor: HEADER_BG }}
-        role="contentinfo"
-      >
-        <span className="block">لا يرد العربون في حالة إلغاء الحجز</span>
-        <span className="block mt-0.5">يجب إحضار الفاتورة الأصلية مع البطاقة الشخصية عند الإرجاع أو الاستلام أو الاستبدال.</span>
-      </footer>
+        <footer
+          className="ack-print-footer w-full py-2 px-3 text-center text-white rounded-t-lg text-[11px] font-semibold shadow shrink-0 min-w-0 wrap-break-word"
+          style={{ backgroundColor: HEADER_BG }}
+          role="contentinfo"
+        >
+          <span className="block">لا يرد العربون في حالة إلغاء الحجز</span>
+          <span className="block mt-0.5">يجب إحضار الفاتورة الأصلية مع البطاقة الشخصية عند الإرجاع أو الاستلام أو الاستبدال.</span>
+        </footer>
+      </div>
 
       <style>{`
         @media print {
@@ -231,14 +231,14 @@ export function OrderReceiptAckPrint({
             width: 100% !important; 
             max-width: 100% !important;
             min-height: 198mm !important;
-            padding: 0 !important; 
+            padding: 0 !important;
             box-sizing: border-box !important; 
             page-break-inside: avoid;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
           }
           .ack-print-content { flex: 1 1 auto !important; min-height: 0 !important; }
-          .ack-print-footer { margin-top: auto !important; }
+          .ack-print-bottom { margin-top: auto !important; flex-shrink: 0 !important; page-break-inside: avoid !important; }
           .ack-print-header-inner,
           .ack-print-content { max-width: 100% !important; }
           .ack-print-header, .ack-print-footer { 

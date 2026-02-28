@@ -177,10 +177,16 @@ const ACK_PRINT_STYLES = `
     color: #111827; 
     line-height: 1.5;
   }
+  .ack-print-bottom {
+    margin-top: auto;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
   .ack-print-rules { 
-    margin-top: auto; 
     padding-top: 8px; 
-    padding-bottom: 16px; 
+    padding-bottom: 8px; 
     border-top: 1px solid #e5e7eb; 
     flex-shrink: 0; 
     page-break-inside: avoid; 
@@ -263,7 +269,7 @@ const ACK_PRINT_STYLES = `
       print-color-adjust: exact;
     }
     .ack-print-content { flex: 1 1 auto !important; min-height: 0 !important; }
-    .ack-print-footer { margin-top: auto !important; flex-shrink: 0 !important; }
+    .ack-print-bottom { margin-top: auto !important; flex-shrink: 0 !important; page-break-inside: avoid !important; }
     .ack-print-header-inner,
     .ack-print-content { width: 100% !important; max-width: 100% !important; }
     .ack-print-root,
