@@ -206,7 +206,7 @@ export function OrderReceiptAckPrint({
           style={{ backgroundColor: HEADER_BG }}
           role="contentinfo"
         >
-          <span className="block">لا يرد العربون في حالة إلغاء الحجز</span>
+          <span className="block">لا يرد العربون في حالة إلغاء الحجز</span><br />
           <span className="block mt-0.5">يجب إحضار الفاتورة الأصلية مع البطاقة الشخصية عند الإرجاع أو الاستلام أو الاستبدال.</span>
         </footer>
       </div>
