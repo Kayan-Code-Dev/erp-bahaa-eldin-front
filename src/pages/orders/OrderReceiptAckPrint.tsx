@@ -185,14 +185,14 @@ export function OrderReceiptAckPrint({
         </section>
       </main>
 
-      {/* القواعد والتعليمات + الفوتر معاً أسفل الصفحة (القواعد فوق الفوتر دائماً) */}
+      {/* القواعد والتعليمات + الفوتر معاً أسفل الصفحة في نفس الصفحة */}
       <div className="ack-print-bottom mt-auto flex flex-col shrink-0 w-full">
-        <aside className="ack-print-rules pt-2 pb-2 border-t border-gray-200 shrink-0 min-w-0 px-3">
-          <h2 className="ack-print-rules-title text-[12px] font-bold text-gray-800 mb-1">
+        <aside className="ack-print-rules pt-1.5 pb-1.5 border-t border-gray-200 shrink-0 min-w-0 px-3">
+          <h2 className="ack-print-rules-title text-[10px] font-bold text-gray-800 mb-0.5">
             القواعد والتعليمات
           </h2>
-          <div className="ack-print-notes-box rounded border border-gray-200 bg-gray-50 py-2 px-3 min-w-0">
-            <ul className="list-none space-y-1 text-[11px] text-gray-800 leading-snug wrap-break-word">
+          <div className="ack-print-notes-box rounded border border-gray-200 bg-gray-50 py-1.5 px-2 min-w-0">
+            <ul className="list-none space-y-0.5 text-[9px] text-gray-800 leading-tight wrap-break-word">
               {RULES_ITEMS.map((text, i) => (
                 <li key={i} className="font-normal wrap-break-word">
                   {text}
@@ -202,7 +202,7 @@ export function OrderReceiptAckPrint({
           </div>
         </aside>
         <footer
-          className="ack-print-footer w-full py-2 px-3 text-center text-white rounded-t-lg text-[11px] font-semibold shadow shrink-0 min-w-0 wrap-break-word"
+          className="ack-print-footer w-full py-1.5 px-3 text-center text-white rounded-t-lg text-[9px] font-semibold shadow shrink-0 min-w-0 wrap-break-word"
           style={{ backgroundColor: HEADER_BG }}
           role="contentinfo"
         >
@@ -230,14 +230,17 @@ export function OrderReceiptAckPrint({
             transform: none !important;
             width: 100% !important; 
             max-width: 100% !important;
-            min-height: 198mm !important;
+            height: 194mm !important;
+            min-height: 194mm !important;
+            max-height: 194mm !important;
             padding: 0 !important;
             box-sizing: border-box !important; 
             page-break-inside: avoid;
+            page-break-after: avoid !important;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
           }
-          .ack-print-content { flex: 1 1 auto !important; min-height: 0 !important; }
+          .ack-print-content { flex: 1 1 auto !important; min-height: 0 !important; overflow: hidden !important; }
           .ack-print-bottom { margin-top: auto !important; flex-shrink: 0 !important; page-break-inside: avoid !important; }
           .ack-print-header-inner,
           .ack-print-content { max-width: 100% !important; }
