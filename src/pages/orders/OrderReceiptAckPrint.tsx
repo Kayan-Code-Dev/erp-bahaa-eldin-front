@@ -44,10 +44,10 @@ export function OrderReceiptAckPrint({
   const phones = c?.phones?.filter(p => p.phone?.trim()) || [];
   const phoneStr = phones.length > 0
     ? phones.map(p => {
-        const phoneType = p.type === 'mobile' ? 'موبايل' : p.type === 'whatsapp' ? 'واتساب' : p.type || 'هاتف';
-        const num = formatPhone(p.phone, "");
-        return num ? `${num} (${phoneType})` : "";
-      }).filter(Boolean).join(" - ")
+      const phoneType = p.type === 'mobile' ? 'موبايل' : p.type === 'whatsapp' ? 'واتساب' : p.type || 'هاتف';
+      const num = formatPhone(p.phone, "");
+      return num ? `${num} (${phoneType})` : "";
+    }).filter(Boolean).join(" - ")
     : null;
   const items = order.items ?? [];
   const startDate = order.visit_datetime ? formatDate(order.visit_datetime) : "-";
@@ -70,7 +70,7 @@ export function OrderReceiptAckPrint({
     >
       <meta itemProp="name" content={`إقرار استلام - طلب رقم ${order.id}`} />
       <meta itemProp="dateCreated" content={order.created_at} />
-      
+
       {/* Header — minimized */}
       <header
         className="invoice-print-header w-full py-3 mb-3 text-white rounded-b-xl shadow-sm"
@@ -94,9 +94,9 @@ export function OrderReceiptAckPrint({
             </div>
           </div>
           <div className="invoice-print-header-logo shrink-0 bg-white/10 rounded-lg p-2 flex items-center justify-center">
-            <img 
-              src={logoUrl} 
-              alt="شعار الشركة" 
+            <img
+              src={logoUrl}
+              alt="شعار الشركة"
               className="invoice-logo-img max-h-14 w-auto object-contain"
               itemProp="image"
             />
@@ -107,81 +107,81 @@ export function OrderReceiptAckPrint({
       <main className="invoice-print-content flex-1 flex flex-col min-h-0 max-w-[210mm] mx-auto px-6 pb-3 w-full">
         {/* Content from title to signature */}
         <section className="invoice-print-body shrink-0">
-        {/* 1. Receipt acknowledgment title — at the top */}
-        <header className="invoice-print-title-wrap flex flex-col items-center justify-center text-center mb-4">
-          <h1 className="invoice-print-title text-[24px] font-bold text-gray-900 tracking-tight mb-2">
-            إقرار استلام
-          </h1>
-          <span className="invoice-print-title-line mt-1 block h-0.5 w-24 rounded-full bg-gray-400" aria-hidden />
-        </header>
+          {/* 1. Receipt acknowledgment title — at the top */}
+          <header className="invoice-print-title-wrap flex flex-col items-center justify-center text-center mb-4">
+            <h1 className="invoice-print-title text-[24px] font-bold text-gray-900 tracking-tight mb-2">
+              إقرار استلام
+            </h1>
+            <span className="invoice-print-title-line mt-1 block h-0.5 w-24 rounded-full bg-gray-400" aria-hidden />
+          </header>
 
-        {/* 2. I received / National ID / Resident in / Phone — from the right */}
-        <section className="invoice-print-recipient text-right mb-4 space-y-1.5 text-[14px]" itemScope itemType="https://schema.org/Person">
-          <p className="text-gray-900">
-            <span className="font-semibold text-gray-700">استلمت أنا :</span>{" "}
-            <span className="font-bold text-gray-900" itemProp="name">{clientName}</span>
-          </p>
-          <p className="text-gray-900">
-            <span className="font-semibold text-gray-700">الرقم القومي :</span>{" "}
-            <span className="font-normal text-gray-900" style={{ fontVariantNumeric: "tabular-nums", fontFamily: "'Segoe UI', Arial, sans-serif" }}>{nationalId}</span>
-          </p>
-          <p className="text-gray-900">
-            <span className="font-semibold text-gray-700">المقيم في :</span>{" "}
-            <span className="font-normal text-gray-900" itemProp="address">{addressStr}</span>
-          </p>
-          {phoneStr && (
+          {/* 2. I received / National ID / Resident in / Phone — from the right */}
+          <section className="invoice-print-recipient text-right mb-4 space-y-1.5 text-[14px]" itemScope itemType="https://schema.org/Person">
             <p className="text-gray-900">
-              <span className="font-semibold text-gray-700">رقم الهاتف :</span>{" "}
-              <span dir="ltr" className="font-normal text-gray-900 inline-block text-right" itemProp="telephone" style={{ fontVariantNumeric: "tabular-nums", fontFamily: "'Segoe UI', Arial, sans-serif" }}>{phoneStr}</span>
+              <span className="font-semibold text-gray-700">استلمت أنا :</span>{" "}
+              <span className="font-bold text-gray-900" itemProp="name">{clientName}</span>
             </p>
-          )}
-        </section>
-
-        {/* 3. Numbered products list */}
-        <section className="invoice-print-items-list mb-4 text-[14px] text-gray-900">
-          <h2 className="sr-only">قائمة المنتجات</h2>
-          {items.length > 0 ? (
-            <ol className="list-decimal list-inside space-y-1" itemProp="itemListElement" itemScope itemType="https://schema.org/ItemList">
-              {items.map((item) => (
-                <li key={item.id} className="font-medium" itemProp="itemListElement" itemScope itemType="https://schema.org/Product">
-                  <span itemProp="name">{(item as { name?: string }).name ?? item.code ?? "-"}</span>
-                  {item.code && (
-                    <span className="text-gray-600 font-normal"> ({item.code})</span>
-                  )}
-                </li>
-              ))}
-            </ol>
-          ) : (
-            <p className="text-gray-500 font-normal">—</p>
-          )}
-        </section>
-
-        {/* 4. Rental period */}
-        <p className="invoice-print-rental text-[14px] text-gray-900 mb-3">
-          وذلك بتأجيره من تاريخ{" "}
-          <time className="font-semibold" dateTime={order.visit_datetime || undefined}>{startDate}</time> حتى تاريخ{" "}
-          <time className="font-semibold" dateTime={order.delivery_date || undefined}>{endDate}</time>
-        </p>
-
-        {/* 5. Receipt acknowledgment and deposit payment */}
-        <p className="invoice-print-deposit text-[14px] text-gray-900 mb-5">
-          وذلك إقرار مني بالاستلام ودفع عربون وقدره :{" "}
-          <span className="font-bold text-gray-900" itemProp="totalPaymentDue" style={{ fontVariantNumeric: "tabular-nums", fontFamily: "'Segoe UI', Arial, sans-serif" }}>{paid} ج.م</span>
-        </p>
-
-        {/* 6. Recipient and signature */}
-        <section className="invoice-print-signature flex justify-end mt-4 pt-4 border-t-2 border-gray-300">
-          <div className="invoice-print-signature-box text-right min-w-[220px] space-y-3 text-[14px] text-gray-900">
-            <p className="flex items-center justify-end gap-4">
-              <span className="font-semibold text-gray-700">المستلم:</span>
-              <span className="inline-block min-w-[200px] h-6">&nbsp;</span>
+            <p className="text-gray-900">
+              <span className="font-semibold text-gray-700">الرقم القومي :</span>{" "}
+              <span className="font-normal text-gray-900" style={{ fontVariantNumeric: "tabular-nums", fontFamily: "'Segoe UI', Arial, sans-serif" }}>{nationalId}</span>
             </p>
-            <p className="flex items-center justify-end gap-4">
-              <span className="font-semibold text-gray-700">التوقيع:</span>
-              <span className="inline-block min-w-[200px] h-6">&nbsp;</span>
+            <p className="text-gray-900">
+              <span className="font-semibold text-gray-700">المقيم في :</span>{" "}
+              <span className="font-normal text-gray-900" itemProp="address">{addressStr}</span>
             </p>
-          </div>
-        </section>
+            {phoneStr && (
+              <p className="text-gray-900">
+                <span className="font-semibold text-gray-700">رقم الهاتف :</span>{" "}
+                <span dir="ltr" className="font-normal text-gray-900 inline-block text-right" itemProp="telephone" style={{ fontVariantNumeric: "tabular-nums", fontFamily: "'Segoe UI', Arial, sans-serif" }}>{phoneStr}</span>
+              </p>
+            )}
+          </section>
+
+          {/* 3. Numbered products list */}
+          <section className="invoice-print-items-list mb-4 text-[14px] text-gray-900">
+            <h2 className="sr-only">قائمة المنتجات</h2>
+            {items.length > 0 ? (
+              <ol className="list-decimal list-inside space-y-1" itemProp="itemListElement" itemScope itemType="https://schema.org/ItemList">
+                {items.map((item) => (
+                  <li key={item.id} className="font-medium" itemProp="itemListElement" itemScope itemType="https://schema.org/Product">
+                    <span itemProp="name">{(item as { name?: string }).name ?? item.code ?? "-"}</span>
+                    {item.code && (
+                      <span className="text-gray-600 font-normal"> ({item.code})</span>
+                    )}
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className="text-gray-500 font-normal">—</p>
+            )}
+          </section>
+
+          {/* 4. Rental period */}
+          <p className="invoice-print-rental text-[14px] text-gray-900 mb-3">
+            وذلك بتأجيره من تاريخ{" "}
+            <time className="font-semibold" dateTime={order.visit_datetime || undefined}>{startDate}</time> حتى تاريخ{" "}
+            <time className="font-semibold" dateTime={order.delivery_date || undefined}>{endDate}</time>
+          </p>
+
+          {/* 5. Receipt acknowledgment and deposit payment */}
+          <p className="invoice-print-deposit text-[14px] text-gray-900 mb-5">
+            وذلك إقرار مني بالاستلام ودفع عربون وقدره :{" "}
+            <span className="font-bold text-gray-900" itemProp="totalPaymentDue" style={{ fontVariantNumeric: "tabular-nums", fontFamily: "'Segoe UI', Arial, sans-serif" }}>{paid} ج.م</span>
+          </p>
+
+          {/* 6. Recipient and signature */}
+          <section className="invoice-print-signature flex justify-end mt-4 pt-4 border-t-2 border-gray-300">
+            <div className="invoice-print-signature-box text-right min-w-[220px] space-y-3 text-[14px] text-gray-900">
+              <p className="flex items-center justify-end gap-4">
+                <span className="font-semibold text-gray-700">المستلم:</span>
+                <span className="inline-block min-w-[200px] h-6">&nbsp;</span>
+              </p>
+              <p className="flex items-center justify-end gap-4">
+                <span className="font-semibold text-gray-700">التوقيع:</span>
+                <span className="inline-block min-w-[200px] h-6">&nbsp;</span>
+              </p>
+            </div>
+          </section>
         </section>
 
         {/* 7. Rules and instructions — fixed at the bottom of the page with spacing above footer */}
@@ -203,11 +203,13 @@ export function OrderReceiptAckPrint({
 
       {/* Footer — minimized */}
       <footer
-        className="invoice-print-footer w-full mt-auto py-3 px-4 text-center text-white rounded-t-xl text-[13px] font-semibold shadow-sm shrink-0"
+        className="invoice-print-footer w-full mt-auto py-3 px-4 text-center text-white rounded-t-lg text-sm font-semibold shadow-md shrink-0"
         style={{ backgroundColor: HEADER_BG }}
         role="contentinfo"
       >
-        لا يرد العربون في حالة إلغاء الحجز
+        لا يرد العربون في حالة الغاء الحجز
+        <br />
+        يجب إحضار الفاتورة الأصلية مع البطاقة الشخصية عند الإرجاع أو الاستلام أو الاستبدال.
       </footer>
 
       <style>{`
@@ -274,4 +276,3 @@ export function OrderReceiptAckPrint({
     </article>
   );
 }
- 

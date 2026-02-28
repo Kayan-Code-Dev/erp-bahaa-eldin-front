@@ -118,15 +118,7 @@ export function OrderInvoicePrint({
   logoUrl = "/app-logo.svg",
   hideItemPrices = false,
 }: Props) {
-  const totalPriceRaw =
-    order.total_price != null && order.total_price !== ""
-      ? parseFloat(String(order.total_price))
-      : NaN;
-  const totalPrice = Number.isFinite(totalPriceRaw) ? totalPriceRaw : 0;
-  const paidRaw = parseFloat(String(order.paid ?? ""));
-  const paid = Number.isFinite(paidRaw) ? paidRaw : 0;
-  const remainingRaw = parseFloat(String(order.remaining ?? ""));
-  const remaining = Number.isFinite(remainingRaw) ? remainingRaw : 0;
+
   const infoValues = getInfoValues(order);
   const items = order.items ?? [];
   const invoiceDate =
@@ -338,6 +330,8 @@ export function OrderInvoicePrint({
         role="contentinfo"
       >
         لا يرد العربون في حالة الغاء الحجز
+        <br/>
+        يجب إحضار الفاتورة الأصلية مع البطاقة الشخصية عند الإرجاع أو الاستلام أو الاستبدال.
       </footer>
 
       <style>{`
