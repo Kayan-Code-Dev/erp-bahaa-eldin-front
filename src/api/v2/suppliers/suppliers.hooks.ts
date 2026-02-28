@@ -49,7 +49,7 @@ export const useGetSuppliersListQueryOptions = () =>
   queryOptions({
     queryKey: [SUPPLIERS_KEY, "list"],
     queryFn: getSuppliersList,
-    staleTime: FIVE_MINUTES,
+    staleTime: FIVE_MINUTES, 
   });
 
 // ---------------------------------------------------------------------------
