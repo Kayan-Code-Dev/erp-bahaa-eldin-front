@@ -5,12 +5,19 @@ import { sidebarLabels } from "./constants";
 import SidebarItem from "./sidebar-item";
 import appLogo from "@/assets/app-logo.svg";
 import useSidebarLabel, { useSidebarPermissions } from "./useSidebarLabel";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useProfile } from "@/api/v2/account/account.hooks";
+import { useAuthStore } from "@/zustand-stores/auth.store";
 
 function MobileSidebar() {
   const location = useLocation();
   const { pathname } = location;
   const permissions = useSidebarPermissions();
   const filteredLabels = useSidebarLabel(sidebarLabels, permissions);
+  const { data: profile } = useProfile();
+  const loginData = useAuthStore((s) => s.loginData);
+  const avatarUrl = profile?.avatar_url ?? profile?.avatar ?? null;
+  const displayName = profile?.name ?? loginData?.user?.name ?? "";
 
   const currentPageIndex = filteredLabels.findIndex(
     (item) => item.path === pathname
@@ -22,10 +29,22 @@ function MobileSidebar() {
 
   return (
     <div className="p-4 h-full bg-white">
-      <div className="flex justify-center items-center p-4">
-        <img src={appLogo} alt="App Logo" className="w-32" />
+      <div className="flex flex-col items-center gap-3 py-4 pb-5 border-b border-border/60">
+        <div className="relative flex items-center justify-center rounded-xl p-1.5 bg-linear-to-b from-muted/50 to-muted/20 ring-1 ring-border/50 shadow-sm">
+          <Avatar className="h-20 w-20 rounded-xl overflow-hidden border-2 border-background shadow-inner">
+            <AvatarImage src={avatarUrl ?? undefined} alt="صورة المستخدم" className="object-cover" />
+            <AvatarFallback className="rounded-xl bg-muted/50 w-full h-full flex items-center justify-center p-2">
+              <img src={appLogo} alt="شعار التطبيق" className="w-full h-full object-contain opacity-80 dark:opacity-90 dark:invert" />
+            </AvatarFallback>
+          </Avatar>
+        </div>
+        {displayName && (
+          <p className="text-center text-sm font-medium text-foreground truncate w-full px-1" title={displayName}>
+            {displayName}
+          </p>
+        )}
       </div>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 pt-4">
         {filteredLabels.map((item) => (
           <SidebarItem
             key={item.path + item.label}
