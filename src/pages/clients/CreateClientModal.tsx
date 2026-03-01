@@ -38,10 +38,11 @@ const formSchema = z.object({
   date_of_birth: z.string().optional(),
   national_id: z.string().optional(),
   source: z.enum(CLIENT_SOURCES),
+  phone: z.string().min(1, { message: "رقم الهاتف مطلوب" }),
+
   address: z.string().min(1, { message: "العنوان مطلوب" }),
   city_id: z.string({ required_error: "المدينة مطلوبة" }),
   notes: z.string().optional(),
-  phone: z.string().optional(),
   phone2: z.string().optional(),
 });
 
@@ -126,71 +127,71 @@ export function CreateClientModal({ open, onOpenChange, onClientCreated }: Props
           >
             <div className="modal-section">
               <p className="modal-section-title">البيانات الشخصية</p>
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>الاسم</FormLabel>
-                  <FormControl>
-                    <Input placeholder="الاسم الكامل للعميل" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <FormField
                 control={form.control}
-                name="date_of_birth"
+                name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>تاريخ الميلاد (اختياري)</FormLabel>
+                    <FormLabel>الاسم</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} value={field.value ?? ""} />
+                      <Input placeholder="الاسم الكامل للعميل" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <FormField
+                  control={form.control}
+                  name="date_of_birth"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>تاريخ الميلاد (اختياري)</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} value={field.value ?? ""} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="national_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>الرقم القومي</FormLabel>
-                    <FormControl>
-                      <Input placeholder="12345678901234" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="national_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>الرقم القومي</FormLabel>
+                      <FormControl>
+                        <Input placeholder="12345678901234" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="source"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>المصدر</FormLabel>
-                    <FormControl>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="اختر المصدر" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {CLIENT_SOURCES.map((source) => (
-                            <SelectItem key={source} value={source}>{CLIENT_SOURCE_LABELS[source]}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                <FormField
+                  control={form.control}
+                  name="source"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>المصدر</FormLabel>
+                      <FormControl>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="اختر المصدر" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {CLIENT_SOURCES.map((source) => (
+                              <SelectItem key={source} value={source}>{CLIENT_SOURCE_LABELS[source]}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
 
             <div className="modal-section">

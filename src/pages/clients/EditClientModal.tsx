@@ -49,8 +49,9 @@ const formSchema = z.object({
   address: z.string().min(1, { message: "العنوان مطلوب" }),
   city_id: z.string({ required_error: "المدينة مطلوبة" }),
   notes: z.string().optional(),
-  phone: z.string().optional(),
+  phone: z.string().min(1, { message: "رقم الهاتف مطلوب" }),
   phone2: z.string().optional(),
+  
 });
 
 type Props = {
