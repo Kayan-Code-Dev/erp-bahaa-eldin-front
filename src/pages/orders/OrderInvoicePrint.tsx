@@ -116,13 +116,19 @@ export function OrderInvoicePrint({
   logoUrl = "/app-logo.svg",
   hideItemPrices = false,
 }: Props) {
-
   const infoValues = getInfoValues(order);
   const items = order.items ?? [];
   const invoiceDate =
     order.created_at && String(order.created_at).trim()
       ? formatDate(String(order.created_at))
       : formatDate(new Date().toISOString());
+
+  // Branch logo: use branch image if available, otherwise fallback to app logo
+  const branchImage =
+    (order.inventory?.inventoriable as any)?.image_url ??
+    (order.inventory?.inventoriable as any)?.image ??
+    null;
+  const effectiveLogoUrl = branchImage || logoUrl;
 
   return (
     <article
@@ -159,7 +165,7 @@ export function OrderInvoicePrint({
           </div>
           <div className="invoice-print-header-logo shrink-0 h-18 flex items-center justify-center bg-white/10 rounded-lg p-1.5">
             <img 
-              src={logoUrl} 
+              src={effectiveLogoUrl} 
               alt="شعار الشركة" 
               className="invoice-logo-img max-h-full max-w-[140px] w-auto object-contain"
               itemProp="image"

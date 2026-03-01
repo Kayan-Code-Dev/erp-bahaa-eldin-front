@@ -153,10 +153,12 @@ function BranchManger() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="text-center">#</TableHead>
+                    <TableHead className="text-center">صورة الفرع</TableHead>
                     <TableHead className="text-center">كود الفرع</TableHead>
                     <TableHead className="text-center">اسم الفرع</TableHead>
                     <TableHead className="text-center">العنوان</TableHead>
                     <TableHead className="text-center">المخزن</TableHead>
+                    <TableHead className="text-center">رقم الهاتف</TableHead>
                     <TableHead className="text-center">إجراءات</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -168,6 +170,19 @@ function BranchManger() {
                       <TableRow key={branch.id}>
                         <TableCell className="text-center">
                           {branch.id}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {branch.image_url || branch.image ? (
+                            <img
+                              src={branch.image_url || (branch.image as string)}
+                              alt={branch.name}
+                              className="mx-auto h-10 w-10 rounded-md object-cover border"
+                            />
+                          ) : (
+                            <span className="text-xs text-muted-foreground">
+                              لا توجد صورة
+                            </span>
+                          )}
                         </TableCell>
                         <TableCell className="font-medium text-center">
                           {branch.branch_code}
@@ -182,6 +197,9 @@ function BranchManger() {
                         </TableCell>
                         <TableCell className="text-center">
                           {branch.inventory?.name || "-"}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {branch.phone || "-"}
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2 justify-center">
@@ -208,7 +226,7 @@ function BranchManger() {
                   ) : (
                     <TableRow>
                       <TableCell
-                        colSpan={6}
+                        colSpan={7}
                         className="py-10 text-center text-muted-foreground"
                       >
                         لا توجد فروع لعرضها.
