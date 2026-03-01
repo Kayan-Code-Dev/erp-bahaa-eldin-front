@@ -32,7 +32,6 @@ import { useUpdateClientMutationOptions } from "@/api/v2/clients/clients.hooks";
 import { TUpdateClientRequest } from "@/api/v2/clients/clients.types";
 import { toast } from "sonner";
 import { CitiesSelect } from "@/components/custom/CitiesSelect";
-import { PhoneInput } from "@/components/ui/phone-input";
 import {
   Select,
   SelectContent,
@@ -45,15 +44,12 @@ import {
 const formSchema = z.object({
   name: z.string().min(1, { message: "الاسم مطلوب" }),
   date_of_birth: z.string().optional(),
-  national_id: z
-    .string()
-    .length(14, { message: "الرقم القومي يجب أن يكون 14 رقمًا" })
-    .regex(/^\d{14}$/, { message: "الرقم القومي يجب أن يتكون من 14 رقمًا" }),
+  national_id: z.string().optional(),
   source: z.enum(CLIENT_SOURCES),
   address: z.string().min(1, { message: "العنوان مطلوب" }),
   city_id: z.string({ required_error: "المدينة مطلوبة" }),
   notes: z.string().optional(),
-  phone: z.string().min(1, { message: "رقم الهاتف مطلوب" }),
+  phone: z.string().optional(),
   phone2: z.string().optional(),
 });
 
@@ -106,9 +102,10 @@ export function EditClientModal({ client, open, onOpenChange }: Props) {
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     if (!client) return;
 
-    const phones: { phone: string; type: string }[] = [
-      { phone: values.phone.trim(), type: "mobile" },
-    ];
+    const phones: { phone: string; type: string }[] = [];
+    if (values.phone?.trim()) {
+      phones.push({ phone: values.phone.trim(), type: "mobile" });
+    }
     if (values.phone2?.trim()) {
       phones.push({ phone: values.phone2.trim(), type: "whatsapp" });
     }
@@ -116,7 +113,7 @@ export function EditClientModal({ client, open, onOpenChange }: Props) {
     const requestData: TUpdateClientRequest = {
       name: values.name.trim(),
       date_of_birth: values.date_of_birth || undefined,
-      national_id: values.national_id || undefined,
+      national_id: values.national_id?.trim() || undefined,
       source: values.source as TClientSource,
       address: {
         city_id: Number(values.city_id),
@@ -241,13 +238,13 @@ export function EditClientModal({ client, open, onOpenChange }: Props) {
                   name="phone"
                   render={({ field }) => (
                     <FormItem dir="ltr">
-                      <FormLabel>رقم الهاتف (مطلوب)</FormLabel>
+                      <FormLabel>رقم الهاتف</FormLabel>
                       <FormControl>
-                        <PhoneInput
+                        <Input
                           placeholder="أدخل رقم الهاتف"
-                          value={field.value}
-                          onChange={field.onChange}
-                          disabled={isPending}
+                          dir="ltr"
+                          {...field}
+                          value={field.value ?? ""}
                         />
                       </FormControl>
                       <FormMessage />
@@ -262,11 +259,11 @@ export function EditClientModal({ client, open, onOpenChange }: Props) {
                   <FormItem dir="ltr">
                     <FormLabel>رقم الواتس (اختياري)</FormLabel>
                       <FormControl>
-                        <PhoneInput
+                        <Input
                           placeholder="أدخل رقم الهاتف الثاني"
-                          value={field.value}
-                          onChange={field.onChange}
-                          disabled={isPending}
+                          dir="ltr"
+                          {...field}
+                          value={field.value ?? ""}
                         />
                       </FormControl>
                       <FormMessage />
