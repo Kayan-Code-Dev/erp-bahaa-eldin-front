@@ -99,15 +99,17 @@ const ACK_PRINT_STYLES = `
   .ack-print-header-right .font-medium { font-weight: 500; }
   .ack-print-header-logo { 
     flex-shrink: 0; 
-    background: rgba(255,255,255,0.1); 
-    border-radius: 6px; 
-    padding: 6px; 
+    background: #ffffff; 
+    border-radius: 9999px; 
+    padding: 6px 18px; 
     display: flex; 
     align-items: center; 
     justify-content: center; 
+    box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+    border: 1px solid rgba(255,255,255,0.7);
   }
   .ack-print-header-logo img, .ack-print-logo-img { 
-    max-height: 40px; 
+    max-height: 44px; 
     width: auto; 
     object-fit: contain; 
   }

@@ -8,7 +8,7 @@ const HEADER_DARK = "#7a6349";
 
 type Props = {
   order: TOrder;
-  /** Logo path (default: /app-logo.svg) */
+  /** Logo path (default: /dressnmore-logo.jpg) */
   logoUrl?: string;
   /** When true (invoice copy): show item name and code only, prices empty. When false (client copy): show all data */
   hideItemPrices?: boolean;
@@ -113,7 +113,7 @@ const EMPTY_PRICE = "";
 
 export function OrderInvoicePrint({
   order,
-  logoUrl = "/app-logo.svg",
+  logoUrl = "/dressnmore-logo.jpg",
   hideItemPrices = false,
 }: Props) {
   const infoValues = getInfoValues(order);
@@ -163,11 +163,11 @@ export function OrderInvoicePrint({
               التاريخ: <span className="font-semibold">{invoiceDate}</span>
             </div>
           </div>
-          <div className="invoice-print-header-logo shrink-0 h-18 flex items-center justify-center bg-white/10 rounded-lg p-1.5">
+          <div className="invoice-print-header-logo shrink-0 h-18 flex items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-white/60 px-4 py-2">
             <img 
               src={effectiveLogoUrl} 
               alt="شعار الشركة" 
-              className="invoice-logo-img max-h-full max-w-[140px] w-auto object-contain"
+              className="invoice-logo-img h-14 max-h-full max-w-[150px] w-auto object-contain"
               itemProp="image"
             />
           </div>

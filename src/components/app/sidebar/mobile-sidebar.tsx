@@ -3,7 +3,6 @@ import { useEffect } from "react";
 import { useLocation } from "react-router";
 import { sidebarLabels } from "./constants";
 import SidebarItem from "./sidebar-item";
-import appLogo from "@/assets/app-logo.svg";
 import useSidebarLabel, { useSidebarPermissions } from "./useSidebarLabel";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useProfile } from "@/api/v2/account/account.hooks";
@@ -34,7 +33,7 @@ function MobileSidebar() {
           <Avatar className="h-20 w-20 rounded-xl overflow-hidden border-2 border-background shadow-inner">
             <AvatarImage src={avatarUrl ?? undefined} alt="صورة المستخدم" className="object-cover" />
             <AvatarFallback className="rounded-xl bg-muted/50 w-full h-full flex items-center justify-center p-2">
-              <img src={appLogo} alt="شعار التطبيق" className="w-full h-full object-contain opacity-80 dark:opacity-90 dark:invert" />
+              <img src="/dressnmore-logo.jpg" alt="شعار dressnmore" className="w-full h-full object-contain opacity-80 dark:opacity-90 dark:invert" />
             </AvatarFallback>
           </Avatar>
         </div>

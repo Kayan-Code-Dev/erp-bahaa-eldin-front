@@ -96,15 +96,17 @@ const INVOICE_PRINT_STYLES = `
   .invoice-print-header-right > * + * { margin-top: 12px; }
   .invoice-print-header-logo { 
     flex-shrink: 0; 
-    background: rgba(255,255,255,0.1); 
-    border-radius: 12px; 
-    padding: 12px; 
+    background: #ffffff; 
+    border-radius: 9999px; 
+    padding: 8px 20px; 
     display: flex; 
     align-items: center; 
     justify-content: center; 
+    box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+    border: 1px solid rgba(255,255,255,0.7);
   }
   .invoice-print-header-logo img, .invoice-logo-img { 
-    max-height: 96px; 
+    max-height: 72px; 
     width: auto; 
     object-fit: contain; 
   }

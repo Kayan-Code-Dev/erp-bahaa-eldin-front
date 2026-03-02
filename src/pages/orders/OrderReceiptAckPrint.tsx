@@ -33,7 +33,7 @@ function formatDate(s: string): string {
 
 export function OrderReceiptAckPrint({
   order,
-  logoUrl = "/app-logo.svg",
+  logoUrl = "/dressnmore-logo.jpg",
 }: Props) {
   const c = order.client;
   const clientName = c?.name?.trim() || "-";
@@ -58,6 +58,13 @@ export function OrderReceiptAckPrint({
       : "-";
   const paid = order.paid != null ? String(order.paid) : "-";
   const invoiceDate = order.created_at ? formatDate(order.created_at) : "-";
+
+  // Branch logo: استخدم لوجو الفرع إن وجد، وإلا استخدم اللوجو الافتراضي
+  const branchImage =
+    (order.inventory?.inventoriable as any)?.image_url ??
+    (order.inventory?.inventoriable as any)?.image ??
+    null;
+  const effectiveLogoUrl = branchImage || logoUrl;
 
   return (
     <article
@@ -93,11 +100,11 @@ export function OrderReceiptAckPrint({
               التاريخ: <span className="font-semibold">{invoiceDate}</span>
             </div>
           </div>
-          <div className="ack-print-header-logo shrink-0 bg-white/10 rounded-lg p-2 flex items-center justify-center">
+          <div className="ack-print-header-logo shrink-0 flex items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-white/60 px-4 py-2">
             <img
-              src={logoUrl}
+              src={effectiveLogoUrl}
               alt="شعار الشركة"
-              className="ack-print-logo-img max-h-10 w-auto object-contain"
+              className="ack-print-logo-img h-12 max-h-full max-w-[140px] w-auto object-contain"
               itemProp="image"
             />
           </div>

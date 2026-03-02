@@ -1,5 +1,4 @@
 import { useLoginMutationOptions } from "@/api/v2/auth/auth.hooks";
-import logo from "@/assets/app-logo.svg";
 import loginImage from "@/assets/login-image.png";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -76,8 +75,8 @@ const Login = () => {
           {/* Logo */}
           <div className="mb-8 text-center">
             <img
-              src={logo}
-              alt="Baha Eldin Logo"
+              src="/dressnmore-logo.jpg"
+              alt="dressnmore logo"
               className="h-30 mx-auto mb-2"
             />
           </div>
