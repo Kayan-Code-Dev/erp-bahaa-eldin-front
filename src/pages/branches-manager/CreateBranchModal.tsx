@@ -20,24 +20,56 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useCreateBranchMutationOptions } from "@/api/v2/branches/branches.hooks";
 import { TCreateBranchRequest } from "@/api/v2/branches/branches.types";
 import { toast } from "sonner";
 import { CitiesSelect } from "@/components/custom/CitiesSelect";
+import { Upload } from "lucide-react";
+import { CurrenciesSelect } from "@/components/custom/CurrenciesSelect";
 
 // Schema for the form
-const formSchema = z.object({
-  branch_code: z.string().min(1, { message: "كود الفرع مطلوب" }),
-  name: z.string().min(2, { message: "اسم الفرع مطلوب" }),
-  street: z.string().min(1, { message: "الشارع مطلوب" }),
-  building: z.string().min(1, { message: "المبنى مطلوب" }),
-  city_id: z.string({ required_error: "المدينة مطلوبة" }),
-  notes: z.string().optional(),
-  inventory_name: z.string().min(1, { message: "اسم المخزن مطلوب" }),
-  phone: z.string().optional(),
-});
+const formSchema = z
+  .object({
+    branch_code: z.string().min(1, { message: "كود الفرع مطلوب" }),
+    name: z.string().min(2, { message: "اسم الفرع مطلوب" }),
+    street: z.string().min(1, { message: "الشارع مطلوب" }),
+    building: z.string().min(1, { message: "المبنى مطلوب" }),
+    city_id: z.string({ required_error: "المدينة مطلوبة" }),
+    notes: z.string().optional(),
+    inventory_name: z.string().min(1, { message: "اسم المخزن مطلوب" }),
+    phone: z.string().optional(),
+    vat_enabled: z.boolean().optional(),
+    vat_type: z.enum(["fixed", "percentage"]).nullable().optional(),
+    vat_value: z
+      .union([z.string(), z.number()])
+      .optional()
+      .nullable(),
+    currency_id: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.vat_enabled) {
+      if (!data.vat_type) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "نوع الضريبة مطلوب عند تفعيلها",
+          path: ["vat_type"],
+        });
+      }
+      if (
+        data.vat_value == null ||
+        data.vat_value === "" ||
+        Number.isNaN(Number(data.vat_value))
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "قيمة الضريبة مطلوبة عند تفعيلها",
+          path: ["vat_value"],
+        });
+      }
+    }
+  });
 
 type Props = {
   open: boolean;
@@ -50,6 +82,17 @@ export function CreateBranchModal({ open, onOpenChange }: Props) {
   );
   const imageInputRef = useRef<HTMLInputElement>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!imageFile) {
+      setImagePreview(null);
+      return;
+    }
+    const url = URL.createObjectURL(imageFile);
+    setImagePreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [imageFile]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -62,6 +105,10 @@ export function CreateBranchModal({ open, onOpenChange }: Props) {
       notes: "",
       inventory_name: "",
       phone: "",
+      vat_enabled: false,
+      vat_type: null,
+      vat_value: "",
+      currency_id: "",
     },
   });
 
@@ -78,6 +125,13 @@ export function CreateBranchModal({ open, onOpenChange }: Props) {
       inventory_name: values.inventory_name,
       phone: values.phone || undefined,
       image: imageFile ?? undefined,
+      vat_enabled: values.vat_enabled ?? false,
+      vat_type: values.vat_enabled ? (values.vat_type as "fixed" | "percentage") : undefined,
+      vat_value:
+        values.vat_enabled && values.vat_value != null && values.vat_value !== ""
+          ? Number(values.vat_value)
+          : undefined,
+      currency_id: values.currency_id ? Number(values.currency_id) : undefined,
     };
 
     createBranch(requestData, {
@@ -160,16 +214,159 @@ export function CreateBranchModal({ open, onOpenChange }: Props) {
               />
             </div>
 
-            {/* Image */}
-            <div className="space-y-2">
-              <FormLabel>صورة الفرع (اختياري)</FormLabel>
-              <input
-                ref={imageInputRef}
-                type="file"
-                accept="image/*"
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium"
-                onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+            {/* VAT Settings */}
+            <div className="space-y-3 border-t pt-4">
+              <h3 className="text-sm font-medium">إعدادات ضريبة القيمة المضافة للفرع</h3>
+              <div className="grid grid-cols-2 gap-4 items-end">
+                <FormField
+                  control={form.control}
+                  name="vat_enabled"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col space-y-2">
+                      <FormLabel>تفعيل الضريبة</FormLabel>
+                      <FormControl>
+                        <label className="inline-flex items-center gap-2 text-sm">
+                          <input
+                            type="checkbox"
+                            className="h-4 w-4 rounded border-border"
+                            checked={field.value ?? false}
+                            onChange={(e) => field.onChange(e.target.checked)}
+                          />
+                          <span>تفعيل ضريبة القيمة المضافة لهذا الفرع</span>
+                        </label>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {form.watch("vat_enabled") && (
+                  <div className="grid grid-cols-2 gap-4 col-span-2">
+                    <FormField
+                      control={form.control}
+                      name="vat_type"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>نوع الضريبة</FormLabel>
+                          <FormControl>
+                            <select
+                              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+                              value={field.value ?? ""}
+                              onChange={field.onChange}
+                            >
+                              <option value="">اختر نوع الضريبة</option>
+                              <option value="percentage">نسبة مئوية (%)</option>
+                              <option value="fixed">قيمة ثابتة</option>
+                            </select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="vat_value"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>قيمة الضريبة</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="text"
+                              placeholder="مثال: 15"
+                              value={field.value ?? ""}
+                              onChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Currency */}
+            <div className="space-y-2 border-t pt-4">
+              <h3 className="text-sm font-medium">عملة الفرع</h3>
+              <FormField
+                control={form.control}
+                name="currency_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>العملة</FormLabel>
+                    <FormControl>
+                      <CurrenciesSelect
+                        value={field.value ?? ""}
+                        onChange={field.onChange}
+                        disabled={isPending}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
+            </div>
+
+            {/* Image */}
+            <div className="space-y-3">
+              <FormLabel>صورة الفرع (اختياري)</FormLabel>
+              <div className="flex items-center gap-4">
+                <div className="h-16 w-16 rounded-full border-2 border-dashed border-muted flex items-center justify-center bg-muted/40 overflow-hidden">
+                  {imagePreview ? (
+                    <img
+                      src={imagePreview}
+                      alt="صورة الفرع"
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-[11px] text-muted-foreground text-center px-2 leading-snug">
+                      لا توجد صورة
+                    </span>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground">
+                    يفضل استخدام صورة مربعة وواضحة (مثال: 512×512 بكسل).
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <input
+                      ref={imageInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) =>
+                        setImageFile(e.target.files?.[0] ?? null)
+                      }
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => imageInputRef.current?.click()}
+                    >
+                      <Upload className="ml-2 h-4 w-4" />
+                      اختيار صورة
+                    </Button>
+                    {imageFile && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setImageFile(null);
+                          if (imageInputRef.current) {
+                            imageInputRef.current.value = "";
+                          }
+                        }}
+                      >
+                        إزالة
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Address Section */}

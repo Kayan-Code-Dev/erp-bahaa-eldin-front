@@ -39,3 +39,68 @@ export const getStatusLabel = (status: TOrder["status"] | string) => {
   };
   return labels[status] ?? status;
 };
+
+type OrderLike = Partial<TOrder> & {
+  branch?: {
+    currency_name?: string | null;
+    currency_code?: string | null;
+    currency_symbol?: string | null;
+  } | null;
+  vat_enabled?: boolean | null;
+  vat_type?: "fixed" | "percentage" | "none" | null;
+  vat_value?: string | number | null;
+};
+
+export const getOrderCurrencyInfo = (order?: OrderLike | null) => {
+  const branch = order?.branch as
+    | {
+        currency_name?: string | null;
+        currency_code?: string | null;
+        currency_symbol?: string | null;
+      }
+    | null
+    | undefined;
+
+  const currency_name = branch?.currency_name ?? "جنيه مصري";
+  const currency_code = branch?.currency_code ?? "EGP";
+  const currency_symbol = branch?.currency_symbol ?? "ج.م";
+
+  return { currency_name, currency_code, currency_symbol };
+};
+
+export const getOrderTotalsWithVat = (order?: OrderLike | null) => {
+  const rawTotal = (order?.total_price ?? "") as string | number;
+  const subtotal =
+    typeof rawTotal === "number"
+      ? rawTotal
+      : parseFloat(String(rawTotal).replace(/,/g, "")) || 0;
+
+  const vatEnabled = Boolean(order?.vat_enabled);
+  const vatType = order?.vat_type ?? null;
+  const rawVatValue = order?.vat_value;
+  const vatValue =
+    rawVatValue == null || rawVatValue === ""
+      ? 0
+      : parseFloat(String(rawVatValue).replace(/,/g, "")) || 0;
+
+  let vatAmount = 0;
+
+  if (vatEnabled && vatValue > 0) {
+    if (vatType === "percentage") {
+      vatAmount = (subtotal * vatValue) / 100;
+    } else if (vatType === "fixed") {
+      vatAmount = vatValue;
+    }
+  }
+
+  const totalWithVat = subtotal + vatAmount;
+
+  return {
+    subtotal,
+    vatAmount,
+    totalWithVat,
+    vatEnabled,
+    vatType,
+    vatValue,
+  };
+};

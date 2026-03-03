@@ -19,8 +19,10 @@ export const getProfileApi = async (): Promise<TAccountProfile | undefined> => {
 /** تعديل البروفايل (الاسم، البريد، الصورة) عبر /me */
 export const updateProfileApi = async (req: TUpdateProfileRequest) => {
   try {
-    const hasFile = req.avatar instanceof File;
-    const useFormData = hasFile || req.avatar_remove;
+    const hasAvatarFile = req.avatar instanceof File;
+    const hasLogoFile = req.logo instanceof File;
+    const useFormData =
+      hasAvatarFile || hasLogoFile || req.avatar_remove || req.logo_remove;
 
     if (useFormData) {
       const formData = new FormData();
@@ -32,6 +34,12 @@ export const updateProfileApi = async (req: TUpdateProfileRequest) => {
       }
       if (req.avatar_remove) {
         formData.append("avatar_remove", "1");
+      }
+      if (req.logo instanceof File) {
+        formData.append("logo", req.logo);
+      }
+      if (req.logo_remove) {
+        formData.append("logo_remove", "1");
       }
       const { data } = await api.post<TAccountProfile>("/me", formData);
       return data;

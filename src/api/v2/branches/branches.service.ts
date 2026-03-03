@@ -16,6 +16,15 @@ const toBranchFormData = (
   if (data.inventory_name != null)
     formData.append("inventory_name", data.inventory_name);
   if (data.phone != null) formData.append("phone", data.phone);
+  if (typeof data.vat_enabled === "boolean") {
+    formData.append("vat_enabled", data.vat_enabled ? "1" : "0");
+  }
+  if (data.vat_type != null) formData.append("vat_type", data.vat_type);
+  if (data.vat_value != null)
+    formData.append("vat_value", String(data.vat_value));
+  if (data.currency_id != null) {
+    formData.append("currency_id", String(data.currency_id));
+  }
   if (data.address) {
     formData.append("address[street]", data.address.street);
     formData.append("address[building]", data.address.building);

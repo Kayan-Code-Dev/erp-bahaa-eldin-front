@@ -7,6 +7,7 @@ import { useNotifications } from "@/hooks/useNotifications";
 
 const SIDEBAR_WIDTH_OPEN = "17rem";
 const SIDEBAR_WIDTH_ICON = "3.5rem";
+const SIDEBAR_GAP_COLLAPSED = "1.5rem";
 
 function MainContent() {
   const { open } = useSidebar();
@@ -14,7 +15,9 @@ function MainContent() {
     <div
       className="flex-1 min-w-0 flex flex-col min-h-screen transition-[margin] duration-200 ease-linear"
       style={{
-        marginRight: open ? SIDEBAR_WIDTH_OPEN : SIDEBAR_WIDTH_ICON,
+        marginRight: open
+          ? SIDEBAR_WIDTH_OPEN
+          : `calc(${SIDEBAR_WIDTH_ICON} + ${SIDEBAR_GAP_COLLAPSED})`,
       }}
     >
       <Header />

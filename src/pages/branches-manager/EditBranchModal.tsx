@@ -27,18 +27,49 @@ import { useUpdateBranchMutationOptions } from "@/api/v2/branches/branches.hooks
 import { TUpdateBranchRequest } from "@/api/v2/branches/branches.types";
 import { toast } from "sonner";
 import { CitiesSelect } from "@/components/custom/CitiesSelect";
+import { CurrenciesSelect } from "@/components/custom/CurrenciesSelect";
 
 // Schema
-const formSchema = z.object({
-  branch_code: z.string().min(1, { message: "كود الفرع مطلوب" }),
-  name: z.string().min(2, { message: "اسم الفرع مطلوب" }),
-  street: z.string().min(1, { message: "الشارع مطلوب" }),
-  building: z.string().min(1, { message: "المبنى مطلوب" }),
-  city_id: z.string({ required_error: "المدينة مطلوبة" }),
-  notes: z.string().optional(),
-  inventory_name: z.string().min(1, { message: "اسم المخزن مطلوب" }),
-  phone: z.string().optional(),
-});
+const formSchema = z
+  .object({
+    branch_code: z.string().min(1, { message: "كود الفرع مطلوب" }),
+    name: z.string().min(2, { message: "اسم الفرع مطلوب" }),
+    street: z.string().min(1, { message: "الشارع مطلوب" }),
+    building: z.string().min(1, { message: "المبنى مطلوب" }),
+    city_id: z.string({ required_error: "المدينة مطلوبة" }),
+    notes: z.string().optional(),
+    inventory_name: z.string().min(1, { message: "اسم المخزن مطلوب" }),
+    phone: z.string().optional(),
+    vat_enabled: z.boolean().optional(),
+    vat_type: z.enum(["fixed", "percentage"]).nullable().optional(),
+    vat_value: z
+      .union([z.string(), z.number()])
+      .optional()
+      .nullable(),
+    currency_id: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.vat_enabled) {
+      if (!data.vat_type) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "نوع الضريبة مطلوب عند تفعيلها",
+          path: ["vat_type"],
+        });
+      }
+      if (
+        data.vat_value == null ||
+        data.vat_value === "" ||
+        Number.isNaN(Number(data.vat_value))
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "قيمة الضريبة مطلوبة عند تفعيلها",
+          path: ["vat_value"],
+        });
+      }
+    }
+  });
 
 type Props = {
   branch: TBranchResponse | null;
@@ -64,6 +95,10 @@ export function EditBranchModal({ branch, open, onOpenChange }: Props) {
       notes: "",
       inventory_name: "",
       phone: "",
+      vat_enabled: false,
+      vat_type: null,
+      vat_value: "",
+      currency_id: "",
     },
   });
 
@@ -82,6 +117,13 @@ export function EditBranchModal({ branch, open, onOpenChange }: Props) {
         notes: branch.address?.notes || "",
         inventory_name: branch.inventory?.name || "",
         phone: branch.phone ?? "",
+        vat_enabled: branch.vat_enabled ?? false,
+        vat_type: (branch.vat_type as "fixed" | "percentage") ?? null,
+        vat_value:
+          typeof branch.vat_value === "number"
+            ? branch.vat_value.toString()
+            : "",
+        currency_id: "",
       });
       setImageFile(null);
       if (imageInputRef.current) imageInputRef.current.value = "";
@@ -103,6 +145,13 @@ export function EditBranchModal({ branch, open, onOpenChange }: Props) {
       inventory_name: values.inventory_name,
       phone: values.phone || undefined,
       image: imageFile ?? undefined,
+      vat_enabled: values.vat_enabled ?? false,
+      vat_type: values.vat_enabled ? (values.vat_type as "fixed" | "percentage") : undefined,
+      vat_value:
+        values.vat_enabled && values.vat_value != null && values.vat_value !== ""
+          ? Number(values.vat_value)
+          : undefined,
+      currency_id: values.currency_id ? Number(values.currency_id) : undefined,
     };
 
     updateBranch(
@@ -181,6 +230,101 @@ export function EditBranchModal({ branch, open, onOpenChange }: Props) {
                     <FormLabel>الهاتف (اختياري)</FormLabel>
                     <FormControl>
                       <Input placeholder="01xxxxxxxxx" type="tel" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* VAT Settings */}
+            <div className="space-y-3 border-t pt-4">
+              <h3 className="text-sm font-medium">إعدادات ضريبة القيمة المضافة للفرع</h3>
+              <div className="grid grid-cols-2 gap-4 items-end">
+                <FormField
+                  control={form.control}
+                  name="vat_enabled"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col space-y-2">
+                      <FormLabel>تفعيل الضريبة</FormLabel>
+                      <FormControl>
+                        <label className="inline-flex items-center gap-2 text-sm">
+                          <input
+                            type="checkbox"
+                            className="h-4 w-4 rounded border-border"
+                            checked={field.value ?? false}
+                            onChange={(e) => field.onChange(e.target.checked)}
+                          />
+                          <span>تفعيل ضريبة القيمة المضافة لهذا الفرع</span>
+                        </label>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {form.watch("vat_enabled") && (
+                  <div className="grid grid-cols-2 gap-4 col-span-2">
+                    <FormField
+                      control={form.control}
+                      name="vat_type"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>نوع الضريبة</FormLabel>
+                          <FormControl>
+                            <select
+                              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+                              value={field.value ?? ""}
+                              onChange={field.onChange}
+                            >
+                              <option value="">اختر نوع الضريبة</option>
+                              <option value="percentage">نسبة مئوية (%)</option>
+                              <option value="fixed">قيمة ثابتة</option>
+                            </select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="vat_value"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>قيمة الضريبة</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="text"
+                              placeholder="مثال: 15"
+                              value={field.value ?? ""}
+                              onChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Currency */}
+            <div className="space-y-2 border-t pt-4">
+              <h3 className="text-sm font-medium">عملة الفرع</h3>
+              <FormField
+                control={form.control}
+                name="currency_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>العملة</FormLabel>
+                    <FormControl>
+                      <CurrenciesSelect
+                        value={field.value ?? ""}
+                        onChange={field.onChange}
+                        disabled={isPending}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

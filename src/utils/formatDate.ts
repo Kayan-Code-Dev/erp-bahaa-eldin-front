@@ -25,7 +25,6 @@ export const formatDateTime = (dateString?: string) => {
     if (!dateString) return "-";
     try {
         const parsedDate = parseISO(dateString);
-        // تنسيق التاريخ مع الوقت: يوم/شهر/سنة - ساعة:دقيقة ص/م
         return format(parsedDate, "yyyy/MM/dd - h:mm a", { locale: ar });
     } catch {
         return dateString;

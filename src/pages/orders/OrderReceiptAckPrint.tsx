@@ -1,5 +1,6 @@
 import { TOrder } from "@/api/v2/orders/orders.types";
 import { OrderEmployeeName } from "@/components/custom/OrderEmployeeName";
+import { getOrderCurrencyInfo } from "@/api/v2/orders/order.utils";
 import { formatPhone } from "@/utils/formatPhone";
 
 const HEADER_BG = "#5170ff";
@@ -59,12 +60,11 @@ export function OrderReceiptAckPrint({
   const paid = order.paid != null ? String(order.paid) : "-";
   const invoiceDate = order.created_at ? formatDate(order.created_at) : "-";
 
-  // Branch logo: استخدم لوجو الفرع إن وجد، وإلا استخدم اللوجو الافتراضي
   const branchImage =
     (order.inventory?.inventoriable as any)?.image_url ??
     (order.inventory?.inventoriable as any)?.image ??
     null;
-  const effectiveLogoUrl = branchImage || logoUrl;
+  const effectiveLogoUrl = branchImage || logoUrl || "/dressnmore-logo.jpg";
 
   return (
     <article
@@ -172,8 +172,23 @@ export function OrderReceiptAckPrint({
 
         {/* 5. Receipt acknowledgment and deposit payment */}
         <p className="ack-print-deposit text-[12px] text-gray-900 mb-3 min-w-0 wrap-break-word">
-          وذلك إقرار مني بالاستلام ودفع عربون وقدره :{" "}
-          <span className="font-bold text-gray-900" itemProp="totalPaymentDue" style={{ fontVariantNumeric: "tabular-nums", fontFamily: "'Segoe UI', Arial, sans-serif" }}>{paid} ج.م</span>
+        وذلك إقرار مني بالاستلام ودفع عربون وقدره :{" "}
+          {(() => {
+            const { currency_symbol } = getOrderCurrencyInfo(order as any);
+            return (
+              <span
+                className="font-bold text-gray-900"
+                itemProp="totalPaymentDue"
+                style={{
+                  fontVariantNumeric: "tabular-nums",
+                  fontFamily: "'Segoe UI', Arial, sans-serif",
+                }}
+                dir="ltr"
+              >
+                {paid} {currency_symbol}
+              </span>
+            );
+          })()}
         </p>
 
         {/* 6. Recipient and signature */}

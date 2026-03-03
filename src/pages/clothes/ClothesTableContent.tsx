@@ -101,7 +101,6 @@ function ClothesTableContent() {
     useGetClothesQueryOptions(queryParams)
   );
 
-  // جلب أسماء الأماكن (فروع، مصانع، ورش) لعرضها بدل الرقم
   const { data: branchesData } = useQuery(useGetBranchesQueryOptions(1, 500));
   const { data: factoriesData } = useQuery(useGetFactoriesQueryOptions(1, 500));
   const { data: workshopsData } = useQuery(useGetWorkshopsQueryOptions(1, 500));

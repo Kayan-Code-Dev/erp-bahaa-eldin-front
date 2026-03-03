@@ -1,5 +1,9 @@
 import { TOrder } from "@/api/v2/orders/orders.types";
-import { getOrderTypeLabel } from "@/api/v2/orders/order.utils";
+import {
+  getOrderCurrencyInfo,
+  getOrderTotalsWithVat,
+  getOrderTypeLabel,
+} from "@/api/v2/orders/order.utils";
 import { OrderEmployeeName } from "@/components/custom/OrderEmployeeName";
 import { formatPhone } from "@/utils/formatPhone";
 
@@ -128,7 +132,17 @@ export function OrderInvoicePrint({
     (order.inventory?.inventoriable as any)?.image_url ??
     (order.inventory?.inventoriable as any)?.image ??
     null;
-  const effectiveLogoUrl = branchImage || logoUrl;
+  const effectiveLogoUrl = branchImage || logoUrl || "/dressnmore-logo.jpg";
+
+  const { currency_symbol } = getOrderCurrencyInfo(order as any);
+  const {
+    subtotal,
+    vatAmount,
+    totalWithVat,
+    vatEnabled,
+    vatType,
+    vatValue,
+  } = getOrderTotalsWithVat(order as any);
 
   return (
     <article
@@ -253,6 +267,114 @@ export function OrderInvoicePrint({
                   </td>
                 </tr>
               )}
+            </tbody>
+          </table>
+        </section>
+
+        <section className="invoice-print-section mb-5">
+          <h2 className="invoice-print-section-title text-xs font-bold text-gray-600 uppercase tracking-wider mb-2.5 pb-2 border-b-2 border-gray-200">
+            ملخص الفاتورة
+          </h2>
+          <table className="invoice-print-table w-full border-collapse overflow-hidden rounded-xl border border-gray-200 shadow-sm">
+            <tbody>
+              <tr className="bg-gray-50/80">
+                <th
+                  scope="row"
+                  className="invoice-print-td border-b border-gray-100 py-2.5 px-4 text-gray-700 font-semibold text-sm text-right"
+                  style={{ width: "40%" }}
+                >
+                  السعر قبل الضريبة
+                </th>
+                <td
+                  className="invoice-print-td border-b border-gray-100 py-2.5 px-4 text-gray-900 font-semibold text-sm"
+                  style={{
+                    width: "60%",
+                    fontVariantNumeric: "tabular-nums",
+                    fontFamily: "'Segoe UI', Arial, sans-serif",
+                  }}
+                  dir="ltr"
+                >
+                  {subtotal.toLocaleString()} {currency_symbol}
+                </td>
+              </tr>
+              <tr>
+                <th
+                  scope="row"
+                  className="invoice-print-td border-b border-gray-100 py-2.5 px-4 text-gray-700 font-semibold text-sm text-right"
+                >
+                  قيمة الضريبة
+                </th>
+                <td
+                  className="invoice-print-td border-b border-gray-100 py-2.5 px-4 text-gray-900 font-semibold text-sm"
+                  style={{
+                    fontVariantNumeric: "tabular-nums",
+                    fontFamily: "'Segoe UI', Arial, sans-serif",
+                  }}
+                  dir="ltr"
+                >
+                  {vatEnabled && vatAmount > 0
+                    ? `${vatAmount.toLocaleString()} ${currency_symbol}${
+                        vatType === "percentage" && vatValue
+                          ? ` (${vatValue}%)`
+                          : ""
+                      }`
+                    : "لا يوجد"}
+                </td>
+              </tr>
+              <tr className="bg-gray-50/80">
+                <th
+                  scope="row"
+                  className="invoice-print-td border-b border-gray-100 py-2.5 px-4 text-gray-900 font-bold text-sm text-right"
+                >
+                  السعر بعد الضريبة
+                </th>
+                <td
+                  className="invoice-print-td border-b border-gray-100 py-2.5 px-4 text-gray-900 font-bold text-sm"
+                  style={{
+                    fontVariantNumeric: "tabular-nums",
+                    fontFamily: "'Segoe UI', Arial, sans-serif",
+                  }}
+                  dir="ltr"
+                >
+                  {totalWithVat.toLocaleString()} {currency_symbol}
+                </td>
+              </tr>
+              <tr>
+                <th
+                  scope="row"
+                  className="invoice-print-td border-b border-gray-100 py-2.5 px-4 text-gray-700 font-semibold text-sm text-right"
+                >
+                  المدفوع
+                </th>
+                <td
+                  className="invoice-print-td border-b border-gray-100 py-2.5 px-4 text-gray-900 font-semibold text-sm"
+                  style={{
+                    fontVariantNumeric: "tabular-nums",
+                    fontFamily: "'Segoe UI', Arial, sans-serif",
+                  }}
+                  dir="ltr"
+                >
+                  {Number(order.paid ?? 0).toLocaleString()} {currency_symbol}
+                </td>
+              </tr>
+              <tr>
+                <th
+                  scope="row"
+                  className="invoice-print-td py-2.5 px-4 text-gray-700 font-semibold text-sm text-right"
+                >
+                  المتبقي
+                </th>
+                <td
+                  className="invoice-print-td py-2.5 px-4 text-gray-900 font-semibold text-sm"
+                  style={{
+                    fontVariantNumeric: "tabular-nums",
+                    fontFamily: "'Segoe UI', Arial, sans-serif",
+                  }}
+                  dir="ltr"
+                >
+                  {Number(order.remaining ?? 0).toLocaleString()} {currency_symbol}
+                </td>
+              </tr>
             </tbody>
           </table>
         </section>

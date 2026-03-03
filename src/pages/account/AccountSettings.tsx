@@ -44,8 +44,11 @@ export default function AccountSettings() {
   const [deletePassword, setDeletePassword] = useState("");
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarRemove, setAvatarRemove] = useState(false);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoRemove, setLogoRemove] = useState(false);
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
   const updateProfile = useUpdateProfile();
   const changePassword = useChangePassword();
@@ -74,7 +77,25 @@ export default function AccountSettings() {
       if (avatarPreview) URL.revokeObjectURL(avatarPreview);
     };
   }, [avatarPreview]);
-  const displayAvatarUrl = avatarRemove ? null : (avatarPreview ?? avatarUrl);
+  const defaultLogoUrl = "/dressnmore-logo.jpg";
+  const displayAvatarUrl = avatarRemove
+    ? null
+    : (avatarPreview ?? avatarUrl ?? defaultLogoUrl);
+
+  const logoUrl =
+    (profile as any)?.logo_url ?? (profile as any)?.logo ?? null;
+  const logoPreview = useMemo(
+    () => (logoFile ? URL.createObjectURL(logoFile) : null),
+    [logoFile]
+  );
+  useEffect(() => {
+    return () => {
+      if (logoPreview) URL.revokeObjectURL(logoPreview);
+    };
+  }, [logoPreview]);
+  const displayLogoUrl = logoRemove
+    ? null
+    : (logoPreview ?? logoUrl ?? defaultLogoUrl);
 
   const handleUpdateProfile = (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,12 +105,17 @@ export default function AccountSettings() {
         email,
         avatar: avatarFile ?? undefined,
         avatar_remove: avatarRemove || undefined,
+        logo: logoFile ?? undefined,
+        logo_remove: logoRemove || undefined,
       },
       {
         onSuccess: () => {
           setAvatarFile(null);
           setAvatarRemove(false);
-          if (fileInputRef.current) fileInputRef.current.value = "";
+          setLogoFile(null);
+          setLogoRemove(false);
+          if (avatarInputRef.current) avatarInputRef.current.value = "";
+          if (logoInputRef.current) logoInputRef.current.value = "";
         },
       }
     );
@@ -117,6 +143,12 @@ export default function AccountSettings() {
     const file = e.target.files?.[0];
     setAvatarFile(file ?? null);
     if (file) setAvatarRemove(false);
+  };
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    setLogoFile(file ?? null);
+    if (file) setLogoRemove(false);
   };
 
   const handleDeleteAccount = () => {
@@ -165,52 +197,104 @@ export default function AccountSettings() {
         <TabsContent value="profile">
           <Card>
             <CardHeader>
-              <CardTitle>معلومات الحساب</CardTitle>
-              <CardDescription>تعديل الاسم والبريد الإلكتروني والصورة الشخصية</CardDescription>
+              <CardTitle>معلومات الحساب والشعارات</CardTitle>
+              <CardDescription>
+                تعديل الاسم، البريد الإلكتروني، والصورة الشخصية، بالإضافة إلى رفع شعار يظهر في النظام والفواتير
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* الصورة الشخصية (avatar) — تُعدّل مع البروفايل بنفس النموذج */}
-              <div className="flex items-center gap-6 flex-wrap">
-                <Avatar className="h-24 w-24 border-2 border-muted shrink-0">
-                  <AvatarImage src={displayAvatarUrl ?? undefined} alt="صورة الحساب" />
-                  <AvatarFallback className="text-2xl font-semibold bg-primary/10 text-primary">
-                    {userInitials}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">
-                    يفضل استخدام صورة بحجم 256×256 بكسل أو أكبر
-                  </p>
-                  <div className="flex gap-2 flex-wrap">
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleAvatarChange}
-                      className="hidden"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      <Upload className="ml-2 h-4 w-4" />
-                      اختيار صورة
-                    </Button>
-                    {(avatarUrl || avatarFile) && !avatarRemove && (
+              {/* الصورة الشخصية والشعار بجانب بعضهما */}
+              <div className="flex flex-wrap gap-8 items-start">
+                {/* الصورة الشخصية */}
+                <div className="flex items-center gap-6">
+                  <Avatar className="h-24 w-24 border-2 border-muted shrink-0">
+                    <AvatarImage src={displayAvatarUrl ?? undefined} alt="الصورة الشخصية" />
+                    <AvatarFallback className="text-2xl font-semibold bg-primary/10 text-primary">
+                      {userInitials}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">
+                      هذه هي الصورة الشخصية التي تظهر في الهيدر والسايد بار.
+                    </p>
+                    <div className="flex gap-2 flex-wrap">
+                      <input
+                        ref={avatarInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleAvatarChange}
+                        className="hidden"
+                      />
                       <Button
                         type="button"
-                        variant="destructive"
-                        onClick={() => {
-                          setAvatarRemove(true);
-                          setAvatarFile(null);
-                          if (fileInputRef.current) fileInputRef.current.value = "";
-                        }}
+                        variant="outline"
+                        onClick={() => avatarInputRef.current?.click()}
                       >
-                        <Trash2 className="ml-2 h-4 w-4" />
-                        إزالة الصورة
+                        <Upload className="ml-2 h-4 w-4" />
+                        اختيار صورة شخصية
                       </Button>
-                    )}
+                      {(avatarUrl || avatarFile) && !avatarRemove && (
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          onClick={() => {
+                            setAvatarRemove(true);
+                            setAvatarFile(null);
+                            if (avatarInputRef.current) avatarInputRef.current.value = "";
+                          }}
+                        >
+                          <Trash2 className="ml-2 h-4 w-4" />
+                          إزالة الصورة
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* الشعار إلى اليسار من الصورة */}
+                <div className="flex items-center gap-6">
+                  <div className="h-20 w-20 rounded-full border-2 border-dashed border-muted flex items-center justify-center bg-muted/40 overflow-hidden">
+                    <img
+                      src={displayLogoUrl ?? "/dressnmore-logo.jpg"}
+                      alt="شعار الحساب"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">
+                      الشعار يمكن استخدامه في الفواتير والتقارير. يفضل استخدام ملف PNG بخلفية شفافة.
+                    </p>
+                    <div className="flex gap-2 flex-wrap">
+                      <input
+                        ref={logoInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoChange}
+                        className="hidden"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => logoInputRef.current?.click()}
+                      >
+                        <Upload className="ml-2 h-4 w-4" />
+                        اختيار شعار
+                      </Button>
+                      {(logoUrl || logoFile) && !logoRemove && (
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          onClick={() => {
+                            setLogoRemove(true);
+                            setLogoFile(null);
+                            if (logoInputRef.current) logoInputRef.current.value = "";
+                          }}
+                        >
+                          <Trash2 className="ml-2 h-4 w-4" />
+                          إزالة الشعار
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -237,14 +321,14 @@ export default function AccountSettings() {
                     required
                   />
                 </div>
-                <Button
-                  type="submit"
-                  disabled={updateProfile.isPending}
-                >
+                  <Button
+                    type="submit"
+                    disabled={updateProfile.isPending}
+                  >
                   {updateProfile.isPending && (
                     <Loader2 className="ml-2 h-4 w-4 animate-spin" />
                   )}
-                  حفظ التغييرات (الاسم، البريد، والصورة)
+                  حفظ التغييرات (الاسم، البريد، والشعار/الصورة)
                 </Button>
               </form>
             </CardContent>

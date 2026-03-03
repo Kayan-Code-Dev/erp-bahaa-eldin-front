@@ -54,7 +54,11 @@ import { OrderInvoicePrintModal } from "./OrderInvoicePrintModal";
 import { OrderReceiptAckPrintModal } from "./OrderReceiptAckPrintModal";
 import { CreateCustodyModal } from "./CreateCustodyModal";
 import { CreatePaymentModal } from "./CreatePaymentModal";
-import { getOrderTypeLabel } from "@/api/v2/orders/order.utils";
+import {
+  getOrderCurrencyInfo,
+  getOrderTotalsWithVat,
+  getOrderTypeLabel,
+} from "@/api/v2/orders/order.utils";
 import { OrderEmployeeName } from "@/components/custom/OrderEmployeeName";
 import { getAllCustodies } from "@/api/v2/custody/custody.service";
 import {
@@ -380,7 +384,7 @@ function OrdersList() {
 
   return (
     <div dir="rtl">
-      <Card className="max-w-screen-lg 2xl:max-w-screen-2xl mx-auto">
+      <Card className="max-w-5xl 2xl:max-w-screen-2xl mx-auto">
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle>قائمة الطلبات</CardTitle>
@@ -980,51 +984,57 @@ function OrdersList() {
 
                       {/* Column 4: Items + Amounts + Order status */}
                       <TableCell className="align-top">
-                        <div className="flex flex-col gap-2 text-sm text-right">
-                          <p className="font-semibold text-gray-900">
-                            الأصناف:
-                            <span className="font-normal text-gray-700">
-                              {" "}
-                              {order.items && order.items.length > 0
-                                ? order.items
-                                  .map((item) =>
-                                    item.code ?? (item as { name?: string }).name
-                                  )
-                                  .filter(Boolean)
-                                  .join("، ")
-                                : "-"}
-                            </span>
-                          </p>
-                          <p className="font-semibold text-gray-900">
-                            السعر:{" "}
-                            <span className="font-medium tabular-nums" dir="ltr">
-                              {toEnglishNumerals(order.total_price)} ج.م
-                            </span>
-                          </p>
-                          <p className="font-semibold text-gray-900">
-                            المدفوع:{" "}
-                            <span className="font-medium text-green-700 tabular-nums" dir="ltr">
-                              {toEnglishNumerals(order.paid)} ج.م
-                            </span>
-                          </p>
-                          <p className="font-semibold text-gray-900">
-                            المتبقي:{" "}
-                            <span className="font-medium text-blue-700 tabular-nums" dir="ltr">
-                              {toEnglishNumerals(order.remaining)} ج.م
-                            </span>
-                          </p>
-                          <div className="mt-1">
-                            <Badge
-                              variant="secondary"
-                              className={getStatusVariant(order.status)}
-                            >
-                              {getStatusLabel(order.status)}
-                            </Badge>
-                            <span className="ml-2 text-xs text-muted-foreground">
-                              ({getOrderTypeLabel(order.order_type)})
-                            </span>
-                          </div>
-                        </div>
+                        {(() => {
+                          const { currency_symbol } = getOrderCurrencyInfo(order as any);
+                          const { totalWithVat } = getOrderTotalsWithVat(order as any);
+                          return (
+                            <div className="flex flex-col gap-2 text-sm text-right">
+                              <p className="font-semibold text-gray-900">
+                                الأصناف:
+                                <span className="font-normal text-gray-700">
+                                  {" "}
+                                  {order.items && order.items.length > 0
+                                    ? order.items
+                                        .map((item) =>
+                                          item.code ?? (item as { name?: string }).name
+                                        )
+                                        .filter(Boolean)
+                                        .join("، ")
+                                    : "-"}
+                                </span>
+                              </p>
+                              <p className="font-semibold text-gray-900">
+                                السعر (شامل الضريبة):{" "}
+                                <span className="font-medium tabular-nums" dir="ltr">
+                                  {totalWithVat.toLocaleString()} {currency_symbol}
+                                </span>
+                              </p>
+                              <p className="font-semibold text-gray-900">
+                                المدفوع:{" "}
+                                <span className="font-medium text-green-700 tabular-nums" dir="ltr">
+                                  {toEnglishNumerals(order.paid)} {currency_symbol}
+                                </span>
+                              </p>
+                              <p className="font-semibold text-gray-900">
+                                المتبقي:{" "}
+                                <span className="font-medium text-blue-700 tabular-nums" dir="ltr">
+                                  {toEnglishNumerals(order.remaining)} {currency_symbol}
+                                </span>
+                              </p>
+                              <div className="mt-1">
+                                <Badge
+                                  variant="secondary"
+                                  className={getStatusVariant(order.status)}
+                                >
+                                  {getStatusLabel(order.status)}
+                                </Badge>
+                                <span className="ml-2 text-xs text-muted-foreground">
+                                  ({getOrderTypeLabel(order.order_type)})
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </TableCell>
 
                       {/* Column 5: Employee */}

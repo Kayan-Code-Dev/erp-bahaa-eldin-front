@@ -158,6 +158,8 @@ function BranchManger() {
                     <TableHead className="text-center">اسم الفرع</TableHead>
                     <TableHead className="text-center">العنوان</TableHead>
                     <TableHead className="text-center">المخزن</TableHead>
+                    <TableHead className="text-center">العملة</TableHead>
+                    <TableHead className="text-center">الضريبة (VAT)</TableHead>
                     <TableHead className="text-center">رقم الهاتف</TableHead>
                     <TableHead className="text-center">إجراءات</TableHead>
                   </TableRow>
@@ -172,17 +174,14 @@ function BranchManger() {
                           {branch.id}
                         </TableCell>
                         <TableCell className="text-center">
-                          {branch.image_url || branch.image ? (
-                            <img
-                              src={branch.image_url || (branch.image as string)}
-                              alt={branch.name}
-                              className="mx-auto h-10 w-10 rounded-md object-cover border"
-                            />
-                          ) : (
-                            <span className="text-xs text-muted-foreground">
-                              لا توجد صورة
-                            </span>
-                          )}
+                          <img
+                            src={
+                              (branch.image_url || (branch.image as string)) ??
+                              "/dressnmore-logo.jpg"
+                            }
+                            alt={branch.name}
+                            className="mx-auto h-10 w-10 rounded-full object-cover border"
+                          />
                         </TableCell>
                         <TableCell className="font-medium text-center">
                           {branch.branch_code}
@@ -197,6 +196,30 @@ function BranchManger() {
                         </TableCell>
                         <TableCell className="text-center">
                           {branch.inventory?.name || "-"}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {branch.currency_name ||
+                          branch.currency_code ||
+                          branch.currency_symbol
+                            ? `${branch.currency_name ?? ""}${
+                                branch.currency_code
+                                  ? ` (${branch.currency_code})`
+                                  : ""
+                              }${
+                                branch.currency_symbol
+                                  ? ` ${branch.currency_symbol}`
+                                  : ""
+                              }`.trim()
+                            : "-"}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {branch.vat_enabled
+                            ? branch.vat_type && branch.vat_value != null
+                              ? branch.vat_type === "percentage"
+                                ? `${branch.vat_value}% نسبة`
+                                : `${branch.vat_value} ثابت`
+                              : "مفعّل"
+                            : "غير مفعّل"}
                         </TableCell>
                         <TableCell className="text-center">
                           {branch.phone || "-"}
@@ -226,7 +249,7 @@ function BranchManger() {
                   ) : (
                     <TableRow>
                       <TableCell
-                        colSpan={7}
+                        colSpan={10}
                         className="py-10 text-center text-muted-foreground"
                       >
                         لا توجد فروع لعرضها.

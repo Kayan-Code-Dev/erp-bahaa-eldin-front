@@ -30,7 +30,10 @@ export function AppSidebar() {
   const loginData = useAuthStore((s) => s.loginData);
   const logout = useAuthStore((s) => s.logout);
 
-  const avatarUrl = profile?.avatar_url ?? profile?.avatar ?? null;
+  const logoUrl =
+    (profile as any)?.logo_url ?? (profile as any)?.logo ?? null;
+  const defaultLogoUrl = "/dressnmore-logo.jpg";
+  const sidebarImageUrl = logoUrl ?? defaultLogoUrl;
   const displayName = profile?.name ?? loginData?.user?.name ?? "dressnmore";
   const userInitials = (displayName || "U")
     .split(" ")
@@ -94,9 +97,9 @@ export function AppSidebar() {
         {/* User profile + toggle */}
         <div className="flex items-center justify-between w-full group-data-[collapsible=icon]:hidden">
           <div className="flex items-center gap-2.5 min-w-0">
-            <Avatar className="h-9 w-9 rounded-lg overflow-hidden ring-1 ring-slate-200 shrink-0">
-              <AvatarImage src={avatarUrl ?? undefined} alt={displayName} className="object-cover" />
-              <AvatarFallback className="rounded-lg bg-main-gold/10 text-main-gold text-[11px] font-semibold">
+            <Avatar className="h-9 w-9 rounded-full overflow-hidden ring-1 ring-slate-200 shrink-0">
+            <AvatarImage src={sidebarImageUrl ?? undefined} alt={displayName} className="object-cover" />
+            <AvatarFallback className="rounded-full bg-main-gold/10 text-main-gold text-[11px] font-semibold">
                 {userInitials}
               </AvatarFallback>
             </Avatar>
@@ -127,9 +130,9 @@ export function AppSidebar() {
 
         {/* Collapsed icon mode — avatar only */}
         <div className="hidden group-data-[collapsible=icon]:flex w-full flex-col items-center gap-2">
-          <Avatar className="h-8 w-8 rounded-lg overflow-hidden ring-1 ring-slate-200">
-            <AvatarImage src={avatarUrl ?? undefined} alt={displayName} className="object-cover" />
-            <AvatarFallback className="rounded-lg bg-main-gold/10 text-main-gold text-[10px] font-semibold">
+          <Avatar className="h-8 w-8 rounded-full overflow-hidden ring-1 ring-slate-200">
+            <AvatarImage src={sidebarImageUrl ?? undefined} alt={displayName} className="object-cover" />
+            <AvatarFallback className="rounded-full bg-main-gold/10 text-main-gold text-[10px] font-semibold">
               {userInitials}
             </AvatarFallback>
           </Avatar>
@@ -190,7 +193,7 @@ export function AppSidebar() {
               size="icon"
               className="size-7 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100"
               title="إعدادات الحساب"
-              onClick={() => navigate("/dashboard/account")}
+              onClick={() => navigate("/account")}
             >
               <Settings className="h-3.5 w-3.5" />
             </Button>

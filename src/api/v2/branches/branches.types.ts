@@ -13,6 +13,10 @@ export type TCreateBranchRequest = {
   inventory_name: string;
   phone?: string;
   image?: File | null;
+  vat_enabled?: boolean;
+  vat_type?: "fixed" | "percentage" | null;
+  vat_value?: number | null;
+  currency_id?: number | null;
 };
 
 export type TBranchResponse = {
@@ -27,6 +31,12 @@ export type TBranchResponse = {
   phone?: string | null;
   image?: string | null;
   image_url?: string | null;
+  vat_enabled?: boolean | null;
+  vat_type?: "fixed" | "percentage" | null;
+  vat_value?: number | null;
+  currency_name?: string | null;
+  currency_code?: string | null;
+  currency_symbol?: string | null;
 };
 
 export type TUpdateBranchRequest = Partial<TCreateBranchRequest>;

@@ -26,6 +26,7 @@ import { CreatePaymentModal } from "./CreatePaymentModal";
 import { toast } from "sonner";
 import { useGetOrderDetailsQueryOptions } from "@/api/v2/orders/orders.hooks";
 import { TOrder } from "@/api/v2/orders/orders.types";
+import { getOrderCurrencyInfo } from "@/api/v2/orders/order.utils";
 
 type Props = {
   orderId: number;
@@ -136,7 +137,7 @@ export function OrderPaymentsTable({ orderId, order: orderProp }: Props) {
     try {
       await markAsPaidMutation.mutateAsync(paymentId);
       toast.success("تم تحديث حالة الدفعة إلى مدفوع بنجاح");
-    } catch (error) {
+    } catch {
       toast.error("حدث خطأ أثناء تحديث حالة الدفعة");
     }
   };
@@ -145,7 +146,7 @@ export function OrderPaymentsTable({ orderId, order: orderProp }: Props) {
     try {
       await markAsCanceledMutation.mutateAsync(paymentId);
       toast.success("تم إلغاء الدفعة بنجاح");
-    } catch (error) {
+    } catch {
       toast.error("حدث خطأ أثناء إلغاء الدفعة");
     }
   };
@@ -185,8 +186,11 @@ export function OrderPaymentsTable({ orderId, order: orderProp }: Props) {
                   <TableCell className="text-center font-medium">
                     {(page - 1) * per_page + index + 1}
                   </TableCell>
-                  <TableCell className="text-center font-medium">
-                    {payment.amount.toLocaleString()} ج.م
+                  <TableCell className="text-center font-medium" dir="ltr">
+                    {(() => {
+                      const { currency_symbol } = getOrderCurrencyInfo(order as any);
+                      return `${payment.amount.toLocaleString()} ${currency_symbol}`;
+                    })()}
                   </TableCell>
                   <TableCell className="text-center">
                     <span

@@ -346,26 +346,22 @@ export const sidebarLabels: SidebarLabel[] = [
   // Disabled: Orders and sales management menu section
   // {
   //   icon: orders,
-  //   label: "إدارة الطلبات والمبيعات",
   //   path: "/orders",
   //   level: 1,
   //   subItems: [
   //     {
   //       icon: null,
-  //       label: "الفروع",
   //       path: "/orders/branches",
   //       level: 2,
   //       subItems: [
   //         {
   //           icon: null,
-  //           label: "اضافة طلبية جديدة",
   //           path: "/orders/branches/add-new-order",
   //           level: 3,
   //           permission: CREATE_ORDER,
   //         },
   //         {
   //           icon: null,
-  //           label: "قائمة الطلبات",
   //           path: "/orders/branches",
   //           level: 3,
   //           permission: READ_ORDERS,
@@ -374,20 +370,17 @@ export const sidebarLabels: SidebarLabel[] = [
   //     },
   //     {
   //       icon: null,
-  //       label: "الموظفين",
   //       path: "/orders/employees",
   //       level: 2,
   //       subItems: [
   //         {
   //           icon: null,
-  //           label: "اضافة طلبية جديدة",
   //           path: "/orders/employees/add-new-order",
   //           level: 3,
   //           permission: CREATE_ORDER,
   //         },
   //         {
   //           icon: null,
-  //           label: "قائمة الطلبات",
   //           path: "/orders/employees",
   //           level: 3,
   //           permission: READ_ORDERS,
@@ -399,27 +392,23 @@ export const sidebarLabels: SidebarLabel[] = [
   // Disabled: Human resources management menu section
   // {
   //   icon: hr,
-  //   label: "إدارة الموارد البشرية",
   //   path: "/hr",
   //   level: 1,
   //   subItems: [
   //     {
   //       icon: null,
-  //       label: " ادارة المشرفين ",
   //       path: "/hr/admins",
   //       level: 2,
   //       permission: READ_ADMINS,
   //       subItems: [
   //         {
   //           icon: null,
-  //           label: "عرض المشرفين",
   //           path: "/hr/admins/list",
   //           level: 3,
   //           permission: READ_ADMINS,
   //         },
   //         {
   //           icon: null,
-  //           label: "عرض المشرفين المحذوفين",
   //           path: "/hr/admins/recycled-bin",
   //           level: 3,
   //           permission: READ_DELETEDADMINS,
@@ -428,35 +417,30 @@ export const sidebarLabels: SidebarLabel[] = [
   //     },
   //     {
   //       icon: null,
-  //       label: "ادارة مدراء الفروع",
   //       level: 2,
   //       path: "/hr/branch-managers",
   //       permission: READ_BRANCHMANAGERS,
   //       subItems: [
   //         {
   //           icon: null,
-  //           label: "عرض مدراء الافرع ",
   //           path: "/hr/branch-managers/all-branches-managers",
   //           level: 3,
   //           permission: READ_BRANCHMANAGERS,
   //         },
   //         {
   //           icon: null,
-  //           label: "عرض مدراء الافرع المحذوفين",
   //           path: "/hr/branch-managers/recycled-bin-all-branches-managers",
   //           level: 3,
   //           permission: READ_DELETEDBRANCHMANAGERS,
   //         },
   //         {
   //           icon: null,
-  //           label: "عرض مدراء الفرع ",
   //           path: "/hr/branch-managers/branches",
   //           level: 3,
   //           permission: READ_BRANCHES,
   //         },
   //         {
   //           icon: null,
-  //           label: "عرض مدراء الفرع المحذوفين",
   //           path: "/hr/branch-managers/recycled-bin-branches",
   //           level: 3,
   //           permission: READ_DELETEDBRANCHES,
@@ -469,28 +453,24 @@ export const sidebarLabels: SidebarLabel[] = [
   // Disabled: Inventory management menu section
   // {
   //   icon: inventory,
-  //   label: "إدارة المخزون",
   //   path: "/inventory",
   //   level: 1,
   //   permission: READ_INVENTORIES,
   //   subItems: [
   //     {
   //       icon: null,
-  //       label: "مدراء الفروع",
   //       path: "/inventory/branches-managers/",
   //       level: 2,
   //       permission: READ_INVENTORIES,
   //       subItems: [
   //         {
   //           icon: null,
-  //           label: "المخزون",
   //           path: "/inventory/branches-managers/",
   //           level: 2,
   //           permission: READ_INVENTORIES,
   //         },
   //         {
   //           icon: null,
-  //           label: "عمليات نقل المخزون",
   //           path: "/inventory/branches-managers/transfer-operations",
   //           level: 2,
   //           permission: READ_INVENTORYTRANSFERS,
@@ -499,20 +479,17 @@ export const sidebarLabels: SidebarLabel[] = [
   //     },
   //     {
   //       icon: null,
-  //       label: "الفروع",
   //       path: "/inventory/branches",
   //       level: 2,
   //       subItems: [
   //         {
   //           icon: null,
-  //           label: "المخزون",
   //           path: "/inventory/branches/",
   //           level: 3,
   //           permission: READ_INVENTORIES,
   //         },
   //         {
   //           icon: null,
-  //           label: "عمليات نقل المخزون",
   //           path: "/inventory/branches/transfer-operations",
   //           permission: READ_INVENTORYTRANSFERS,
   //           level: 3,
@@ -521,19 +498,16 @@ export const sidebarLabels: SidebarLabel[] = [
   //     },
   //     {
   //       icon: null,
-  //       label: "الموظفين",
   //       path: "/inventory/employees",
   //       level: 2,
   //       subItems: [
   //         {
   //           icon: null,
-  //           label: "المخزون",
   //           path: "/inventory/employees/",
   //           level: 3,
   //         },
   //         {
   //           icon: null,
-  //           label: "عمليات نقل المخزون",
   //           path: "/inventory/employees/transfer-operations",
   //           level: 3,
   //         },
@@ -624,39 +598,33 @@ export const sidebarLabels: SidebarLabel[] = [
   // Disabled: Permissions and roles management menu section
   // {
   //   icon: permissions,
-  //   label: "إدارة الصلاحيات و الاذونات",
   //   path: "/permissions-roles",
   //   level: 1,
   //   subItems: [
   //     {
   //       icon: null,
-  //       label: "المشرف",
   //       path: "/permissions-roles/admins",
   //       level: 2,
   //       subItems: [
   //         {
   //           icon: null,
-  //           label: "الاذونات",
   //           path: "/permissions-roles/admins/permissions",
   //           level: 2,
   //           permission: READ_PERMISSIONS,
   //         },
   //         {
   //           icon: null,
-  //           label: "الصلاحيات",
   //           path: "/permissions-roles/admins/roles",
   //           level: 2,
   //           subItems: [
   //             {
   //               icon: null,
-  //               label: "اضافة صلاحيات جديدة",
   //               path: "/permissions-roles/admins/roles/create",
   //               level: 3,
   //               permission: CREATE_ROLE,
   //             },
   //             {
   //               icon: null,
-  //               label: "قائمة الصلاحيات",
   //               path: "/permissions-roles/admins/roles/list-roles",
   //               level: 3,
   //               permission: READ_ROLES,
@@ -667,14 +635,12 @@ export const sidebarLabels: SidebarLabel[] = [
   //     },
   //     {
   //       icon: null,
-  //       label: "مدير الفروع",
   //       path: "/permissions-roles/branches-managers/roles",
   //       level: 2,
   //       permission: READ_ROLES,
   //     },
   //     {
   //       icon: null,
-  //       label: "الفرع",
   //       path: "/permissions-roles/branches/roles",
   //       level: 2,
   //       permission: READ_ROLES,
@@ -686,7 +652,15 @@ export const sidebarLabels: SidebarLabel[] = [
     label: "ادارة المحتوى",
     path: "/content",
     level: 1,
-    permissions: ["countries.view", "cities.view", "categories.view", "subcategories.view", "addresses.view", "phones.view"],
+    permissions: [
+      "countries.view",
+      "cities.view",
+      "categories.view",
+      "subcategories.view",
+      "currencies.view",
+      "addresses.view",
+      "phones.view",
+    ],
     iconComponent: createIcon(Settings),
     subItems: [
       {
@@ -720,6 +694,20 @@ export const sidebarLabels: SidebarLabel[] = [
         level: 2,
         permissions: ["subcategories.view", "subcategories.create", "subcategories.update", "subcategories.delete", "subcategories.export"],
         iconComponent: createIcon(FolderTree),
+      },
+      {
+        icon: null,
+        label: "العملات",
+        path: "/content/currencies",
+        level: 2,
+        permissions: [
+          "currencies.view",
+          "currencies.create",
+          "currencies.update",
+          "currencies.delete",
+          "currencies.export",
+        ],
+        iconComponent: createIcon(Globe),
       },
     ],
   },

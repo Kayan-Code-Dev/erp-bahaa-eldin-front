@@ -40,7 +40,6 @@ import { CategoriesSelect } from "@/components/custom/CategoriesSelect";
 import { SubcategoriesSelect } from "@/components/custom/SubcategoriesSelect";
 import { toast } from "sonner";
 
-// Schema: كود المنتج، المقاسات (اختيارية)، الحالة، المكان، قسم المنتجات (اختياري)، ملاحظات (اختياري)
 const formSchema = z.object({
   code: z.string().min(1, { message: "كود المنتج مطلوب" }),
   breast_size: z.string().optional(),

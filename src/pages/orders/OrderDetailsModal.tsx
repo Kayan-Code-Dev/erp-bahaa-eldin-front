@@ -19,7 +19,11 @@ import {
 import { TOrder } from "@/api/v2/orders/orders.types";
 import { useGetOrderDetailsQueryOptions } from "@/api/v2/orders/orders.hooks";
 import { formatDate } from "@/utils/formatDate";
-import { getOrderTypeLabel } from "@/api/v2/orders/order.utils";
+import {
+  getOrderCurrencyInfo,
+  getOrderTotalsWithVat,
+  getOrderTypeLabel,
+} from "@/api/v2/orders/order.utils";
 
 type Props = {
   order: TOrder | null;
@@ -120,28 +124,80 @@ export function OrderDetailsModal({ order, open, onOpenChange }: Props) {
                     {getStatusLabel(orderData.status)}
                   </Badge>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    السعر الإجمالي
-                  </p>
-                  <p className="text-lg font-semibold">
-                    {orderData.total_price} ج.م
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    المدفوع
-                  </p>
-                  <p className="text-lg font-semibold">{orderData.paid} ج.م</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    المتبقي
-                  </p>
-                  <p className="text-lg font-semibold">
-                    {orderData.remaining} ج.م
-                  </p>
-                </div>
+              {(() => {
+                const { currency_symbol } = getOrderCurrencyInfo(orderData as any);
+                const {
+                  subtotal,
+                  totalWithVat,
+                  vatEnabled,
+                  vatType,
+                  vatValue,
+                } = getOrderTotalsWithVat(orderData as any);
+                const paid = Number(orderData.paid ?? 0);
+                const remaining = Number(orderData.remaining ?? 0);
+
+                const vatLabel =
+                  vatEnabled && vatValue
+                    ? vatType === "percentage"
+                      ? `${vatValue}%`
+                      : `${vatValue}`
+                    : null;
+
+                return (
+                  <>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        السعر الإجمالي
+                      </p>
+                      <p className="text-lg font-semibold">
+                        <span className="inline-flex items-baseline gap-1 tabular-nums">
+                          <span>{subtotal.toLocaleString()}</span>
+                          <span>{currency_symbol}</span>
+                        </span>
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        السعر مع الضريبة
+                      </p>
+                      <p className="text-lg font-semibold">
+                        <span className="inline-flex items-baseline gap-1 tabular-nums">
+                          <span>{totalWithVat.toLocaleString()}</span>
+                          <span>{currency_symbol}</span>
+                        </span>
+                      </p>
+                      {vatEnabled && vatLabel && (
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          (قيمة الضريبة: {vatLabel}
+                          {vatType === "percentage" ? "%" : ""})
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        المدفوع
+                      </p>
+                      <p className="text-lg font-semibold">
+                        <span className="inline-flex items-baseline gap-1 tabular-nums">
+                          <span>{paid.toLocaleString()}</span>
+                          <span>{currency_symbol}</span>
+                        </span>
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        المتبقي
+                      </p>
+                      <p className="text-lg font-semibold">
+                        <span className="inline-flex items-baseline gap-1 tabular-nums">
+                          <span>{remaining.toLocaleString()}</span>
+                          <span>{currency_symbol}</span>
+                        </span>
+                      </p>
+                    </div>
+                  </>
+                );
+              })()}
                 {orderData.discount_type &&
                   orderData.discount_type !== "none" && (
                     <>
@@ -159,9 +215,14 @@ export function OrderDetailsModal({ order, open, onOpenChange }: Props) {
                             قيمة الخصم (على الطلب)
                           </p>
                           <p className="text-lg">
-                            {orderData.discount_type === "percentage"
-                              ? `${orderData.discount_value ?? ""}%`
-                              : `${orderData.discount_value ?? ""} ج.م`}
+                            {orderData.discount_type === "percentage" ? (
+                              `${orderData.discount_value ?? ""}%`
+                            ) : (
+                              <span className="inline-flex items-baseline gap-1 tabular-nums">
+                                <span>{orderData.discount_value ?? ""}</span>
+                                <span>{getOrderCurrencyInfo(orderData as any).currency_symbol}</span>
+                              </span>
+                            )}
                           </p>
                         </div>
                       )}
