@@ -2,7 +2,7 @@ import { TOrder } from "@/api/v2/orders/orders.types";
 import { OrderEmployeeName } from "@/components/custom/OrderEmployeeName";
 import { formatPhone } from "@/utils/formatPhone";
 
-const HEADER_BG = "#907457";
+const HEADER_BG = "#5170ff";
 
 /** Receipt acknowledgment rules and instructions — at the bottom of the page */
 const RULES_ITEMS = [

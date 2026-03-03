@@ -56,7 +56,7 @@ const ACK_PRINT_STYLES = `
     width: 100%; 
     flex-shrink: 0; 
     padding: 8px 0; 
-    background: #907457 !important; 
+    background: #5170ff !important; 
     color: #fff; 
     font-weight: 500; 
     border-bottom-left-radius: 0.5rem; 
@@ -238,7 +238,7 @@ const ACK_PRINT_STYLES = `
     padding: 8px 12px; 
     text-align: center; 
     color: #fff; 
-    background: #907457 !important; 
+    background: #5170ff !important; 
     border-top-left-radius: 0.5rem; 
     border-top-right-radius: 0.5rem; 
     font-size: 11px; 

@@ -3,8 +3,8 @@ import { getOrderTypeLabel } from "@/api/v2/orders/order.utils";
 import { OrderEmployeeName } from "@/components/custom/OrderEmployeeName";
 import { formatPhone } from "@/utils/formatPhone";
 
-const HEADER_BG = "#907457";
-const HEADER_DARK = "#7a6349";
+const HEADER_BG = "#5170ff";
+const HEADER_DARK = "#3f5ae0";
 
 type Props = {
   order: TOrder;
@@ -413,7 +413,7 @@ export function OrderInvoicePrint({
     .invoice-print-header { 
       padding: 1.5mm 0 !important; 
       margin-bottom: 2mm !important;
-      background-color: #907457 !important;
+      background-color: #5170ff !important;
       border-radius: 2mm !important;
       flex-shrink: 0 !important;        /* منع التقلص */
     }
@@ -491,7 +491,7 @@ export function OrderInvoicePrint({
     }
     
     .invoice-print-table-items .invoice-print-th {
-      background: #7a6349 !important;
+      background: #3f5ae0 !important;
       color: white !important;
       padding: 1mm 0.5mm !important;
       font-size: 8px !important;
@@ -524,7 +524,7 @@ export function OrderInvoicePrint({
     }
     
     .invoice-print-measurements-thead th {
-      background: #7a6349 !important;
+      background: #3f5ae0 !important;
       color: white !important;
       padding: 0.75mm 0.5mm !important;
       font-size: 7px !important;
@@ -610,7 +610,7 @@ export function OrderInvoicePrint({
     
     /* ===== الفوتر ===== */
     .invoice-print-footer {
-      background: #907457 !important;
+      background: #5170ff !important;
       color: white !important;
       padding: 1.5mm 3mm !important;
       font-size: 9px !important;

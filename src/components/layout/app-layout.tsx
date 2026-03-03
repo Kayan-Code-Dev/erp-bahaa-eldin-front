@@ -5,8 +5,8 @@ import { SidebarProvider, useSidebar } from "../ui/sidebar";
 import { AppSidebar } from "../app/new-sidebar/AppSideBar";
 import { useNotifications } from "@/hooks/useNotifications";
 
-const SIDEBAR_WIDTH_OPEN = "20rem";  /* w-80 in AppSidebar */
-const SIDEBAR_WIDTH_ICON = "4rem";
+const SIDEBAR_WIDTH_OPEN = "17rem";
+const SIDEBAR_WIDTH_ICON = "3.5rem";
 
 function MainContent() {
   const { open } = useSidebar();

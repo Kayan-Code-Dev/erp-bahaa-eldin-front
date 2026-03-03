@@ -88,7 +88,7 @@ function DashboardPage() {
   return (
     <div className="flex-1" dir="rtl">
       {/* Header */}
-      <div className="bg-[#907457] text-white px-4 py-3">
+      <div className="bg-[#5170ff] text-white px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="space-y-1 text-right">
             <h1 className="text-xl font-bold">لوحة التحكم</h1>

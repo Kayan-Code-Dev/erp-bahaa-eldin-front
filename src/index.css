@@ -47,7 +47,7 @@ body {
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  --main-gold: #907457;
+  --main-gold: #5170ff;
 }
 
 .dark {
@@ -132,65 +132,56 @@ body {
   }
 }
 
-/* App sidebar: force main theme colors so they always apply */
+/* ═══════ App sidebar — clean flat design ═══════ */
 [data-app-sidebar] [data-sidebar="sidebar"] {
-  background: var(--sidebar) !important;
-  color: var(--sidebar-foreground);
-  border-color: var(--sidebar-border);
+  background: #fff !important;
+  color: #334155;
+  border-color: transparent;
+  border-left: 1px solid #f1f5f9;
 }
 [data-app-sidebar] [data-sidebar="sidebar"] a,
 [data-app-sidebar] [data-sidebar="sidebar"] button,
 [data-app-sidebar] [data-sidebar="sidebar"] [data-sidebar="menu-button"] {
   color: inherit;
 }
-/* Sidebar accents (hover/active) use CSS variables */
-[data-app-sidebar] [data-sidebar="sidebar"] [data-sidebar="menu-button"]:hover {
-  background: var(--sidebar-accent);
-  color: var(--sidebar-accent-foreground);
-}
+
 [data-app-sidebar] [data-sidebar="sidebar"] [data-sidebar="menu-button"] {
-  border-radius: 0.6rem;
+  border-radius: 0.5rem;
   font-size: 13px;
-  line-height: 1.4;
-  height: 2.25rem;
-  padding-inline: 0.65rem;
-  transition:
-    background-color 150ms ease-out,
-    color 150ms ease-out,
-    box-shadow 150ms ease-out,
-    transform 120ms ease-out;
+  line-height: 1.5;
+  height: auto;
+  min-height: 2.25rem;
+  padding-inline: 0.625rem;
+  transition: all 120ms ease-out;
+}
+[data-app-sidebar] [data-sidebar="sidebar"] [data-sidebar="menu-button"]:hover {
+  background: #f8fafc;
+  color: #0f172a;
 }
 [data-app-sidebar] [data-sidebar="sidebar"] [data-sidebar="menu-button"]:active {
-  transform: scale(0.985);
+  transform: scale(0.98);
 }
+
+/* Active state — subtle tinted background */
 [data-app-sidebar] [data-sidebar="sidebar"] [data-sidebar="menu-button"][data-active="true"],
-[data-app-sidebar] [data-sidebar="sidebar"] .sidebar-active-gold {
-  background: rgba(144, 116, 87, 0.18) !important;
+[data-app-sidebar] [data-sidebar="sidebar"] .sidebar-item-active {
+  background: rgba(81, 112, 255, 0.07) !important;
   color: var(--main-gold) !important;
-  border-radius: 0.55rem !important;
-  border-right: 2px solid var(--main-gold);
-  box-shadow: 0 0 0 1px rgba(144, 116, 87, 0.26);
+  font-weight: 600;
 }
 [data-app-sidebar] [data-sidebar="sidebar"] [data-sidebar="menu-button"][data-active="true"]:hover,
-[data-app-sidebar] [data-sidebar="sidebar"] .sidebar-active-gold:hover {
-  background: rgba(144, 116, 87, 0.32) !important;
+[data-app-sidebar] [data-sidebar="sidebar"] .sidebar-item-active:hover {
+  background: rgba(81, 112, 255, 0.12) !important;
   color: var(--main-gold) !important;
 }
 
-/* Sidebar layout: gap does not take flow space; main content uses margin so sidebar does not overlap */
+/* Sidebar layout: gap does not take flow space */
 [data-slot="sidebar"]:has([data-app-sidebar]) [data-slot="sidebar-gap"] {
   width: 0 !important;
   min-width: 0 !important;
   overflow: hidden;
 }
 
-/* Opened by hover: subtle distinction (shadow) so it’s clear it’s hover-open vs pinned */
-[data-app-sidebar][data-open-by="hover"] {
-  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.08);
-}
-[data-app-sidebar][data-open-by="hover"] [data-sidebar="sidebar"] {
-  border-radius: 12px 0 0 12px;
-}
 
 @layer utilities {
   .rtl-flip {

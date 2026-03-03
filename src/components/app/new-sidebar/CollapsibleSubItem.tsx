@@ -32,43 +32,56 @@ const CollapsibleSubItem = ({
     !!item.subItems?.length
   );
   const hasActiveDescendant = hasActiveChild(pathname, item);
-  // Parent should only be colored if it's active AND no child is active
   const shouldColorParent = active && !hasActiveDescendant;
   const [open, setOpen] = useState(active || hasActiveDescendant);
   const isTopLevel = item.level === 1;
+  const isActive = shouldColorParent || hasActiveDescendant;
 
   return (
     <Collapsible
       key={item.label}
       defaultOpen={active || hasActiveDescendant}
       open={open}
-      className="py-0.5 w-full"
+      className="w-full"
       onOpenChange={setOpen}
     >
-      <SidebarGroup className="px-2 group-data-[collapsible=icon]:items-center gap-1">
+      <SidebarGroup className="px-1 group-data-[collapsible=icon]:items-center gap-0">
         <SidebarMenuItem className="relative group-data-[collapsible=icon]:w-fit group-data-[collapsible=icon]:mx-auto">
           <CollapsibleTrigger asChild>
             <SidebarMenuButton
               asChild
               isActive={shouldColorParent}
               className={cn(
-                "w-full justify-start text-[13px] rounded-md px-1.5 py-1.5 cursor-pointer text-sidebar-foreground/85 bg-transparent",
-                "hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/35",
+                "w-full justify-start rounded-lg px-2.5 py-1.5 cursor-pointer text-slate-600 bg-transparent",
+                "hover:bg-slate-50 hover:text-slate-900",
                 "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0",
-                shouldColorParent && "sidebar-active-gold"
+                shouldColorParent && "sidebar-item-active"
               )}
             >
               <div className="flex items-center justify-between w-full min-w-0 text-inherit">
-                <div className="shrink-0 flex items-center gap-2 min-w-0">
+                <div className="shrink-0 flex items-center gap-2.5 min-w-0">
                   {item.iconComponent ? (
-                    <span className="flex h-4 w-4 items-center justify-center text-sidebar-foreground/75 shrink-0 [&_svg]:w-4 [&_svg]:h-4 [&_svg]:shrink-0">
+                    <span
+                      className={cn(
+                        "flex h-7 w-7 items-center justify-center rounded-md shrink-0 transition-colors",
+                        "[&_svg]:w-4 [&_svg]:h-4 [&_svg]:shrink-0",
+                        isActive
+                          ? "bg-main-gold/10 text-main-gold"
+                          : "bg-slate-100 text-slate-500"
+                      )}
+                    >
                       {item.iconComponent}
                     </span>
                   ) : item.icon ? (
-                    <span className="flex h-4 w-4 items-center justify-center text-sidebar-foreground/75 shrink-0">
+                    <span
+                      className={cn(
+                        "flex h-7 w-7 items-center justify-center rounded-md shrink-0 transition-colors",
+                        isActive ? "bg-main-gold/10" : "bg-slate-100"
+                      )}
+                    >
                       <img
                         src={item.icon}
-                        className="w-4 h-4 opacity-80"
+                        className={cn("w-4 h-4", isActive ? "opacity-100" : "opacity-70")}
                         alt=""
                       />
                     </span>
@@ -76,9 +89,8 @@ const CollapsibleSubItem = ({
                   <span
                     className={cn(
                       "truncate text-inherit group-data-[collapsible=icon]:hidden",
-                      isTopLevel
-                        ? "text-[13px] font-medium"
-                        : "text-[12px] text-sidebar-foreground/80"
+                      isTopLevel ? "text-[13px]" : "text-[12px]",
+                      isActive ? "font-semibold text-slate-900" : "font-medium"
                     )}
                   >
                     {item.label}
@@ -86,7 +98,7 @@ const CollapsibleSubItem = ({
                 </div>
                 <ChevronLeft
                   className={cn(
-                    "h-4 w-4 shrink-0 transition duration-200 text-sidebar-foreground/60 group-data-[collapsible=icon]:hidden",
+                    "h-3.5 w-3.5 shrink-0 transition-transform duration-200 text-slate-400 group-data-[collapsible=icon]:hidden",
                     open && "-rotate-90"
                   )}
                 />
@@ -96,7 +108,7 @@ const CollapsibleSubItem = ({
         </SidebarMenuItem>
 
         <CollapsibleContent className="group-data-[collapsible=icon]:hidden">
-          <SidebarGroupContent className="ps-3 pt-1.5 pe-1 pb-1.5 mt-0.5 ms-1 rounded-lg bg-sidebar-accent/15 border border-sidebar-border/60 w-[calc(100%-0.5rem)]">
+          <SidebarGroupContent className="pr-4 pl-1 pt-0.5 pb-0.5 mt-0.5 mr-[14px] border-r border-slate-200">
             <SidebarNav items={item.subItems!} keyPrefix={keyPrefix} />
           </SidebarGroupContent>
         </CollapsibleContent>

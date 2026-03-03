@@ -8,9 +8,9 @@ import {
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { Menu, LogOut, Search } from "lucide-react";
+import { PanelRightClose, PanelRightOpen, LogOut, Search, Settings, X } from "lucide-react";
+import { useNavigate } from "react-router";
 import { SidebarNav } from "./SideBarNav";
 import { sidebarLabels, SidebarLabel } from "../sidebar/constants";
 import useSidebarLabel, { useSidebarPermissions } from "../sidebar/useSidebarLabel";
@@ -19,8 +19,9 @@ import { useAuthStore } from "@/zustand-stores/auth.store";
 
 export function AppSidebar() {
   const { open, setOpen } = useSidebar();
-  const [pinned, setPinned] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchFocused, setSearchFocused] = useState(false);
+  const navigate = useNavigate();
 
   const permissions = useSidebarPermissions();
   const filteredLabels = useSidebarLabel(sidebarLabels, permissions);
@@ -39,28 +40,7 @@ export function AppSidebar() {
     .toUpperCase();
 
   const handleToggle = () => {
-    if (open) {
-      if (pinned) {
-        setOpen(false);
-        setPinned(false);
-      } else {
-        setPinned(true);
-      }
-    } else {
-      setOpen(true);
-      setPinned(true);
-    }
-  };
-
-  const handleMouseEnter = () => {
-    if (!open) {
-      setOpen(true);
-      setPinned(false);
-    }
-  };
-
-  const handleMouseLeave = () => {
-    if (!pinned) setOpen(false);
+    setOpen(!open);
   };
 
   const handleLogout = () => {
@@ -101,35 +81,30 @@ export function AppSidebar() {
       variant="floating"
       collapsible="icon"
       data-app-sidebar
-      data-open-by={open ? (pinned ? "button" : "hover") : undefined}
       className={cn(
-        "w-80 text-sidebar-foreground",
-        "md:*:data-[slot=sidebar-container]:px-2",
-        "md:**:data-[sidebar=sidebar]:bg-sidebar md:**:data-[sidebar=sidebar]:border-sidebar-border/70",
-        "md:**:data-[sidebar=sidebar]:shadow-[0_18px_40px_rgba(15,23,42,0.45)]"
+        "w-68 text-sidebar-foreground",
+        "md:*:data-[slot=sidebar-container]:px-0",
+        "md:**:data-[sidebar=sidebar]:bg-white md:**:data-[sidebar=sidebar]:border-0",
+        "md:**:data-[sidebar=sidebar]:shadow-[0_1px_3px_rgba(0,0,0,0.08),0_8px_24px_rgba(0,0,0,0.06)]",
+        "md:**:data-[sidebar=sidebar]:rounded-none"
       )}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
     >
-      {/* HEADER بأسلوب مشابه لـ Zoho: شريط علوي بسيط مع بروفايل المستخدم وزر القائمة */}
-      <SidebarHeader className="border-b border-sidebar-border/60 px-3 pt-3 pb-2 flex flex-col gap-2 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-2">
-        {/* وضع السايدبار المفتوح: بروفايل + زر قائمة على الحافة */}
-        <div className="flex items-center justify-between w-full gap-2 group-data-[collapsible=icon]:hidden">
-          <div className="flex items-center gap-2 min-w-0">
-            <Avatar className="h-9 w-9 rounded-xl overflow-hidden border border-sidebar-border/70 bg-sidebar-accent/20 shadow-inner">
-              <AvatarImage src={avatarUrl ?? undefined} alt="صورة المستخدم" className="object-cover" />
-              <AvatarFallback className="rounded-xl bg-primary/10 text-primary text-sm font-semibold w-full h-full flex items-center justify-center">
+      {/* HEADER — بروفايل المستخدم + بحث + زر toggle */}
+      <SidebarHeader className="px-4 pt-4 pb-3 flex flex-col gap-3 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-2 group-data-[collapsible=icon]:pt-3">
+        {/* User profile + toggle */}
+        <div className="flex items-center justify-between w-full group-data-[collapsible=icon]:hidden">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <Avatar className="h-9 w-9 rounded-lg overflow-hidden ring-1 ring-slate-200 shrink-0">
+              <AvatarImage src={avatarUrl ?? undefined} alt={displayName} className="object-cover" />
+              <AvatarFallback className="rounded-lg bg-main-gold/10 text-main-gold text-[11px] font-semibold">
                 {userInitials}
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col min-w-0">
-              <span
-                className="text-sm font-semibold tracking-tight truncate"
-                title={displayName}
-              >
+              <span className="text-[13px] font-semibold text-slate-900 tracking-tight truncate">
                 {displayName}
               </span>
-              <span className="text-[11px] text-sidebar-foreground/60">
+              <span className="text-[10px] text-slate-400 font-medium">
                 حساب المستخدم
               </span>
             </div>
@@ -139,85 +114,96 @@ export function AppSidebar() {
             variant="ghost"
             size="icon"
             onClick={handleToggle}
-            className={cn(
-              "size-8 shrink-0 rounded-lg transition-colors text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-              open && pinned && "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
-            )}
+            className="size-7 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100"
             aria-label={open ? "إغلاق القائمة" : "فتح القائمة"}
-            title={open ? "إغلاق القائمة" : "فتح القائمة"}
           >
-            <Menu className="h-4 w-4" />
+            {open ? (
+              <PanelRightClose className="h-4 w-4" />
+            ) : (
+              <PanelRightOpen className="h-4 w-4" />
+            )}
           </Button>
         </div>
 
-        {/* وضع الأيقونة فقط: زر القائمة في المنتصف داخل الهيدر الضيق */}
-        <div className="hidden group-data-[collapsible=icon]:flex w-full items-center justify-center">
+        {/* Collapsed icon mode — avatar only */}
+        <div className="hidden group-data-[collapsible=icon]:flex w-full flex-col items-center gap-2">
+          <Avatar className="h-8 w-8 rounded-lg overflow-hidden ring-1 ring-slate-200">
+            <AvatarImage src={avatarUrl ?? undefined} alt={displayName} className="object-cover" />
+            <AvatarFallback className="rounded-lg bg-main-gold/10 text-main-gold text-[10px] font-semibold">
+              {userInitials}
+            </AvatarFallback>
+          </Avatar>
           <Button
             variant="ghost"
             size="icon"
             onClick={handleToggle}
-            className="size-9 rounded-xl text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-            aria-label={open ? "إغلاق القائمة" : "فتح القائمة"}
-            title={open ? "إغلاق القائمة" : "فتح القائمة"}
+            className="size-7 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+            aria-label="فتح القائمة"
           >
-            <Menu className="h-4 w-4" />
+            <PanelRightOpen className="h-4 w-4" />
           </Button>
+        </div>
+
+        {/* Search */}
+        <div className="w-full group-data-[collapsible=icon]:hidden">
+          <div
+            className={cn(
+              "flex items-center gap-2 rounded-lg px-2.5 h-8 transition-all duration-150",
+              searchFocused
+                ? "bg-white ring-1 ring-main-gold/40 shadow-sm"
+                : "bg-slate-50 hover:bg-slate-100"
+            )}
+          >
+            <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+            <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => setSearchFocused(true)}
+              onBlur={() => setSearchFocused(false)}
+              placeholder="بحث..."
+              className="flex-1 bg-transparent border-0 outline-none text-[12px] text-slate-700 placeholder:text-slate-400"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            )}
+          </div>
         </div>
       </SidebarHeader>
 
-      {/* المحتوى (القائمة) مع بطاقة مساحة العمل + مربع البحث بتصميم مختلف كلياً */}
-      <SidebarContent className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-3 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-2 scrollbar-thin scrollbar-track-sidebar-accent/20 scrollbar-thumb-sidebar-border/70">
-        {/* بطاقة مساحة العمل الاحترافية */}
-        <div className="px-1.5 mb-3 mt-1 w-full space-y-2 group-data-[collapsible=icon]:hidden">
-          <div className="rounded-2xl border border-sidebar-border/70 bg-sidebar-accent/25 shadow-sm overflow-hidden">
-            <div className="flex items-center justify-start gap-2 px-3 py-2.5 bg-[linear-gradient(to_left,rgba(144,116,87,0.18),transparent)]">
-              <div className="flex items-center gap-2 min-w-0">
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[radial-gradient(circle_at_30%_0%,rgba(255,255,255,0.35),transparent_60%),rgba(15,23,42,0.12)] border border-sidebar-border/70 shadow-inner text-[13px] font-semibold text-sidebar-foreground">
-                  DM
-                </div>
-                <div className="flex flex-col min-w-0">
-                  <span className="text-[11px] font-medium text-sidebar-foreground/60">
-                    مساحة العمل
-                  </span>
-                  <span className="text-xs font-semibold truncate">
-                    Dressnmore Workspace
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* شريط البحث فقط بدون زر الإضافة */}
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2 flex-1 rounded-xl bg-sidebar-accent/30 border border-sidebar-border/60 px-2.5 py-1.5 shadow-sm">
-              <Search className="w-3.5 h-3.5 text-sidebar-foreground/45 shrink-0" />
-              <Input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="بحث في القوائم"
-                className="h-6 border-0 bg-transparent px-0 text-[12px] placeholder:text-sidebar-foreground/45 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* القائمة الرئيسية */}
+      {/* CONTENT — القائمة بدون أي عناصر إضافية */}
+      <SidebarContent className="flex-1 overflow-y-auto overflow-x-hidden px-2.5 py-1 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-1.5 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-200/70">
         <SidebarNav items={visibleLabels} />
       </SidebarContent>
 
-      {/* FOOTER بسيط لزر تسجيل الخروج */}
-      <SidebarFooter className="border-t border-sidebar-border/60 px-3 py-2 group-data-[collapsible=icon]:px-2">
-        <div className="flex items-center justify-between gap-2 group-data-[collapsible=icon]:justify-center w-full">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-sidebar-foreground/70 hover:text-destructive hover:bg-destructive/10"
-            onClick={handleLogout}
-            title="تسجيل الخروج"
-            aria-label="تسجيل الخروج"
-          >
-            <LogOut className="h-4 w-4" />
-          </Button>
+      {/* FOOTER — إعدادات + تسجيل خروج */}
+      <SidebarFooter className="border-t border-slate-100 px-3 py-2.5 group-data-[collapsible=icon]:px-1.5">
+        <div className="flex items-center justify-between w-full group-data-[collapsible=icon]:justify-center">
+          <div className="flex items-center gap-0.5">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-7 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+              title="إعدادات الحساب"
+              onClick={() => navigate("/dashboard/account")}
+            >
+              <Settings className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-7 rounded-md text-slate-400 hover:text-red-500 hover:bg-red-50"
+              onClick={handleLogout}
+              title="تسجيل الخروج"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+            </Button>
+          </div>
         </div>
       </SidebarFooter>
     </Sidebar>

@@ -47,7 +47,7 @@ const INVOICE_PRINT_STYLES = `
     width: 100%; 
     flex-shrink: 0; 
     padding: 24px 0; 
-    background: #907457 !important; 
+    background: #5170ff !important; 
     color: #fff; 
     border-bottom-left-radius: 1rem; 
     border-bottom-right-radius: 1rem; 
@@ -253,8 +253,8 @@ const INVOICE_PRINT_STYLES = `
     font-weight: 700; 
     text-transform: uppercase; 
     letter-spacing: 0.05em; 
-    background: #907457 !important; 
-    background-color: #907457 !important; 
+    background: #5170ff !important; 
+    background-color: #5170ff !important; 
     -webkit-print-color-adjust: exact !important; 
     print-color-adjust: exact !important; 
   }
@@ -317,7 +317,7 @@ const INVOICE_PRINT_STYLES = `
     padding: 16px 24px; 
     text-align: center; 
     color: #fff; 
-    background: #907457 !important; 
+    background: #5170ff !important; 
     border-top-left-radius: 1rem; 
     border-top-right-radius: 1rem; 
     font-size: 14px; 
