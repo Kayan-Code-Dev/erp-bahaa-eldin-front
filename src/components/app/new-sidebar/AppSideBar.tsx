@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -8,10 +8,11 @@ import {
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { Menu, LogOut } from "lucide-react";
+import { Menu, LogOut, Search, Plus } from "lucide-react";
 import { SidebarNav } from "./SideBarNav";
-import { sidebarLabels } from "../sidebar/constants";
+import { sidebarLabels, SidebarLabel } from "../sidebar/constants";
 import useSidebarLabel, { useSidebarPermissions } from "../sidebar/useSidebarLabel";
 import { useProfile } from "@/api/v2/account/account.hooks";
 import { useAuthStore } from "@/zustand-stores/auth.store";
@@ -19,6 +20,7 @@ import { useAuthStore } from "@/zustand-stores/auth.store";
 export function AppSidebar() {
   const { open, setOpen } = useSidebar();
   const [pinned, setPinned] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const permissions = useSidebarPermissions();
   const filteredLabels = useSidebarLabel(sidebarLabels, permissions);
@@ -29,6 +31,12 @@ export function AppSidebar() {
 
   const avatarUrl = profile?.avatar_url ?? profile?.avatar ?? null;
   const displayName = profile?.name ?? loginData?.user?.name ?? "dressnmore";
+  const userInitials = (displayName || "U")
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .substring(0, 2)
+    .toUpperCase();
 
   const handleToggle = () => {
     if (open) {
@@ -60,26 +68,74 @@ export function AppSidebar() {
     window.location.href = "/login";
   };
 
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+
+  const visibleLabels: SidebarLabel[] = useMemo(() => {
+    if (!normalizedQuery) return filteredLabels;
+
+    const filterItems = (items: SidebarLabel[]): SidebarLabel[] => {
+      const result: SidebarLabel[] = [];
+
+      items.forEach((item) => {
+        const matchSelf = item.label.toLowerCase().includes(normalizedQuery);
+        const children = item.subItems ? filterItems(item.subItems) : [];
+
+        if (matchSelf || children.length) {
+          const nextItem: SidebarLabel = {
+            ...item,
+            subItems: children.length ? children : item.subItems,
+          };
+          result.push(nextItem);
+        }
+      });
+
+      return result;
+    };
+
+    return filterItems(filteredLabels);
+  }, [filteredLabels, normalizedQuery]);
+
   return (
     <Sidebar
       side="right"
+      variant="floating"
       collapsible="icon"
       data-app-sidebar
       data-open-by={open ? (pinned ? "button" : "hover") : undefined}
       className={cn(
-        "w-80 border-l bg-sidebar text-sidebar-foreground",
-        "shadow-[0_0_30px_rgba(15,23,42,0.14)]"
+        "w-80 text-sidebar-foreground",
+        "md:*:data-[slot=sidebar-container]:px-2",
+        "md:**:data-[sidebar=sidebar]:bg-sidebar md:**:data-[sidebar=sidebar]:border-sidebar-border/70",
+        "md:**:data-[sidebar=sidebar]:shadow-[0_18px_40px_rgba(15,23,42,0.45)]"
       )}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {/* HEADER */}
-      <SidebarHeader className="border-b border-sidebar-border px-3 py-3 flex flex-col gap-3 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-2">
-        {/* زر الفتح/الإغلاق */}
-        <div className="flex items-center justify-between w-full">
-          <span className="text-xs font-semibold tracking-[0.15em] uppercase text-sidebar-foreground/60 group-data-[collapsible=icon]:hidden">
-            dressnmore
-          </span>
+      {/* HEADER بأسلوب مشابه لـ Zoho: شريط علوي بسيط مع بروفايل المستخدم وزر القائمة */}
+      <SidebarHeader className="border-b border-sidebar-border/60 px-3 pt-3 pb-2 flex flex-col gap-2 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-2">
+        <div className="flex items-center justify-between w-full gap-2">
+          {/* بروفايل المستخدم في أعلى السايدبار بدل اللوغو */}
+          <div className="flex items-center gap-2 min-w-0 group-data-[collapsible=icon]:hidden">
+            <Avatar className="h-9 w-9 rounded-xl overflow-hidden border border-sidebar-border/70 bg-sidebar-accent/20 shadow-inner">
+              <AvatarImage src={avatarUrl ?? undefined} alt="صورة المستخدم" className="object-cover" />
+              <AvatarFallback className="rounded-xl bg-primary/10 text-primary text-sm font-semibold w-full h-full flex items-center justify-center">
+                {userInitials}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col min-w-0">
+              <span
+                className="text-sm font-semibold tracking-tight truncate"
+                title={displayName}
+              >
+                {displayName}
+              </span>
+              <span className="text-[11px] text-sidebar-foreground/60">
+                حساب المستخدم
+              </span>
+            </div>
+          </div>
+
+          {/* زر الفتح/الإغلاق */}
           <Button
             variant="ghost"
             size="icon"
@@ -95,61 +151,69 @@ export function AppSidebar() {
           </Button>
         </div>
 
-        {/* هوية المستخدم / اللوغو */}
-        <div className="flex items-center gap-3 group-data-[collapsible=icon]:hidden">
-          <div className="relative flex items-center justify-center rounded-xl p-1.5 bg-linear-to-b from-sidebar-accent/40 to-sidebar-accent/10 ring-1 ring-sidebar-border/60 shadow-sm">
-            <Avatar className="h-12 w-12 rounded-xl overflow-hidden border border-background/80 shadow-inner">
-              <AvatarImage src={avatarUrl ?? undefined} alt="صورة المستخدم" className="object-cover" />
-              <AvatarFallback className="rounded-xl bg-muted/50 w-full h-full flex items-center justify-center p-2">
-                <img
-                  src="/dressnmore-logo.jpg"
-                  alt="شعار dressnmore"
-                  className="w-full h-full object-contain opacity-90 dark:invert"
-                />
-              </AvatarFallback>
-            </Avatar>
-          </div>
-          <div className="flex flex-col min-w-0">
-            <span
-              className="text-sm font-semibold text-sidebar-foreground truncate"
-              title={displayName}
-            >
-              {displayName}
-            </span>
-            <span className="text-[11px] text-sidebar-foreground/60">
-              لوحة التحكم
-            </span>
-          </div>
-        </div>
-
-        {/* نسخة مضغوطة للأيقونة فقط */}
-        <div className="hidden group-data-[collapsible=icon]:flex justify-center items-center">
-          <div className="flex items-center justify-center rounded-lg p-0.5 ring-1 ring-sidebar-border/50 bg-sidebar-accent/20">
-            <Avatar className="h-9 w-9 rounded-lg overflow-hidden border border-background/80">
-              <AvatarImage src={avatarUrl ?? undefined} alt="صورة المستخدم" className="object-cover" />
-              <AvatarFallback className="rounded-lg bg-muted/50 w-full h-full flex items-center justify-center p-1">
-                <img
-                  src="/dressnmore-logo.jpg"
-                  alt="شعار dressnmore"
-                  className="w-full h-full object-contain opacity-90 dark:invert"
-                />
-              </AvatarFallback>
-            </Avatar>
-          </div>
+        {/* بروفايل مضغوط في وضع الأيقونة فقط */}
+        <div className="hidden group-data-[collapsible=icon]:flex justify-center items-center w-full">
+          <Avatar className="h-9 w-9 rounded-xl overflow-hidden border border-sidebar-border/70 bg-sidebar-accent/25 shadow-inner">
+            <AvatarImage src={avatarUrl ?? undefined} alt="صورة المستخدم" className="object-cover" />
+            <AvatarFallback className="rounded-xl bg-primary/10 text-primary text-sm font-semibold w-full h-full flex items-center justify-center">
+              {userInitials}
+            </AvatarFallback>
+          </Avatar>
         </div>
       </SidebarHeader>
 
-      {/* المحتوى (القائمة) */}
+      {/* المحتوى (القائمة) مع بطاقة مساحة العمل + مربع البحث بتصميم مختلف كلياً */}
       <SidebarContent className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-3 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-2 scrollbar-thin scrollbar-track-sidebar-accent/20 scrollbar-thumb-sidebar-border/70">
-        <SidebarNav items={filteredLabels} />
+        {/* بطاقة مساحة العمل الاحترافية */}
+        <div className="px-1.5 mb-3 mt-1 w-full space-y-2 group-data-[collapsible=icon]:hidden">
+          <div className="rounded-2xl border border-sidebar-border/70 bg-sidebar-accent/25 shadow-sm overflow-hidden">
+            <div className="flex items-center justify-start gap-2 px-3 py-2.5 bg-[linear-gradient(to_left,rgba(144,116,87,0.18),transparent)]">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[radial-gradient(circle_at_30%_0%,rgba(255,255,255,0.35),transparent_60%),rgba(15,23,42,0.12)] border border-sidebar-border/70 shadow-inner text-[13px] font-semibold text-sidebar-foreground">
+                  DM
+                </div>
+                <div className="flex flex-col min-w-0">
+                  <span className="text-[11px] font-medium text-sidebar-foreground/60">
+                    مساحة العمل
+                  </span>
+                  <span className="text-xs font-semibold truncate">
+                    Dressnmore Workspace
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* شريط البحث المختصر + زر الإضافة */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1 rounded-xl bg-sidebar-accent/30 border border-sidebar-border/60 px-2.5 py-1.5 shadow-sm">
+              <Search className="w-3.5 h-3.5 text-sidebar-foreground/45 shrink-0" />
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="بحث في القوائم"
+                className="h-6 border-0 bg-transparent px-0 text-[12px] placeholder:text-sidebar-foreground/45 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none"
+              />
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="shrink-0 rounded-xl border border-sidebar-border/60 bg-sidebar-accent/40 text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              aria-label="إضافة عنصر جديد"
+            >
+              <Plus className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* القائمة الرئيسية */}
+        <SidebarNav items={visibleLabels} />
       </SidebarContent>
 
-      {/* FOOTER */}
-      <SidebarFooter className="border-t border-sidebar-border px-3 py-2 group-data-[collapsible=icon]:px-2">
-        <div className="flex items-center justify-between gap-2 group-data-[collapsible=icon]:justify-center">
-          <span className="text-[11px] text-sidebar-foreground/50 group-data-[collapsible=icon]:hidden">
-            © {new Date().getFullYear()} dressnmore
-          </span>
+      {/* FOOTER بسيط لزر تسجيل الخروج */}
+      <SidebarFooter className="border-t border-sidebar-border/60 px-3 py-2 group-data-[collapsible=icon]:px-2">
+        <div className="flex items-center justify-between gap-2 group-data-[collapsible=icon]:justify-center w-full">
           <Button
             variant="ghost"
             size="icon"

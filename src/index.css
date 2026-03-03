@@ -150,8 +150,11 @@ body {
 }
 [data-app-sidebar] [data-sidebar="sidebar"] [data-sidebar="menu-button"][data-active="true"],
 [data-app-sidebar] [data-sidebar="sidebar"] .sidebar-active-gold {
-  background: rgba(144, 116, 87, 0.22) !important;
+  background: rgba(144, 116, 87, 0.18) !important;
   color: var(--main-gold) !important;
+  border-radius: 0.55rem !important;
+  border-right: 2px solid var(--main-gold);
+  box-shadow: 0 0 0 1px rgba(144, 116, 87, 0.26);
 }
 [data-app-sidebar] [data-sidebar="sidebar"] [data-sidebar="menu-button"][data-active="true"]:hover,
 [data-app-sidebar] [data-sidebar="sidebar"] .sidebar-active-gold:hover {

@@ -17,6 +17,12 @@ function MobileSidebar() {
   const loginData = useAuthStore((s) => s.loginData);
   const avatarUrl = profile?.avatar_url ?? profile?.avatar ?? null;
   const displayName = profile?.name ?? loginData?.user?.name ?? "";
+  const userInitials = (displayName || "U")
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .substring(0, 2)
+    .toUpperCase();
 
   const currentPageIndex = filteredLabels.findIndex(
     (item) => item.path === pathname
@@ -32,8 +38,8 @@ function MobileSidebar() {
         <div className="relative flex items-center justify-center rounded-xl p-1.5 bg-linear-to-b from-muted/50 to-muted/20 ring-1 ring-border/50 shadow-sm">
           <Avatar className="h-20 w-20 rounded-xl overflow-hidden border-2 border-background shadow-inner">
             <AvatarImage src={avatarUrl ?? undefined} alt="صورة المستخدم" className="object-cover" />
-            <AvatarFallback className="rounded-xl bg-muted/50 w-full h-full flex items-center justify-center p-2">
-              <img src="/dressnmore-logo.jpg" alt="شعار dressnmore" className="w-full h-full object-contain opacity-80 dark:opacity-90 dark:invert" />
+            <AvatarFallback className="rounded-xl bg-primary/10 text-primary text-2xl font-semibold w-full h-full flex items-center justify-center">
+              {userInitials}
             </AvatarFallback>
           </Avatar>
         </div>

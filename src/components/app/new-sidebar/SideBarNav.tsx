@@ -19,11 +19,11 @@ export function SidebarNav({ items, keyPrefix = "nav" }: SidebarNavProps) {
   const { pathname } = useLocation();
 
   return (
-    <SidebarMenu className="group-data-[collapsible=icon]:items-center">
+    <SidebarMenu className="group-data-[collapsible=icon]:items-center gap-0.5">
       {items.map((item, index) => {
         const active = includeRoute(pathname, item.path, item.level);
         const uniqueKey = `${keyPrefix}-${index}-${item.label}`;
-        // --- 1. RENDER ITEM WITH SUB-MENU ---
+        // --- 1. RENDER ITEM WITH SUB-MENU (يشبه مجموعات Zoho القابلة للطي) ---
         if (item.subItems) {
           return (
             <CollapsibleSubItem key={uniqueKey} item={item} keyPrefix={uniqueKey} />
@@ -32,24 +32,37 @@ export function SidebarNav({ items, keyPrefix = "nav" }: SidebarNavProps) {
 
         // --- 2. RENDER SIMPLE ITEM (NO SUB-MENU) ---
         return (
-          <SidebarMenuItem key={uniqueKey} className="py-0.5 px-1 group-data-[collapsible=icon]:w-fit group-data-[collapsible=icon]:mx-auto">
+          <SidebarMenuItem
+            key={uniqueKey}
+            className="py-0.5 px-1 group-data-[collapsible=icon]:w-fit group-data-[collapsible=icon]:mx-auto"
+          >
             <SidebarMenuButton
               asChild
               isActive={active}
               className={cn(
-                "w-full justify-start text-sm rounded-lg px-3 py-2.5 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-2",
+                "w-full justify-start text-[13px] rounded-lg px-2.5 py-2 text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors",
+                "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-2",
                 active && "sidebar-active-gold"
               )}
             >
-              <Link to={item.path} className="flex items-center gap-2 min-w-0 text-inherit">
+              <Link
+                to={item.path}
+                className="flex items-center gap-2 min-w-0 text-inherit"
+              >
                 {item.iconComponent ? (
-                  <span className="flex items-center justify-center shrink-0 min-w-5 min-h-5 w-5 h-5 [&_svg]:w-5 [&_svg]:h-5 [&_svg]:shrink-0 [&_svg]:text-current text-inherit">
+                  <span className="flex items-center justify-center shrink-0 min-w-5 min-h-5 w-5 h-5 [&_svg]:w-4 [&_svg]:h-4 [&_svg]:shrink-0 [&_svg]:text-current text-inherit">
                     {item.iconComponent}
                   </span>
                 ) : item.icon ? (
-                  <img src={item.icon} className="w-5 h-5 shrink-0 opacity-90" alt="" />
+                  <img
+                    src={item.icon}
+                    className="w-5 h-5 shrink-0 opacity-90"
+                    alt=""
+                  />
                 ) : null}
-                <span className="truncate group-data-[collapsible=icon]:hidden">{item.label}</span>
+                <span className="truncate group-data-[collapsible=icon]:hidden">
+                  {item.label}
+                </span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
