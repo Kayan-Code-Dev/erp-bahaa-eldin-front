@@ -35,14 +35,15 @@ export function SidebarNav({ items, keyPrefix = "nav" }: SidebarNavProps) {
         return (
           <SidebarMenuItem
             key={uniqueKey}
-            className="py-0.5 px-1.5 group-data-[collapsible=icon]:w-fit group-data-[collapsible=icon]:mx-auto"
+            className="py-0.5 px-2 group-data-[collapsible=icon]:w-fit group-data-[collapsible=icon]:mx-auto"
           >
             <SidebarMenuButton
               asChild
               isActive={active}
               className={cn(
-                "w-full justify-start text-[13px] rounded-lg px-2.5 py-2 text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-2",
+                "w-full justify-start text-[13px] rounded-md px-1.5 py-1.5 text-sidebar-foreground/85 bg-transparent",
+                "hover:bg-sidebar-accent/35 hover:text-sidebar-accent-foreground/95",
+                "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0",
                 active && "sidebar-active-gold"
               )}
             >
@@ -51,11 +52,11 @@ export function SidebarNav({ items, keyPrefix = "nav" }: SidebarNavProps) {
                 className="flex items-center gap-2 min-w-0 text-inherit"
               >
                 {item.iconComponent ? (
-                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sidebar-accent/20 border border-sidebar-border/50 text-current shrink-0 [&_svg]:w-4 [&_svg]:h-4 [&_svg]:shrink-0">
+                  <span className="flex h-4 w-4 items-center justify-center text-sidebar-foreground/75 shrink-0 [&_svg]:w-4 [&_svg]:h-4 [&_svg]:shrink-0">
                     {item.iconComponent}
                   </span>
                 ) : item.icon ? (
-                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sidebar-accent/20 border border-sidebar-border/50 shrink-0">
+                  <span className="flex h-4 w-4 items-center justify-center text-sidebar-foreground/75 shrink-0">
                     <img
                       src={item.icon}
                       className="w-4 h-4 opacity-90"

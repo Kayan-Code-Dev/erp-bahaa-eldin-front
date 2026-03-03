@@ -45,26 +45,27 @@ const CollapsibleSubItem = ({
       className="py-0.5 w-full"
       onOpenChange={setOpen}
     >
-      <SidebarGroup className="px-1.5 group-data-[collapsible=icon]:items-center gap-1">
+      <SidebarGroup className="px-2 group-data-[collapsible=icon]:items-center gap-1">
         <SidebarMenuItem className="relative group-data-[collapsible=icon]:w-fit group-data-[collapsible=icon]:mx-auto">
           <CollapsibleTrigger asChild>
             <SidebarMenuButton
               asChild
               isActive={shouldColorParent}
               className={cn(
-                "w-full justify-start text-[13px] rounded-lg px-2.5 py-2 cursor-pointer text-sidebar-foreground/85 hover:text-sidebar-accent-foreground hover:bg-sidebar-accent",
-                "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-2",
+                "w-full justify-start text-[13px] rounded-md px-1.5 py-1.5 cursor-pointer text-sidebar-foreground/85 bg-transparent",
+                "hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/35",
+                "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0",
                 shouldColorParent && "sidebar-active-gold"
               )}
             >
               <div className="flex items-center justify-between w-full min-w-0 text-inherit">
                 <div className="shrink-0 flex items-center gap-2 min-w-0">
                   {item.iconComponent ? (
-                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sidebar-accent/20 border border-sidebar-border/50 text-current shrink-0 [&_svg]:w-4 [&_svg]:h-4 [&_svg]:shrink-0">
+                    <span className="flex h-4 w-4 items-center justify-center text-sidebar-foreground/75 shrink-0 [&_svg]:w-4 [&_svg]:h-4 [&_svg]:shrink-0">
                       {item.iconComponent}
                     </span>
                   ) : item.icon ? (
-                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sidebar-accent/20 border border-sidebar-border/50 shrink-0">
+                    <span className="flex h-4 w-4 items-center justify-center text-sidebar-foreground/75 shrink-0">
                       <img
                         src={item.icon}
                         className="w-4 h-4 opacity-80"
