@@ -4,10 +4,17 @@ import { Link } from "react-router";
 import { Play, CheckCircle2 } from "lucide-react";
 
 const LandingPage = () => {
+  const scrollToSection = (id: string) => {
+    if (typeof document === "undefined") return;
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
   return (
     <div className="min-h-screen w-full bg-[radial-gradient(circle_at_top,rgba(144,116,87,0.12),transparent_55%),linear-gradient(to_bottom_right,#f5f5f7,#e3e4e8)] flex flex-col">
       {/* Header */}
-      <header className="w-full border-b border-border/60 bg-white/80 backdrop-blur-sm">
+      <header className="w-full border-b border-border/60 bg-white/85 backdrop-blur-sm sticky top-0 z-30">
         <div className="max-w-6xl mx-auto flex items-center justify-between px-4 py-3 md:py-4">
           {/* Logo */}
           <div className="flex items-center gap-3">
@@ -28,13 +35,43 @@ const LandingPage = () => {
             </div>
           </div>
 
-          {/* Center nav (فقط شكلي الآن) */}
+          {/* Center nav */}
           <nav className="hidden md:flex items-center gap-6 text-[13px] text-muted-foreground">
-            <button className="font-semibold text-foreground">الرئيسية</button>
-            <button className="hover:text-foreground">المميزات</button>
-            <button className="hover:text-foreground">الأسعار</button>
-            <button className="hover:text-foreground">الأسئلة الشائعة</button>
-            <button className="hover:text-foreground">عن النظام</button>
+            <button
+              type="button"
+              onClick={() => scrollToSection("hero")}
+              className="font-semibold text-foreground"
+            >
+              الرئيسية
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollToSection("features")}
+              className="hover:text-foreground"
+            >
+              المميزات
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollToSection("pricing")}
+              className="hover:text-foreground"
+            >
+              الأسعار
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollToSection("testimonial")}
+              className="hover:text-foreground"
+            >
+              آراء العملاء
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollToSection("footer")}
+              className="hover:text-foreground"
+            >
+              عن النظام
+            </button>
           </nav>
 
           {/* Auth buttons */}
@@ -67,11 +104,11 @@ const LandingPage = () => {
         </div>
       </header>
 
-      {/* Hero + logos + pricing */}
-      <main className="flex-1 flex items-center justify-center px-4 py-10">
-        <div className="max-w-6xl w-full space-y-10">
+      {/* Hero + باقي الأقسام */}
+      <main className="flex-1 px-4 py-10 md:py-14">
+        <div className="max-w-6xl w-full mx-auto space-y-14 md:space-y-20">
           {/* Hero section – مطابق أكثر لتصميم Biccas مع الشخص والكارد */}
-          <section className="space-y-6" dir="rtl">
+          <section id="hero" className="space-y-6" dir="rtl">
             {/* سطر الشارة وزري CTA */}
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="inline-flex items-center gap-2 rounded-full bg-white/80 border border-border/60 px-3 py-1 text-[11px] text-muted-foreground shadow-sm">
@@ -167,22 +204,24 @@ const LandingPage = () => {
 
           {/* Logos row مثل "More than 25,000 teams use Collabs" */}
           <section className="space-y-4 text-center" dir="rtl">
-            <p className="text-xs md:text-sm font-medium text-muted-foreground">
-              أكثر من 500 فريق يعتمدون على Dressnmore لإدارة عملياتهم اليومية
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-6 text-[11px] md:text-xs text-muted-foreground">
-              <span className="uppercase tracking-[0.18em]">Unsplash</span>
-              <span className="uppercase tracking-[0.18em]">Notion</span>
-              <span className="uppercase tracking-[0.18em]">Intercom</span>
-              <span className="uppercase tracking-[0.18em]">Descript</span>
-              <span className="uppercase tracking-[0.18em]">Grammarly</span>
+            <div className="max-w-3xl mx-auto space-y-3">
+              <p className="text-xs md:text-sm font-medium text-muted-foreground">
+                أكثر من 500 فريق يعتمدون على Dressnmore لإدارة عملياتهم اليومية
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-6 text-[11px] md:text-xs text-muted-foreground/80">
+                <span className="uppercase tracking-[0.18em]">Retail Pro</span>
+                <span className="uppercase tracking-[0.18em]">Service Hub</span>
+                <span className="uppercase tracking-[0.18em]">Client Care</span>
+                <span className="uppercase tracking-[0.18em]">Workshop X</span>
+                <span className="uppercase tracking-[0.18em]">Branch Flow</span>
+              </div>
             </div>
           </section>
 
   
           {/* Features section بشكل مقارب للصورة المُرسلة */}
-          <section className="pt-10" dir="rtl">
-            <div className="max-w-6xl mx-auto space-y-8">
+          <section id="features" className="pt-10" dir="rtl">
+            <div className="space-y-8">
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div className="space-y-1">
                   <h2 className="text-2xl md:text-3xl font-bold text-foreground">
@@ -283,7 +322,7 @@ const LandingPage = () => {
           </section>
 
           {/* Benefits section - ما الفوائد التي ستحصل عليها */}
-          <section className="py-12 md:py-16" dir="rtl">
+          <section id="benefits" className="py-12 md:py-16" dir="rtl">
             <div className="max-w-6xl mx-auto px-4 grid gap-10 lg:grid-cols-2 items-center">
               {/* Text + bullets */}
               <div className="space-y-5">
@@ -362,7 +401,7 @@ const LandingPage = () => {
           </section>
 
           {/* Pricing section - ثلاث خطط مثل التصميم */}
-          <section className="pt-8" dir="rtl">
+          <section id="pricing" className="pt-8" dir="rtl">
             <div className="max-w-4xl mx-auto text-center space-y-4">
               <h2 className="text-2xl md:text-3xl font-bold text-foreground">
                 اختر الخطة المناسبة لعملك
@@ -477,7 +516,7 @@ const LandingPage = () => {
           </section>
 
           {/* Testimonial + demo section - مباشرة بعد التسعير */}
-          <section className="py-1" dir="rtl">
+          <section id="testimonial" className="py-12 md:py-16 bg-slate-950" dir="rtl">
             <div className="max-w-6xl mx-auto px-4">
               <div className="rounded-3xl bg-slate-900/80 text-slate-50 shadow-[0_30px_80px_rgba(15,23,42,0.6)] border border-slate-800 px-6 py-8 md:px-10 md:py-10 grid gap-10 md:grid-cols-[minmax(0,1.1fr),minmax(0,1fr)] items-start">
                 {/* Left: testimonial */}
@@ -573,7 +612,7 @@ const LandingPage = () => {
       </main>
 
       {/* Footer بلون داكن يغطي عرض الشاشة */}
-      <footer className="border-t border-slate-800 bg-slate-950">
+      <footer id="footer" className="border-t border-slate-800 bg-slate-950">
         <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-2 text-[11px] md:text-xs text-slate-400">
           <span>
             للدعم الفني يرجى التواصل على{" "}
