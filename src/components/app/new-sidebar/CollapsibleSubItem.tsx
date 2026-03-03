@@ -44,14 +44,14 @@ const CollapsibleSubItem = ({
       className="py-0.5 w-full"
       onOpenChange={setOpen}
     >
-      <SidebarGroup className="px-1 group-data-[collapsible=icon]:items-center gap-1">
+      <SidebarGroup className="px-1.5 group-data-[collapsible=icon]:items-center gap-1">
         <SidebarMenuItem className="relative group-data-[collapsible=icon]:w-fit group-data-[collapsible=icon]:mx-auto">
           <CollapsibleTrigger asChild>
             <SidebarMenuButton
               asChild
               isActive={shouldColorParent}
               className={cn(
-                "w-full justify-start text-[13px] rounded-lg px-2.5 py-2 cursor-pointer text-sidebar-foreground/85 hover:text-sidebar-accent-foreground hover:bg-sidebar-accent transition-colors",
+                "w-full justify-start text-[13px] rounded-lg px-2.5 py-2 cursor-pointer text-sidebar-foreground/85 hover:text-sidebar-accent-foreground hover:bg-sidebar-accent",
                 "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-2",
                 shouldColorParent && "sidebar-active-gold"
               )}
@@ -85,7 +85,7 @@ const CollapsibleSubItem = ({
         </SidebarMenuItem>
 
         <CollapsibleContent className="group-data-[collapsible=icon]:hidden">
-          <SidebarGroupContent className="ps-3 pt-1.5 pe-1 pb-1.5 mt-0.5 ms-1 rounded-lg bg-sidebar-accent/25 border border-sidebar-border/70 w-[calc(100%-0.5rem)]">
+          <SidebarGroupContent className="ps-3 pt-1.5 pe-1 pb-1.5 mt-0.5 ms-1 rounded-lg bg-sidebar-accent/15 border border-sidebar-border/60 w-[calc(100%-0.5rem)]">
             <SidebarNav items={item.subItems!} keyPrefix={keyPrefix} />
           </SidebarGroupContent>
         </CollapsibleContent>

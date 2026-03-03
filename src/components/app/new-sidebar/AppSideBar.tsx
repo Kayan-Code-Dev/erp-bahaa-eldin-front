@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { Menu, LogOut, Search, Plus } from "lucide-react";
+import { Menu, LogOut, Search } from "lucide-react";
 import { SidebarNav } from "./SideBarNav";
 import { sidebarLabels, SidebarLabel } from "../sidebar/constants";
 import useSidebarLabel, { useSidebarPermissions } from "../sidebar/useSidebarLabel";
@@ -184,7 +184,7 @@ export function AppSidebar() {
             </div>
           </div>
 
-          {/* شريط البحث المختصر + زر الإضافة */}
+          {/* شريط البحث فقط بدون زر الإضافة */}
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2 flex-1 rounded-xl bg-sidebar-accent/30 border border-sidebar-border/60 px-2.5 py-1.5 shadow-sm">
               <Search className="w-3.5 h-3.5 text-sidebar-foreground/45 shrink-0" />
@@ -195,15 +195,6 @@ export function AppSidebar() {
                 className="h-6 border-0 bg-transparent px-0 text-[12px] placeholder:text-sidebar-foreground/45 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none"
               />
             </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="shrink-0 rounded-xl border border-sidebar-border/60 bg-sidebar-accent/40 text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-              aria-label="إضافة عنصر جديد"
-            >
-              <Plus className="w-4 h-4" />
-            </Button>
           </div>
         </div>
 
