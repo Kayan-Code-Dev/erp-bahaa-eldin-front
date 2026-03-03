@@ -1,5 +1,4 @@
 import { useLoginMutationOptions } from "@/api/v2/auth/auth.hooks";
-import loginImage from "@/assets/login-image.png";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -59,7 +58,7 @@ const Login = () => {
       {
         onSuccess: (res) => {
           login(res!);
-          navigate("/");
+          navigate("/dashboard");
         },
         onError: () => {
           setLoginError(true);
@@ -69,44 +68,64 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <div className="w-full flex flex-row flex-1 min-h-[calc(100vh-80px)]">
-        <div className="w-full md:w-1/2 flex flex-col items-center justify-center p-6 min-h-full">
-          {/* Logo */}
-          <div className="mb-8 text-center">
+    <div className="min-h-screen w-full bg-[radial-gradient(circle_at_top,rgba(144,116,87,0.12),transparent_55%),linear-gradient(to_bottom_right,#f5f5f7,#e3e4e8)] flex items-center justify-center px-4 py-8">
+      <div className="w-full max-w-md space-y-6" dir="rtl">
+        {/* Logo + title */}
+        <div className="flex flex-col items-center gap-2 text-center">
+          <div className="h-12 w-12 rounded-2xl bg-white/90 border border-border/70 shadow-sm flex items-center justify-center overflow-hidden">
             <img
               src="/dressnmore-logo.jpg"
               alt="dressnmore logo"
-              className="h-30 mx-auto mb-2"
+              className="h-9 w-9 object-contain"
             />
           </div>
+          <div className="space-y-1">
+            <h1 className="text-xl font-bold tracking-tight text-foreground">
+              تسجيل الدخول إلى Dressnmore ERP
+            </h1>
+            <p className="text-[12px] text-muted-foreground">
+              أدخل بيانات حسابك للوصول إلى لوحة التحكم وإدارة الفروع والورشة.
+            </p>
+          </div>
+        </div>
 
-          <Card className="w-full max-w-md border-none shadow-none bg-gray-200">
-            <CardContent className="pt-6 flex flex-col gap-6">
+        {/* Auth card */}
+        <Card className="border border-border/70 shadow-[0_18px_45px_rgba(15,23,42,0.16)] bg-white/95 backdrop-blur-sm">
+            <CardContent className="pt-6 pb-7 px-6 md:px-7 flex flex-col gap-6">
+              <div className="flex flex-col gap-1 text-right">
+              <h2 className="text-lg md:text-xl font-semibold tracking-tight text-foreground">
+                بيانات الدخول
+              </h2>
+              <p className="text-[12px] text-muted-foreground">
+                البريد الإلكتروني وكلمة المرور المستخدمة لتفعيل حسابك في النظام.
+              </p>
+              </div>
+
               <Form {...form}>
                 <form
                   onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-6"
+                  className="space-y-5"
+                  dir="rtl"
                 >
                   <FormField
                     control={form.control}
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-right text-gray-700 font-medium">
+                        <FormLabel className="text-right text-sm text-muted-foreground font-medium">
                           اسم المستخدم
                         </FormLabel>
                         <FormControl>
                           <div className="relative">
                             <Input
-                              placeholder="yousef@gmail.com"
-                              className="pl-10 text-right"
+                              placeholder="example@dressnmore.com"
+                              className="pr-3 pl-9 text-right"
                               {...field}
                             />
-                            <User className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                            <User className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground/70" />
                           </div>
                         </FormControl>
-                        <FormMessage className="text-right" />
+                        <FormMessage className="text-right text-[11px]" />
                       </FormItem>
                     )}
                   />
@@ -116,21 +135,21 @@ const Login = () => {
                     name="password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className=" text-gray-700 font-medium">
-                          كلمة السر
+                        <FormLabel className="text-right text-sm text-muted-foreground font-medium">
+                          كلمة المرور
                         </FormLabel>
                         <FormControl>
                           <div className="relative">
                             <Input
                               type={showPassword ? "text" : "password"}
-                              placeholder="password"
-                              className="pl-10"
+                              placeholder="••••••••"
+                              className="pr-3 pl-9"
                               {...field}
                             />
                             <button
                               type="button"
                               onClick={() => setShowPassword(!showPassword)}
-                              className="absolute left-3 top-2.5 text-gray-400"
+                              className="absolute left-3 top-2.5 text-muted-foreground/70"
                               aria-label={
                                 showPassword
                                   ? "إخفاء كلمة السر"
@@ -145,104 +164,84 @@ const Login = () => {
                             </button>
                           </div>
                         </FormControl>
-                        <FormMessage className="text-right" />
+                        <FormMessage className="text-right text-[11px]" />
                       </FormItem>
                     )}
                   />
 
+                  <div className="flex items-center justify-between gap-2 text-[11px] md:text-xs">
+                    <span className="text-muted-foreground/80">
+                      يتم تأمين جلسات النظام تلقائيًا
+                    </span>
+                    <Button
+                      variant="link"
+                      className="p-0 h-auto text-[11px] md:text-xs text-main-gold hover:text-main-gold/90"
+                    >
+                      <Link to="/forget-password">نسيت كلمة المرور؟</Link>
+                    </Button>
+                  </div>
+
                   <Button
                     type="submit"
-                    className="w-full font-medium text-lg py-6 bg-[#64A5FF] cursor-pointer hover:bg-[#64a5ffee]"
+                    className="w-full font-medium text-sm md:text-base py-3.5 bg-main-gold text-white hover:bg-main-gold/90"
                     variant={"default"}
                     isLoading={isPending}
                   >
-                    تسجيل الدخول
+                    تسجيل الدخول إلى الحساب
                   </Button>
                 </form>
-                <div className="flex justify-start -mt-2">
-                  <Button
-                    variant="link"
-                    className="p-0 h-auto text-sm text-gray-600 hover:text-primary"
-                  >
-                    <Link to="/forget-password">نسيت كلمة السر؟</Link>
-                  </Button>
-                </div>
               </Form>
+
+              <p className="text-[11px] text-muted-foreground text-right">
+                يتم مراقبة الأنشطة لحماية بيانات العملاء والموردين، وتشفير حركة
+                البيانات بين المتصفح والخادم.
+              </p>
             </CardContent>
           </Card>
 
-          {/* Login Error Dialog */}
-          <Dialog open={loginError} onOpenChange={setLoginError}>
-            <DialogContent className="max-w-md rounded-lg flex flex-col items-center p-6 text-center">
-              <div className="bg-red-50 p-4 rounded-full mb-4">
-                <svg
-                  className="h-12 w-12 text-red-500 mx-auto"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                  />
-                </svg>
-              </div>
-              <h2 className="text-xl font-bold mb-2">كلمة المرور خطأ</h2>
-              <p className="mb-6">أعد التسجيل مرة اخرى</p>
-              <div className="flex gap-4 w-full">
-                <Button
-                  variant="outline"
-                  onClick={() => setLoginError(false)}
-                  className="w-1/2"
-                >
-                  إلغاء
-                </Button>
-                <Button
-                  onClick={() => {
-                    form.reset();
-                    setLoginError(false);
-                  }}
-                  className="w-1/2"
-                >
-                  تأكيد
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
-        <div className="w-full md:w-1/2 bg-white flex items-center justify-center p-6 min-h-full">
-          <div className="max-w-md w-full">
-            <div className="relative h-64 md:h-96">
-              <img
-                src={loginImage}
-                alt="Login Illustration"
-                className="object-contain h-full w-full"
-              />
+        {/* Login Error Dialog */}
+        <Dialog open={loginError} onOpenChange={setLoginError}>
+          <DialogContent className="max-w-md rounded-lg flex flex-col items-center p-6 text-center">
+            <div className="bg-red-50 p-4 rounded-full mb-4">
+              <svg
+                className="h-12 w-12 text-red-500 mx-auto"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
+              </svg>
             </div>
-          </div>
-        </div>
+            <h2 className="text-xl font-bold mb-2">كلمة المرور غير صحيحة</h2>
+            <p className="mb-6 text-sm text-muted-foreground">
+              تأكد من صحة بيانات الدخول ثم حاول مرة أخرى.
+            </p>
+            <div className="flex gap-4 w-full">
+              <Button
+                variant="outline"
+                onClick={() => setLoginError(false)}
+                className="w-1/2"
+              >
+                إلغاء
+              </Button>
+              <Button
+                onClick={() => {
+                  form.reset();
+                  setLoginError(false);
+                }}
+                className="w-1/2"
+              >
+                إعادة المحاولة
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
-      <footer className="bg-white border-t mt-auto py-3">
-        <div className="text-center text-sm text-gray-500">
-          <span>
-            للدعم الفني يرجى التواصل على{" "}
-            <span className="text-primary font-semibold">00201070205189</span>
-          </span>
-        </div>
-        <div className="text-center text-xs text-gray-400 mt-1">
-          تصميم وتطوير{" "}
-          <a
-            href="https://highleveltecknology.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary font-semibold"
-          >
-            High Level Technology
-          </a>
-        </div>
-      </footer>
     </div>
   );
 };

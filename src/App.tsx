@@ -1,5 +1,6 @@
 import AppLayout from "@/components/layout/app-layout";
 import DashboardPage from "@/pages/dashboard-page/dashboard-page";
+import LandingPage from "@/pages/landing/LandingPage";
 import { Route, Routes } from "react-router";
 import { Toaster } from "sonner";
 import Clients from "./pages/clients/Clients";
@@ -29,8 +30,12 @@ function App() {
   return (
     <>
       <Routes>
+        {/* Public marketing landing page */}
+        <Route path="/" element={<LandingPage />} />
+
+        {/* Authenticated application layout */}
         <Route element={<AppLayout />}>
-          <Route path="/" element={<DashboardPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
           {branchesRoutes()}
           <Route path="/clients" element={<Clients />} />
           {clothesRoutes()}

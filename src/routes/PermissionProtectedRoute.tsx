@@ -13,7 +13,7 @@ function PermissionProtectedRoute({ permission }: TProps) {
   const navigate = useNavigate();
   useEffect(() => {
     if (isSuccess && !hasPermission) {
-      navigate("/");
+      navigate("/dashboard");
     }
   }, [hasPermission, isSuccess]);
 

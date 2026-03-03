@@ -54,7 +54,7 @@ export const sidebarLabels: SidebarLabel[] = [
   {
     icon: null,
     label: "لوحة التحكم",
-    path: "/",
+    path: "/dashboard",
     level: 1,
     permissions: ["dashboard.view", "dashboard.activity.view", "dashboard.business.view", "dashboard.hr.view"],
     iconComponent: createIcon(LayoutDashboard),

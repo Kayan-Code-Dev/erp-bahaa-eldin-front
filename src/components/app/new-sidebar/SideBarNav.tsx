@@ -24,7 +24,8 @@ export function SidebarNav({ items, keyPrefix = "nav" }: SidebarNavProps) {
         const active = includeRoute(pathname, item.path, item.level);
         const uniqueKey = `${keyPrefix}-${index}-${item.label}`;
         const isTopLevel = item.level === 1;
-        // --- 1. RENDER ITEM WITH SUB-MENU (يشبه مجموعات Zoho القابلة للطي) ---
+
+        // --- 1. RENDER ITEM WITH SUB-MENU ---
         if (item.subItems) {
           return (
             <CollapsibleSubItem key={uniqueKey} item={item} keyPrefix={uniqueKey} />
