@@ -23,6 +23,7 @@ export function SidebarNav({ items, keyPrefix = "nav" }: SidebarNavProps) {
       {items.map((item, index) => {
         const active = includeRoute(pathname, item.path, item.level);
         const uniqueKey = `${keyPrefix}-${index}-${item.label}`;
+        const isTopLevel = item.level === 1;
         // --- 1. RENDER ITEM WITH SUB-MENU (يشبه مجموعات Zoho القابلة للطي) ---
         if (item.subItems) {
           return (
@@ -50,17 +51,26 @@ export function SidebarNav({ items, keyPrefix = "nav" }: SidebarNavProps) {
                 className="flex items-center gap-2 min-w-0 text-inherit"
               >
                 {item.iconComponent ? (
-                  <span className="flex items-center justify-center shrink-0 min-w-5 min-h-5 w-5 h-5 [&_svg]:w-4 [&_svg]:h-4 [&_svg]:shrink-0 [&_svg]:text-current text-inherit">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sidebar-accent/20 border border-sidebar-border/50 text-current shrink-0 [&_svg]:w-4 [&_svg]:h-4 [&_svg]:shrink-0">
                     {item.iconComponent}
                   </span>
                 ) : item.icon ? (
-                  <img
-                    src={item.icon}
-                    className="w-5 h-5 shrink-0 opacity-90"
-                    alt=""
-                  />
+                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sidebar-accent/20 border border-sidebar-border/50 shrink-0">
+                    <img
+                      src={item.icon}
+                      className="w-4 h-4 opacity-90"
+                      alt=""
+                    />
+                  </span>
                 ) : null}
-                <span className="truncate group-data-[collapsible=icon]:hidden">
+                <span
+                  className={cn(
+                    "truncate group-data-[collapsible=icon]:hidden",
+                    isTopLevel
+                      ? "text-[13px] font-medium"
+                      : "text-[12px] text-sidebar-foreground/80"
+                  )}
+                >
                   {item.label}
                 </span>
               </Link>

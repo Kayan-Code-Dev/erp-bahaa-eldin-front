@@ -113,9 +113,9 @@ export function AppSidebar() {
     >
       {/* HEADER بأسلوب مشابه لـ Zoho: شريط علوي بسيط مع بروفايل المستخدم وزر القائمة */}
       <SidebarHeader className="border-b border-sidebar-border/60 px-3 pt-3 pb-2 flex flex-col gap-2 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-2">
-        <div className="flex items-center justify-between w-full gap-2">
-          {/* بروفايل المستخدم في أعلى السايدبار بدل اللوغو */}
-          <div className="flex items-center gap-2 min-w-0 group-data-[collapsible=icon]:hidden">
+        {/* وضع السايدبار المفتوح: بروفايل + زر قائمة على الحافة */}
+        <div className="flex items-center justify-between w-full gap-2 group-data-[collapsible=icon]:hidden">
+          <div className="flex items-center gap-2 min-w-0">
             <Avatar className="h-9 w-9 rounded-xl overflow-hidden border border-sidebar-border/70 bg-sidebar-accent/20 shadow-inner">
               <AvatarImage src={avatarUrl ?? undefined} alt="صورة المستخدم" className="object-cover" />
               <AvatarFallback className="rounded-xl bg-primary/10 text-primary text-sm font-semibold w-full h-full flex items-center justify-center">
@@ -135,7 +135,6 @@ export function AppSidebar() {
             </div>
           </div>
 
-          {/* زر الفتح/الإغلاق */}
           <Button
             variant="ghost"
             size="icon"
@@ -151,14 +150,18 @@ export function AppSidebar() {
           </Button>
         </div>
 
-        {/* بروفايل مضغوط في وضع الأيقونة فقط */}
-        <div className="hidden group-data-[collapsible=icon]:flex justify-center items-center w-full">
-          <Avatar className="h-9 w-9 rounded-xl overflow-hidden border border-sidebar-border/70 bg-sidebar-accent/25 shadow-inner">
-            <AvatarImage src={avatarUrl ?? undefined} alt="صورة المستخدم" className="object-cover" />
-            <AvatarFallback className="rounded-xl bg-primary/10 text-primary text-sm font-semibold w-full h-full flex items-center justify-center">
-              {userInitials}
-            </AvatarFallback>
-          </Avatar>
+        {/* وضع الأيقونة فقط: زر القائمة في المنتصف داخل الهيدر الضيق */}
+        <div className="hidden group-data-[collapsible=icon]:flex w-full items-center justify-center">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleToggle}
+            className="size-9 rounded-xl text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            aria-label={open ? "إغلاق القائمة" : "فتح القائمة"}
+            title={open ? "إغلاق القائمة" : "فتح القائمة"}
+          >
+            <Menu className="h-4 w-4" />
+          </Button>
         </div>
       </SidebarHeader>
 

@@ -35,6 +35,7 @@ const CollapsibleSubItem = ({
   // Parent should only be colored if it's active AND no child is active
   const shouldColorParent = active && !hasActiveDescendant;
   const [open, setOpen] = useState(active || hasActiveDescendant);
+  const isTopLevel = item.level === 1;
 
   return (
     <Collapsible
@@ -59,17 +60,26 @@ const CollapsibleSubItem = ({
               <div className="flex items-center justify-between w-full min-w-0 text-inherit">
                 <div className="shrink-0 flex items-center gap-2 min-w-0">
                   {item.iconComponent ? (
-                    <span className="flex items-center justify-center shrink-0 min-w-5 min-h-5 w-5 h-5 [&_svg]:w-4 [&_svg]:h-4 [&_svg]:shrink-0 [&_svg]:text-current text-inherit">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sidebar-accent/20 border border-sidebar-border/50 text-current shrink-0 [&_svg]:w-4 [&_svg]:h-4 [&_svg]:shrink-0">
                       {item.iconComponent}
                     </span>
                   ) : item.icon ? (
-                    <img
-                      src={item.icon}
-                      className="w-5 h-5 shrink-0 opacity-80"
-                      alt=""
-                    />
+                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sidebar-accent/20 border border-sidebar-border/50 shrink-0">
+                      <img
+                        src={item.icon}
+                        className="w-4 h-4 opacity-80"
+                        alt=""
+                      />
+                    </span>
                   ) : null}
-                  <span className="truncate text-inherit group-data-[collapsible=icon]:hidden">
+                  <span
+                    className={cn(
+                      "truncate text-inherit group-data-[collapsible=icon]:hidden",
+                      isTopLevel
+                        ? "text-[13px] font-medium"
+                        : "text-[12px] text-sidebar-foreground/80"
+                    )}
+                  >
                     {item.label}
                   </span>
                 </div>
