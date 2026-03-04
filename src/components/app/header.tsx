@@ -9,11 +9,13 @@ import { useNavigate } from "react-router";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useProfile } from "@/api/v2/account/account.hooks";
+import { useHasPermission } from "@/api/auth/auth.hooks";
 
 function Header() {
   const logout = useAuthStore((s) => s.logout);
   const loginData = useAuthStore((s) => s.loginData);
   const { data: profile } = useProfile();
+  const { hasPermission: canViewNotifications } = useHasPermission(["notifications.view", "notifications.manage"]);
   const { mutate: logoutMutation } = useMutation(useLogoutMutationOptions());
   const navigate = useNavigate();
 
@@ -73,7 +75,7 @@ function Header() {
             </AvatarFallback>
           </Avatar>
         </button>
-        <NotificationBell />
+        {canViewNotifications && <NotificationBell />}
       </div>
     </header>
   );

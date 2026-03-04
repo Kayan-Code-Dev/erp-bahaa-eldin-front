@@ -13,6 +13,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useGetInfiniteClientsQueryOptions } from "@/api/v2/clients/clients.hooks";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import useDebounce from "@/hooks/useDebounce";
+import { useHasPermission } from "@/api/auth/auth.hooks";
 
 type Props = {
   value: string;
@@ -23,11 +24,32 @@ type Props = {
 export function ClientsSelect({ value, onChange, disabled }: Props) {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce({ value: search, delay: 500 });
+  const { hasPermission, isPending } = useHasPermission("clients.view");
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
-    useInfiniteQuery(
-      useGetInfiniteClientsQueryOptions(10, debouncedSearch || undefined)
+    useInfiniteQuery({
+      ...useGetInfiniteClientsQueryOptions(10, debouncedSearch || undefined),
+      enabled: hasPermission,
+    });
+
+  if (isPending) {
+    return (
+      <Select disabled value={value}>
+        <SelectTrigger>
+          <Loader2 className="h-4 w-4 animate-spin" />
+        </SelectTrigger>
+      </Select>
     );
+  }
+  if (!hasPermission) {
+    return (
+      <Select disabled value={value}>
+        <SelectTrigger>
+          <SelectValue placeholder="لا تملك صلاحية عرض العملاء" />
+        </SelectTrigger>
+      </Select>
+    );
+  }
 
   return (
     <Select

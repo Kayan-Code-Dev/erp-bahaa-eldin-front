@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Combobox, ComboboxOption } from "@/components/ui/combobox";
 import { useGetJobTitleLevelsQueryOptions } from "@/api/v2/content-managment/job-titles/job-titles.hooks";
 import { Loader2 } from "lucide-react";
+import { useHasPermission } from "@/api/auth/auth.hooks";
 
 // Single select props
 export interface JobTitlesLevelsSelectPropsSingle {
@@ -48,9 +49,11 @@ export function JobTitlesLevelsSelect({
   allowClear = true,
   multi = false,
 }: JobTitlesLevelsSelectProps) {
-  const { data: levelsData, isLoading } = useQuery(
-    useGetJobTitleLevelsQueryOptions()
-  );
+  const { hasPermission, isPending } = useHasPermission("hr.employees.view");
+  const { data: levelsData, isLoading } = useQuery({
+    ...useGetJobTitleLevelsQueryOptions(),
+    enabled: hasPermission,
+  });
 
   // Filter excluded keys
   const allLevels = useMemo(() => {
@@ -67,6 +70,22 @@ export function JobTitlesLevelsSelect({
       })),
     [allLevels]
   );
+
+  if (isPending) {
+    return (
+      <div className="flex h-9 w-full items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-sm">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        <span className="mr-2">جاري التحميل...</span>
+      </div>
+    );
+  }
+  if (!hasPermission) {
+    return (
+      <div className="flex h-9 w-full items-center rounded-md border border-input bg-muted px-3 py-2 text-sm text-muted-foreground">
+        لا تملك صلاحية عرض المستويات
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (

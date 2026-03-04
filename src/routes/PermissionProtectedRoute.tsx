@@ -4,12 +4,16 @@ import { useEffect } from "react";
 import { Outlet, useNavigate } from "react-router";
 
 type TProps = {
-  permission: string;
+  /** صلاحية واحدة أو مصفوفة — المستخدم يحتاج واحدة على الأقل */
+  permission: string | string[];
 };
 
 function PermissionProtectedRoute({ permission }: TProps) {
   const { data, isSuccess, isPending } = useMyPermissions();
-  const hasPermission = permission == "" || (data && data.includes(permission));
+  const permissions = Array.isArray(permission) ? permission : [permission];
+  const hasPermission =
+    permissions.length === 0 ||
+    permissions.some((p) => p === "" || (data && data.includes(p)));
   const navigate = useNavigate();
   useEffect(() => {
     if (isSuccess && !hasPermission) {

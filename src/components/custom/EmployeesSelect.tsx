@@ -5,6 +5,7 @@ import { TGetEmployeesParams } from "@/api/v2/employees/employees.types";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Combobox, ComboboxOption } from "@/components/ui/combobox";
 import { Button } from "@/components/ui/button";
+import { useHasPermission } from "@/api/auth/auth.hooks";
 
 // Single select props
 export interface EmployeesSelectPropsSingle {
@@ -56,6 +57,8 @@ export interface EmployeesSelectPropsMulti {
 
 export type EmployeesSelectProps = EmployeesSelectPropsSingle | EmployeesSelectPropsMulti;
 
+const EMPLOYEES_VIEW_PERMISSION = "hr.employees.view";
+
 function EmployeesSelectContent({
   params,
   value,
@@ -68,6 +71,8 @@ function EmployeesSelectContent({
   allowClear = false,
   multi = false,
 }: EmployeesSelectProps) {
+  const { hasPermission, isPending } = useHasPermission(EMPLOYEES_VIEW_PERMISSION);
+
   const {
     data,
     fetchNextPage,
@@ -75,7 +80,10 @@ function EmployeesSelectContent({
     isFetchingNextPage,
     isFetching,
     isLoading,
-  } = useInfiniteQuery(useGetInfiniteEmployeesQueryOptions(params));
+  } = useInfiniteQuery({
+    ...useGetInfiniteEmployeesQueryOptions(params),
+    enabled: hasPermission,
+  });
 
   // Flatten all employees from all pages into options
   const options: ComboboxOption[] = useMemo(() => {
@@ -87,6 +95,26 @@ function EmployeesSelectContent({
       }))
     );
   }, [data?.pages]);
+
+  // Still loading permissions
+  if (isPending) {
+    return (
+      <div className="flex h-9 w-full items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-sm">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        <span className="mr-2">جاري التحميل...</span>
+      </div>
+    );
+  }
+
+  // No permission: show disabled state
+  if (!hasPermission) {
+    const noAccessPlaceholder = "لا تملك صلاحية عرض الموظفين";
+    return (
+      <div className="flex h-9 w-full items-center rounded-md border border-input bg-muted px-3 py-2 text-sm text-muted-foreground">
+        {noAccessPlaceholder}
+      </div>
+    );
+  }
 
   // Show loader on first load
   if (isLoading) {

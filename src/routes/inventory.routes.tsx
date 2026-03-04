@@ -6,10 +6,19 @@ import EmployeesTransferOperations from "@/pages/inventory-page/employees/employ
 import EmployeesInventory from "@/pages/inventory-page/employees/EmployeesInventory";
 import InventoryWelcomePage from "@/pages/inventory-page/InventoryWelcomePage";
 import { Route } from "react-router";
+import PermissionProtectedRoute from "./PermissionProtectedRoute";
 
 export const inventoryRoutes = () => {
   return (
-    <Route path="/inventory" element={<InventoryWelcomePage />}>
+    <Route
+      path="/inventory"
+      element={
+        <PermissionProtectedRoute
+          permission={["inventories.view", "transfers.view"]}
+        />
+      }
+    >
+      <Route element={<InventoryWelcomePage />}>
       <Route path="branches-managers">
         <Route index element={<Inventory />} />
         <Route path="transfer-operations" element={<TransferOperations />} />
@@ -27,6 +36,7 @@ export const inventoryRoutes = () => {
           path="transfer-operations"
           element={<EmployeesTransferOperations />}
         />
+      </Route>
       </Route>
     </Route>
   );

@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { Loader2 } from "lucide-react";
 import { Combobox, ComboboxOption } from "@/components/ui/combobox";
 import { useGetEmployeeCustodyTypesQueryOptions } from "@/api/v2/employees/employee-custodies/employee-custodies.hooks";
+import { useHasPermission } from "@/api/auth/auth.hooks";
 
 export type EmployeeCustodyTypesSelectProps = {
   value?: string;
@@ -27,9 +28,11 @@ export function EmployeeCustodyTypesSelect({
   disabled = false,
   allowClear = false,
 }: EmployeeCustodyTypesSelectProps) {
-  const { data, isLoading, isError } = useQuery(
-    useGetEmployeeCustodyTypesQueryOptions()
-  );
+  const { hasPermission, isPending } = useHasPermission("hr.custody.view");
+  const { data, isLoading, isError } = useQuery({
+    ...useGetEmployeeCustodyTypesQueryOptions(),
+    enabled: hasPermission,
+  });
 
   // Transform the data to ComboboxOption format
   const options: ComboboxOption[] = useMemo(() => {
@@ -39,6 +42,22 @@ export function EmployeeCustodyTypesSelect({
       label: type.name,
     }));
   }, [data]);
+
+  if (isPending) {
+    return (
+      <div className="flex h-9 w-full items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-sm">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        <span className="mr-2">جاري التحميل...</span>
+      </div>
+    );
+  }
+  if (!hasPermission) {
+    return (
+      <div className="flex h-9 w-full items-center rounded-md border border-input bg-muted px-3 py-2 text-sm text-muted-foreground">
+        لا تملك صلاحية عرض أنواع الضمانات
+      </div>
+    );
+  }
 
   // Show loader while loading
   if (isLoading) {

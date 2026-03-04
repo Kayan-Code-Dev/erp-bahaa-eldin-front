@@ -5,6 +5,7 @@ import { Route, Routes } from "react-router";
 import { Toaster } from "sonner";
 import Clients from "./pages/clients/Clients";
 import Factory from "./pages/factory/Factory";
+import PermissionProtectedRoute from "./routes/PermissionProtectedRoute";
 import getAuthRoutes from "./routes/auth.routes";
 import { branchesRoutes } from "./routes/branches.route";
 import { clothesRoutes } from "./routes/clothes.routes";
@@ -35,15 +36,59 @@ function App() {
 
         {/* Authenticated application layout */}
         <Route element={<AppLayout />}>
-          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route
+            path="/dashboard"
+            element={
+              <PermissionProtectedRoute
+                permission={[
+                  "dashboard.view",
+                  "dashboard.activity.view",
+                  "dashboard.business.view",
+                  "dashboard.hr.view",
+                ]}
+              />
+            }
+          >
+            <Route index element={<DashboardPage />} />
+          </Route>
           {branchesRoutes()}
-          <Route path="/clients" element={<Clients />} />
+          <Route
+            path="/clients"
+            element={
+              <PermissionProtectedRoute
+                permission={[
+                  "clients.view",
+                  "clients.create",
+                  "clients.update",
+                  "clients.delete",
+                  "clients.export",
+                ]}
+              />
+            }
+          >
+            <Route index element={<Clients />} />
+          </Route>
           {clothesRoutes()}
           {ordersRoutes()}
           {paymentsRoutes()}
           {hrRoutes()}
           {inventoryRoutes()}
-          <Route path="/factory" element={<Factory />} />
+          <Route
+            path="/factory"
+            element={
+              <PermissionProtectedRoute
+                permission={[
+                  "factories.view",
+                  "factories.create",
+                  "factories.update",
+                  "factories.delete",
+                  "factories.manage",
+                ]}
+              />
+            }
+          >
+            <Route index element={<Factory />} />
+          </Route>
           {workshopRoutes()}
           {permissionsRoutes()}
           {contentManagementRouts()}
@@ -54,7 +99,16 @@ function App() {
           {overduereturnsRoutes()}
           {deliveriesRoutes()}
           {returnsRoutes()}
-          <Route path="/notifications" element={<Notifications />} />
+          <Route
+            path="/notifications"
+            element={
+              <PermissionProtectedRoute
+                permission={["notifications.view", "notifications.manage"]}
+              />
+            }
+          >
+            <Route index element={<Notifications />} />
+          </Route>
           <Route path="/account" element={<AccountSettings />} />
 
         </Route>

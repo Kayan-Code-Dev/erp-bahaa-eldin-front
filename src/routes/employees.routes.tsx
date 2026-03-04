@@ -6,29 +6,31 @@ import EmployeeCustodies from "@/pages/employees/employee-custodies/EmployeeCust
 import OverdueEmployeeCustodies from "@/pages/employees/employee-custodies/OverdueEmployeeCustodies";
 import EmployeeDocuments from "@/pages/employees/empolyee-documents/EmployeeDocuments";
 import EmployeeDeductions from "@/pages/employees/employee-deductions/EmployeeDeductions";
+import PermissionProtectedRoute from "./PermissionProtectedRoute";
 
 export const employeesRoutes = () => {
   return (
-    <>
-      <Route path="employees/add" element={<CreateEmployee />} />
-      <Route path="employees/list" element={<Employees />} />
-      <Route
-        path="employees/list/:id"
-        element={<ShowDetailsAndEditEmployee />}
-      />
-      <Route path="employees/custodies" element={<EmployeeCustodies />} />
-      <Route
-        path="employees/custodies/overdue"
-        element={<OverdueEmployeeCustodies />}
-      />
-      <Route
-        path="employees/employee-documents"
-        element={<EmployeeDocuments />}
-      />
-      <Route
-        path="employees/employee-deductions"
-        element={<EmployeeDeductions />}
-      />
-    </>
+    <Route
+      path="employees"
+      element={
+        <PermissionProtectedRoute
+          permission={[
+            "hr.employees.view",
+            "hr.employees.create",
+            "hr.custody.view",
+            "hr.documents.view",
+            "hr.deductions.view",
+          ]}
+        />
+      }
+    >
+      <Route path="add" element={<CreateEmployee />} />
+      <Route path="list" element={<Employees />} />
+      <Route path="list/:id" element={<ShowDetailsAndEditEmployee />} />
+      <Route path="custodies" element={<EmployeeCustodies />} />
+      <Route path="custodies/overdue" element={<OverdueEmployeeCustodies />} />
+      <Route path="employee-documents" element={<EmployeeDocuments />} />
+      <Route path="employee-deductions" element={<EmployeeDeductions />} />
+    </Route>
   );
 };

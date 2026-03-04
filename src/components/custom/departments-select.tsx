@@ -3,6 +3,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { Combobox, ComboboxOption } from "@/components/ui/combobox";
 import { useGetInfiniteDepartmentsQueryOptions } from "@/api/v2/content-managment/depratments/departments.hooks";
 import { Loader2 } from "lucide-react";
+import { useHasPermission } from "@/api/auth/auth.hooks";
 
 export interface DepartmentsSelectProps {
   value?: string;
@@ -25,10 +26,14 @@ export function DepartmentsSelect({
   excludeIds = [],
   allowClear = true,
 }: DepartmentsSelectProps) {
+  const { hasPermission, isPending } = useHasPermission("hr.employees.view");
   const {
     data: departmentsData,
     isLoading,
-  } = useInfiniteQuery(useGetInfiniteDepartmentsQueryOptions(100));
+  } = useInfiniteQuery({
+    ...useGetInfiniteDepartmentsQueryOptions(100),
+    enabled: hasPermission,
+  });
 
   // Flatten all pages into a single array and filter excluded IDs
   const allDepartments = useMemo(() => {
@@ -48,6 +53,22 @@ export function DepartmentsSelect({
       })),
     [allDepartments]
   );
+
+  if (isPending) {
+    return (
+      <div className="flex h-9 w-full items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-sm">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        <span className="mr-2">جاري التحميل...</span>
+      </div>
+    );
+  }
+  if (!hasPermission) {
+    return (
+      <div className="flex h-9 w-full items-center rounded-md border border-input bg-muted px-3 py-2 text-sm text-muted-foreground">
+        لا تملك صلاحية عرض الأقسام
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (

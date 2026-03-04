@@ -8,11 +8,26 @@ import BranchesManagersRecyclebin from "@/pages/hr/branch-managers/branches-mana
 import DeletedBranchManagers from "@/pages/hr/branch-managers/branch-manager/DeletedBranchManagers";
 import HR from "@/pages/hr/HR";
 import { Route } from "react-router";
+import PermissionProtectedRoute from "./PermissionProtectedRoute";
 
 export const hrRoutes = () => {
   return (
-    <Route path="hr" element={<HR />}>
-      <Route path="admins" element={<Admins />}>
+    <Route
+      path="hr"
+      element={
+        <PermissionProtectedRoute
+          permission={[
+            "users.view",
+            "roles.view",
+            "roles.create",
+            "roles.update",
+            "roles.delete",
+          ]}
+        />
+      }
+    >
+      <Route element={<HR />}>
+        <Route path="admins" element={<Admins />}>
         <Route path="list" element={<ListAdmins />} />
         <Route path="recycled-bin" element={<AdminsRecycleBin />} />
       </Route>
@@ -25,6 +40,7 @@ export const hrRoutes = () => {
           path="recycled-bin-branches"
           element={<DeletedBranchManagers />}
         />
+      </Route>
       </Route>
     </Route>
   );

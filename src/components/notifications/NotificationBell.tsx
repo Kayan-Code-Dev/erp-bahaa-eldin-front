@@ -18,21 +18,25 @@ import {
   useMarkAllNotificationsAsReadMutationOptions,
 } from '@/api/v2/notifications/notifications.hooks';
 import { toast } from 'sonner';
+import { useHasPermission } from '@/api/auth/auth.hooks';
 
 export function NotificationBell() {
   const navigate = useNavigate();
+  const { hasPermission } = useHasPermission(["notifications.view", "notifications.manage"]);
 
-  const { data: apiNotifications } = useQuery(
-    useGetNotificationsQueryOptions({
+  const { data: apiNotifications } = useQuery({
+    ...useGetNotificationsQueryOptions({
       page: 1,
       per_page: 10,
       unread_only: false,
-    })
-  );
+    }),
+    enabled: hasPermission,
+  });
 
-  const { data: unreadCountData } = useQuery(
-    useGetUnreadCountQueryOptions()
-  );
+  const { data: unreadCountData } = useQuery({
+    ...useGetUnreadCountQueryOptions(),
+    enabled: hasPermission,
+  });
 
   const markAllAsReadMutation = useMutation(
     useMarkAllNotificationsAsReadMutationOptions()

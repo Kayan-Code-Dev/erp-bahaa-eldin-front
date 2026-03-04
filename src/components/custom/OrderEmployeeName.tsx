@@ -1,6 +1,7 @@
 import { TOrder } from "@/api/v2/orders/orders.types";
 import { useQuery } from "@tanstack/react-query";
 import { useGetEmployeeQueryOptions } from "@/api/v2/employees/employees.hooks";
+import { useHasPermission } from "@/api/auth/auth.hooks";
 
 type Props = {
   order: TOrder;
@@ -23,11 +24,13 @@ export function OrderEmployeeName({ order, className }: Props) {
     order.employee_name.trim().length > 0;
 
   const nestedEmployeeName = (order as any).employee?.user?.name;
+  const { hasPermission } = useHasPermission("hr.employees.view");
 
   // If name is available from API (nested employee or employee_name), use it directly
-  const { data: employeeData, isLoading } = useQuery(
-    useGetEmployeeQueryOptions(employeeId || 0),
-  );
+  const { data: employeeData, isLoading } = useQuery({
+    ...useGetEmployeeQueryOptions(employeeId || 0),
+    enabled: hasPermission && (employeeId ?? 0) > 0,
+  });
 
   const fetchedName = employeeData?.user?.name;
 

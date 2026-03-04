@@ -63,3 +63,16 @@ export const useMyPermissions = () => {
     refetchOnWindowFocus: false, // disable extra fetch on tab focus
   });
 };
+
+/** يتحقق من صلاحية واحدة أو أكثر — يكفي امتلاك واحدة */
+export const useHasPermission = (
+  permission: string | string[]
+): { hasPermission: boolean; isPending: boolean } => {
+  const { data, isSuccess, isPending } = useMyPermissions();
+  const perms = Array.isArray(permission) ? permission : [permission];
+  const hasPermission =
+    isSuccess &&
+    Array.isArray(data) &&
+    perms.some((p) => p === "" || data.includes(p));
+  return { hasPermission: !!hasPermission, isPending };
+};

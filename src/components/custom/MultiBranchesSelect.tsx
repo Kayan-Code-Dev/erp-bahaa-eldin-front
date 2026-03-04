@@ -5,6 +5,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { Combobox, ComboboxOption } from "@/components/ui/combobox";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/zustand-stores/auth.store";
+import { useHasPermission } from "@/api/auth/auth.hooks";
 
 // Single select props
 export interface BranchesSelectPropsSingle {
@@ -105,7 +106,8 @@ function BranchesSelectContent({
       BRANCH_ACCESS_PERMISSIONS.some((perm) => p === perm) ||
       p.startsWith("branches.")
     ) ?? false;
-  const canViewBranches = hasBranchRole || hasBranchPermission;
+  const { hasPermission } = useHasPermission("branches.view");
+  const canViewBranches = hasBranchRole || hasBranchPermission || hasPermission;
 
   const {
     data,

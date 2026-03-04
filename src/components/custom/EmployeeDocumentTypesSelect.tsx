@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { Loader2 } from "lucide-react";
 import { Combobox, ComboboxOption } from "@/components/ui/combobox";
 import { useGetEmployeeDocumentTypesQueryOptions } from "@/api/v2/employees/employee-documents/employee-documents.hooks";
+import { useHasPermission } from "@/api/auth/auth.hooks";
 
 export type EmployeeDocumentTypesSelectProps = {
   value?: string;
@@ -27,9 +28,11 @@ export function EmployeeDocumentTypesSelect({
   disabled = false,
   allowClear = false,
 }: EmployeeDocumentTypesSelectProps) {
-  const { data, isLoading, isError } = useQuery(
-    useGetEmployeeDocumentTypesQueryOptions()
-  );
+  const { hasPermission, isPending } = useHasPermission("hr.documents.view");
+  const { data, isLoading, isError } = useQuery({
+    ...useGetEmployeeDocumentTypesQueryOptions(),
+    enabled: hasPermission,
+  });
 
   // Transform the data to ComboboxOption format
   const options: ComboboxOption[] = useMemo(() => {
@@ -39,6 +42,22 @@ export function EmployeeDocumentTypesSelect({
       label: type.name,
     }));
   }, [data]);
+
+  if (isPending) {
+    return (
+      <div className="flex h-9 w-full items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-sm">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        <span className="mr-2">جاري التحميل...</span>
+      </div>
+    );
+  }
+  if (!hasPermission) {
+    return (
+      <div className="flex h-9 w-full items-center rounded-md border border-input bg-muted px-3 py-2 text-sm text-muted-foreground">
+        لا تملك صلاحية عرض أنواع الوثائق
+      </div>
+    );
+  }
 
   // Show loader while loading
   if (isLoading) {
