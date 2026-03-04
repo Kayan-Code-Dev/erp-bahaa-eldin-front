@@ -56,6 +56,27 @@ export interface BranchesSelectPropsMulti {
 
 export type BranchesSelectProps = BranchesSelectPropsSingle | BranchesSelectPropsMulti;
 
+/** Permission/role names that grant access to view branches */
+const BRANCH_ACCESS_ROLES = [
+  "branches_manager",
+  "branches_basic_view_create",
+] as const;
+const BRANCH_ACCESS_PERMISSIONS = [
+  "branches.view",
+  "branches.create",
+  "branches.update",
+  "branches.delete",
+  "branches.export",
+  "Read-Branches",
+] as const;
+
+function getPermissionStrings(perms: unknown): string[] {
+  if (!Array.isArray(perms)) return [];
+  return perms
+    .map((p) => (typeof p === "string" ? p : (p as { name?: string })?.name))
+    .filter((s): s is string => typeof s === "string" && s.length > 0);
+}
+
 function BranchesSelectContent({
   value,
   onChange,
@@ -69,13 +90,22 @@ function BranchesSelectContent({
   multi = false,
 }: BranchesSelectProps) {
   const loginData = useAuthStore((s) => s.loginData);
-  const canViewBranches =
-    loginData?.roles?.some(
+  const roles = loginData?.roles ?? [];
+  const permissions = getPermissionStrings(
+    loginData?.permissions ?? (loginData as { data?: { permissions?: unknown } })?.data?.permissions
+  );
+  const hasBranchRole =
+    roles.some(
       (role) =>
-        role === "branches_manager" ||
-        role === "branches_basic_view_create" ||
+        BRANCH_ACCESS_ROLES.includes(role as (typeof BRANCH_ACCESS_ROLES)[number]) ||
         role.startsWith("branches_")
     ) ?? false;
+  const hasBranchPermission =
+    permissions.some((p) =>
+      BRANCH_ACCESS_PERMISSIONS.some((perm) => p === perm) ||
+      p.startsWith("branches.")
+    ) ?? false;
+  const canViewBranches = hasBranchRole || hasBranchPermission;
 
   const {
     data,

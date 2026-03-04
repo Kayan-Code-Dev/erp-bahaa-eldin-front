@@ -26,9 +26,9 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DatePicker } from "@/components/custom/DatePicker";
-import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { BranchesSelect } from "@/components/custom/BranchesSelect";
+import { OrderStepsStepper } from "@/components/custom/OrderStepsStepper";
 import { ClientsSelect } from "@/components/custom/ClientsSelect";
 import { CitiesSelect } from "@/components/custom/CitiesSelect";
 import { TEntity } from "@/lib/types/entity.types";
@@ -74,7 +74,6 @@ import {
   MapPin,
   UserCircle,
   Banknote,
-  Tag,
   Percent,
   StickyNote,
 } from "lucide-react";
@@ -255,6 +254,10 @@ function ChooseClient() {
   }, [clientData]);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     if (entityType && entityId && deliveryDate) {
       refetch();
     }
@@ -384,6 +387,10 @@ function ChooseClient() {
       dressSize: "",
     });
     toast.success("تم إضافة المنتج إلى الطلب");
+    // الانتقال إلى أعلى الشاشة لعرض المنتجات المختارة (المراجعة)
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }, 100);
   };
 
   const handleRemoveProduct = (id: number) => {
@@ -721,64 +728,249 @@ function ChooseClient() {
   };
 
   return (
-    <div dir="rtl" className="min-h-screen   ">
-      <div className="max-w-7xl mx-auto space-y-6">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Link to="/orders/list" className="hover:text-foreground transition-colors">
+    <div dir="rtl" className="min-h-screen bg-[#f2f2f2] dark:bg-slate-950">
+      <div className="max-w-7xl mx-auto space-y-8 py-8 px-4 lg:px-8">
+        <nav className="flex items-center gap-2 text-sm">
+          <Link
+            to="/orders/list"
+            className="text-slate-500 dark:text-slate-400 hover:text-[#5170ff] transition-colors font-medium"
+          >
             قائمة الطلبات
           </Link>
-          <ChevronRight className="h-4 w-4" />
-          <span className="text-foreground font-medium">إنشاء طلب إيجار جديد</span>
+          <ChevronRight className="h-4 w-4 text-slate-400" />
+          <span className="text-slate-900 dark:text-slate-100 font-semibold">إنشاء طلب إيجار جديد</span>
+        </nav>
+
+        <div className="sticky top-0 z-20 -mx-4 -mt-8 px-4 pt-8 pb-4 lg:-mx-8 lg:px-8 lg:pt-8 lg:pb-4 bg-[#f2f2f2] dark:bg-slate-950">
+          <OrderStepsStepper
+            currentStep={
+              selectedClientFromList || selectedClient
+                ? selectedProducts.length >= 1
+                  ? 3
+                  : 2
+                : 1
+            }
+            stepState={
+              selectedClientFromList || selectedClient
+                ? {
+                    2: { client: selectedClientFromList ?? selectedClient ?? undefined },
+                    3:
+                      selectedProducts.length >= 1
+                        ? {
+                            client_id: (selectedClientFromList ?? selectedClient)?.id,
+                            entity_type: entityType,
+                            entity_id: Number(entityId),
+                            delivery_date: deliveryDate?.toISOString?.(),
+                            selected_clothes: selectedProducts.map((p) => ({
+                              id: p.id,
+                              code: p.code,
+                              name: p.name ?? p.code,
+                              price: p.price,
+                            })),
+                            client: selectedClientFromList ?? selectedClient,
+                          }
+                        : undefined,
+                  }
+                : undefined
+            }
+            allowCurrentStepClick={selectedProducts.length >= 1}
+          />
         </div>
-        <div className="mb-2">
-          <h1 className="text-3xl font-bold text-gray-900">إنشاء طلب إيجار جديد</h1>
-          <p className="text-gray-600 mt-2">
+
+        <div className="space-y-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
+            إنشاء طلب إيجار جديد
+          </h1>
+          <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base">
             أدخل بيانات العميل، اختر المنتجات المتاحة، وأدخل تفاصيل الطلب
           </p>
         </div>
 
-        {/* Single comprehensive card for all order creation steps */}
-        <Card className="shadow-xl border-gray-200">
-          <CardHeader className="border-b bg-white">
-            <CardTitle className="flex items-center gap-3 text-xl text-gray-900">
-              <div className="p-2 rounded-lg bg-blue-50">
-                <ShoppingBag className="h-6 w-6 text-blue-600" />
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_420px]">
+          {/* لوحة المنتجات المختارة - اليسار */}
+          <aside className="w-full order-first lg:order-none lg:col-start-2 lg:row-start-1">
+            <div className="sticky top-24 overflow-hidden rounded-3xl bg-white dark:bg-slate-900 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.08)] dark:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.4)] ring-1 ring-slate-200/80 dark:ring-slate-700/60">
+              <div className="relative overflow-hidden bg-gradient-to-br from-[#5170ff] via-[#4a67f5] to-[#3d5ae0] px-8 py-8">
+                <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.06\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-60" />
+                <div className="relative flex items-center gap-5">
+                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white/25 backdrop-blur-sm ring-1 ring-white/40 shadow-lg">
+                    <ShoppingBag className="h-8 w-8 text-white drop-shadow-sm" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold tracking-tight text-white drop-shadow-sm">
+                      المنتجات المختارة
+                    </h2>
+                    <p className="mt-1 text-sm text-white/95">
+                      {selectedProducts.length} قطعة مضافة إلى الطلب
+                    </p>
+                  </div>
+                </div>
               </div>
-              <span>كل خطوات إنشاء طلب الإيجار</span>
+              <div className="flex flex-col">
+                {selectedProducts.length === 0 ? (
+                  <div className="rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/50 p-10 text-center">
+                    <ShoppingBag className="h-10 w-10 mx-auto text-slate-300 dark:text-slate-600 mb-3" />
+                    <p className="text-sm text-slate-600 dark:text-slate-300 font-semibold">
+                      لم تضف أي منتجات بعد
+                    </p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                      اختر من جدول المنتجات المتاحة أدناه
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    {/* رأس الجدول */}
+                    <div className="grid grid-cols-[1fr_auto_auto] gap-3 px-6 py-3 bg-slate-50 dark:bg-slate-800/50 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
+                      <span>المنتج</span>
+                      <span className="text-center">الكمية</span>
+                      <span className="text-end min-w-[4rem]">المبلغ</span>
+                    </div>
+                    {/* قائمة المنتجات */}
+                    <div className="max-h-52 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
+                      {selectedProducts.map((cloth) => {
+                        const typeLabel =
+                          cloth.type === "tailoring"
+                            ? "تفصيل"
+                            : cloth.type === "buy"
+                              ? "شراء"
+                              : null;
+                        const subtotal = (cloth.quantity ?? 1) * cloth.price;
+                        return (
+                          <div
+                            key={cloth.id}
+                            className="grid grid-cols-[1fr_auto_auto] gap-3 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors items-center"
+                          >
+                            <div className="min-w-0 flex items-center gap-3">
+                              <div className="flex-1 min-w-0">
+                                <p className="font-mono font-bold text-slate-900 dark:text-slate-100 text-sm truncate">
+                                  {cloth.code}
+                                </p>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                  {typeLabel && (
+                                    <Badge
+                                      variant="outline"
+                                      className={`text-[10px] rounded-md px-1.5 py-0 shrink-0 ${
+                                        cloth.type === "tailoring"
+                                          ? "bg-purple-500/10 text-purple-600 border-purple-500/30"
+                                          : "bg-amber-500/10 text-amber-600 border-amber-500/30"
+                                      }`}
+                                    >
+                                      {typeLabel}
+                                    </Badge>
+                                  )}
+                                  {(cloth.name && cloth.name !== cloth.code) && (
+                                    <span className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                                      {cloth.name}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0 shrink-0 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors"
+                                onClick={() => handleRemoveProduct(cloth.id)}
+                                title="إزالة من الطلب"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                            <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 tabular-nums text-center">
+                              {cloth.quantity ?? 1}
+                            </span>
+                            <span className="text-sm font-bold text-slate-900 dark:text-slate-100 tabular-nums min-w-[4rem] text-end">
+                              {subtotal.toFixed(0)} ج.م
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {/* ملخص المبالغ */}
+                    <div className="border-t-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-6 py-4 space-y-2.5">
+                      <div className="flex justify-between items-center text-sm gap-4">
+                        <span className="font-medium text-slate-600 dark:text-slate-400">الإجمالي</span>
+                        <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">{Number(totalAmount).toFixed(0)} ج.م</span>
+                      </div>
+                      <div className="flex justify-between items-center text-sm gap-4">
+                        <span className="font-medium text-slate-600 dark:text-slate-400">المدفوع</span>
+                        <span className="font-bold text-emerald-600 dark:text-emerald-500 tabular-nums">{Number(totalPaid).toFixed(0)} ج.م</span>
+                      </div>
+                      <div className="flex justify-between items-center pt-3 mt-1 border-t border-slate-200 dark:border-slate-600 gap-4">
+                        <span className="font-bold text-slate-800 dark:text-slate-200">المتبقي</span>
+                        <span className="text-base font-bold text-[#5170ff] tabular-nums">{Number(remainingAmount).toFixed(0)} ج.م</span>
+                      </div>
+                    </div>
+                  </>
+                )}
+                {/* أزرار إنشاء الطلب والحفظ المؤقت */}
+                <div className="flex flex-col gap-3 p-6 border-t border-slate-200 dark:border-slate-700">
+                  <Button
+                    variant="outline"
+                    className="w-full h-12 rounded-xl border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800"
+                    onClick={handleSaveDraft}
+                  >
+                    حفظ مؤقت
+                  </Button>
+                  <Button
+                    onClick={handleCreateOrder}
+                    disabled={selectedProducts.length === 0 || isCreatingOrder}
+                    className="w-full h-12 rounded-xl bg-[#5170ff] hover:bg-[#4560e6] text-white font-semibold shadow-lg shadow-[#5170ff]/25 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98]"
+                  >
+                    {isCreatingOrder ? (
+                      <>
+                        <Loader2 className="ml-3 h-5 w-5 animate-spin" />
+                        جاري إنشاء الطلب...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="ml-3 h-5 w-5" />
+                        إنشاء الطلب
+                        <ArrowRight className="mr-3 h-5 w-5" />
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          {/* البطاقة الرئيسية */}
+        <Card className="overflow-hidden rounded-3xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.08)] dark:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.4)] ring-1 ring-slate-200/80 dark:ring-slate-700/60 lg:col-start-1 lg:row-start-1">
+          <CardHeader className="border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-8 py-6">
+            <CardTitle className="flex items-center gap-4 text-xl text-slate-900 dark:text-slate-100">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#5170ff]/10 ring-1 ring-[#5170ff]/20">
+                <ShoppingBag className="h-7 w-7 text-[#5170ff]" />
+              </div>
+              <div>
+                <span>كل خطوات إنشاء طلب الإيجار</span>
+                <CardDescription className="mt-1 text-sm text-slate-500 dark:text-slate-400 font-normal">
+                  اختر المكان والتاريخ، حدد أو أنشئ عميل، ثم اختر المنتجات وأدخل التفاصيل والمقاسات من نفس البطاقة.
+                </CardDescription>
+              </div>
             </CardTitle>
-            <CardDescription className="mt-1 text-sm text-gray-600">
-              اختر المكان والتاريخ، حدد أو أنشئ عميل، ثم اختر المنتجات وأدخل التفاصيل والمقاسات من نفس البطاقة.
-            </CardDescription>
           </CardHeader>
 
-          <CardContent className="p-6 space-y-8 ">
+          <CardContent className="p-8 space-y-8">
             <div className="space-y-6 ">
               {/* Left column: Basics + Client data + Order discount + Selected products summary */}
               <div className="space-y-6 ">
                 {/* Basics */}
-                <section className="rounded-2xl border bg-muted/30 p-5 space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-purple-50 rounded-lg">
-                      <Calendar className="h-6 w-6 text-purple-600" />
+                <section className="rounded-2xl bg-white dark:bg-slate-900 p-6 ring-1 ring-slate-200/60 dark:ring-slate-700/50">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#5170ff]/10">
+                      <Calendar className="h-5 w-5 text-[#5170ff]" />
                     </div>
                     <div>
-                      <h2 className="text-base font-semibold text-purple-900">الأساسيات</h2>
-                      <p className="text-xs text-gray-600 mt-1">
-                        اختر نوع المكان، المكان، وتاريخ التسليم قبل اختيار المنتجات
+                      <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">الأساسيات</h2>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        اختر المكان وتاريخ التسليم قبل اختيار المنتجات
                       </p>
                     </div>
                   </div>
                   <div className="space-y-4 w-full">
-                    {/* نوع المكان ثابت على "فرع" ولا يمكن تغييره */}
                     <div className="space-y-2 w-full">
-                      <Label className="text-sm font-medium">نوع المكان</Label>
-                      <div className="flex h-10 w-full items-center rounded-md border border-input bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
-                        فرع
-                      </div>
-                    </div>
-                    <div className="space-y-2 w-full">
-                      <Label className="text-sm font-medium">
-                        المكان <span className="text-destructive">*</span>
+                      <Label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                        المكان <span className="text-red-500">*</span>
                       </Label>
                       <BranchesSelect
                         value={entityId}
@@ -787,9 +979,8 @@ function ChooseClient() {
                         className="w-full"
                       />
                     </div>
-                    {/* Select employee who created the invoice */}
                     <div className="space-y-2">
-                      <Label className="text-gray-700 font-medium">
+                      <Label className="text-sm font-medium text-slate-700 dark:text-slate-300">
                         الموظف المسؤول عن الفاتورة
                       </Label>
                       <EmployeesSelect
@@ -802,7 +993,7 @@ function ChooseClient() {
                     </div>
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                       <div className="space-y-2">
-                        <Label htmlFor="receive-date" className="text-gray-700 font-medium">
+                        <Label htmlFor="receive-date" className="text-sm font-medium text-slate-700 dark:text-slate-300">
                           تاريخ الاستلام
                         </Label>
                         <DatePicker
@@ -810,11 +1001,11 @@ function ChooseClient() {
                           onChange={setReceiveDate}
                           placeholder="اختر تاريخ الاستلام"
                           minDate={new Date()}
-                          className="h-12 rounded-lg w-full"
+                          className="h-11 rounded-xl w-full"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="branch-date" className="text-gray-700 font-medium">
+                        <Label htmlFor="branch-date" className="text-sm font-medium text-slate-700 dark:text-slate-300">
                           تاريخ الفرح
                         </Label>
                         <DatePicker
@@ -823,11 +1014,11 @@ function ChooseClient() {
                           placeholder="اختر تاريخ الفرح"
                           allowPastDates={true}
                           allowFutureDates={true}
-                          className="h-12 rounded-lg w-full"
+                          className="h-11 rounded-xl w-full"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="delivery-date" className="text-gray-700 font-medium">
+                        <Label htmlFor="delivery-date" className="text-sm font-medium text-slate-700 dark:text-slate-300">
                           تاريخ الاسترجاع
                         </Label>
                         <DatePicker
@@ -835,43 +1026,43 @@ function ChooseClient() {
                           onChange={setDeliveryDate}
                           placeholder="اختر تاريخ الاسترجاع"
                           minDate={new Date()}
-                          className="h-12 rounded-lg w-full"
+                          className="h-11 rounded-xl w-full"
                         />
                       </div>
                     </div>
                     {entityType && entityId && deliveryDate && (
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                        <p className="text-sm text-blue-700">جاهز لعرض المنتجات المتاحة</p>
+                      <div className="rounded-xl bg-emerald-50 dark:bg-emerald-950/30 ring-1 ring-emerald-200/60 dark:ring-emerald-800/50 px-4 py-3">
+                        <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">✓ جاهز لعرض المنتجات المتاحة</p>
                       </div>
                     )}
                   </div>
                 </section>
 
-                {/* Client data (existing / new) */}
-                <section className="rounded-2xl border bg-muted/30 p-5 space-y-4" dir="rtl">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-50 rounded-lg">
-                      <User className="h-6 w-6 text-blue-600" />
+                {/* بيانات العميل */}
+                <section className="rounded-2xl bg-white dark:bg-slate-900 p-6 ring-1 ring-slate-200/60 dark:ring-slate-700/50" dir="rtl">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#5170ff]/10">
+                      <User className="h-5 w-5 text-[#5170ff]" />
                     </div>
                     <div>
-                      <h2 className="text-base font-semibold text-blue-900">بيانات العميل</h2>
-                      <p className="text-xs text-gray-600 mt-1">
+                      <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">بيانات العميل</h2>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                         اختر عميلاً موجوداً أو أضف عميل جديد في نفس المكان
                       </p>
                     </div>
                   </div>
 
                   <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 bg-gray-100 p-1 rounded-lg">
+                    <TabsList className="grid w-full grid-cols-2 bg-slate-200/60 dark:bg-slate-700/30 p-1.5 rounded-xl">
                       <TabsTrigger
                         value="existing"
-                        className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md"
+                        className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-slate-900 dark:data-[state=active]:bg-slate-900 dark:data-[state=active]:text-slate-100 rounded-lg font-medium transition-all"
                       >
                         عميل موجود
                       </TabsTrigger>
                       <TabsTrigger
                         value="new"
-                        className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md"
+                        className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-slate-900 dark:data-[state=active]:bg-slate-900 dark:data-[state=active]:text-slate-100 rounded-lg font-medium transition-all"
                       >
                         عميل جديد
                       </TabsTrigger>
@@ -880,10 +1071,12 @@ function ChooseClient() {
                     {/* Existing client */}
                     <TabsContent value="existing" className="mt-6 space-y-4">
                       {(selectedClientFromList || selectedClient) && (
-                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <div className="rounded-xl bg-emerald-50 dark:bg-emerald-950/30 ring-1 ring-emerald-200/60 dark:ring-emerald-800/50 p-4">
                           <div className="flex flex-col items-end gap-2 text-right">
-                            <p className="font-bold text-green-800">:العميل المختار</p>
-                            <p className="font-medium text-gray-900">
+                            <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400 border-0 rounded-lg mb-2">
+                              العميل المختار
+                            </Badge>
+                            <p className="font-bold text-slate-900 dark:text-slate-100 text-lg">
                               {(() => {
                                 const c = selectedClientFromList ?? selectedClient;
                                 return (
@@ -895,32 +1088,31 @@ function ChooseClient() {
                                 );
                               })()}
                             </p>
-                            <div className="mt-1 space-y-1">
-                              <p className="text-sm text-gray-600">
+                            <div className="mt-2 space-y-1 text-sm">
+                              <p className="text-slate-600 dark:text-slate-400">
                                 الرقم القومي:{" "}
-                                {selectedClientFromList?.national_id ||
-                                  selectedClient?.national_id ||
-                                  "-"}
+                                <span className="font-medium text-slate-900 dark:text-slate-100">
+                                  {selectedClientFromList?.national_id ||
+                                    selectedClient?.national_id ||
+                                    "—"}
+                                </span>
                               </p>
-                              <p className="text-sm text-gray-600">
+                              <p className="text-slate-600 dark:text-slate-400">
                                 الهاتف:{" "}
-                                <span dir="ltr">
+                                <span dir="ltr" className="font-medium text-slate-900 dark:text-slate-100">
                                   {formatPhone(
                                     selectedClientFromList?.phones?.[0]?.phone ||
                                       selectedClient?.phones?.[0]?.phone,
-                                    "-"
+                                    "—"
                                   )}
                                 </span>
                               </p>
                             </div>
-                            <Badge className="bg-green-100 text-green-800 border-green-200">
-                              مختار
-                            </Badge>
                           </div>
                         </div>
                       )}
                       <div className="space-y-2">
-                        <Label className="text-gray-700 font-medium text-right block w-full">
+                        <Label className="text-sm font-medium text-slate-700 dark:text-slate-300 text-right block w-full">
                           اختر عميلاً من القائمة
                         </Label>
                         <ClientsSelect
@@ -939,15 +1131,17 @@ function ChooseClient() {
                           className="space-y-6 text-right"
                           dir="rtl"
                         >
-                          <p className="text-sm text-muted-foreground text-right">
+                          <p className="text-sm text-slate-500 dark:text-slate-400 text-right">
                             أدخل بيانات العميل الجديد وسيتم إنشاء الطلب باسمه بعد الحفظ.
                           </p>
 
                           {/* Basic information */}
-                          <div className="rounded-xl border bg-muted/30 p-4 space-y-4">
+                          <div className="rounded-xl bg-slate-50 dark:bg-slate-800/50 p-5 ring-1 ring-slate-200/60 dark:ring-slate-700/50 space-y-4">
                             <div className="flex items-center gap-2 text-right">
-                              <UserCircle className="h-5 w-5 text-primary" />
-                              <h3 className="text-sm font-semibold">البيانات الأساسية</h3>
+                              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#5170ff]/10">
+                                <UserCircle className="h-4 w-4 text-[#5170ff]" />
+                              </div>
+                              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">البيانات الأساسية</h3>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <div className="space-y-4">
@@ -960,7 +1154,7 @@ function ChooseClient() {
                                       <FormControl>
                                         <Input
                                           placeholder="الاسم الكامل للعميل"
-                                          className="h-11 rounded-lg text-right"
+                                          className="h-11 rounded-xl text-right"
                                           {...field}
                                         />
                                       </FormControl>
@@ -978,7 +1172,7 @@ function ChooseClient() {
                                         <Input
                                           placeholder="14 رقم"
                                           maxLength={14}
-                                          className="h-11 rounded-lg font-mono text-right"
+                                          className="h-11 rounded-xl font-mono text-right"
                                           {...field}
                                         />
                                       </FormControl>
@@ -999,7 +1193,7 @@ function ChooseClient() {
                                       <FormControl>
                                         <Input
                                           type="date"
-                                          className="h-11 rounded-lg"
+                                          className="h-11 rounded-xl"
                                           {...field}
                                           value={field.value ?? ""}
                                         />
@@ -1037,10 +1231,12 @@ function ChooseClient() {
                           </div>
 
                           {/* Phone numbers */}
-                          <div className="rounded-xl border bg-muted/30 p-4 space-y-4">
+                          <div className="rounded-xl bg-slate-50 dark:bg-slate-800/50 p-5 ring-1 ring-slate-200/60 dark:ring-slate-700/50 space-y-4">
                             <div className="flex items-center gap-2 text-right">
-                              <Phone className="h-5 w-5 text-primary" />
-                              <h3 className="text-sm font-semibold">أرقام الهاتف</h3>
+                              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#5170ff]/10">
+                                <Phone className="h-4 w-4 text-[#5170ff]" />
+                              </div>
+                              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">أرقام الهاتف</h3>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <FormField
@@ -1055,7 +1251,7 @@ function ChooseClient() {
                                       <Input
                                         placeholder="أدخل رقم الهاتف"
                                         dir="ltr"
-                                        className="h-11 rounded-lg"
+                                        className="h-11 rounded-xl"
                                         {...field}
                                         value={field.value ?? ""}
                                       />
@@ -1076,7 +1272,7 @@ function ChooseClient() {
                                       <Input
                                         placeholder="أدخل رقم الواتس"
                                         dir="ltr"
-                                        className="h-11 rounded-lg"
+                                        className="h-11 rounded-xl"
                                         {...field}
                                         value={field.value ?? ""}
                                       />
@@ -1089,10 +1285,12 @@ function ChooseClient() {
                           </div>
 
                           {/* Address */}
-                          <div className="rounded-xl border bg-muted/30 p-4 space-y-4">
+                          <div className="rounded-xl bg-slate-50 dark:bg-slate-800/50 p-5 ring-1 ring-slate-200/60 dark:ring-slate-700/50 space-y-4">
                             <div className="flex items-center gap-2 text-right">
-                              <MapPin className="h-5 w-5 text-primary" />
-                              <h3 className="text-sm font-semibold">العنوان</h3>
+                              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#5170ff]/10">
+                                <MapPin className="h-4 w-4 text-[#5170ff]" />
+                              </div>
+                              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">العنوان</h3>
                             </div>
                             <FormField
                               control={newClientForm.control}
@@ -1103,7 +1301,7 @@ function ChooseClient() {
                                   <FormControl>
                                     <Input
                                       placeholder="الشارع، الحي، رقم المبنى"
-                                      className="h-11 rounded-lg"
+                                      className="h-11 rounded-xl"
                                       {...field}
                                     />
                                   </FormControl>
@@ -1140,7 +1338,7 @@ function ChooseClient() {
                                     <FormControl>
                                       <Textarea
                                         placeholder="ملاحظات إضافية..."
-                                        className="min-h-[44px] rounded-lg resize-none"
+                                        className="min-h-[44px] rounded-xl resize-none"
                                         {...field}
                                       />
                                     </FormControl>
@@ -1156,200 +1354,40 @@ function ChooseClient() {
                   </Tabs>
                 </section>
 
-                {/* Order-level discount */}
-                <section className="rounded-2xl border bg-muted/30 p-5 space-y-4 ">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-amber-50 rounded-lg">
-                      <Percent className="h-5 w-5 text-amber-600" />
-                    </div>
-                    <div>
-                      <h2 className="text-base font-semibold text-amber-900">
-                        خصم على الطلب كاملاً (اختياري)
-                      </h2>
-                      <p className="text-xs text-gray-600 mt-1">
-                        يمكنك أيضاً إضافة خصم لكل قطعة من تفاصيل المنتج.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-gray-700 font-medium">نوع الخصم</Label>
-                      <Select
-                        value={orderDiscount.type}
-                        onValueChange={(v: "none" | "percentage" | "fixed") =>
-                          setOrderDiscount({ ...orderDiscount, type: v })
-                        }
-                      >
-                        <SelectTrigger className="h-11 rounded-lg">
-                          <SelectValue placeholder="نوع الخصم" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">لا يوجد</SelectItem>
-                          <SelectItem value="percentage">نسبة مئوية</SelectItem>
-                          <SelectItem value="fixed">مبلغ ثابت</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    {orderDiscount.type !== "none" && (
-                      <div className="space-y-2">
-                        <Label className="text-gray-700 font-medium">قيمة الخصم</Label>
-                        <Input
-                          value={orderDiscount.value || ""}
-                          onChange={(e) => {
-                            const val = e.target.value.replace(/[^0-9.]/g, "");
-                            const numVal = val === "" ? 0 : parseFloat(val) || 0;
-                            setOrderDiscount({
-                              ...orderDiscount,
-                              value: numVal,
-                            });
-                          }}
-                          className="h-11 rounded-lg"
-                          placeholder={
-                            orderDiscount.type === "percentage" ? "مثال: 10" : "مثال: 50"
-                          }
-                        />
-                      </div>
-                    )}
-                  </div>
-                </section>
-
-                {/* Selected products summary (at the end) */}
-                {selectedProducts.length > 0 && (
-                  <section className="rounded-2xl border bg-muted/30 p-5 space-y-4">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-green-50 rounded-lg">
-                        <ShoppingBag className="h-6 w-6 text-green-600" />
-                      </div>
-                      <div>
-                        <h2 className="text-base font-semibold text-green-900">
-                          المنتجات المختارة
-                        </h2>
-                        <p className="text-xs text-gray-600 mt-1">
-                          {selectedProducts.length} قطعة مضافة إلى الطلب
-                        </p>
-                      </div>
-                    </div>
-                    <div className="space-y-3 max-h-64 overflow-y-auto">
-                      {selectedProducts.map((cloth) => {
-                        const measurementLabels: Record<string, string> = {
-                          sleeveLength: "طول الكم",
-                          forearm: "الزند",
-                          shoulderWidth: "عرض الكتف",
-                          cuffs: "الإسوار",
-                          waist: "الوسط",
-                          chestLength: "طول الصدر",
-                          totalLength: "الطول الكلي",
-                          hinch: "الهش",
-                          dressSize: "مقاس الفستان",
-                        };
-                        const measurementsSummary =
-                          cloth.measurements
-                            ? Object.entries(cloth.measurements)
-                              .filter(([, v]) => v != null && String(v).trim() !== "")
-                              .map(([k, v]) => `${measurementLabels[k] ?? k}: ${v}`)
-                              .join("، ")
-                            : null;
-                        return (
-                          <div
-                            key={cloth.id}
-                            className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                          >
-                            <div className="min-w-0 flex-1">
-                              <p className="font-medium text-gray-900">{cloth.name ?? cloth.code}</p>
-                              <div className="flex items-center gap-2 mt-1 flex-wrap">
-                                <Badge variant="outline" className="text-xs">
-                                  {cloth.code}
-                                </Badge>
-                                <Badge
-                                  variant="outline"
-                                  className={`text-xs ${cloth.type === "rent"
-                                      ? "bg-blue-50 text-blue-700"
-                                      : cloth.type === "tailoring"
-                                        ? "bg-purple-50 text-purple-700"
-                                        : "bg-amber-50 text-amber-700"
-                                    }`}
-                                >
-                                  {cloth.type === "rent"
-                                    ? "إيجار"
-                                    : cloth.type === "tailoring"
-                                      ? "تفصيل"
-                                      : "شراء"}
-                                </Badge>
-                                <Badge
-                                  variant="outline"
-                                  className="text-xs bg-green-50 text-green-700"
-                                >
-                                  {cloth.quantity} × {cloth.price} ج.م
-                                </Badge>
-                              </div>
-                              {measurementsSummary && (
-                                <p
-                                  className="text-xs text-muted-foreground mt-2 truncate"
-                                  title={measurementsSummary}
-                                >
-                                  مقاسات هذه القطعة: {measurementsSummary}
-                                </p>
-                              )}
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50 shrink-0"
-                              onClick={() => handleRemoveProduct(cloth.id)}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        );
-                      })}
-                    </div>
-                    <Separator className="my-4" />
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">الإجمالي:</span>
-                        <span className="font-bold">{totalAmount} ج.م</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">المدفوع:</span>
-                        <span className="font-bold text-green-600">{totalPaid} ج.م</span>
-                      </div>
-                      <div className="flex justify-between pt-2 border-t">
-                        <span className="text-gray-800 font-bold">المتبقي:</span>
-                        <span className="font-bold text-blue-600">{remainingAmount} ج.م</span>
-                      </div>
-                    </div>
-                  </section>
-                )}
               </div>
 
               {/* Right column: Product filters + Products table + Item details + Measurements */}
               <div className="space-y-6">
-                {/* Product filtering */}
-                <section className="rounded-2xl border bg-muted/30 p-5 space-y-4">
-                  <div className="flex items-center justify-between">
+                {/* فلترة المنتجات */}
+                <section className="rounded-2xl bg-white dark:bg-slate-900 p-6 ring-1 ring-slate-200/60 dark:ring-slate-700/50">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 bg-amber-50 rounded-lg">
-                        <Filter className="h-6 w-6 text-amber-600" />
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#5170ff]/10">
+                        <Filter className="h-5 w-5 text-[#5170ff]" />
                       </div>
                       <div>
-                        <h2 className="text-base font-semibold text-amber-900">
-                          فلترة المنتجات
-                        </h2>
-                        <p className="text-xs text-gray-600 mt-1">
-                          ابحث عن المنتجات المتاحة حسب الكود، قسم المنتجات وأقسام المنتجات الفرعية
+                        <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">فلترة المنتجات</h2>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                          ابحث حسب الكود، قسم المنتجات وأقسام المنتجات الفرعية
                         </p>
                       </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 shrink-0">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => setShowFilters(!showFilters)}
+                        className="rounded-xl border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800"
                       >
                         <Filter className="ml-2 h-4 w-4" />
                         {showFilters ? "إخفاء الفلاتر" : "عرض الفلاتر"}
                       </Button>
-                      <Button variant="outline" size="sm" onClick={resetFilters}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={resetFilters}
+                        className="rounded-xl border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800"
+                      >
                         <RotateCcw className="ml-2 h-4 w-4" />
                         إعادة تعيين
                       </Button>
@@ -1357,21 +1395,21 @@ function ChooseClient() {
                   </div>
 
                   {showFilters && (
-                    <div className="pt-4 space-y-4">
+                    <div className="mt-5 pt-5 border-t border-slate-200 dark:border-slate-700 space-y-5">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label className="text-gray-700 font-medium">كود المنتج</Label>
+                          <Label className="text-sm font-medium text-slate-700 dark:text-slate-300">كود المنتج</Label>
                           <Input
                             placeholder="ابحث بالكود..."
                             value={productCodeFilter}
                             onChange={(e) => setProductCodeFilter(e.target.value)}
-                            className="h-10"
+                            className="h-11 rounded-xl"
                           />
                         </div>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label className="text-gray-700 font-medium">قسم المنتجات</Label>
+                          <Label className="text-sm font-medium text-slate-700 dark:text-slate-300">قسم المنتجات</Label>
                           <CategoriesSelect
                             value={categoryId}
                             onChange={(id) => {
@@ -1381,7 +1419,7 @@ function ChooseClient() {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-gray-700 font-medium">أقسام المنتجات الفرعية</Label>
+                          <Label className="text-sm font-medium text-slate-700 dark:text-slate-300">أقسام المنتجات الفرعية</Label>
                           <SubcategoriesSelect
                             multiple
                             value={subcategoryIds}
@@ -1394,15 +1432,15 @@ function ChooseClient() {
                   )}
                 </section>
 
-                {/* Available products table */}
-                <section className="rounded-2xl border bg-muted/30 p-5 space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-50 rounded-lg">
-                      <ShoppingBag className="h-6 w-6 text-blue-800" />
+                {/* جدول المنتجات المتاحة */}
+                <section className="rounded-2xl bg-white dark:bg-slate-900 p-6 ring-1 ring-slate-200/60 dark:ring-slate-700/50">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#5170ff]/10">
+                      <ShoppingBag className="h-5 w-5 text-[#5170ff]" />
                     </div>
                     <div>
-                      <h2 className="text-base font-semibold text-blue-900">المنتجات المتاحة</h2>
-                      <p className="text-xs text-gray-600 mt-1">
+                      <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">المنتجات المتاحة</h2>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                         {entityType && entityId && deliveryDate
                           ? `إجمالي المنتجات المتاحة: ${clothesData?.total || 0}`
                           : "اختر المكان والتاريخ لعرض المنتجات"}
@@ -1412,36 +1450,58 @@ function ChooseClient() {
 
                   <div className="pt-2">
                     {!entityType || !entityId || !deliveryDate ? (
-                      <div className="text-center py-10 text-gray-500">
-                        <Calendar className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                        <p>يرجى اختيار نوع المكان والمكان وتاريخ التسليم أولاً</p>
+                      <div className="flex flex-col items-center justify-center py-16 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/50">
+                        <Calendar className="h-14 w-14 text-slate-300 dark:text-slate-600 mb-4" />
+                        <p className="text-slate-600 dark:text-slate-400 font-medium">يرجى اختيار المكان وتاريخ التسليم أولاً</p>
+                        <p className="text-sm text-slate-500 dark:text-slate-500 mt-1">سيتم عرض المنتجات المتاحة تلقائياً</p>
                       </div>
                     ) : isClothesPending ? (
-                      <div className="space-y-4">
-                        {[1, 2, 3].map((i) => (
-                          <div
-                            key={i}
-                            className="h-12 bg-gray-200 rounded-lg animate-pulse"
-                          ></div>
-                        ))}
-                      </div>
-                    ) : availableClothes.length === 0 ? (
-                      <div className="text-center py-10 text-gray-500">
-                        <ShoppingBag className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                        <p>لا توجد منتجات متاحة حسب الفلاتر المحددة</p>
-                      </div>
-                    ) : (
-                      <div className="overflow-hidden rounded-md border">
+                      <div className="overflow-hidden rounded-xl ring-1 ring-slate-200/60 dark:ring-slate-700/50">
                         <Table>
                           <TableHeader>
-                            <TableRow>
-                              <TableHead className="text-center">#</TableHead>
-                              <TableHead className="text-center">الكود</TableHead>
-                              <TableHead className="text-center">الاسم</TableHead>
-                              <TableHead className="text-center">الحالة</TableHead>
-                              <TableHead className="text-center">المكان</TableHead>
-                              <TableHead className="text-center">السعر</TableHead>
-                              <TableHead className="text-center">إجراءات</TableHead>
+                            <TableRow className="bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800">
+                              <TableHead className="w-12">#</TableHead>
+                              <TableHead>الكود</TableHead>
+                              <TableHead>الاسم</TableHead>
+                              <TableHead>الحالة</TableHead>
+                              <TableHead>المكان</TableHead>
+                              <TableHead className="text-end">السعر</TableHead>
+                              <TableHead className="w-24 text-center">إجراءات</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {Array.from({ length: 6 }).map((_, i) => (
+                              <TableRow key={i}>
+                                <TableCell><div className="h-4 w-6 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" /></TableCell>
+                                <TableCell><div className="h-4 w-16 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" /></TableCell>
+                                <TableCell><div className="h-4 w-24 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" /></TableCell>
+                                <TableCell><div className="h-5 w-20 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" /></TableCell>
+                                <TableCell><div className="h-4 w-14 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" /></TableCell>
+                                <TableCell><div className="h-4 w-14 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" /></TableCell>
+                                <TableCell><div className="h-8 w-16 bg-slate-200 dark:bg-slate-700 rounded animate-pulse mx-auto" /></TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    ) : availableClothes.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center py-16 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/50">
+                        <ShoppingBag className="h-14 w-14 text-slate-300 dark:text-slate-600 mb-4" />
+                        <p className="text-slate-600 dark:text-slate-400 font-medium">لا توجد منتجات متاحة</p>
+                        <p className="text-sm text-slate-500 dark:text-slate-500 mt-1">حسب الفلاتر المحددة</p>
+                      </div>
+                    ) : (
+                      <div className="overflow-hidden rounded-xl ring-1 ring-slate-200/60 dark:ring-slate-700/50 bg-white dark:bg-slate-900">
+                        <Table>
+                          <TableHeader>
+                            <TableRow className="bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+                              <TableHead className="w-12 text-slate-600 dark:text-slate-400 font-semibold">#</TableHead>
+                              <TableHead className="text-slate-600 dark:text-slate-400 font-semibold">الكود</TableHead>
+                              <TableHead className="text-slate-600 dark:text-slate-400 font-semibold">الاسم</TableHead>
+                              <TableHead className="text-slate-600 dark:text-slate-400 font-semibold">الحالة</TableHead>
+                              <TableHead className="text-slate-600 dark:text-slate-400 font-semibold">المكان</TableHead>
+                              <TableHead className="text-end text-slate-600 dark:text-slate-400 font-semibold">السعر</TableHead>
+                              <TableHead className="w-28 text-center text-slate-600 dark:text-slate-400 font-semibold">إجراءات</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -1449,50 +1509,64 @@ function ChooseClient() {
                               const isSelected = selectedProducts.some(
                                 (p) => p.id === cloth.id,
                               );
+                              const isHighlighted = selectedProduct?.id === cloth.id;
                               return (
                                 <TableRow
                                   key={cloth.id}
-                                  className={`${isSelected
-                                      ? "bg-green-50"
-                                      : selectedProduct?.id === cloth.id
-                                        ? "bg-blue-50"
-                                        : ""
-                                    }`}
+                                  className={`transition-colors border-b border-slate-100 dark:border-slate-800 last:border-0 ${
+                                    isSelected
+                                      ? "bg-emerald-50/80 dark:bg-emerald-950/30"
+                                      : isHighlighted
+                                        ? "bg-[#5170ff]/5 dark:bg-[#5170ff]/10"
+                                        : "hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                                  }`}
                                 >
-                                  <TableCell className="text-center">
+                                  <TableCell className="font-mono text-sm text-slate-500 dark:text-slate-400">
                                     {cloth.id}
                                   </TableCell>
-                                  <TableCell className="text-center font-medium">
+                                  <TableCell className="font-mono font-semibold text-slate-900 dark:text-slate-100">
                                     {cloth.code}
                                   </TableCell>
-                                  <TableCell className="text-center">
+                                  <TableCell className="text-slate-700 dark:text-slate-300">
                                     {cloth.name ?? cloth.code}
                                   </TableCell>
-                                  <TableCell className="text-center">
-                                    <Badge variant={getStatusBadgeVariant(cloth.status)}>
+                                  <TableCell>
+                                    <Badge
+                                      variant={getStatusBadgeVariant(cloth.status)}
+                                      className={`text-xs rounded-lg font-medium ${
+                                        cloth.status === "ready_for_rent"
+                                          ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400 border-0"
+                                          : ""
+                                      }`}
+                                    >
                                       {getStatusLabel(cloth.status)}
                                     </Badge>
                                   </TableCell>
-                                  <TableCell className="text-center">
+                                  <TableCell className="text-slate-600 dark:text-slate-400 text-sm">
                                     {cloth.entity_type === "branch"
                                       ? "فرع"
                                       : cloth.entity_type === "factory"
                                         ? "مصنع"
                                         : "ورشة"}{" "}
-                                    #{cloth.entity_id}
+                                    <span className="font-mono">#{cloth.entity_id}</span>
                                   </TableCell>
-                                  <TableCell className="text-center font-bold text-blue-600">
-                                    {cloth.price ? `${cloth.price} ج.م` : "-"}
+                                  <TableCell className="text-end font-bold text-[#5170ff] tabular-nums">
+                                    {cloth.price ? `${cloth.price} ج.م` : "—"}
                                   </TableCell>
                                   <TableCell>
-                                    <div className="flex items-center gap-2 justify-center">
+                                    <div className="flex justify-center">
                                       <Button
                                         variant={isSelected ? "outline" : "default"}
                                         size="sm"
                                         onClick={() => handleClothSelect(cloth)}
                                         disabled={isSelected}
+                                        className={`rounded-lg font-medium ${
+                                          isSelected
+                                            ? "border-emerald-300 text-emerald-700 bg-emerald-50 dark:bg-emerald-950/30 dark:border-emerald-800 dark:text-emerald-400"
+                                            : "bg-[#5170ff] hover:bg-[#4560e6] text-white"
+                                        }`}
                                       >
-                                        {isSelected ? "مضافة" : "اختيار"}
+                                        {isSelected ? "مضافة ✓" : "اختيار"}
                                       </Button>
                                     </div>
                                   </TableCell>
@@ -1506,22 +1580,22 @@ function ChooseClient() {
                   </div>
                 </section>
 
-                {/* Selected product details + Measurements (in one section) */}
-                <section className="rounded-2xl border bg-muted/30 p-5 space-y-5">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <ShoppingBag className="h-6 w-6 text-primary" />
+                {/* تفاصيل المنتج المختار والمقاسات */}
+                <section className="rounded-2xl bg-white dark:bg-slate-900 p-6 ring-1 ring-slate-200/60 dark:ring-slate-700/50">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#5170ff]/10">
+                      <Ruler className="h-5 w-5 text-[#5170ff]" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h2 className="text-base font-semibold text-foreground">
+                      <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
                         تفاصيل المنتج المختار والمقاسات
                       </h2>
                       {selectedProduct ? (
-                        <p className="text-xs text-gray-600 mt-1">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-mono">
                           {selectedProduct.code}
                         </p>
                       ) : (
-                        <p className="text-xs text-gray-600 mt-1">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                           قم باختيار منتج من الجدول لعرض التفاصيل وإدخال المقاسات
                         </p>
                       )}
@@ -1529,29 +1603,33 @@ function ChooseClient() {
                   </div>
 
                   {!selectedProduct ? (
-                    <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
-                      <div className="rounded-full bg-muted p-4 mb-4">
-                        <Ruler className="h-10 w-10 text-muted-foreground" />
+                    <div className="flex flex-col items-center justify-center py-12 px-6 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/50 text-center">
+                      <div className="rounded-full bg-slate-100 dark:bg-slate-800 p-5 mb-4">
+                        <Ruler className="h-12 w-12 text-slate-400 dark:text-slate-500" />
                       </div>
-                      <p className="text-base font-medium text-foreground mb-1">
+                      <p className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-1">
                         قم باختيار المنتج
                       </p>
-                      <p className="text-sm text-muted-foreground max-w-sm">
+                      <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm">
                         اختر قطعة من جدول المنتجات المتاحة أعلاه، ثم أدخل التفاصيل والمقاسات (اختياري)
                         واضغط إضافة المنتج.
                       </p>
                     </div>
                   ) : (
-                    <>
-                      {/* Price, quantity and order type */}
-                      <div className="rounded-xl border bg-muted/5 p-4">
-                        <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                          <Banknote className="h-4 w-4" />
-                          السعر والكمية ونوع الطلب
-                        </p>
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <div className="space-y-6">
+                      {/* السعر والكمية */}
+                      <div className="rounded-xl bg-slate-50 dark:bg-slate-800/50 p-6 ring-1 ring-slate-200/50 dark:ring-slate-700/50 shadow-sm">
+                        <div className="flex items-center gap-2 mb-5">
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#5170ff]/10">
+                            <Banknote className="h-4 w-4 text-[#5170ff]" />
+                          </div>
+                          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                            السعر والكمية
+                          </h3>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                           <div className="space-y-2">
-                            <Label htmlFor="quantity" className="font-medium">
+                            <Label htmlFor="quantity" className="text-sm font-medium text-slate-700 dark:text-slate-300 block">
                               الكمية
                             </Label>
                             <Input
@@ -1564,11 +1642,11 @@ function ChooseClient() {
                                   quantity: val || "1",
                                 });
                               }}
-                              className="h-10 rounded-lg"
+                              className="h-11 rounded-xl"
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="price" className="font-medium">
+                            <Label htmlFor="price" className="text-sm font-medium text-slate-700 dark:text-slate-300 block">
                               السعر (ج.م)
                             </Label>
                             <div className="relative">
@@ -1582,43 +1660,18 @@ function ChooseClient() {
                                     price: val,
                                   });
                                 }}
-                                className="h-10 rounded-lg pr-10"
+                                className="h-11 rounded-xl pr-10"
                               />
-                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-500 dark:text-slate-400">
                                 ج.م
                               </span>
                             </div>
                           </div>
                           <div className="space-y-2">
-                            <Label
-                              htmlFor="type"
-                              className="flex items-center gap-1.5 font-medium"
-                            >
-                              <Tag className="h-4 w-4" />
-                              نوع الطلب
-                            </Label>
-                            <Select
-                              value={productDetails.type}
-                              onValueChange={(value: "rent" | "buy" | "tailoring") =>
-                                setProductDetails({ ...productDetails, type: value })
-                              }
-                            >
-                              <SelectTrigger className="h-10 rounded-lg" id="type">
-                                <SelectValue placeholder="اختر نوع الطلب" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="rent">إيجار</SelectItem>
-                                <SelectItem value="buy">شراء</SelectItem>
-                                <SelectItem value="tailoring">تفصيل</SelectItem>
-                              </SelectContent>
-                            </Select>
-
-                          </div>
-                          <div className="max-w-xs">
-                            <Label htmlFor="paid" className="font-medium">
+                            <Label htmlFor="paid" className="text-sm font-medium text-slate-700 dark:text-slate-300 block">
                               المدفوع (ج.م)
                             </Label>
-                            <div className="relative mt-2">
+                            <div className="relative">
                               <Input
                                 id="paid"
                                 value={productDetails.paid}
@@ -1629,9 +1682,9 @@ function ChooseClient() {
                                     paid: val,
                                   });
                                 }}
-                                className="h-10 rounded-lg pr-10"
+                                className="h-11 rounded-xl pr-10"
                               />
-                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-500 dark:text-slate-400">
                                 ج.م
                               </span>
                             </div>
@@ -1639,16 +1692,19 @@ function ChooseClient() {
                         </div>
                       </div>
 
-
-                      {/* Discount */}
-                      <div className="rounded-xl border bg-muted/5 p-4">
-                        <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                          <Percent className="h-4 w-4" />
-                          الخصم
-                        </p>
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      {/* الخصم */}
+                      <div className="rounded-xl bg-slate-50 dark:bg-slate-800/50 p-6 ring-1 ring-slate-200/50 dark:ring-slate-700/50 shadow-sm">
+                        <div className="flex items-center gap-2 mb-5">
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#5170ff]/10">
+                            <Percent className="h-4 w-4 text-[#5170ff]" />
+                          </div>
+                          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                            خصم القطعة
+                          </h3>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                           <div className="space-y-2">
-                            <Label htmlFor="discount_type" className="font-medium">
+                            <Label htmlFor="discount_type" className="text-sm font-medium text-slate-700 dark:text-slate-300 block">
                               نوع الخصم
                             </Label>
                             <Select
@@ -1660,7 +1716,7 @@ function ChooseClient() {
                                 })
                               }
                             >
-                              <SelectTrigger className="h-10 rounded-lg" id="discount_type">
+                              <SelectTrigger className="h-11 rounded-xl" id="discount_type">
                                 <SelectValue placeholder="اختر نوع الخصم" />
                               </SelectTrigger>
                               <SelectContent>
@@ -1672,7 +1728,7 @@ function ChooseClient() {
                           </div>
                           {productDetails.discount_type !== "none" && (
                             <div className="space-y-2">
-                              <Label htmlFor="discount_value" className="font-medium">
+                              <Label htmlFor="discount_value" className="text-sm font-medium text-slate-700 dark:text-slate-300 block">
                                 قيمة الخصم
                               </Label>
                               <Input
@@ -1685,26 +1741,31 @@ function ChooseClient() {
                                     discount_value: val,
                                   });
                                 }}
-                                className="h-10 rounded-lg"
+                                className="h-11 rounded-xl"
+                                placeholder={productDetails.discount_type === "percentage" ? "مثال: 10" : "مثال: 50"}
                               />
                             </div>
                           )}
                         </div>
                       </div>
 
-                      {/* Notes */}
-                      <div className="rounded-xl border bg-muted/5 p-4">
-                        <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                          <StickyNote className="h-4 w-4" />
-                          ملاحظات
-                        </p>
+                      {/* ملاحظات */}
+                      <div className="rounded-xl bg-slate-50 dark:bg-slate-800/50 p-6 ring-1 ring-slate-200/50 dark:ring-slate-700/50 shadow-sm">
+                        <div className="flex items-center gap-2 mb-5">
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#5170ff]/10">
+                            <StickyNote className="h-4 w-4 text-[#5170ff]" />
+                          </div>
+                          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                            ملاحظات المنتج
+                          </h3>
+                        </div>
                         <div className="space-y-2">
-                          <Label htmlFor="notes" className="font-medium">
-                            ملاحظات حول المنتج
+                          <Label htmlFor="notes" className="text-sm font-medium text-slate-700 dark:text-slate-300 block">
+                            ملاحظات اختيارية حول هذه القطعة
                           </Label>
                           <Input
                             id="notes"
-                            placeholder="ملاحظات اختيارية..."
+                            placeholder="أدخل ملاحظاتك هنا..."
                             value={productDetails.notes}
                             onChange={(e) =>
                               setProductDetails({
@@ -1712,31 +1773,27 @@ function ChooseClient() {
                                 notes: e.target.value,
                               })
                             }
-                            className="h-10 rounded-lg"
+                            className="h-11 rounded-xl"
                           />
                         </div>
                       </div>
 
-                      {/* Measurements */}
-                      <div className="rounded-xl border bg-muted/5 p-4 space-y-4">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-purple-50 rounded-lg">
-                            <Ruler className="h-6 w-6 text-purple-600" />
+                      {/* المقاسات */}
+                      <div className="rounded-xl bg-slate-50 dark:bg-slate-800/50 p-6 ring-1 ring-slate-200/50 dark:ring-slate-700/50 shadow-sm">
+                        <div className="flex items-center gap-2 mb-4">
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#5170ff]/10">
+                            <Ruler className="h-4 w-4 text-[#5170ff]" />
                           </div>
                           <div>
-                            <h3 className="text-sm font-semibold text-purple-900">
+                            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
                               المقاسات (اختياري)
                             </h3>
-                            <p className="text-xs text-gray-600 mt-1">
-                              يمكنك إدخال مقاسات هذا المنتج وسيتم إرسالها مع الطلب. جميع الحقول اختيارية.
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                              تُربط بالمنتج عند الإضافة. جميع الحقول اختيارية.
                             </p>
                           </div>
                         </div>
-                        <p className="text-sm text-muted-foreground mb-2 pb-2 border-b">
-                          تُربط هذه المقاسات بالمنتج عند إضافته للطلب، بغض النظر عن نوع الطلب. جميع
-                          الحقول اختيارية.
-                        </p>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                           {[
                             { key: "sleeveLength", label: "طول الكم", placeholder: "سم" },
                             { key: "forearm", label: "الزند", placeholder: "سم" },
@@ -1753,13 +1810,15 @@ function ChooseClient() {
                             },
                           ].map(({ key, label, placeholder }) => (
                             <div key={key} className="space-y-2">
-                              <Label className="text-gray-700 font-medium">{label}</Label>
+                              <Label className="text-sm font-medium text-slate-700 dark:text-slate-300 block">
+                                {label}
+                              </Label>
                               <Input
                                 value={(measurements as any)[key]}
                                 onChange={(e) =>
                                   setMeasurements({ ...measurements, [key]: e.target.value })
                                 }
-                                className="h-11 rounded-lg"
+                                className="h-11 rounded-xl"
                                 placeholder={placeholder}
                               />
                             </div>
@@ -1767,61 +1826,92 @@ function ChooseClient() {
                         </div>
                       </div>
 
-                      {/* Add product button */}
-                      <div className="flex justify-center pt-6 mt-2 border-t">
+                      {/* زر الإضافة */}
+                      <div className="flex justify-center pt-2">
                         <Button
                           onClick={handleAddProduct}
-                          className="h-12 px-8 rounded-lg bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800"
+                          className="h-12 px-10 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-lg shadow-emerald-500/25 hover:shadow-xl transition-all active:scale-[0.98]"
                         >
                           <Plus className="ml-2 h-5 w-5" />
                           إضافة المنتج إلى الطلب
                         </Button>
                       </div>
-                    </>
+                    </div>
                   )}
                 </section>
               </div>
             </div>
+
+            {/* خصم على الطلب كاملاً (اختياري) - في الأخير */}
+            <section className="rounded-2xl bg-white dark:bg-slate-900 p-6 ring-1 ring-slate-200/60 dark:ring-slate-700/50">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#5170ff]/10">
+                  <Percent className="h-5 w-5 text-[#5170ff]" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
+                    خصم على الطلب كاملاً (اختياري)
+                  </h2>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    يمكنك أيضاً إضافة خصم لكل قطعة من تفاصيل المنتج.
+                  </p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-slate-700 dark:text-slate-300 font-medium">نوع الخصم</Label>
+                  <Select
+                    value={orderDiscount.type}
+                    onValueChange={(v: "none" | "percentage" | "fixed") =>
+                      setOrderDiscount({ ...orderDiscount, type: v })
+                    }
+                  >
+                    <SelectTrigger className="h-11 rounded-xl">
+                      <SelectValue placeholder="نوع الخصم" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">لا يوجد</SelectItem>
+                      <SelectItem value="percentage">نسبة مئوية</SelectItem>
+                      <SelectItem value="fixed">مبلغ ثابت</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                {orderDiscount.type !== "none" && (
+                  <div className="space-y-2">
+                    <Label className="text-slate-700 dark:text-slate-300 font-medium">قيمة الخصم</Label>
+                    <Input
+                      value={orderDiscount.value || ""}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/[^0-9.]/g, "");
+                        const numVal = val === "" ? 0 : parseFloat(val) || 0;
+                        setOrderDiscount({
+                          ...orderDiscount,
+                          value: numVal,
+                        });
+                      }}
+                      className="h-11 rounded-xl"
+                      placeholder={
+                        orderDiscount.type === "percentage" ? "مثال: 10" : "مثال: 50"
+                      }
+                    />
+                  </div>
+                )}
+              </div>
+            </section>
           </CardContent>
 
-          <CardFooter className="flex flex-col gap-3 border-t bg-gray-50 pt-6 sm:flex-row sm:justify-between sm:items-center sm:gap-4">
+          <CardFooter className="flex flex-col gap-4 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-8 py-6">
             <Button
               variant="outline"
               onClick={() => navigate("/orders/list")}
-              className="h-12 px-6 rounded-lg border-gray-300 hover:border-gray-400"
+              className="h-12 px-6 rounded-xl border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors w-fit"
             >
               <ArrowLeft className="ml-2 h-5 w-5" />
               رجوع للقائمة
             </Button>
-            <div className="flex gap-3">
-              <Button
-                variant="outline"
-                className="h-12 px-6 rounded-lg border-amber-300 text-amber-700 hover:bg-amber-50"
-                onClick={handleSaveDraft}
-              >
-                حفظ مؤقت
-              </Button>
-              <Button
-                onClick={handleCreateOrder}
-                disabled={selectedProducts.length === 0 || isCreatingOrder}
-                className="h-12 px-8 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isCreatingOrder ? (
-                  <>
-                    <Loader2 className="ml-3 h-5 w-5 animate-spin" />
-                    جاري إنشاء الطلب...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle className="ml-3 h-5 w-5" />
-                    إنشاء الطلب
-                    <ArrowRight className="mr-3 h-5 w-5" />
-                  </>
-                )}
-              </Button>
-            </div>
           </CardFooter>
         </Card>
+        </div>
       </div>
     </div>
   );

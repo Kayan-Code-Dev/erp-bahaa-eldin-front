@@ -4,7 +4,6 @@ import { toast } from "sonner";
 import { TClientResponse } from "@/api/v2/clients/clients.types";
 import { TEntity } from "@/lib/types/entity.types";
 import {
-  ChevronRight,
   Loader2,
   User,
   FileText,
@@ -13,7 +12,6 @@ import {
   Shirt,
   Banknote,
   StickyNote,
-  Tag,
 } from "lucide-react";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -39,21 +37,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Card,
-  CardHeader,
-  CardTitle,
   CardDescription,
-  CardContent,
-  CardFooter,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { DatePicker } from "@/components/custom/DatePicker";
 import { SimpleDateTimePicker } from "@/components/custom/SimpleDateTimePicker";
 import { useCreateOrderMutationOptions } from "@/api/v2/orders/orders.hooks";
 import { TCreateOrderRequest } from "@/api/v2/orders/orders.types";
 import { useMutation } from "@tanstack/react-query";
 import { formatPhone } from "@/utils/formatPhone";
+import { OrderStepsStepper } from "@/components/custom/OrderStepsStepper";
 
 type SelectedCloth = {
   id: number;
@@ -70,6 +62,8 @@ type LocationState = {
   selected_clothes: SelectedCloth[];
   client?: TClientResponse;
 };
+
+const ORDER_DRAFT_KEY = "order-create-order-draft";
 
 // Zod schema for order form (rental dates at order level, not item level)
 const orderItemSchema = z
@@ -230,10 +224,48 @@ function CreateOrderForm() {
 
   const items = useWatch({ control: form.control, name: "items" });
   const hasRentItem = (items ?? []).some((i) => i?.type === "rent");
+  const orderDiscountType = useWatch({
+    control: form.control,
+    name: "order_discount_type",
+  });
+  const orderDiscountValue = useWatch({
+    control: form.control,
+    name: "order_discount_value",
+  });
+  const paid = useWatch({ control: form.control, name: "paid" }) ?? 0;
+
+  const { subtotal, orderDiscount, total } = useMemo(() => {
+    const itemList = items ?? [];
+    let st = 0;
+    for (const item of itemList) {
+      let p = Number(item?.price) || 0;
+      if (item?.has_discount && item?.discount_type && item?.discount_type !== "none") {
+        const dv = Number(item?.discount_value) || 0;
+        if (item.discount_type === "fixed") p -= dv;
+        else if (item.discount_type === "percentage") p *= 1 - dv / 100;
+      }
+      st += p;
+    }
+    let od = 0;
+    if (hasOrderDiscount && orderDiscountType && orderDiscountType !== "none") {
+      const dv = Number(orderDiscountValue) || 0;
+      if (orderDiscountType === "fixed") od = dv;
+      else if (orderDiscountType === "percentage") od = st * (dv / 100);
+    }
+    return {
+      subtotal: st,
+      orderDiscount: od,
+      total: Math.max(0, st - od),
+    };
+  }, [items, hasOrderDiscount, orderDiscountType, orderDiscountValue]);
 
   const createOrderMutation = useMutation(useCreateOrderMutationOptions());
   const { mutate: createOrder, isPending: isCreatingOrder } =
     createOrderMutation;
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   useEffect(() => {
     // Validate required state
@@ -388,85 +420,227 @@ function CreateOrderForm() {
     }
   };
 
-  return (
-    <div dir="rtl" className="min-h-screen bg-muted/30">
-      <div className="mx-auto max-w-4xl space-y-6 py-6 px-4">
-        {/* Breadcrumbs */}
-        <nav
-          className="flex items-center gap-2 rounded-lg border bg-card px-4 py-3 text-sm shadow-sm"
-          aria-label="مسار التنقل"
-        >
-          <Link
-            to="/orders/choose-client"
-            className="text-muted-foreground transition-colors hover:text-foreground"
-          >
-            اختيار العميل
-          </Link>
-          <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/70" />
-          <Link
-            to="/orders/choose-clothes"
-            className="text-muted-foreground transition-colors hover:text-foreground"
-            state={client ? { client } : null}
-          >
-            اختيار المنتجات
-          </Link>
-          <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/70" />
-          <span className="font-medium text-foreground">إنشاء الطلب</span>
-        </nav>
+  const handleSaveDraft = () => {
+    const values = form.getValues();
+    const draft = {
+      locationState,
+      formValues: {
+        ...values,
+        delivery_date: values.delivery_date?.toISOString?.() ?? null,
+        occasion_datetime: values.occasion_datetime?.toISOString?.() ?? null,
+        items: values.items.map((item) => ({
+          ...item,
+          occasion_datetime: (item as { occasion_datetime?: Date })?.occasion_datetime?.toISOString?.() ?? null,
+          delivery_date: (item as { delivery_date?: Date })?.delivery_date?.toISOString?.() ?? null,
+        })),
+      },
+      savedAt: new Date().toISOString(),
+    };
+    try {
+      localStorage.setItem(ORDER_DRAFT_KEY, JSON.stringify(draft));
+      toast.success("تم حفظ الطلب كمسودة");
+    } catch {
+      toast.error("فشل حفظ المسودة");
+    }
+  };
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Single comprehensive card for all order details */}
-            <Card className="overflow-hidden border shadow-sm">
-              <CardHeader className="border-b bg-muted/20 pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    <FileText className="h-5 w-5 text-primary" />
+  return (
+    <div dir="rtl" className="min-h-screen bg-[#f2f2f2] dark:bg-slate-950">
+      <div className="mx-auto max-w-7xl space-y-8 py-8 px-4 lg:px-8">
+        {/* شريط الخطوات */}
+        <div className="sticky top-0 z-20 -mx-4 -mt-8 px-4 pt-8 pb-4 lg:-mx-8 lg:px-8 lg:pt-8 lg:pb-4 bg-[#f2f2f2] dark:bg-slate-950">
+          <OrderStepsStepper
+            currentStep={3}
+            stepState={
+              locationState?.client
+                ? { 2: { client: locationState.client } }
+                : undefined
+            }
+          />
+        </div>
+
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_420px]">
+          {/* لوحة الفاتورة الاحترافية - في اليسار */}
+          <aside className="w-full order-first lg:order-none lg:col-start-2 lg:row-start-1">
+            <div className="sticky top-24 overflow-hidden rounded-3xl bg-white dark:bg-slate-900 shadow-2xl shadow-slate-200/50 dark:shadow-black/30 ring-1 ring-slate-200/60 dark:ring-slate-700/50">
+              {/* رأس الفاتورة */}
+              <div className="relative overflow-hidden bg-gradient-to-br from-[#5170ff] to-[#3d5ae0] px-8 py-8">
+                <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.05\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50" />
+                <div className="relative flex items-center gap-5">
+                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-md ring-1 ring-white/30">
+                    <FileText className="h-8 w-8 text-white" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg">إنشاء طلب إيجار جديد</CardTitle>
-                    <CardDescription>
-                      بيانات العميل، تفاصيل الطلب، والقطع المختارة في بطاقة واحدة مرتبة
-                    </CardDescription>
+                    <h2 className="text-2xl font-bold tracking-tight text-white">
+                      ملخص الفاتورة
+                    </h2>
+                    <p className="mt-1 text-sm text-white/90">
+                      {(items ?? []).length} قطعة · مراجعة نهائية
+                    </p>
                   </div>
                 </div>
-              </CardHeader>
+              </div>
 
-              <CardContent className="space-y-8 pt-6">
-                {/* Client information inside the card */}
+              {/* جدول القطع */}
+              <div className="border-b border-slate-200 dark:border-slate-700">
+                <div className="flex items-center justify-between gap-4 px-6 py-4 bg-slate-50 dark:bg-slate-800/50 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  <span>القطعة</span>
+                  <span>المبلغ</span>
+                </div>
+                <div className="max-h-60 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
+                  {(items ?? []).map((item, index) => {
+                    const cloth = selected_clothes.find((c) => c.id === item?.cloth_id);
+                    let price = Number(item?.price) || 0;
+                    if (item?.has_discount && item?.discount_type && item?.discount_type !== "none") {
+                      const dv = Number(item?.discount_value) || 0;
+                      if (item.discount_type === "fixed") price -= dv;
+                      else if (item.discount_type === "percentage") price *= 1 - dv / 100;
+                    }
+                    return (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <p className="font-semibold text-slate-900 dark:text-slate-100 truncate">
+                            {cloth?.name ?? cloth?.code ?? `قطعة ${index + 1}`}
+                          </p>
+                          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                            <span className="font-mono">{cloth?.code ?? `#${index + 1}`}</span>
+                          </p>
+                        </div>
+                        <span className="font-bold text-slate-900 dark:text-slate-100 shrink-0 tabular-nums">
+                          {price.toFixed(0)} ج.م
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* ملخص المبالغ */}
+              <div className="space-y-4 bg-slate-50 dark:bg-slate-800/50 px-6 py-6">
+                {hasOrderDiscount && orderDiscount > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-slate-500 dark:text-slate-400">الخصم</span>
+                    <span className="font-semibold text-amber-600 dark:text-amber-400 tabular-nums">
+                      -{orderDiscount.toFixed(0)} ج.م
+                    </span>
+                  </div>
+                )}
+                <div className="flex justify-between items-baseline">
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">الإجمالي</span>
+                  <span className="text-xl font-bold text-[#5170ff] tabular-nums">{total.toFixed(0)} ج.م</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-500 dark:text-slate-400">المدفوع</span>
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
+                    {Number(paid).toFixed(0)} ج.م
+                  </span>
+                </div>
+                <div className="flex justify-between border-t border-slate-200 dark:border-slate-700 pt-4 font-bold">
+                  <span className="text-slate-800 dark:text-slate-200">المتبقي</span>
+                  <span className="text-lg text-slate-900 dark:text-slate-100 tabular-nums">
+                    {Math.max(0, total - Number(paid)).toFixed(0)} ج.م
+                  </span>
+                </div>
+              </div>
+
+              {/* أزرار الإجراء */}
+              <div className="space-y-3 p-6">
+                <Button
+                  type="button"
+                  onClick={form.handleSubmit(onSubmit)}
+                  disabled={isCreatingOrder}
+                  className="w-full h-12 rounded-xl bg-[#5170ff] hover:bg-[#4560e6] text-white font-semibold shadow-lg shadow-[#5170ff]/30 transition-all hover:shadow-xl hover:shadow-[#5170ff]/40 active:scale-[0.98]"
+                >
+                  {isCreatingOrder ? (
+                    <>
+                      <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                      جاري الإنشاء...
+                    </>
+                  ) : (
+                    "إنشاء الطلب"
+                  )}
+                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="flex-1 h-10 rounded-xl border-2"
+                    onClick={handleSaveDraft}
+                  >
+                    حفظ كمسودة
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="h-10 rounded-xl text-slate-500 hover:text-slate-900 dark:hover:text-slate-100"
+                    onClick={() => navigate(-1)}
+                  >
+                    إلغاء
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          <div className="min-w-0 lg:col-start-1 lg:row-start-1">
+          <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            {/* بطاقة تفاصيل الطلب */}
+            <div className="overflow-hidden rounded-3xl bg-white dark:bg-slate-900 shadow-2xl shadow-slate-200/50 dark:shadow-black/30 ring-1 ring-slate-200/60 dark:ring-slate-700/50">
+              <div className="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-8 py-6">
+                <div className="flex items-center gap-5">
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#5170ff]/10 ring-1 ring-[#5170ff]/20">
+                    <FileText className="h-7 w-7 text-[#5170ff]" />
+                  </div>
+                  <div>
+                    <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+                      تفاصيل الطلب
+                    </h1>
+                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                      مراجعة وتعديل بيانات العميل، المدفوع، التواريخ، والقطع المختارة
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-8 p-8">
+                {/* معلومات العميل */}
                 {client && (
-                  <section aria-label="معلومات العميل" className="rounded-xl border bg-muted/10 p-5 space-y-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
-                        <User className="h-5 w-5 text-primary" />
+                  <section aria-label="معلومات العميل" className="rounded-2xl bg-slate-50 dark:bg-slate-800/50 p-6 ring-1 ring-slate-200/60 dark:ring-slate-700/50">
+                    <div className="flex items-center gap-3 mb-5">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#5170ff]/10">
+                        <User className="h-5 w-5 text-[#5170ff]" />
                       </div>
                       <div>
-                        <h2 className="text-base font-semibold text-foreground">معلومات العميل</h2>
-                        <p className="text-xs text-muted-foreground">العميل المختار لهذا الطلب</p>
+                        <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">معلومات العميل</h2>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">العميل المختار لهذا الطلب</p>
                       </div>
                     </div>
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-                      <div className="space-y-1 rounded-lg border bg-card/60 p-3">
-                        <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                      <div className="rounded-xl bg-white dark:bg-slate-900 p-4 ring-1 ring-slate-200/60 dark:ring-slate-700/50">
+                        <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                           الاسم الكامل
                         </p>
-                        <p className="text-sm font-semibold text-foreground">
+                        <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
                           {client.first_name} {client.middle_name} {client.last_name}
                         </p>
                       </div>
-                      <div className="space-y-1 rounded-lg border bg-card/60 p-3">
-                        <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                      <div className="rounded-xl bg-white dark:bg-slate-900 p-4 ring-1 ring-slate-200/60 dark:ring-slate-700/50">
+                        <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                           الرقم القومي
                         </p>
-                        <p className="text-sm font-semibold text-foreground">
+                        <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
                           {client.national_id || "—"}
                         </p>
                       </div>
-                      <div className="space-y-1 rounded-lg border bg-card/60 p-3 sm:col-span-2 md:col-span-1">
-                        <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                      <div className="rounded-xl bg-white dark:bg-slate-900 p-4 ring-1 ring-slate-200/60 dark:ring-slate-700/50 sm:col-span-2 md:col-span-1">
+                        <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                           أرقام الهاتف
                         </p>
-                        <p className="text-sm font-semibold text-foreground">
+                        <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
                           <span dir="ltr">{client.phones?.map((p) => formatPhone(p.phone, "")).filter(Boolean).join("، ") || "—"}</span>
                         </p>
                       </div>
@@ -474,16 +648,18 @@ function CreateOrderForm() {
                   </section>
                 )}
 
-                <Separator />
-
-                {/* 1) Payment amount and delivery date + Rental dates at order level */}
-                <section aria-label="Order details" className="space-y-6">
-                  {/* Payment amount and delivery date */}
-                  <div>
-                    <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
-                      <Banknote className="h-4 w-4 text-muted-foreground" />
-                      المدفوع وتاريخ التسليم
-                    </h3>
+                {/* المدفوع وتاريخ التسليم */}
+                <section aria-label="Order details" className="rounded-2xl bg-slate-50 dark:bg-slate-800/50 p-6 ring-1 ring-slate-200/60 dark:ring-slate-700/50">
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#5170ff]/10">
+                        <Banknote className="h-5 w-5 text-[#5170ff]" />
+                      </div>
+                      <div>
+                        <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">المدفوع وتاريخ التسليم</h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">أدخل المبلغ المدفوع وتاريخ التسليم</p>
+                      </div>
+                    </div>
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <FormField
                         control={form.control}
@@ -528,14 +704,16 @@ function CreateOrderForm() {
 
                   {/* Rental dates at order level */}
                   {hasRentItem && (
-                    <div className="rounded-xl border-2 border-primary/20 bg-primary/5 p-5">
-                      <h3 className="mb-1 flex items-center gap-2 text-sm font-semibold text-foreground">
-                        <CalendarClock className="h-4 w-4 text-primary" />
-                        تواريخ الإيجار (تنطبق على الطلب بالكامل)
-                      </h3>
-                      <p className="mb-4 text-xs text-muted-foreground">
-                        حدد تاريخ ووقت المناسبة وعدد أيام الإيجار لجميع القطع المؤجرة.
-                      </p>
+                    <div className="rounded-xl bg-[#5170ff]/5 ring-1 ring-[#5170ff]/20 p-5">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#5170ff]/10">
+                          <CalendarClock className="h-5 w-5 text-[#5170ff]" />
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">تواريخ الإيجار</h3>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">تنطبق على الطلب بالكامل</p>
+                        </div>
+                      </div>
                       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <FormField
                           control={form.control}
@@ -581,106 +759,26 @@ function CreateOrderForm() {
                   )}
                 </section>
 
-                <Separator />
-
-                {/* 2) Order discount and order notes */}
-                <section aria-label="Order discount and notes" className="space-y-6">
-                  {/* Order discount */}
-                  <div>
-                    <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
-                      <Percent className="h-4 w-4 text-muted-foreground" />
-                      خصم الطلب
-                    </h3>
-                    <FormField
-                      control={form.control}
-                      name="has_order_discount"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-xl border bg-muted/10 p-4">
-                          <div className="space-y-0.5">
-                            <FormLabel className="text-base">
-                              إضافة خصم على الطلب
-                            </FormLabel>
-                            <CardDescription>
-                              تفعيل الخصم على مستوى الطلب بالكامل
-                            </CardDescription>
-                          </div>
-                          <FormControl>
-                            <Switch
-                              dir="ltr"
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    {hasOrderDiscount && (
-                      <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-                        <FormField
-                          control={form.control}
-                          name="order_discount_type"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>نوع الخصم</FormLabel>
-                              <Select
-                                onValueChange={field.onChange}
-                                value={field.value}
-                              >
-                                <FormControl>
-                                  <SelectTrigger className="h-10">
-                                    <SelectValue placeholder="اختر نوع الخصم" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="percentage">
-                                    نسبة مئوية
-                                  </SelectItem>
-                                  <SelectItem value="fixed">مبلغ ثابت</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="order_discount_value"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>قيمة الخصم</FormLabel>
-                              <FormControl>
-                                <Input
-                                  placeholder="0.00"
-                                  className="h-10"
-                                  value={field.value ?? ""}
-                                  onChange={(e) => {
-                                    const val = e.target.value.replace(/[^0-9.]/g, "");
-                                    field.onChange(val === "" ? 0 : parseFloat(val) || 0);
-                                  }}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    )}
+                {/* ملاحظات الطلب */}
+                <section aria-label="Order notes" className="rounded-2xl bg-slate-50 dark:bg-slate-800/50 p-6 ring-1 ring-slate-200/60 dark:ring-slate-700/50">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#5170ff]/10">
+                      <StickyNote className="h-5 w-5 text-[#5170ff]" />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">ملاحظات الطلب</h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">ملاحظات اختيارية حول الطلب</p>
+                    </div>
                   </div>
-
-                  {/* Order notes */}
                   <FormField
                     control={form.control}
                     name="order_notes"
                     render={({ field }) => (
                       <FormItem>
-                        <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-foreground">
-                          <StickyNote className="h-4 w-4 text-muted-foreground" />
-                          ملاحظات الطلب
-                        </h3>
                         <FormControl>
                           <Textarea
                             placeholder="أدخل ملاحظات حول الطلب (اختياري)..."
-                            className="resize-none rounded-lg"
+                            className="resize-none rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
                             rows={4}
                             {...field}
                           />
@@ -691,23 +789,19 @@ function CreateOrderForm() {
                   />
                 </section>
 
-                <Separator />
-
-                {/* 3) Selected items details inside the same card */}
+                {/* تفاصيل القطع المختارة */}
                 <section aria-label="تفاصيل القطع المختارة" className="space-y-5">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
-                        <Shirt className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <h2 className="text-base font-semibold text-foreground">
-                          تفاصيل المنتج المختار
-                        </h2>
-                        <p className="text-xs text-muted-foreground">
-                          أدخل السعر، نوع الطلب، الخصم والملاحظات لكل قطعة — {fields.length} قطعة
-                        </p>
-                      </div>
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#5170ff]/10">
+                      <Shirt className="h-5 w-5 text-[#5170ff]" />
+                    </div>
+                    <div>
+                      <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
+                        تفاصيل المنتج المختار
+                      </h2>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        أدخل السعر، الخصم والملاحظات لكل قطعة — {fields.length} قطعة
+                      </p>
                     </div>
                   </div>
 
@@ -716,109 +810,71 @@ function CreateOrderForm() {
                       (c) => c.id === field.cloth_id
                     );
                     const itemHasDiscount = items?.[index]?.has_discount;
-                    const itemType = items?.[index]?.type;
 
                     return (
                       <div
                         key={field.id}
-                        className="rounded-2xl border-2 border-muted/40 bg-card shadow-sm transition-shadow hover:border-primary/20 hover:shadow-md"
+                        className="rounded-2xl bg-white dark:bg-slate-900 shadow-lg shadow-slate-200/30 dark:shadow-black/20 ring-1 ring-slate-200/60 dark:ring-slate-700/50 overflow-hidden transition-all hover:ring-[#5170ff]/30 hover:shadow-xl"
                       >
-                        {/* Item header: number + code + name + type badge */}
-                        <div className="flex flex-row items-center gap-3 border-b bg-muted/10 px-4 py-4">
+                        {/* Item header */}
+                        <div className="flex flex-row items-center gap-3 bg-slate-50 dark:bg-slate-800/50 px-6 py-4 border-b border-slate-200/60 dark:border-slate-700/50">
                           <span
-                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground"
+                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#5170ff] text-sm font-bold text-white shadow-lg shadow-[#5170ff]/30"
                             aria-hidden
                           >
                             {index + 1}
                           </span>
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-base font-semibold text-foreground">
+                            <p className="truncate text-base font-bold text-slate-900 dark:text-slate-100">
                               {cloth?.name ?? cloth?.code}
                             </p>
-                            <p className="mt-0.5 truncate text-sm text-muted-foreground">
+                            <p className="mt-0.5 truncate text-sm text-slate-500 dark:text-slate-400">
                               الكود: {cloth?.code}
                             </p>
                           </div>
-                          <Badge
-                            variant={itemType === "buy" ? "secondary" : "default"}
-                            className="shrink-0"
-                          >
-                            {itemType === "buy" ? "شراء" : "إيجار"}
-                          </Badge>
                         </div>
 
-                        <div className="space-y-4 px-4 pb-5 pt-4">
-                          {/* Price and order type — in one clear box */}
-                          <div className="rounded-xl border bg-muted/5 p-4">
-                            <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                              <Banknote className="h-4 w-4" />
-                              السعر ونوع الطلب
+                        <div className="space-y-5 p-6">
+                          {/* Price */}
+                          <div className="rounded-xl bg-slate-50 dark:bg-slate-800/50 p-4 ring-1 ring-slate-200/40 dark:ring-slate-700/40">
+                            <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                              <Banknote className="h-4 w-4 text-[#5170ff]" />
+                              السعر
                             </p>
-                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                              <FormField
-                                control={form.control}
-                                name={`items.${index}.price`}
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>السعر (ج.م)</FormLabel>
-                                    <FormControl>
-                                      <Input
-                                        placeholder="0.00"
-                                        className="h-10"
-                                        value={field.value ?? ""}
-                                        onChange={(e) => {
-                                          const val = e.target.value.replace(/[^0-9.]/g, "");
-                                          field.onChange(val === "" ? 0 : parseFloat(val) || 0);
-                                        }}
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              <FormField
-                                control={form.control}
-                                name={`items.${index}.type`}
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>
-                                      <span className="flex items-center gap-1.5">
-                                        <Tag className="h-4 w-4" />
-                                        نوع الطلب
-                                      </span>
-                                    </FormLabel>
-                                    <Select
-                                      onValueChange={field.onChange}
-                                      value={field.value}
-                                    >
-                                      <FormControl>
-                                        <SelectTrigger className="h-10">
-                                          <SelectValue placeholder="اختر نوع الطلب" />
-                                        </SelectTrigger>
-                                      </FormControl>
-                                      <SelectContent>
-                                        <SelectItem value="rent">إيجار</SelectItem>
-                                        <SelectItem value="buy">شراء</SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                            </div>
+                            <FormField
+                              control={form.control}
+                              name={`items.${index}.price`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>السعر (ج.م)</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="0.00"
+                                      className="h-10"
+                                      value={field.value ?? ""}
+                                      onChange={(e) => {
+                                        const val = e.target.value.replace(/[^0-9.]/g, "");
+                                        field.onChange(val === "" ? 0 : parseFloat(val) || 0);
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
                           </div>
 
                           {/* Item discount */}
-                          <div className="rounded-xl border bg-muted/5 p-4">
-                            <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                              <Percent className="h-4 w-4" />
+                          <div className="rounded-xl bg-slate-50 dark:bg-slate-800/50 p-4 ring-1 ring-slate-200/40 dark:ring-slate-700/40">
+                            <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                              <Percent className="h-4 w-4 text-[#5170ff]" />
                               خصم القطعة
                             </p>
                             <FormField
                               control={form.control}
                               name={`items.${index}.has_discount`}
                               render={({ field }) => (
-                                <FormItem className="flex flex-row items-center justify-between rounded-lg border bg-background p-3">
+                                <FormItem className="flex flex-row items-center justify-between rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200/60 dark:ring-slate-700/50 p-4">
                                   <div className="space-y-0.5">
                                     <FormLabel className="text-sm font-medium">
                                       إضافة خصم على هذه القطعة
@@ -897,17 +953,17 @@ function CreateOrderForm() {
                             control={form.control}
                             name={`items.${index}.notes`}
                             render={({ field }) => (
-                              <FormItem className="rounded-xl border bg-muted/5 p-4">
+                              <FormItem className="rounded-xl bg-slate-50 dark:bg-slate-800/50 p-4 ring-1 ring-slate-200/40 dark:ring-slate-700/40">
                                 <FormLabel>
-                                  <span className="flex items-center gap-1.5">
-                                    <StickyNote className="h-4 w-4" />
+                                  <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+                                    <StickyNote className="h-4 w-4 text-[#5170ff]" />
                                     ملاحظات القطعة
                                   </span>
                                 </FormLabel>
                                 <FormControl>
                                   <Textarea
                                     placeholder="ملاحظات خاصة بهذه القطعة (اختياري)..."
-                                    className="resize-none rounded-lg border-0 bg-transparent focus-visible:ring-0"
+                                    className="resize-none rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
                                     rows={2}
                                     {...field}
                                   />
@@ -921,36 +977,99 @@ function CreateOrderForm() {
                     );
                   })}
                 </section>
-              </CardContent>
 
-              {/* Action buttons at the bottom of the same card */}
-              <CardFooter className="flex flex-col gap-3 border-t bg-card pt-6 sm:flex-row sm:justify-end sm:gap-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="order-2 sm:order-1 h-11 min-w-[120px]"
-                  onClick={() => navigate(-1)}
-                >
-                  إلغاء
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={isCreatingOrder}
-                  className="order-1 h-11 min-w-[160px] sm:order-2"
-                >
-                  {isCreatingOrder ? (
-                    <>
-                      <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-                      جاري الإنشاء...
-                    </>
-                  ) : (
-                    "إنشاء الطلب"
+                {/* خصم على الطلب كاملاً */}
+                <section aria-label="خصم على الطلب" className="rounded-2xl bg-slate-50 dark:bg-slate-800/50 p-6 ring-1 ring-slate-200/60 dark:ring-slate-700/50">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#5170ff]/10">
+                      <Percent className="h-5 w-5 text-[#5170ff]" />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">خصم على الطلب كاملاً</h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">اختياري — تفعيل الخصم على مستوى الطلب بالكامل</p>
+                    </div>
+                  </div>
+                  <FormField
+                    control={form.control}
+                    name="has_order_discount"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200/60 dark:ring-slate-700/50 p-5">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-base font-semibold text-slate-900 dark:text-slate-100">
+                            إضافة خصم على الطلب
+                          </FormLabel>
+                          <p className="text-sm text-slate-500 dark:text-slate-400">
+                            تفعيل الخصم على مستوى الطلب بالكامل
+                          </p>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            dir="ltr"
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  {hasOrderDiscount && (
+                    <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <FormField
+                          control={form.control}
+                          name="order_discount_type"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>نوع الخصم</FormLabel>
+                              <Select
+                                onValueChange={field.onChange}
+                                value={field.value}
+                              >
+                                <FormControl>
+                                  <SelectTrigger className="h-10">
+                                    <SelectValue placeholder="اختر نوع الخصم" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="percentage">
+                                    نسبة مئوية
+                                  </SelectItem>
+                                  <SelectItem value="fixed">مبلغ ثابت</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="order_discount_value"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>قيمة الخصم</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="0.00"
+                                  className="h-10"
+                                  value={field.value ?? ""}
+                                  onChange={(e) => {
+                                    const val = e.target.value.replace(/[^0-9.]/g, "");
+                                    field.onChange(val === "" ? 0 : parseFloat(val) || 0);
+                                  }}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                    </div>
                   )}
-                </Button>
-              </CardFooter>
-            </Card>
+                </section>
+              </div>
+            </div>
           </form>
         </Form>
+          </div>
+        </div>
       </div>
     </div>
   );
