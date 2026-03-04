@@ -70,8 +70,6 @@ const DEFAULT_CLOTH_ITEM = {
   status: "ready_for_rent",
   entity_type: "branch" as const,
   entity_id: "",
-  category_id: "",
-  subcategory_ids: [] as string[],
   price: 0,
   payment: 0,
 };
@@ -91,8 +89,6 @@ const clothItemSchema = z.object({
     required_error: "نوع المكان مطلوب",
   }),
   entity_id: z.string().min(1, "المكان مطلوب"),
-  category_id: z.string().optional(),
-  subcategory_ids: z.array(z.string()).optional(),
   price: z.number().min(0, "السعر يجب أن يكون ≥ 0"),
   payment: z.number().min(0, "المدفوع يجب أن يكون ≥ 0"),
 });
@@ -105,6 +101,8 @@ const formSchema = z
     supplier_code: z.string().optional(),
     supplier_phone: z.string().optional(),
     supplier_address: z.string().optional(),
+    category_id: z.string().min(1, { message: "قسم المنتجات مطلوب" }),
+    subcategory_id: z.string().min(1, { message: "قسم المنتجات الفرعي مطلوب" }),
     order_date: z.string().min(1, { message: "تاريخ الطلبية مطلوب" }),
     total_amount: z.number().min(0),
     payment_amount: z.number().min(0),
@@ -184,6 +182,8 @@ export function CreateSupplierOrderForm({
       supplier_code: "",
       supplier_phone: "",
       supplier_address: "",
+      category_id: "",
+      subcategory_id: "",
       order_date: "",
       total_amount: 0,
       payment_amount: 0,
@@ -197,6 +197,7 @@ export function CreateSupplierOrderForm({
     control: form.control,
     name: "add_new_supplier",
   });
+  const categoryId = useWatch({ control: form.control, name: "category_id" });
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -236,6 +237,8 @@ export function CreateSupplierOrderForm({
       supplier_code: "",
       supplier_phone: "",
       supplier_address: "",
+      category_id: "",
+      subcategory_id: "",
       order_date: "",
       total_amount: 0,
       payment_amount: 0,
@@ -259,10 +262,6 @@ export function CreateSupplierOrderForm({
           status: c.status || undefined,
           entity_type: "branch" as const,
           entity_id: Number(c.entity_id),
-          category_id: c.category_id ? Number(c.category_id) : undefined,
-          subcategory_ids: c.subcategory_ids?.length
-            ? c.subcategory_ids.map(Number)
-            : undefined,
           price,
           payment,
           remaining: Math.max(0, price - payment),
@@ -273,10 +272,8 @@ export function CreateSupplierOrderForm({
     const firstCloth = values.clothes[0];
     const payload: TCreateSupplierOrderRequest = {
       supplier_id: supplierId,
-      category_id: firstCloth?.category_id ? Number(firstCloth.category_id) : 0,
-      subcategory_id: firstCloth?.subcategory_ids?.[0]
-        ? Number(firstCloth.subcategory_ids[0])
-        : 0,
+      category_id: Number(values.category_id),
+      subcategory_id: Number(values.subcategory_id),
       branch_id: firstCloth?.entity_id ? Number(firstCloth.entity_id) : 0,
       order_date: values.order_date?.slice(0, 10) ?? "",
       total_amount: clothesPayload.reduce((s, c) => s + (c.price ?? 0), 0),
@@ -463,6 +460,48 @@ export function CreateSupplierOrderForm({
           )}
         />
 
+        {/* Category & Subcategory (required) */}
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="category_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>قسم المنتجات</FormLabel>
+                <FormControl>
+                  <CategoriesSelect
+                    value={field.value ?? ""}
+                    onChange={(id) => {
+                      field.onChange(id);
+                      form.setValue("subcategory_id", "");
+                    }}
+                    disabled={isPending}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="subcategory_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>قسم المنتجات الفرعي</FormLabel>
+                <FormControl>
+                  <SubcategoriesSelect
+                    value={field.value ?? ""}
+                    onChange={field.onChange}
+                    category_id={categoryId ? Number(categoryId) : undefined}
+                    disabled={isPending || !categoryId}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
         {/* Notes */}
         <FormField
           control={form.control}
@@ -532,52 +571,6 @@ export function CreateSupplierOrderForm({
                     <FormMessage />
                   </FormItem>
                 )}
-              />
-
-              <FormField
-                control={form.control}
-                name={`clothes.${index}.category_id`}
-                render={({ field: f }) => (
-                  <FormItem>
-                    <FormLabel>قسم المنتجات (اختياري)</FormLabel>
-                    <FormControl>
-                      <CategoriesSelect
-                        value={f.value ?? ""}
-                        onChange={(id) => {
-                          f.onChange(id);
-                          form.setValue(`clothes.${index}.subcategory_ids`, []);
-                        }}
-                        disabled={isPending}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name={`clothes.${index}.subcategory_ids`}
-                render={({ field: f }) => {
-                  const clothCat = form.watch(`clothes.${index}.category_id`);
-                  return (
-                    <FormItem>
-                      <FormLabel>أقسام فرعية (اختياري)</FormLabel>
-                      <FormControl>
-                        <SubcategoriesSelect
-                          multiple
-                          value={f.value ?? []}
-                          onChange={f.onChange}
-                          category_id={
-                            clothCat ? Number(clothCat) : undefined
-                          }
-                          disabled={isPending}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  );
-                }}
               />
 
               <FormField
