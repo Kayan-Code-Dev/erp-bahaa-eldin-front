@@ -5,12 +5,14 @@ export const getOrderTypeLabel = (order_type: TOrder["order_type"]) => {
   if (order_type === "buy") return "شراء";
   if (order_type === "tailoring") return "تفصيل";
   if (order_type === "mixed") return "مختلط";
+  if (order_type === "unknown") return "—";
   return order_type ?? "—";
 };
 
 export const getStatusVariant = (status: TOrder["status"] | string) => {
   switch (status) {
     case "paid":
+    case "finished":
       return "bg-green-600 text-white hover:bg-green-600/80";
     case "partially_paid":
       return "bg-yellow-500 text-white hover:bg-yellow-500/80";
@@ -31,6 +33,7 @@ export const getStatusLabel = (status: TOrder["status"] | string) => {
   const labels: Record<string, string> = {
     created: "تم إنشاء الطلب",
     paid: "مدفوع",
+    finished: "منتهي",
     partially_paid: "مدفوع جزئياً",
     canceled: "ملغي",
     delivered: "تم تسليم الطلب",
@@ -70,7 +73,7 @@ export const getOrderCurrencyInfo = (order?: OrderLike | null) => {
 
 export const getOrderTotalsWithVat = (order?: OrderLike | null) => {
   const rawTotal = (order?.total_price ?? "") as string | number;
-  const subtotal =
+  const totalWithVat =
     typeof rawTotal === "number"
       ? rawTotal
       : parseFloat(String(rawTotal).replace(/,/g, "")) || 0;
@@ -83,21 +86,9 @@ export const getOrderTotalsWithVat = (order?: OrderLike | null) => {
       ? 0
       : parseFloat(String(rawVatValue).replace(/,/g, "")) || 0;
 
-  let vatAmount = 0;
-
-  if (vatEnabled && vatValue > 0) {
-    if (vatType === "percentage") {
-      vatAmount = (subtotal * vatValue) / 100;
-    } else if (vatType === "fixed") {
-      vatAmount = vatValue;
-    }
-  }
-
-  const totalWithVat = subtotal + vatAmount;
-
   return {
-    subtotal,
-    vatAmount,
+    subtotal: totalWithVat,
+    vatAmount: 0,
     totalWithVat,
     vatEnabled,
     vatType,

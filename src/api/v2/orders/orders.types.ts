@@ -144,6 +144,24 @@ export type TOrder = {
   employee_name?: string | null;
   inventory?: TOrderInventory | null;
   items: TOrderItem[];
+  /** VAT settings from API */
+  vat_enabled?: boolean | null;
+  vat_type?: "fixed" | "percentage" | null;
+  vat_value?: string | null;
+  /** Branch info (currency, etc.) */
+  branch?: {
+    id?: number;
+    branch_code?: string;
+    name?: string;
+    currency_name?: string | null;
+    currency_code?: string | null;
+    currency_symbol?: string | null;
+  } | null;
+  /** Employee who created the order */
+  employee?: {
+    id?: number;
+    user?: { name?: string; email?: string };
+  } | null;
   /** Set by API when filtering returned/overdue orders */
   is_returned?: boolean;
   is_overdue?: boolean;
@@ -153,12 +171,13 @@ export type TOrderPaymentStatus =
   | "created"
   | "paid"
   | "partially_paid"
+  | "finished"
   | "canceled"
   | "delivered";
 
 export type TDiscountType = "none" | "percentage" | "fixed";
 
-export type TOrderType = "rent" | "buy" | "tailoring" | "mixed";
+export type TOrderType = "rent" | "buy" | "tailoring" | "mixed" | "unknown";
 
 /** Payment request payload */
 export type TAddPaymentRequest = {

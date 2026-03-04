@@ -56,7 +56,6 @@ import { CreateCustodyModal } from "./CreateCustodyModal";
 import { CreatePaymentModal } from "./CreatePaymentModal";
 import {
   getOrderCurrencyInfo,
-  getOrderTotalsWithVat,
   getOrderTypeLabel,
 } from "@/api/v2/orders/order.utils";
 import { OrderEmployeeName } from "@/components/custom/OrderEmployeeName";
@@ -354,7 +353,7 @@ function OrdersList() {
   const canEditOrder = (o: TOrder) => isActive(o);
   const canPrintOrder = (o: TOrder) => o.status !== "canceled";
   const canAddPayment = (o: TOrder) =>
-    o.status !== "paid" && o.status !== "canceled";
+    o.status !== "paid" && o.status !== "finished" && o.status !== "canceled";
   const canCreateCustodyForOrder = (o: TOrder) =>
     o.order_type === "rent" && !hasCustodyByOrderId[o.id] && isActive(o);
   const canDeleteOrder = (o: TOrder) =>
@@ -986,7 +985,7 @@ function OrdersList() {
                       <TableCell className="align-top">
                         {(() => {
                           const { currency_symbol } = getOrderCurrencyInfo(order as any);
-                          const { totalWithVat } = getOrderTotalsWithVat(order as any);
+                          const totalPrice = Number(order.total_price ?? 0);
                           return (
                             <div className="flex flex-col gap-2 text-sm text-right">
                               <p className="font-semibold text-gray-900">
@@ -1006,7 +1005,7 @@ function OrdersList() {
                               <p className="font-semibold text-gray-900">
                                 السعر (شامل الضريبة):{" "}
                                 <span className="font-medium tabular-nums" dir="ltr">
-                                  {totalWithVat.toLocaleString()} {currency_symbol}
+                                  {totalPrice.toLocaleString()} {currency_symbol}
                                 </span>
                               </p>
                               <p className="font-semibold text-gray-900">

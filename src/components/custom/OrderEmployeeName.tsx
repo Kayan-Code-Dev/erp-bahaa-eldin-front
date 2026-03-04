@@ -22,7 +22,9 @@ export function OrderEmployeeName({ order, className }: Props) {
     typeof order.employee_name === "string" &&
     order.employee_name.trim().length > 0;
 
-  // If name is available from API, use it directly without additional request
+  const nestedEmployeeName = (order as any).employee?.user?.name;
+
+  // If name is available from API (nested employee or employee_name), use it directly
   const { data: employeeData, isLoading } = useQuery(
     useGetEmployeeQueryOptions(employeeId || 0),
   );
@@ -31,6 +33,7 @@ export function OrderEmployeeName({ order, className }: Props) {
 
   const displayName =
     (hasEmployeeName && order.employee_name) ||
+    nestedEmployeeName ||
     fetchedName ||
     (employeeId ? `#${employeeId}` : "-");
 
