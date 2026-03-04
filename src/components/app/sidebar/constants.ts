@@ -30,6 +30,7 @@ import {
   Building,
   ShoppingCart,
   Bell,
+  Search,
 } from "lucide-react";
 
 const iconSize = 20;
@@ -119,6 +120,14 @@ export const sidebarLabels: SidebarLabel[] = [
         level: 2,
         permissions: ["orders.create"],
         iconComponent: createIcon(PlusCircle),
+      },
+      {
+        icon: null,
+        label: "بحث التسليمات والارجاعات",
+        path: "/orders/search-deliveries-returns",
+        level: 2,
+        permissions: ["orders.view", "orders.export", "orders.deliver", "orders.return"],
+        iconComponent: createIcon(Search),
       },
     ],
   },
