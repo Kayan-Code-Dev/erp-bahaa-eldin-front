@@ -157,7 +157,7 @@ function Cities() {
                         {city.name}
                       </TableCell>
                       <TableCell className="text-center">
-                        {city.country.name}
+                        {city.country?.name ?? "-"}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2 justify-center">

@@ -255,7 +255,7 @@ function Cashboxes() {
                           {cashbox.name}
                         </TableCell>
                         <TableCell className="text-center">
-                          {cashbox.branch.name}
+                          {cashbox.branch?.name ?? "-"}
                         </TableCell>
                         <TableCell className="text-center">
                           {cashbox.initial_balance.toLocaleString()}
