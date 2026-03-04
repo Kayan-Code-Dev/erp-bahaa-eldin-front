@@ -4,6 +4,7 @@ import { useGetInfiniteBranchesQueryOptions } from "@/api/v2/branches/branches.h
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Combobox, ComboboxOption } from "@/components/ui/combobox";
 import { Button } from "@/components/ui/button";
+import { useAuthStore } from "@/zustand-stores/auth.store";
 
 // Single select props
 export interface BranchesSelectPropsSingle {
@@ -67,6 +68,15 @@ function BranchesSelectContent({
   allowClear = false,
   multi = false,
 }: BranchesSelectProps) {
+  const loginData = useAuthStore((s) => s.loginData);
+  const canViewBranches =
+    loginData?.roles?.some(
+      (role) =>
+        role === "branches_manager" ||
+        role === "branches_basic_view_create" ||
+        role.startsWith("branches_")
+    ) ?? false;
+
   const {
     data,
     fetchNextPage,
@@ -74,7 +84,10 @@ function BranchesSelectContent({
     isFetchingNextPage,
     isFetching,
     isLoading,
-  } = useInfiniteQuery(useGetInfiniteBranchesQueryOptions(perPage));
+  } = useInfiniteQuery({
+    ...useGetInfiniteBranchesQueryOptions(perPage),
+    enabled: canViewBranches,
+  });
 
   // Flatten all branches from all pages into options
   const options: ComboboxOption[] = useMemo(() => {
@@ -88,7 +101,7 @@ function BranchesSelectContent({
   }, [data?.pages]);
 
   // Show loader on first load
-  if (isLoading) {
+  if (canViewBranches && isLoading) {
     return (
       <div className="flex h-9 w-full items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-sm">
         <Loader2 className="h-4 w-4 animate-spin" />
@@ -100,7 +113,8 @@ function BranchesSelectContent({
   // Single select mode
   if (!multi) {
     const singleValue = (value as string) || "";
-    const defaultPlaceholder = placeholder || "اختر الفرع...";
+    const defaultPlaceholder =
+      placeholder || (canViewBranches ? "اختر الفرع..." : "لا تملك صلاحية عرض الفروع");
 
     return (
       <div className="space-y-2">
@@ -111,15 +125,15 @@ function BranchesSelectContent({
           onChange={onChange as (value: string) => void}
           placeholder={defaultPlaceholder}
           searchPlaceholder={searchPlaceholder}
-          emptyText="لا توجد فروع."
-          disabled={disabled}
+          emptyText={canViewBranches ? "لا توجد فروع." : "لا تملك صلاحية عرض الفروع."}
+          disabled={disabled || !canViewBranches}
           className={className}
           popoverClassName={popoverClassName}
           allowClear={allowClear}
         />
         
         {/* Load More Button - shown when there are more pages */}
-        {hasNextPage && (
+        {canViewBranches && hasNextPage && (
           <Button
             variant="outline"
             size="sm"
@@ -142,7 +156,7 @@ function BranchesSelectContent({
         )}
         
         {/* Loading indicator for initial fetch */}
-        {isFetching && !isFetchingNextPage && (
+        {canViewBranches && isFetching && !isFetchingNextPage && (
           <div className="flex items-center justify-center p-2">
             <Loader2 className="h-4 w-4 animate-spin" />
           </div>
@@ -162,17 +176,19 @@ function BranchesSelectContent({
         options={options}
         value={multiValue}
         onChange={onChange as (value: string[]) => void}
-        placeholder={defaultPlaceholder}
+        placeholder={
+          canViewBranches ? defaultPlaceholder : "لا تملك صلاحية عرض الفروع"
+        }
         searchPlaceholder={searchPlaceholder}
-        emptyText="لا توجد فروع."
-        disabled={disabled}
+        emptyText={canViewBranches ? "لا توجد فروع." : "لا تملك صلاحية عرض الفروع."}
+        disabled={disabled || !canViewBranches}
         className={className}
         popoverClassName={popoverClassName}
         allowClear={allowClear}
       />
       
       {/* Load More Button - shown when there are more pages */}
-      {hasNextPage && (
+      {canViewBranches && hasNextPage && (
         <Button
           variant="outline"
           size="sm"
@@ -195,7 +211,7 @@ function BranchesSelectContent({
       )}
       
       {/* Loading indicator for initial fetch */}
-      {isFetching && !isFetchingNextPage && (
+      {canViewBranches && isFetching && !isFetchingNextPage && (
         <div className="flex items-center justify-center p-2">
           <Loader2 className="h-4 w-4 animate-spin" />
         </div>

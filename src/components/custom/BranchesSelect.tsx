@@ -11,6 +11,7 @@ import { Loader2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useGetInfiniteBranchesQueryOptions } from "@/api/v2/branches/branches.hooks";
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
+import { useAuthStore } from "@/zustand-stores/auth.store";
 
 type Props = {
   value: string;
@@ -19,7 +20,7 @@ type Props = {
   className?: string;
 };
 
-function BranchesSelectContent({ value, onChange, disabled }: Props) {
+function BranchesSelectWithAccess({ value, onChange, disabled }: Props) {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isFetching } =
     useSuspenseInfiniteQuery(useGetInfiniteBranchesQueryOptions(10));
 
@@ -73,6 +74,33 @@ function BranchesSelectContent({ value, onChange, disabled }: Props) {
       </SelectContent>
     </Select>
   );
+}
+
+function BranchesSelectNoAccess({ value }: Props) {
+  return (
+    <Select disabled value={value}>
+      <SelectTrigger className="w-full">
+        <SelectValue placeholder="لا تملك صلاحية عرض الفروع" />
+      </SelectTrigger>
+    </Select>
+  );
+}
+
+function BranchesSelectContent(props: Props) {
+  const loginData = useAuthStore((s) => s.loginData);
+  const hasBranchRole =
+    loginData?.roles?.some(
+      (role) =>
+        role === "branches_manager" ||
+        role === "branches_basic_view_create" ||
+        role.startsWith("branches_")
+    ) ?? false;
+
+  if (!hasBranchRole) {
+    return <BranchesSelectNoAccess {...props} />;
+  }
+
+  return <BranchesSelectWithAccess {...props} />;
 }
 
 function BranchesSelectSkeleton() {

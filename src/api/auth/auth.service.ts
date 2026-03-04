@@ -8,6 +8,7 @@ import {
   TUpdatePasswordRequest,
   TVerifyOtpRequest,
 } from "./auth.types";
+import { useAuthStore } from "@/zustand-stores/auth.store";
 
 export const loginApi = async (req: TLoginRequest) => {
   try {
@@ -98,12 +99,8 @@ export const updatePasswordApi = async (req: TUpdatePasswordRequest) => {
 };
 
 export const getMyPermissionsApi = async () => {
-  try {
-    const { data } = await api.get<{ data: string[] }>(
-      `/auth/get_my_permissions`
-    );
-    return data.data;
-  } catch (error) {
-    populateError(error, "خطأ اثناء تحميل الصلاحيات");
-  }
+  // لا يوجد مسار backend للصلاحيات في هذا الـ API،
+  // لذلك نقرأها مباشرة من بيانات تسجيل الدخول المخزنة محليًا.
+  const { loginData } = useAuthStore.getState();
+  return loginData?.permissions ?? [];
 };
