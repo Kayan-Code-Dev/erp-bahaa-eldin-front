@@ -1,5 +1,4 @@
 import { api } from "../api-contants";
-import { populateError } from "../api.utils";
 import {
   LoginResponse,
   TForgetPasswordRequest,

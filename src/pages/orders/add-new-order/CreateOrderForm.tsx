@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import { useLocation, useNavigate, Link } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { TClientResponse } from "@/api/v2/clients/clients.types";
 import { TEntity } from "@/lib/types/entity.types";
@@ -234,7 +234,7 @@ function CreateOrderForm() {
   });
   const paid = useWatch({ control: form.control, name: "paid" }) ?? 0;
 
-  const { subtotal, orderDiscount, total } = useMemo(() => {
+  const { orderDiscount, total } = useMemo(() => {
     const itemList = items ?? [];
     let st = 0;
     for (const item of itemList) {
