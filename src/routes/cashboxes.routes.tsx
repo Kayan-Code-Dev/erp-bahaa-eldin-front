@@ -1,6 +1,6 @@
 import { Route } from "react-router";
-import Cashboxes from "@/pages/cachboxes/Cashboxes";
-import CashboxDetails from "@/pages/cachboxes/CashboxDetails";
+import Cashboxes from "@/pages/cashboxes/Cashboxes";
+import CashboxDetails from "@/pages/cashboxes/CashboxDetails";
 import PermissionProtectedRoute from "./PermissionProtectedRoute";
 
 export const cashboxesRoutes = () => {

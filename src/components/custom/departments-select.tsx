@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Combobox, ComboboxOption } from "@/components/ui/combobox";
-import { useGetInfiniteDepartmentsQueryOptions } from "@/api/v2/content-managment/depratments/departments.hooks";
+import { useGetInfiniteDepartmentsQueryOptions } from "@/api/v2/content-managment/departments/departments.hooks";
 import { Loader2 } from "lucide-react";
 import { useHasPermission } from "@/api/auth/auth.hooks";
 

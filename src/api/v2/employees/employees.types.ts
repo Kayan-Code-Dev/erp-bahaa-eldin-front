@@ -1,5 +1,5 @@
 import { TEntity } from "@/lib/types/entity.types";
-import { TDepartment } from "../content-managment/depratments/departments.types";
+import { TDepartment } from "../content-managment/departments/departments.types";
 import { TJobTitle } from "../content-managment/job-titles/job-titles.types";
 import { TBranchResponse } from "../branches/branches.types";
 import { TRole } from "../content-managment/roles/roles.types";

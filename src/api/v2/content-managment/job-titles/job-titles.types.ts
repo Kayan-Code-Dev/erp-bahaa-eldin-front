@@ -1,4 +1,4 @@
-import { TDepartment } from "../depratments/departments.types";
+import { TDepartment } from "../departments/departments.types";
 import { TRole } from "../roles/roles.types";
 
 export type TCreateJobTitleRequest = {

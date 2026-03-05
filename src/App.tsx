@@ -1,10 +1,7 @@
+import { lazy, Suspense } from "react";
 import AppLayout from "@/components/layout/app-layout";
-import DashboardPage from "@/pages/dashboard-page/dashboard-page";
-import LandingPage from "@/pages/landing/LandingPage";
 import { Route, Routes } from "react-router";
 import { Toaster } from "sonner";
-import Clients from "./pages/clients/Clients";
-import Factory from "./pages/factory/Factory";
 import PermissionProtectedRoute from "./routes/PermissionProtectedRoute";
 import getAuthRoutes from "./routes/auth.routes";
 import { branchesRoutes } from "./routes/branches.route";
@@ -23,13 +20,19 @@ import { suppliersRoutes } from "./routes/suppliers.routes";
 import { overduereturnsRoutes } from "./routes/overdureturns.routes";
 import { returnsRoutes } from "./routes/returns.routes";
 import { deliveriesRoutes } from "./routes/deliveries.routes";
-import Notifications from "./pages/notifications/Notifications";
-import AccountSettings from "./pages/account/AccountSettings";
+
+const LandingPage = lazy(() => import("./pages/landing/LandingPage"));
+const DashboardPage = lazy(() => import("./pages/dashboard-page/dashboard-page"));
+const Clients = lazy(() => import("./pages/clients/Clients"));
+const Factory = lazy(() => import("./pages/factory/Factory"));
+const Notifications = lazy(() => import("./pages/notifications/Notifications"));
+const AccountSettings = lazy(() => import("./pages/account/AccountSettings"));
 
 
 function App() {
   return (
     <>
+      <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>}>
       <Routes>
         {/* Public marketing landing page */}
         <Route path="/" element={<LandingPage />} />
@@ -120,6 +123,7 @@ function App() {
         />
         {getAuthRoutes()}
       </Routes>
+      </Suspense>
       <Toaster />
     </>
   );

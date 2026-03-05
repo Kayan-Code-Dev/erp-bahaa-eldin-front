@@ -51,6 +51,7 @@ const getStatusLabel = (status: TOrder["status"]) => {
     created: "تم إنشاء الطلب",
     paid: "مدفوع",
     partially_paid: "مدفوع جزئياً",
+    finished: "منتهي",
     canceled: "ملغي",
     delivered: "تم تسليم الطلب",
   };

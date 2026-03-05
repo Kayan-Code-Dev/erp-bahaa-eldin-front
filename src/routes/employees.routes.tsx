@@ -4,7 +4,7 @@ import Employees from "@/pages/employees/Employees";
 import { Route } from "react-router";
 import EmployeeCustodies from "@/pages/employees/employee-custodies/EmployeeCustodies";
 import OverdueEmployeeCustodies from "@/pages/employees/employee-custodies/OverdueEmployeeCustodies";
-import EmployeeDocuments from "@/pages/employees/empolyee-documents/EmployeeDocuments";
+import EmployeeDocuments from "@/pages/employees/employee-documents/EmployeeDocuments";
 import EmployeeDeductions from "@/pages/employees/employee-deductions/EmployeeDeductions";
 import PermissionProtectedRoute from "./PermissionProtectedRoute";
 

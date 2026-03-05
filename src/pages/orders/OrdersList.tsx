@@ -1,5 +1,5 @@
-import { useState, useMemo, useEffect, useRef, useCallback } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useState, useMemo, useCallback } from "react";
+import { useMutation, useQueries, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useSearchParams, useNavigate } from "react-router";
 import {
@@ -59,7 +59,9 @@ import {
   getOrderTypeLabel,
 } from "@/api/v2/orders/order.utils";
 import { OrderEmployeeName } from "@/components/custom/OrderEmployeeName";
+import { CUSTODIES_KEY } from "@/api/v2/custody/custody.hooks";
 import { getAllCustodies } from "@/api/v2/custody/custody.service";
+import { queryOptions } from "@tanstack/react-query";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -128,6 +130,7 @@ const getStatusLabel = (status: TOrder["status"]) => {
     created: "تم إنشاء الطلب",
     paid: "مدفوع",
     partially_paid: "مدفوع جزئياً",
+    finished: "منتهي",
     canceled: "ملغي",
     delivered: "تم تسليم الطلب",
   };
@@ -199,7 +202,6 @@ function OrdersList() {
   const [orderToAction, setOrderToAction] = useState<TOrder | null>(null);
   const [custodyModalOrder, setCustodyModalOrder] = useState<TOrder | null>(null);
   const [paymentModalOrder, setPaymentModalOrder] = useState<TOrder | null>(null);
-  const [hasCustodyByOrderId, setHasCustodyByOrderId] = useState<Record<number, boolean>>({});
 
   const displayedOrders = useMemo(() => {
     if (!data?.data) return [];
@@ -207,48 +209,40 @@ function OrdersList() {
     return data.data.filter((order) => order.order_type === orderTypeFilter);
   }, [data?.data, orderTypeFilter]);
 
-  const orderIdsKey = useMemo(
-    () => displayedOrders.map((o) => o.id).join(","),
+  // Only fetch custody for rent orders (needed for "Create Custody" button)
+  const rentOrders = useMemo(
+    () => displayedOrders.filter((o) => o.order_type === "rent"),
     [displayedOrders],
   );
-  const lastCustodyKey = useRef("");
 
-  useEffect(() => {
-    if (!displayedOrders.length || orderIdsKey === lastCustodyKey.current) {
-      if (!displayedOrders.length) setHasCustodyByOrderId({});
-      return;
-    }
-    lastCustodyKey.current = orderIdsKey;
+  const custodyQueries = useQueries({
+    queries: rentOrders.map((order) =>
+      queryOptions({
+        queryKey: [CUSTODIES_KEY, order.id, order.client_id],
+        queryFn: () =>
+          getAllCustodies({
+            order_id: order.id,
+            client_id: order.client_id,
+            page: 1,
+            per_page: 1,
+          }),
+        staleTime: 1000 * 60 * 5,
+      })
+    ),
+  });
 
-    let cancelled = false;
-    const load = async () => {
-      const entries = await Promise.all(
-        displayedOrders.map(async (order) => {
-          try {
-            const res = await getAllCustodies({
-              order_id: order.id,
-              client_id: order.client_id,
-              page: 1,
-              per_page: 1,
-            });
-            const hasAny =
-              !!res &&
-              Array.isArray((res as { data?: unknown }).data) &&
-              (res as { data: unknown[] }).data.length > 0;
-            return [order.id, hasAny] as const;
-          } catch {
-            return [order.id, false] as const;
-          }
-        }),
-      );
-      if (cancelled) return;
-      const map: Record<number, boolean> = {};
-      for (const [id, has] of entries) map[id] = has;
-      setHasCustodyByOrderId(map);
-    };
-    load();
-    return () => { cancelled = true; };
-  }, [displayedOrders, orderIdsKey]);
+  const hasCustodyByOrderId = useMemo(() => {
+    const map: Record<number, boolean> = {};
+    rentOrders.forEach((order, i) => {
+      const res = custodyQueries[i]?.data;
+      const hasAny =
+        !!res &&
+        Array.isArray((res as { data?: unknown }).data) &&
+        (res as { data: unknown[] }).data.length > 0;
+      map[order.id] = hasAny;
+    });
+    return map;
+  }, [rentOrders, custodyQueries]);
 
   const { mutate: exportOrdersToCSV, isPending: isExporting } = useMutation(
     useExportOrdersToCSVMutationOptions()

@@ -26,10 +26,16 @@ export function OrderEmployeeName({ order, className }: Props) {
   const nestedEmployeeName = (order as any).employee?.user?.name;
   const { hasPermission } = useHasPermission("hr.employees.view");
 
-  // If name is available from API (nested employee or employee_name), use it directly
+  // Only fetch when we don't already have the name from API
+  const needsFetch =
+    hasPermission &&
+    (employeeId ?? 0) > 0 &&
+    !hasEmployeeName &&
+    !nestedEmployeeName;
+
   const { data: employeeData, isLoading } = useQuery({
     ...useGetEmployeeQueryOptions(employeeId || 0),
-    enabled: hasPermission && (employeeId ?? 0) > 0,
+    enabled: needsFetch,
   });
 
   const fetchedName = employeeData?.user?.name;
