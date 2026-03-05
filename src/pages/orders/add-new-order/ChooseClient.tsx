@@ -790,9 +790,9 @@ function ChooseClient() {
           {/* لوحة المنتجات المختارة - اليسار */}
           <aside className="w-full order-first lg:order-none lg:col-start-2 lg:row-start-1">
             <div className="sticky top-24 overflow-hidden rounded-3xl bg-white dark:bg-slate-900 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.08)] dark:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.4)] ring-1 ring-slate-200/80 dark:ring-slate-700/60">
-              <div className="relative overflow-hidden bg-gradient-to-br from-[#5170ff] via-[#4a67f5] to-[#3d5ae0] px-8 py-8">
+              <div className="relative overflow-hidden bg-gradient-to-br from-[#5170ff] via-[#4a67f5] to-[#3d5ae0] px-4 py-6 sm:px-8 sm:py-8">
                 <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.06\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-60" />
-                <div className="relative flex items-center gap-5">
+                <div className="relative flex items-center gap-3 sm:gap-5">
                   <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white/25 backdrop-blur-sm ring-1 ring-white/40 shadow-lg">
                     <ShoppingBag className="h-8 w-8 text-white drop-shadow-sm" />
                   </div>
@@ -820,10 +820,10 @@ function ChooseClient() {
                 ) : (
                   <>
                     {/* رأس الجدول */}
-                    <div className="grid grid-cols-[1fr_auto_auto] gap-3 px-6 py-3 bg-slate-50 dark:bg-slate-800/50 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
-                      <span>المنتج</span>
-                      <span className="text-center">الكمية</span>
-                      <span className="text-end min-w-[4rem]">المبلغ</span>
+                    <div className="grid grid-cols-[1fr_auto_auto] gap-2 sm:gap-3 px-4 py-3 sm:px-6 bg-slate-50 dark:bg-slate-800/50 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
+                      <span className="min-w-0 truncate">المنتج</span>
+                      <span className="text-center shrink-0">الكمية</span>
+                      <span className="text-end min-w-[3rem] sm:min-w-[4rem] shrink-0">المبلغ</span>
                     </div>
                     {/* قائمة المنتجات */}
                     <div className="max-h-52 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
@@ -838,7 +838,7 @@ function ChooseClient() {
                         return (
                           <div
                             key={cloth.id}
-                            className="grid grid-cols-[1fr_auto_auto] gap-3 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors items-center"
+                            className="grid grid-cols-[1fr_auto_auto] gap-2 sm:gap-3 px-4 py-3 sm:px-6 sm:py-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors items-center"
                           >
                             <div className="min-w-0 flex items-center gap-3">
                               <div className="flex-1 min-w-0">
@@ -886,7 +886,7 @@ function ChooseClient() {
                       })}
                     </div>
                     {/* ملخص المبالغ */}
-                    <div className="border-t-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-6 py-4 space-y-2.5">
+                    <div className="border-t-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-4 sm:px-6 space-y-2.5">
                       <div className="flex justify-between items-center text-sm gap-4">
                         <span className="font-medium text-slate-600 dark:text-slate-400">الإجمالي</span>
                         <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">{Number(totalAmount).toFixed(0)} ج.م</span>
@@ -903,10 +903,10 @@ function ChooseClient() {
                   </>
                 )}
                 {/* أزرار إنشاء الطلب والحفظ المؤقت */}
-                <div className="flex flex-col gap-3 p-6 border-t border-slate-200 dark:border-slate-700">
+                <div className="flex flex-col sm:flex-row gap-3 p-4 sm:p-6 border-t border-slate-200 dark:border-slate-700">
                   <Button
                     variant="outline"
-                    className="w-full h-12 rounded-xl border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800"
+                    className="w-full h-12 rounded-xl border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0"
                     onClick={handleSaveDraft}
                   >
                     حفظ مؤقت
@@ -914,18 +914,18 @@ function ChooseClient() {
                   <Button
                     onClick={handleCreateOrder}
                     disabled={selectedProducts.length === 0 || isCreatingOrder}
-                    className="w-full h-12 rounded-xl bg-[#5170ff] hover:bg-[#4560e6] text-white font-semibold shadow-lg shadow-[#5170ff]/25 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98]"
+                    className="w-full h-12 rounded-xl bg-[#5170ff] hover:bg-[#4560e6] text-white font-semibold shadow-lg shadow-[#5170ff]/25 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98] shrink-0 flex-row"
                   >
                     {isCreatingOrder ? (
                       <>
-                        <Loader2 className="ml-3 h-5 w-5 animate-spin" />
-                        جاري إنشاء الطلب...
+                        <Loader2 className="h-5 w-5 animate-spin shrink-0" />
+                        <span>جاري إنشاء الطلب...</span>
                       </>
                     ) : (
                       <>
-                        <CheckCircle className="ml-3 h-5 w-5" />
-                        إنشاء الطلب
-                        <ArrowRight className="mr-3 h-5 w-5" />
+                        <CheckCircle className="h-5 w-5 shrink-0" />
+                        <span>إنشاء الطلب</span>
+                        <ArrowRight className="h-5 w-5 shrink-0" />
                       </>
                     )}
                   </Button>
@@ -991,7 +991,7 @@ function ChooseClient() {
                         placeholder="اختر الموظف..."
                       />
                     </div>
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                       <div className="space-y-2">
                         <Label htmlFor="receive-date" className="text-sm font-medium text-slate-700 dark:text-slate-300">
                           تاريخ الاستلام
@@ -1143,7 +1143,7 @@ function ChooseClient() {
                               </div>
                               <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">البيانات الأساسية</h3>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                               <div className="space-y-4">
                                 <FormField
                                   control={newClientForm.control}
@@ -1238,7 +1238,7 @@ function ChooseClient() {
                               </div>
                               <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">أرقام الهاتف</h3>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                               <FormField
                                 control={newClientForm.control}
                                 name="phone"
@@ -1309,7 +1309,7 @@ function ChooseClient() {
                                 </FormItem>
                               )}
                             />
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                               <FormField
                                 control={newClientForm.control}
                                 name="city_id"
@@ -1360,43 +1360,43 @@ function ChooseClient() {
               <div className="space-y-6">
                 {/* فلترة المنتجات */}
                 <section className="rounded-2xl bg-white dark:bg-slate-900 p-6 ring-1 ring-slate-200/60 dark:ring-slate-700/50">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div className="flex items-center gap-3">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-3 min-w-0">
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#5170ff]/10">
                         <Filter className="h-5 w-5 text-[#5170ff]" />
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">فلترة المنتجات</h2>
                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                           ابحث حسب الكود، قسم المنتجات وأقسام المنتجات الفرعية
                         </p>
                       </div>
                     </div>
-                    <div className="flex gap-2 shrink-0">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:shrink-0">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => setShowFilters(!showFilters)}
-                        className="rounded-xl border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800"
+                        className="w-full rounded-xl border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 sm:w-auto inline-flex flex-row items-center gap-2"
                       >
-                        <Filter className="ml-2 h-4 w-4" />
-                        {showFilters ? "إخفاء الفلاتر" : "عرض الفلاتر"}
+                        <Filter className="h-4 w-4 shrink-0" />
+                        <span>{showFilters ? "إخفاء الفلاتر" : "عرض الفلاتر"}</span>
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={resetFilters}
-                        className="rounded-xl border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800"
+                        className="w-full rounded-xl border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 sm:w-auto inline-flex flex-row items-center gap-2"
                       >
-                        <RotateCcw className="ml-2 h-4 w-4" />
-                        إعادة تعيين
+                        <RotateCcw className="h-4 w-4 shrink-0" />
+                        <span>إعادة تعيين</span>
                       </Button>
                     </div>
                   </div>
 
                   {showFilters && (
                     <div className="mt-5 pt-5 border-t border-slate-200 dark:border-slate-700 space-y-5">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div className="space-y-2">
                           <Label className="text-sm font-medium text-slate-700 dark:text-slate-300">كود المنتج</Label>
                           <Input
@@ -1407,7 +1407,7 @@ function ChooseClient() {
                           />
                         </div>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div className="space-y-2">
                           <Label className="text-sm font-medium text-slate-700 dark:text-slate-300">قسم المنتجات</Label>
                           <CategoriesSelect
@@ -1491,8 +1491,8 @@ function ChooseClient() {
                         <p className="text-sm text-slate-500 dark:text-slate-500 mt-1">حسب الفلاتر المحددة</p>
                       </div>
                     ) : (
-                      <div className="overflow-hidden rounded-xl ring-1 ring-slate-200/60 dark:ring-slate-700/50 bg-white dark:bg-slate-900">
-                        <Table>
+                      <div className="overflow-x-auto rounded-xl ring-1 ring-slate-200/60 dark:ring-slate-700/50 bg-white dark:bg-slate-900">
+                        <Table className="min-w-[640px]">
                           <TableHeader>
                             <TableRow className="bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
                               <TableHead className="w-12 text-slate-600 dark:text-slate-400 font-semibold">#</TableHead>
@@ -1560,7 +1560,7 @@ function ChooseClient() {
                                         size="sm"
                                         onClick={() => handleClothSelect(cloth)}
                                         disabled={isSelected}
-                                        className={`rounded-lg font-medium ${
+                                        className={`w-full sm:w-auto min-w-[4.5rem] rounded-lg font-medium ${
                                           isSelected
                                             ? "border-emerald-300 text-emerald-700 bg-emerald-50 dark:bg-emerald-950/30 dark:border-emerald-800 dark:text-emerald-400"
                                             : "bg-[#5170ff] hover:bg-[#4560e6] text-white"
@@ -1627,7 +1627,7 @@ function ChooseClient() {
                             السعر والكمية
                           </h3>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                           <div className="space-y-2">
                             <Label htmlFor="quantity" className="text-sm font-medium text-slate-700 dark:text-slate-300 block">
                               الكمية
@@ -1702,7 +1702,7 @@ function ChooseClient() {
                             خصم القطعة
                           </h3>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                           <div className="space-y-2">
                             <Label htmlFor="discount_type" className="text-sm font-medium text-slate-700 dark:text-slate-300 block">
                               نوع الخصم
@@ -1793,7 +1793,7 @@ function ChooseClient() {
                             </p>
                           </div>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                           {[
                             { key: "sleeveLength", label: "طول الكم", placeholder: "سم" },
                             { key: "forearm", label: "الزند", placeholder: "سم" },
@@ -1830,10 +1830,10 @@ function ChooseClient() {
                       <div className="flex justify-center pt-2">
                         <Button
                           onClick={handleAddProduct}
-                          className="h-12 px-10 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-lg shadow-emerald-500/25 hover:shadow-xl transition-all active:scale-[0.98]"
+                          className="h-12 w-full sm:w-auto sm:px-10 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-lg shadow-emerald-500/25 hover:shadow-xl transition-all active:scale-[0.98] inline-flex flex-row items-center gap-2"
                         >
-                          <Plus className="ml-2 h-5 w-5" />
-                          إضافة المنتج إلى الطلب
+                          <Plus className="h-5 w-5 shrink-0" />
+                          <span>إضافة المنتج إلى الطلب</span>
                         </Button>
                       </div>
                     </div>
@@ -1857,7 +1857,7 @@ function ChooseClient() {
                   </p>
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
                   <Label className="text-slate-700 dark:text-slate-300 font-medium">نوع الخصم</Label>
                   <Select
@@ -1900,14 +1900,14 @@ function ChooseClient() {
             </section>
           </CardContent>
 
-          <CardFooter className="flex flex-col gap-4 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-8 py-6">
+          <CardFooter className="flex flex-col gap-4 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-6 sm:px-8">
             <Button
               variant="outline"
               onClick={() => navigate("/orders/list")}
-              className="h-12 px-6 rounded-xl border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors w-fit"
+              className="h-12 px-6 rounded-xl border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors w-full sm:w-fit inline-flex flex-row items-center gap-2"
             >
-              <ArrowLeft className="ml-2 h-5 w-5" />
-              رجوع للقائمة
+              <ArrowLeft className="h-5 w-5 shrink-0" />
+              <span>رجوع للقائمة</span>
             </Button>
           </CardFooter>
         </Card>

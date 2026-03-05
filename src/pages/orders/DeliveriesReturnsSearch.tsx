@@ -384,25 +384,25 @@ function DeliveriesReturnsSearch() {
   return (
     <div dir="rtl">
       <Card className="max-w-5xl 2xl:max-w-screen-2xl mx-auto">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
+        <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
             <CardTitle>بحث التسليمات والارجاعات</CardTitle>
             <CardDescription>
               البحث في التسليمات والارجاعات مع عرض التواريخ والإجراءات بشكل منفصل
             </CardDescription>
           </div>
-          <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
+          <div className="flex flex-row flex-wrap items-center gap-2 shrink-0">
             <Button
               type="button"
               variant="outline"
               size="sm"
-              className="flex items-center gap-1"
+              className="flex items-center gap-1 shrink-0"
               onClick={() => setShowFilters((prev) => !prev)}
             >
-              <Filter className="ml-1 h-4 w-4" />
+              <Filter className="h-4 w-4 shrink-0" />
               {showFilters ? "إخفاء الفلاتر" : "الفلاتر"}
             </Button>
-            <div className="inline-flex rounded-md border bg-muted/40 p-0.5">
+            <div className="inline-flex rounded-md border bg-muted/40 p-0.5 shrink-0">
               <Button
                 type="button"
                 variant={orderTypeFilter === "all" ? "default" : "ghost"}
@@ -442,11 +442,13 @@ function DeliveriesReturnsSearch() {
             </div>
             <Button
               variant="outline"
+              size="sm"
               onClick={handleExport}
               disabled={isExporting}
+              className="shrink-0"
             >
-              <Download className="ml-2 h-4 w-4" />
-              {isExporting ? "جاري التصدير..." : "تصدير إلى CSV"}
+              <Download className="h-4 w-4 shrink-0" />
+              {isExporting ? "جاري التصدير..." : "تصدير"}
             </Button>
           </div>
         </CardHeader>
@@ -457,7 +459,7 @@ function DeliveriesReturnsSearch() {
               <h3 className="mb-3 text-sm font-semibold text-foreground">الفلاتر</h3>
               <Form {...form}>
                 <form className="space-y-4">
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <FormField
                       control={form.control}
                       name="order_id"
@@ -669,8 +671,8 @@ function DeliveriesReturnsSearch() {
             </div>
           )}
 
-          <div className="overflow-hidden rounded-md border">
-            <Table>
+          <div className="overflow-x-auto rounded-md border">
+            <Table className="min-w-[720px]">
               <TableHeader>
                 <TableRow>
                   <TableHead className="text-center w-16">#</TableHead>
@@ -678,7 +680,7 @@ function DeliveriesReturnsSearch() {
                   <TableHead className="text-right w-48">التواريخ</TableHead>
                   <TableHead className="text-right w-[28%]">الأصناف / المبالغ / الحالة</TableHead>
                   <TableHead className="text-center w-32">الموظف</TableHead>
-                  <TableHead className="text-center w-40">الإجراءات</TableHead>
+                  <TableHead className="text-center min-w-[280px] w-[280px]">الإجراءات</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -843,9 +845,9 @@ function DeliveriesReturnsSearch() {
                       </TableCell>
 
                       {/* Column 6: Actions only */}
-                      <TableCell className="align-top">
+                      <TableCell className="align-top min-w-[280px] text-center">
                         <TooltipProvider delayDuration={300}>
-                          <div className="flex flex-wrap items-center gap-1 justify-center">
+                          <div className="inline-grid grid-cols-[repeat(4,2rem)] gap-0 place-items-center mx-auto">
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Button

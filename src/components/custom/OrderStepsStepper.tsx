@@ -25,7 +25,7 @@ export function OrderStepsStepper({ currentStep, stepState, allowNextStep, allow
       className="w-full"
       dir="rtl"
     >
-      <ol className="flex items-center justify-center gap-0 sm:gap-1 flex-wrap">
+      <ol className="flex items-center justify-center gap-0 sm:gap-1 flex-nowrap overflow-x-auto pb-1">
         {STEPS.map((step, index) => {
           const isActive = step.id === currentStep;
           const isCompleted = step.id < currentStep;
@@ -35,7 +35,7 @@ export function OrderStepsStepper({ currentStep, stepState, allowNextStep, allow
             (allowCurrentStepClick && step.id === currentStep);
 
           return (
-            <li key={step.id} className="flex items-center">
+            <li key={step.id} className="flex items-center shrink-0">
               {index > 0 && (
                 <ChevronLeft
                   className={cn(
@@ -47,7 +47,7 @@ export function OrderStepsStepper({ currentStep, stepState, allowNextStep, allow
               )}
               <span
                 className={cn(
-                  "inline-flex items-center gap-2 text-sm font-medium px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl transition-all duration-200",
+                  "inline-flex flex-row items-center gap-2 text-sm font-medium px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl transition-all duration-200",
                   isActive &&
                     "text-[#5170ff] bg-[#5170ff]/10 ring-1 ring-[#5170ff]/20 shadow-sm",
                   isCompleted && "text-slate-700 dark:text-slate-300",

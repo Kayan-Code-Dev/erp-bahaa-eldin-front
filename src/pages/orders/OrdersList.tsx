@@ -794,9 +794,9 @@ function OrdersList() {
                                 : "-"}
                             </span>
                           </p>
-                          <div className="mt-2">
+                          <div className="mt-2 flex justify-center">
                             <TooltipProvider delayDuration={300}>
-                              <div className="flex flex-wrap items-center gap-1 justify-start">
+                              <div className="inline-grid grid-cols-[repeat(4,2rem)] gap-0 place-items-center">
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <Button
