@@ -70,8 +70,8 @@ export function OrderReceiptAckPrint({
     <article
       dir="rtl"
       lang="ar"
-      className="ack-print-root w-full max-w-[148mm] min-h-[198mm] flex flex-col bg-white text-gray-900 text-[12px] leading-snug ack-print-document"
-      style={{ fontFamily: "'Cairo', 'Segoe UI', Arial, sans-serif" }}
+      className="ack-print-root w-full max-w-[148mm] min-h-[198mm] flex flex-col bg-white text-gray-900 text-[10px] leading-snug ack-print-document"
+      style={{ fontFamily: "'Segoe UI', 'Cairo', Arial, sans-serif" }}
       itemScope
       itemType="https://schema.org/Receipt"
     >
@@ -80,12 +80,12 @@ export function OrderReceiptAckPrint({
       
       {/* Header — minimized */}
       <header
-        className="ack-print-header w-full py-2 mb-2 text-white rounded-b-lg shadow-sm"
+        className="ack-print-header w-full py-1.5 mb-1.5 text-white rounded-b shadow-sm"
         style={{ backgroundColor: HEADER_BG }}
         role="banner"
       >
-        <div className="ack-print-header-inner flex items-center justify-between gap-3 w-full px-3">
-          <div className="ack-print-header-right text-right shrink-0 space-y-0.5 text-[11px]">
+        <div className="ack-print-header-inner flex items-center justify-between gap-2 w-full px-2">
+          <div className="ack-print-header-right text-right shrink-0 space-y-0.5 text-[9px]">
             <div className="flex items-baseline justify-end gap-2 flex-wrap">
               <span className="text-white/95 font-medium">رقم الفاتورة:</span>
               <span className="font-bold text-white" itemProp="identifier" style={{ fontVariantNumeric: "tabular-nums", fontFamily: "'Segoe UI', Arial, sans-serif" }}>{order.id}</span>
@@ -100,30 +100,30 @@ export function OrderReceiptAckPrint({
               التاريخ: <span className="font-semibold">{invoiceDate}</span>
             </div>
           </div>
-          <div className="ack-print-header-logo shrink-0 flex items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-white/60 px-4 py-2">
+          <div className="ack-print-header-logo shrink-0 w-10 h-10 flex items-center justify-center rounded-full overflow-hidden bg-white shadow-md ring-2 ring-white/80">
             <img
               src={effectiveLogoUrl}
               alt="شعار الشركة"
-              className="ack-print-logo-img h-12 max-h-full max-w-[140px] w-auto object-contain"
+              className="ack-print-logo-img w-full h-full object-cover"
               itemProp="image"
             />
           </div>
         </div>
       </header>
 
-      <main className="ack-print-content flex-1 flex flex-col min-h-0 w-full px-3 pb-2 overflow-hidden">
+      <main className="ack-print-content flex-1 flex flex-col min-h-0 w-full px-2 pb-1 overflow-hidden">
         {/* Content from title to signature only */}
         <section className="ack-print-body shrink-0">
         {/* 1. Receipt acknowledgment title — at the top */}
-        <header className="ack-print-title-wrap flex flex-col items-center justify-center text-center mb-2">
-          <h1 className="ack-print-title text-[18px] font-bold text-gray-900 tracking-tight mb-1">
+        <header className="ack-print-title-wrap flex flex-col items-center justify-center text-center mb-1.5">
+          <h1 className="ack-print-title text-[14px] font-bold text-gray-900 tracking-tight mb-0.5">
             إقرار استلام
           </h1>
-          <span className="ack-print-title-line block h-0.5 w-16 rounded-full bg-gray-400" aria-hidden />
+          <span className="ack-print-title-line block h-0.5 w-12 rounded-full bg-gray-400" aria-hidden />
         </header>
 
         {/* 2. I received / National ID / Resident in / Phone */}
-        <section className="ack-print-recipient text-right mb-2 space-y-1 text-[12px] min-w-0" itemScope itemType="https://schema.org/Person">
+        <section className="ack-print-recipient text-right mb-1.5 space-y-0.5 text-[10px] min-w-0" itemScope itemType="https://schema.org/Person">
           <p className="text-gray-900">
             <span className="font-semibold text-gray-700">استلمت أنا :</span>{" "}
             <span className="font-bold text-gray-900" itemProp="name">{clientName}</span>
@@ -145,7 +145,7 @@ export function OrderReceiptAckPrint({
         </section>
 
         {/* 3. Numbered products list */}
-        <section className="ack-print-items-list mb-2 text-[12px] text-gray-900 min-w-0">
+        <section className="ack-print-items-list mb-1.5 text-[10px] text-gray-900 min-w-0">
           <h2 className="sr-only">قائمة المنتجات</h2>
           {items.length > 0 ? (
             <ol className="list-decimal list-inside space-y-1" itemProp="itemListElement" itemScope itemType="https://schema.org/ItemList">
@@ -164,14 +164,14 @@ export function OrderReceiptAckPrint({
         </section>
 
         {/* 4. Rental period */}
-        <p className="ack-print-rental text-[12px] text-gray-900 mb-2 min-w-0 wrap-break-word">
+        <p className="ack-print-rental text-[10px] text-gray-900 mb-1 min-w-0 wrap-break-word">
           وذلك بتأجيره من تاريخ{" "}
           <time className="font-semibold" dateTime={order.visit_datetime || undefined}>{startDate}</time> حتى تاريخ{" "}
           <time className="font-semibold" dateTime={order.delivery_date || undefined}>{endDate}</time>
         </p>
 
         {/* 5. Receipt acknowledgment and deposit payment */}
-        <p className="ack-print-deposit text-[12px] text-gray-900 mb-3 min-w-0 wrap-break-word">
+        <p className="ack-print-deposit text-[10px] text-gray-900 mb-1.5 min-w-0 wrap-break-word">
         وذلك إقرار مني بالاستلام ودفع عربون وقدره :{" "}
           {(() => {
             const { currency_symbol } = getOrderCurrencyInfo(order as any);
@@ -192,15 +192,15 @@ export function OrderReceiptAckPrint({
         </p>
 
         {/* 6. Recipient and signature */}
-        <section className="ack-print-signature flex justify-end mt-2 pt-2 border-t border-gray-300 min-w-0">
-          <div className="ack-print-signature-box text-right min-w-0 space-y-1.5 text-[12px] text-gray-900">
-            <p className="flex items-center justify-end gap-2 flex-wrap">
+        <section className="ack-print-signature flex justify-end mt-1.5 pt-1.5 border-t border-gray-300 min-w-0">
+          <div className="ack-print-signature-box text-right min-w-0 space-y-1 text-[10px] text-gray-900">
+            <p className="flex items-center justify-end gap-1.5 flex-wrap">
               <span className="font-semibold text-gray-700 shrink-0">المستلم:</span>
-              <span className="inline-block min-w-[80px] flex-1 max-w-[120px] h-4 border-b border-gray-400">&nbsp;</span>
+              <span className="inline-block min-w-[60px] flex-1 max-w-[90px] h-3 border-b border-gray-400">&nbsp;</span>
             </p>
-            <p className="flex items-center justify-end gap-2 flex-wrap">
+            <p className="flex items-center justify-end gap-1.5 flex-wrap">
               <span className="font-semibold text-gray-700 shrink-0">التوقيع:</span>
-              <span className="inline-block min-w-[80px] flex-1 max-w-[120px] h-4 border-b border-gray-400">&nbsp;</span>
+              <span className="inline-block min-w-[60px] flex-1 max-w-[90px] h-3 border-b border-gray-400">&nbsp;</span>
             </p>
           </div>
         </section>
@@ -209,12 +209,12 @@ export function OrderReceiptAckPrint({
 
       {/* القواعد والتعليمات + الفوتر معاً أسفل الصفحة في نفس الصفحة */}
       <div className="ack-print-bottom mt-auto flex flex-col shrink-0 w-full">
-        <aside className="ack-print-rules pt-1.5 pb-1.5 border-t border-gray-200 shrink-0 min-w-0 px-3">
-          <h2 className="ack-print-rules-title text-[10px] font-bold text-gray-800 mb-0.5">
+        <aside className="ack-print-rules pt-1 pb-1 border-t border-gray-200 shrink-0 min-w-0 px-2">
+          <h2 className="ack-print-rules-title text-[9px] font-bold text-gray-800 mb-0.5">
             القواعد والتعليمات
           </h2>
-          <div className="ack-print-notes-box rounded border border-gray-200 bg-gray-50 py-1.5 px-2 min-w-0">
-            <ul className="list-none space-y-0.5 text-[9px] text-gray-800 leading-tight wrap-break-word">
+          <div className="ack-print-notes-box rounded border border-gray-200 bg-gray-50 py-1 px-1.5 min-w-0">
+            <ul className="list-none space-y-0.5 text-[8px] text-gray-800 leading-tight wrap-break-word">
               {RULES_ITEMS.map((text, i) => (
                 <li key={i} className="font-normal wrap-break-word">
                   {text}
@@ -224,7 +224,7 @@ export function OrderReceiptAckPrint({
           </div>
         </aside>
         <footer
-          className="ack-print-footer w-full py-1.5 px-3 text-center text-white rounded-t-lg text-[9px] font-semibold shadow shrink-0 min-w-0 wrap-break-word"
+          className="ack-print-footer w-full py-1 px-2 text-center text-white rounded-t text-[8px] font-semibold shrink-0 min-w-0 wrap-break-word"
           style={{ backgroundColor: HEADER_BG }}
           role="contentinfo"
         >
@@ -235,7 +235,7 @@ export function OrderReceiptAckPrint({
 
       <style>{`
         @media print {
-          @page { size: A5 portrait; margin: 8mm; }
+          @page { size: A5 portrait; margin: 6mm; }
           html, body { 
             margin: 0 !important; 
             padding: 0 !important; 
@@ -251,10 +251,10 @@ export function OrderReceiptAckPrint({
             top: 0 !important;
             transform: none !important;
             width: 100% !important; 
-            max-width: 100% !important;
-            height: 194mm !important;
-            min-height: 194mm !important;
-            max-height: 194mm !important;
+            max-width: 148mm !important;
+            height: 198mm !important;
+            min-height: 198mm !important;
+            max-height: 198mm !important;
             padding: 0 !important;
             box-sizing: border-box !important; 
             page-break-inside: avoid;

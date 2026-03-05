@@ -18,11 +18,11 @@ const LandingPage = () => {
         <div className="max-w-6xl mx-auto flex items-center justify-between px-4 py-3 md:py-4">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-2xl bg-white border border-border/60 shadow-sm flex items-center justify-center overflow-hidden">
+            <div className="h-10 w-10 rounded-full bg-white border border-border/60 shadow-md ring-1 ring-slate-200/60 flex items-center justify-center overflow-hidden">
               <img
                 src="/dressnmore-logo.jpg"
                 alt="dressnmore logo"
-                className="h-7 w-7 object-contain"
+                className="w-full h-full object-cover"
               />
             </div>
             <div className="flex flex-col">

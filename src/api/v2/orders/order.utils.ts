@@ -9,6 +9,20 @@ export const getOrderTypeLabel = (order_type: TOrder["order_type"]) => {
   return order_type ?? "—";
 };
 
+/** Get subcategory display for order item (منتج فرعي) */
+export function getItemSubcategoryDisplay(item: Record<string, unknown>): string {
+  const subcategoryNames = item.subcategory_names as string[] | undefined;
+  if (subcategoryNames?.length) return subcategoryNames.join("، ");
+  const subcategories = item.subcategories as { name?: string }[] | undefined;
+  if (Array.isArray(subcategories) && subcategories.length)
+    return subcategories.map((s) => s?.name ?? "").filter(Boolean).join("، ");
+  const subcategoryName = item.subcategory_name;
+  if (subcategoryName && String(subcategoryName).trim()) return String(subcategoryName).trim();
+  const subcategory = item.subcategory as { name?: string } | undefined;
+  if (subcategory?.name) return subcategory.name;
+  return "";
+}
+
 export const getStatusVariant = (status: TOrder["status"] | string) => {
   switch (status) {
     case "paid":
@@ -86,9 +100,28 @@ export const getOrderTotalsWithVat = (order?: OrderLike | null) => {
       ? 0
       : parseFloat(String(rawVatValue).replace(/,/g, "")) || 0;
 
+  let subtotal: number;
+  let vatAmount: number;
+
+  if (vatEnabled && vatValue > 0) {
+    if (vatType === "percentage") {
+      subtotal = Math.round((totalWithVat / (1 + vatValue / 100)) * 100) / 100;
+      vatAmount = Math.round((totalWithVat - subtotal) * 100) / 100;
+    } else if (vatType === "fixed") {
+      vatAmount = vatValue;
+      subtotal = Math.round((totalWithVat - vatAmount) * 100) / 100;
+    } else {
+      subtotal = totalWithVat;
+      vatAmount = 0;
+    }
+  } else {
+    subtotal = totalWithVat;
+    vatAmount = 0;
+  }
+
   return {
-    subtotal: totalWithVat,
-    vatAmount: 0,
+    subtotal,
+    vatAmount,
     totalWithVat,
     vatEnabled,
     vatType,

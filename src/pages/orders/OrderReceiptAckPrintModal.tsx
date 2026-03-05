@@ -99,19 +99,24 @@ const ACK_PRINT_STYLES = `
   .ack-print-header-right .font-medium { font-weight: 500; }
   .ack-print-header-logo { 
     flex-shrink: 0; 
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
     background: #ffffff; 
-    border-radius: 9999px; 
-    padding: 6px 18px; 
+    border-radius: 50%; 
+    padding: 0; 
+    overflow: hidden;
     display: flex; 
     align-items: center; 
     justify-content: center; 
-    box-shadow: 0 3px 6px rgba(0,0,0,0.08);
-    border: 1px solid rgba(255,255,255,0.7);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+    border: 2px solid rgba(255,255,255,0.9);
   }
   .ack-print-header-logo img, .ack-print-logo-img { 
-    max-height: 44px; 
-    width: auto; 
-    object-fit: contain; 
+    width: 100%;
+    height: 100%;
+    object-fit: cover; 
   }
   .ack-print-title-wrap { 
     display: flex; 

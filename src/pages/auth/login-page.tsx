@@ -72,11 +72,11 @@ const Login = () => {
       <div className="w-full max-w-md space-y-6" dir="rtl">
         {/* Logo + title */}
         <div className="flex flex-col items-center gap-2 text-center">
-          <div className="h-12 w-12 rounded-2xl bg-white/90 border border-border/70 shadow-sm flex items-center justify-center overflow-hidden">
+          <div className="h-16 w-16 rounded-full bg-white/95 border border-border/70 shadow-lg ring-2 ring-primary/10 flex items-center justify-center overflow-hidden">
             <img
               src="/dressnmore-logo.jpg"
               alt="dressnmore logo"
-              className="h-9 w-9 object-contain"
+              className="w-full h-full object-cover"
             />
           </div>
           <div className="space-y-1">

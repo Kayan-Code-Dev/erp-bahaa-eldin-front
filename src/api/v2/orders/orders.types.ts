@@ -105,6 +105,11 @@ export type TOrderItem = {
   total_length?: string | null;
   hinch?: string | null;
   dress_size?: string | null;
+  /** Subcategory name(s) — from cloth/inventory (منتج فرعي) */
+  subcategory_name?: string | null;
+  subcategory_names?: string[] | null;
+  subcategory?: { id?: number; name?: string } | null;
+  subcategories?: { id?: number; name?: string }[] | null;
 };
 
 export type TOrder = {

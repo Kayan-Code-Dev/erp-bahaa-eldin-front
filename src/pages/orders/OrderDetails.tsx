@@ -38,6 +38,7 @@ import {
   getOrderCurrencyInfo,
   getOrderTotalsWithVat,
   getOrderTypeLabel,
+  getItemSubcategoryDisplay,
 } from "@/api/v2/orders/order.utils";
 
 const getStatusVariant = (status: TOrder["status"]) => {
@@ -545,7 +546,11 @@ function OrderDetails() {
                                 {item.name ?? item.code}
                               </TableCell>
                               <TableCell className="text-center">
-                                {getOrderTypeLabel(item.type)}
+                                {(() => {
+                                  const typeLabel = getOrderTypeLabel(item.type);
+                                  const subcategory = getItemSubcategoryDisplay(item as Record<string, unknown>);
+                                  return subcategory ? `${typeLabel} (${subcategory})` : typeLabel;
+                                })()}
                               </TableCell>
                               <TableCell className="text-center">
                                 {item.quantity}

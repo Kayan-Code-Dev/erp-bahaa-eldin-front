@@ -23,6 +23,7 @@ import {
   getOrderCurrencyInfo,
   getOrderTotalsWithVat,
   getOrderTypeLabel,
+  getItemSubcategoryDisplay,
 } from "@/api/v2/orders/order.utils";
 
 type Props = {
@@ -381,7 +382,11 @@ export function OrderDetailsModal({ order, open, onOpenChange }: Props) {
                               {item.name ?? item.code}
                             </TableCell>
                             <TableCell className="text-center">
-                              {getOrderTypeLabel(item.type)}
+                              {(() => {
+                                const typeLabel = getOrderTypeLabel(item.type);
+                                const subcategory = getItemSubcategoryDisplay(item as Record<string, unknown>);
+                                return subcategory ? `${typeLabel} (${subcategory})` : typeLabel;
+                              })()}
                             </TableCell>
                             <TableCell className="text-center">
                               {item.quantity}
