@@ -35,7 +35,7 @@ function Header() {
     .toUpperCase();
 
   return (
-    <header className="bg-white p-4 flex items-center justify-between border-b">
+    <header className="bg-white/95 backdrop-blur-sm border-b border-border/60 px-4 md:px-6 py-3 flex items-center justify-between shadow-sm">
       <div className="flex items-center gap-2 md:order-2">
         <Button
           variant="ghost"

@@ -21,7 +21,7 @@ function MainContent() {
       }}
     >
       <Header />
-      <div className="p-4 flex-1">
+      <div className="p-5 md:p-6 flex-1">
         <Outlet />
       </div>
     </div>
@@ -39,7 +39,7 @@ function AppLayout() {
   }
   return (
     <SidebarProvider defaultOpen={false}>
-      <div className="min-h-screen bg-[#f2f2f2] w-full flex flex-row">
+      <div className="min-h-screen bg-[linear-gradient(180deg,hsl(220_20%_98%)_0%,hsl(220_14%_96%)_100%)] w-full flex flex-row">
         <AppSidebar />
         <MainContent />
       </div>

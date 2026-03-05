@@ -68,7 +68,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[radial-gradient(circle_at_top,rgba(144,116,87,0.12),transparent_55%),linear-gradient(to_bottom_right,#f5f5f7,#e3e4e8)] flex items-center justify-center px-4 py-8">
+    <div className="min-h-screen w-full bg-[linear-gradient(180deg,hsl(220_25%_98%)_0%,hsl(220_20%_96%)_50%,hsl(220_15%_94%)_100%)] flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md space-y-6" dir="rtl">
         {/* Logo + title */}
         <div className="flex flex-col items-center gap-2 text-center">
@@ -90,7 +90,7 @@ const Login = () => {
         </div>
 
         {/* Auth card */}
-        <Card className="border border-border/70 shadow-[0_18px_45px_rgba(15,23,42,0.16)] bg-white/95 backdrop-blur-sm">
+        <Card className="border border-border/70 shadow-[0_4px_24px_rgb(0_0_0/0.08),0_8px_24px_rgb(0_0_0/0.06)] bg-white">
             <CardContent className="pt-6 pb-7 px-6 md:px-7 flex flex-col gap-6">
               <div className="flex flex-col gap-1 text-right">
               <h2 className="text-lg md:text-xl font-semibold tracking-tight text-foreground">
@@ -175,7 +175,7 @@ const Login = () => {
                     </span>
                     <Button
                       variant="link"
-                      className="p-0 h-auto text-[11px] md:text-xs text-main-gold hover:text-main-gold/90"
+                      className="p-0 h-auto text-[11px] md:text-xs text-primary hover:text-primary/90"
                     >
                       <Link to="/forget-password">نسيت كلمة المرور؟</Link>
                     </Button>
@@ -183,8 +183,8 @@ const Login = () => {
 
                   <Button
                     type="submit"
-                    className="w-full font-medium text-sm md:text-base py-3.5 bg-main-gold text-white hover:bg-main-gold/90"
-                    variant={"default"}
+                    className="w-full font-medium text-sm md:text-base py-3.5 shadow-md"
+                    variant="default"
                     isLoading={isPending}
                   >
                     تسجيل الدخول إلى الحساب

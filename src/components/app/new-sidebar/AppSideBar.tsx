@@ -99,7 +99,7 @@ export function AppSidebar() {
           <div className="flex items-center gap-2.5 min-w-0">
             <Avatar className="h-9 w-9 rounded-full overflow-hidden ring-1 ring-slate-200 shrink-0">
             <AvatarImage src={sidebarImageUrl ?? undefined} alt={displayName} className="object-cover" />
-            <AvatarFallback className="rounded-full bg-main-gold/10 text-main-gold text-[11px] font-semibold">
+            <AvatarFallback className="rounded-full bg-primary/10 text-primary text-[11px] font-semibold">
                 {userInitials}
               </AvatarFallback>
             </Avatar>
@@ -132,7 +132,7 @@ export function AppSidebar() {
         <div className="hidden group-data-[collapsible=icon]:flex w-full flex-col items-center gap-2">
           <Avatar className="h-8 w-8 rounded-full overflow-hidden ring-1 ring-slate-200">
             <AvatarImage src={sidebarImageUrl ?? undefined} alt={displayName} className="object-cover" />
-            <AvatarFallback className="rounded-full bg-main-gold/10 text-main-gold text-[10px] font-semibold">
+            <AvatarFallback className="rounded-full bg-primary/10 text-primary text-[10px] font-semibold">
               {userInitials}
             </AvatarFallback>
           </Avatar>
@@ -153,7 +153,7 @@ export function AppSidebar() {
             className={cn(
               "flex items-center gap-2 rounded-lg px-2.5 h-8 transition-all duration-150",
               searchFocused
-                ? "bg-white ring-1 ring-main-gold/40 shadow-sm"
+                ? "bg-white ring-1 ring-primary/40 shadow-sm"
                 : "bg-slate-50 hover:bg-slate-100"
             )}
           >

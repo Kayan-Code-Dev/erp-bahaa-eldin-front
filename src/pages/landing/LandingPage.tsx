@@ -12,9 +12,9 @@ const LandingPage = () => {
     }
   };
   return (
-    <div className="min-h-screen w-full bg-[radial-gradient(circle_at_top,rgba(144,116,87,0.12),transparent_55%),linear-gradient(to_bottom_right,#f5f5f7,#e3e4e8)] flex flex-col">
+    <div className="min-h-screen w-full bg-[linear-gradient(180deg,hsl(220_25%_98%)_0%,hsl(220_20%_96%)_50%,hsl(220_15%_94%)_100%)] flex flex-col">
       {/* Header */}
-      <header className="w-full border-b border-border/60 bg-white/85 backdrop-blur-sm sticky top-0 z-30">
+      <header className="w-full border-b border-border/60 bg-white/90 backdrop-blur-md sticky top-0 z-30 shadow-sm">
         <div className="max-w-6xl mx-auto flex items-center justify-between px-4 py-3 md:py-4">
           {/* Logo */}
           <div className="flex items-center gap-3">
@@ -84,7 +84,7 @@ const LandingPage = () => {
             <Link to="/login">
               <Button
                 size="sm"
-                className="rounded-full px-4 bg-main-gold text-white hover:bg-main-gold/90"
+                className="rounded-lg px-5 font-medium shadow-md"
               >
                 جرّب الآن
               </Button>
@@ -93,10 +93,7 @@ const LandingPage = () => {
 
           <div className="md:hidden">
             <Link to="/login">
-              <Button
-                size="sm"
-                className="rounded-full px-4 bg-main-gold text-white hover:bg-main-gold/90"
-              >
+              <Button size="sm" className="rounded-lg px-4 font-medium">
                 دخول
               </Button>
             </Link>

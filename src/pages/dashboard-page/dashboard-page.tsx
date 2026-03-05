@@ -88,19 +88,19 @@ function DashboardPage() {
   return (
     <div className="flex-1" dir="rtl">
       {/* Header */}
-      <div className="bg-[#5170ff] text-white px-4 py-3">
+      <div className="bg-primary text-primary-foreground rounded-xl px-5 py-4 shadow-lg mb-6">
         <div className="flex items-center justify-between">
           <div className="space-y-1 text-right">
-            <h1 className="text-xl font-bold">لوحة التحكم</h1>
-            <p className="text-xs text-white/80">
+            <h1 className="text-xl font-bold tracking-tight">لوحة التحكم</h1>
+            <p className="text-sm text-primary-foreground/85">
               نظرة عامة على أداء النظام خلال الفترة المحددة
             </p>
           </div>
           <Button
-            variant="outline"
+            variant="secondary"
             size="sm"
             onClick={() => setShowFilters((v) => !v)}
-            className="bg-white/10 hover:bg-white/20 border-white/30 text-white"
+            className="bg-white/15 hover:bg-white/25 border-0 text-white"
           >
             <Filter className="ml-2 h-4 w-4" />
             {showFilters ? "إخفاء الفلاتر" : "عرض الفلاتر"}
@@ -109,7 +109,7 @@ function DashboardPage() {
       </div>
 
       {/* Content */}
-      <div className="p-4 space-y-6">
+      <div className="space-y-6">
         {/* Filters */}
         {showFilters && (
           <Card>
