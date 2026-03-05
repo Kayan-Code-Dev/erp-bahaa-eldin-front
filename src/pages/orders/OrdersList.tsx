@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
-import { useMutation, useQueries, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useSearchParams, useNavigate } from "react-router";
 import {
@@ -59,9 +59,6 @@ import {
   getOrderTypeLabel,
 } from "@/api/v2/orders/order.utils";
 import { OrderEmployeeName } from "@/components/custom/OrderEmployeeName";
-import { CUSTODIES_KEY } from "@/api/v2/custody/custody.hooks";
-import { getAllCustodies } from "@/api/v2/custody/custody.service";
-import { queryOptions } from "@tanstack/react-query";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -209,41 +206,6 @@ function OrdersList() {
     return data.data.filter((order) => order.order_type === orderTypeFilter);
   }, [data?.data, orderTypeFilter]);
 
-  // Only fetch custody for rent orders (needed for "Create Custody" button)
-  const rentOrders = useMemo(
-    () => displayedOrders.filter((o) => o.order_type === "rent"),
-    [displayedOrders],
-  );
-
-  const custodyQueries = useQueries({
-    queries: rentOrders.map((order) =>
-      queryOptions({
-        queryKey: [CUSTODIES_KEY, order.id, order.client_id],
-        queryFn: () =>
-          getAllCustodies({
-            order_id: order.id,
-            client_id: order.client_id,
-            page: 1,
-            per_page: 1,
-          }),
-        staleTime: 1000 * 60 * 5,
-      })
-    ),
-  });
-
-  const hasCustodyByOrderId = useMemo(() => {
-    const map: Record<number, boolean> = {};
-    rentOrders.forEach((order, i) => {
-      const res = custodyQueries[i]?.data;
-      const hasAny =
-        !!res &&
-        Array.isArray((res as { data?: unknown }).data) &&
-        (res as { data: unknown[] }).data.length > 0;
-      map[order.id] = hasAny;
-    });
-    return map;
-  }, [rentOrders, custodyQueries]);
-
   const { mutate: exportOrdersToCSV, isPending: isExporting } = useMutation(
     useExportOrdersToCSVMutationOptions()
   );
@@ -349,7 +311,7 @@ function OrdersList() {
   const canAddPayment = (o: TOrder) =>
     o.status !== "paid" && o.status !== "finished" && o.status !== "canceled";
   const canCreateCustodyForOrder = (o: TOrder) =>
-    o.order_type === "rent" && !hasCustodyByOrderId[o.id] && isActive(o);
+    o.order_type === "rent" && isActive(o);
   const canDeleteOrder = (o: TOrder) =>
     o.status === "canceled" || o.status === "created";
 

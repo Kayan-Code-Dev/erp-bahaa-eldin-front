@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useSearchParams, useNavigate } from "react-router";
@@ -59,7 +59,6 @@ import {
   getOrderTypeLabel,
 } from "@/api/v2/orders/order.utils";
 import { OrderEmployeeName } from "@/components/custom/OrderEmployeeName";
-import { getAllCustodies } from "@/api/v2/custody/custody.service";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -200,56 +199,12 @@ function DeliveriesReturnsSearch() {
   const [orderToAction, setOrderToAction] = useState<TOrder | null>(null);
   const [custodyModalOrder, setCustodyModalOrder] = useState<TOrder | null>(null);
   const [paymentModalOrder, setPaymentModalOrder] = useState<TOrder | null>(null);
-  const [hasCustodyByOrderId, setHasCustodyByOrderId] = useState<Record<number, boolean>>({});
 
   const displayedOrders = useMemo(() => {
     if (!data?.data) return [];
     if (orderTypeFilter === "all") return data.data;
     return data.data.filter((order) => order.order_type === orderTypeFilter);
   }, [data?.data, orderTypeFilter]);
-
-  const orderIdsKey = useMemo(
-    () => displayedOrders.map((o) => o.id).join(","),
-    [displayedOrders],
-  );
-  const lastCustodyKey = useRef("");
-
-  useEffect(() => {
-    if (!displayedOrders.length || orderIdsKey === lastCustodyKey.current) {
-      if (!displayedOrders.length) setHasCustodyByOrderId({});
-      return;
-    }
-    lastCustodyKey.current = orderIdsKey;
-
-    let cancelled = false;
-    const load = async () => {
-      const entries = await Promise.all(
-        displayedOrders.map(async (order) => {
-          try {
-            const res = await getAllCustodies({
-              order_id: order.id,
-              client_id: order.client_id,
-              page: 1,
-              per_page: 1,
-            });
-            const hasAny =
-              !!res &&
-              Array.isArray((res as { data?: unknown }).data) &&
-              (res as { data: unknown[] }).data.length > 0;
-            return [order.id, hasAny] as const;
-          } catch {
-            return [order.id, false] as const;
-          }
-        }),
-      );
-      if (cancelled) return;
-      const map: Record<number, boolean> = {};
-      for (const [id, has] of entries) map[id] = has;
-      setHasCustodyByOrderId(map);
-    };
-    load();
-    return () => { cancelled = true; };
-  }, [displayedOrders, orderIdsKey]);
 
   const { mutate: exportOrdersToCSV, isPending: isExporting } = useMutation(
     useExportOrdersToCSVMutationOptions()
@@ -356,7 +311,7 @@ function DeliveriesReturnsSearch() {
   const canAddPayment = (o: TOrder) =>
     o.status !== "paid" && o.status !== "finished" && o.status !== "canceled";
   const canCreateCustodyForOrder = (o: TOrder) =>
-    o.order_type === "rent" && !hasCustodyByOrderId[o.id] && isActive(o);
+    o.order_type === "rent" && isActive(o);
   const canDeleteOrder = (o: TOrder) =>
     o.status === "canceled" || o.status === "created";
 

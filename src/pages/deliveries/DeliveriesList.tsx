@@ -87,7 +87,6 @@ import {
   deliveriesFilterSchema,
   type DeliveriesFilterFormValues,
 } from "./deliveriesFilter.schema";
-import { getAllCustodies } from "@/api/v2/custody/custody.service";
 
 function DeliveriesList() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -119,7 +118,6 @@ function DeliveriesList() {
   const [orderToAction, setOrderToAction] = useState<TOrder | null>(null);
   const [custodyModalOrder, setCustodyModalOrder] = useState<TOrder | null>(null);
   const [paymentModalOrder, setPaymentModalOrder] = useState<TOrder | null>(null);
-  const [hasCustodyByOrderId, setHasCustodyByOrderId] = useState<Record<number, boolean>>({});
 
   const formValues = form.watch();
   const debouncedFormValues = useDebounce({
@@ -204,48 +202,6 @@ function DeliveriesList() {
     if (orderTypeFilter === "all") return base;
     return base.filter((order) => order.order_type === orderTypeFilter);
   }, [data?.data, orderTypeFilter]);
-
-  // Load custody status for each order on current page
-  useEffect(() => {
-    const loadCustodies = async () => {
-      if (!displayedOrders.length) {
-        setHasCustodyByOrderId({});
-        return;
-      }
-
-      try {
-        const entries = await Promise.all(
-          displayedOrders.map(async (order) => {
-            try {
-              const res = await getAllCustodies({
-                order_id: order.id,
-                client_id: order.client_id,
-                page: 1,
-                per_page: 1,
-              });
-              const hasAny =
-                !!res &&
-                Array.isArray((res as any).data) &&
-                (res as any).data.length > 0;
-              return [order.id, hasAny] as const;
-            } catch {
-              return [order.id, false] as const;
-            }
-          })
-        );
-
-        const map: Record<number, boolean> = {};
-        for (const [id, has] of entries) {
-          map[id] = has;
-        }
-        setHasCustodyByOrderId(map);
-      } catch {
-        // On error, leave map as is and don't block the button
-      }
-    };
-
-    loadCustodies();
-  }, [displayedOrders]);
 
   // Export Mutation
   const { mutate: exportOrdersToCSV, isPending: isExporting } = useMutation(
@@ -728,9 +684,8 @@ function DeliveriesList() {
                                     </Tooltip>
                                   )}
 
-                          {/* Create Custody (for rent orders without custody) */}
-                          {order.order_type === "rent" &&
-                            !hasCustodyByOrderId[order.id] && (
+                          {/* Create Custody (for rent orders) */}
+                          {order.order_type === "rent" && (
                               <Tooltip>
                                 <TooltipTrigger asChild>
                                   <Button
