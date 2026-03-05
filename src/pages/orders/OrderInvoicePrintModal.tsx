@@ -21,16 +21,20 @@ const INVOICE_PRINT_STYLES = `
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+  html, body { 
+    margin: 0 !important; 
+    padding: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
   body { 
-    margin: 0; 
-    padding: 0; 
     font-family: 'Segoe UI', 'Cairo', Arial, sans-serif; 
     direction: rtl;
     font-weight: 400;
     line-height: 1.4;
     color: #1f2937;
     width: 148mm;
-    min-height: 210mm;
   }
   .invoice-print-root { 
     display: flex; 
@@ -354,9 +358,16 @@ const INVOICE_PRINT_STYLES = `
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
-    body, html { 
-      height: auto; 
-      overflow: visible; 
+    html { 
+      height: 100% !important; 
+      overflow: hidden !important;
+    }
+    body { 
+      height: 99% !important; 
+      min-height: 0 !important;
+      overflow: hidden !important;
+      margin: 0 !important;
+      padding: 0 !important;
     }
     .invoice-print-footer { 
       margin-top: auto;
@@ -364,6 +375,8 @@ const INVOICE_PRINT_STYLES = `
     /* Keep signature and footer on same page */
     .invoice-print-signature { page-break-before: avoid; }
     .invoice-print-footer { page-break-before: avoid; }
+    /* منع الصفحة الثانية الفارغة */
+    body > *:last-child { page-break-after: avoid !important; }
     .invoice-print-measurements-wrap {
       border: 1px solid #d1d5db !important;
       border-radius: 6px !important;

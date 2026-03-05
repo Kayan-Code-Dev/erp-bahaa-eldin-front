@@ -361,7 +361,7 @@ export function OrderDetailsModal({ order, open, onOpenChange }: Props) {
                           <TableHead className="text-center">#</TableHead>
                           <TableHead className="text-center">الكود</TableHead>
                           <TableHead className="text-center">الاسم</TableHead>
-                          <TableHead className="text-center">النوع</TableHead>
+                          <TableHead className="text-center">المنتج الفرعي</TableHead>
                           <TableHead className="text-center">الكمية</TableHead>
                           <TableHead className="text-center">السعر</TableHead>
                           <TableHead className="text-center">المدفوع</TableHead>
@@ -382,11 +382,7 @@ export function OrderDetailsModal({ order, open, onOpenChange }: Props) {
                               {item.name ?? item.code}
                             </TableCell>
                             <TableCell className="text-center">
-                              {(() => {
-                                const typeLabel = getOrderTypeLabel(item.type);
-                                const subcategory = getItemSubcategoryDisplay(item as Record<string, unknown>);
-                                return subcategory ? `${typeLabel} (${subcategory})` : typeLabel;
-                              })()}
+                              {getItemSubcategoryDisplay(item as Record<string, unknown>) || "-"}
                             </TableCell>
                             <TableCell className="text-center">
                               {item.quantity}

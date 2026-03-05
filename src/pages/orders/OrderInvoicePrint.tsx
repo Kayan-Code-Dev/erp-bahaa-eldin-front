@@ -2,7 +2,6 @@ import { TOrder } from "@/api/v2/orders/orders.types";
 import {
   getOrderCurrencyInfo,
   getOrderTotalsWithVat,
-  getOrderTypeLabel,
   getItemSubcategoryDisplay,
 } from "@/api/v2/orders/order.utils";
 import { OrderEmployeeName } from "@/components/custom/OrderEmployeeName";
@@ -129,7 +128,7 @@ export function OrderInvoicePrint({
       : formatDate(new Date().toISOString());
 
   const printDate = formatDate(new Date().toISOString());
-  const printTime = new Date().toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" });
+  const printTime = new Date().toLocaleTimeString("en", { hour: "2-digit", minute: "2-digit" });
 
   // Branch logo: use branch image if available, otherwise fallback to app logo
   const branchImage =
@@ -236,7 +235,7 @@ export function OrderInvoicePrint({
             <thead>
               <tr className="invoice-print-thead-row" style={{ backgroundColor: HEADER_DARK }}>
                 <th scope="col" className="invoice-print-th py-1 px-1 text-center font-bold text-white text-[8px]">الرقم</th>
-                <th scope="col" className="invoice-print-th py-1 px-1 text-center font-bold text-white text-[8px]">نوع المنتج</th>
+                <th scope="col" className="invoice-print-th py-1 px-1 text-center font-bold text-white text-[8px]">المنتج الفرعي</th>
                 <th scope="col" className="invoice-print-th py-1 px-1 text-center font-bold text-white text-[8px]">كود المنتج</th>
                 <th scope="col" className="invoice-print-th py-1 px-1 text-center font-bold text-white text-[8px]">سعر القطعة</th>
                 <th scope="col" className="invoice-print-th py-1 px-1 text-center font-bold text-white text-[8px]">المدفوع</th>
@@ -265,11 +264,7 @@ export function OrderInvoicePrint({
                     <tr key={item.id} className={index % 2 === 0 ? "invoice-print-row-even bg-gray-50/50" : "bg-white"} itemScope itemType="https://schema.org/Product">
                       <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-1 px-1 text-center text-[9px] font-medium" style={{ fontVariantNumeric: "tabular-nums", fontFamily: "'Segoe UI', Arial, sans-serif" }}>{index + 1}</td>
                       <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-1 px-1 text-center text-[9px] font-normal">
-                        {(() => {
-                          const typeLabel = getOrderTypeLabel(item.type);
-                          const subcategory = getItemSubcategoryDisplay(item as Record<string, any>);
-                          return subcategory ? `${typeLabel} (${subcategory})` : typeLabel;
-                        })()}
+                        {getItemSubcategoryDisplay(item as Record<string, any>) || "-"}
                       </td>
                       <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-1 px-1 text-center text-[9px] font-normal" style={{ fontVariantNumeric: "tabular-nums", fontFamily: "'Segoe UI', Arial, sans-serif" }}>{item.code || "-"}</td>
                       <td className="invoice-print-td invoice-print-td-center border-b border-gray-100 py-1 px-1 text-center text-[9px] font-semibold" style={{ fontVariantNumeric: "tabular-nums", fontFamily: "'Segoe UI', Arial, sans-serif" }}>{showPrices ? price : EMPTY_PRICE}</td>
@@ -463,11 +458,12 @@ export function OrderInvoicePrint({
       </main>
 
       <footer
-        className="invoice-print-footer w-full py-1.5 px-2 text-center text-white rounded-t text-[8px] font-semibold shrink-0"
+        className="invoice-print-footer w-full py-1 px-2 text-center text-white rounded-t text-[8px] font-semibold shrink-0 min-w-0"
         style={{ backgroundColor: HEADER_BG }}
         role="contentinfo"
       >
-        لا يرد العربون في حالة الغاء الحجز. يجب إحضار الفاتورة الأصلية مع البطاقة الشخصية عند الإرجاع أو الاستلام أو الاستبدال.
+        <span className="block">لا يرد العربون في حالة إلغاء الحجز</span><br />
+        <span className="block mt-0.5">يجب إحضار الفاتورة الأصلية مع البطاقة الشخصية عند الإرجاع أو الاستلام أو الاستبدال.</span>
       </footer>
 
       <style>{`
@@ -490,7 +486,7 @@ export function OrderInvoicePrint({
       top: 0;
       width: 100%;
       max-width: 148mm;
-      height: 210mm !important;        /* ارتفاع ثابت بدلاً من min-height */
+      height: 202mm !important;        /* يتناسب مع A5 بعد خصم الهوامش 4mm */
       min-height: 0 !important;         /* إلغاء min-height */
       padding: 0;
       margin: 0 auto;
@@ -750,19 +746,21 @@ export function OrderInvoicePrint({
       border-bottom: 1px solid #9ca3af !important;
     }
     
-    /* ===== الفوتر ===== */
+    /* ===== الفوتر (نفس إقرار الاستلام) ===== */
     .invoice-print-footer {
       background: #5170ff !important;
       color: white !important;
-      padding: 1.5mm 3mm !important;
-      font-size: 9px !important;
+      padding: 1mm 2mm !important;
+      font-size: 8px !important;
       font-weight: 600 !important;
       text-align: center !important;
       border-radius: 2mm 2mm 0 0 !important;
-      margin-top: auto !important;       /* دفع الفوتر للأسفل */
-      page-break-inside: avoid !important;
-      line-height: 1.6 !important;
+      margin-top: auto !important;
+      page-break-before: avoid !important;
+      line-height: 1.4 !important;
       flex-shrink: 0 !important;
+      word-wrap: break-word !important;
+      overflow-wrap: break-word !important;
     }
     
     /* ===== منع التقسيم - الفاتورة كلها في صفحة واحدة ===== */
