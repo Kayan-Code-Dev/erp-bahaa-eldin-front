@@ -46,7 +46,7 @@ const formSchema = z.object({
   waist_size: z.string().optional(),
   sleeve_size: z.string().optional(),
   category_id: z.string().optional(),
-  subcategory_ids: z.array(z.string()).optional(),
+  subcategory_id: z.string().optional(),
   status: z.enum(
     [
       "damaged",
@@ -95,7 +95,7 @@ export function EditClothModal({ cloth, open, onOpenChange }: Props) {
       waist_size: "",
       sleeve_size: "",
       category_id: "",
-      subcategory_ids: [],
+      subcategory_id: "",
       status: "ready_for_rent",
       entity_type: undefined,
       entity_id: "",
@@ -112,7 +112,7 @@ export function EditClothModal({ cloth, open, onOpenChange }: Props) {
         waist_size: cloth.waist_size || "",
         sleeve_size: cloth.sleeve_size || "",
         category_id: cloth.category_id != null ? String(cloth.category_id) : "",
-        subcategory_ids: (cloth.subcategory_ids ?? []).map(String),
+        subcategory_id: cloth.subcategory_ids?.[0] != null ? String(cloth.subcategory_ids[0]) : "",
         status: cloth.status,
         entity_type: cloth.entity_type,
         entity_id: cloth.entity_id.toString(),
@@ -135,9 +135,7 @@ export function EditClothModal({ cloth, open, onOpenChange }: Props) {
       sleeve_size: values.sleeve_size || undefined,
       category_id: values.category_id ? Number(values.category_id) : undefined,
       subcategory_ids:
-        values.subcategory_ids?.length
-          ? values.subcategory_ids.map((id) => Number(id))
-          : undefined,
+        values.subcategory_id ? [Number(values.subcategory_id)] : undefined,
     };
 
     updateCloth(
@@ -244,7 +242,7 @@ export function EditClothModal({ cloth, open, onOpenChange }: Props) {
                       value={field.value ?? ""}
                       onChange={(id) => {
                         field.onChange(id);
-                        form.setValue("subcategory_ids", []);
+                        form.setValue("subcategory_id", "");
                       }}
                       disabled={isPending}
                     />
@@ -255,14 +253,13 @@ export function EditClothModal({ cloth, open, onOpenChange }: Props) {
             />
             <FormField
               control={form.control}
-              name="subcategory_ids"
+              name="subcategory_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>أقسام المنتجات الفرعية (اختياري)</FormLabel>
+                  <FormLabel>المنتج الفرعي (اختياري - واحد فقط)</FormLabel>
                   <FormControl>
                     <SubcategoriesSelect
-                      multiple
-                      value={field.value ?? []}
+                      value={field.value ?? ""}
                       onChange={field.onChange}
                       category_id={
                         form.watch("category_id")

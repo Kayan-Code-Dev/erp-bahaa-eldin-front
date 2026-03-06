@@ -44,7 +44,7 @@ const formSchema = z.object({
   waist_size: z.string().optional(),
   sleeve_size: z.string().optional(),
   category_id: z.string().optional(),
-  subcategory_ids: z.array(z.string()).optional(),
+  subcategory_id: z.string().optional(),
   status: z.enum(
     [
       "damaged",
@@ -92,7 +92,7 @@ export function CreateClothModal({ open, onOpenChange }: Props) {
       waist_size: "",
       sleeve_size: "",
       category_id: "",
-      subcategory_ids: [],
+      subcategory_id: "",
       status: "ready_for_rent",
       entity_type: undefined,
       entity_id: "",
@@ -113,9 +113,7 @@ export function CreateClothModal({ open, onOpenChange }: Props) {
       sleeve_size: values.sleeve_size || "",
       category_id: values.category_id ? Number(values.category_id) : undefined,
       subcategory_ids:
-        values.subcategory_ids?.length ?
-          values.subcategory_ids.map((id) => Number(id))
-        : undefined,
+        values.subcategory_id ? [Number(values.subcategory_id)] : undefined,
     };
 
     createCloth(requestData, {
@@ -213,13 +211,13 @@ export function CreateClothModal({ open, onOpenChange }: Props) {
               name="category_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>قسم المنتجات (اختياري)</FormLabel>
+                  <FormLabel>قسم المنتجات </FormLabel>
                   <FormControl>
                     <CategoriesSelect
                       value={field.value ?? ""}
                       onChange={(id) => {
                         field.onChange(id);
-                        form.setValue("subcategory_ids", []);
+                        form.setValue("subcategory_id", "");
                       }}
                       disabled={isPending}
                     />
@@ -230,14 +228,13 @@ export function CreateClothModal({ open, onOpenChange }: Props) {
             />
             <FormField
               control={form.control}
-              name="subcategory_ids"
+              name="subcategory_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>أقسام المنتجات الفرعية (اختياري)</FormLabel>
+                  <FormLabel>المنتج الفرعي </FormLabel>
                   <FormControl>
                     <SubcategoriesSelect
-                      multiple
-                      value={field.value ?? []}
+                      value={field.value ?? ""}
                       onChange={field.onChange}
                       category_id={
                         form.watch("category_id")
