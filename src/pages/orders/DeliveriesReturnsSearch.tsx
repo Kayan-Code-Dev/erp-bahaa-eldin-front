@@ -844,7 +844,7 @@ function DeliveriesReturnsSearch() {
                                       <FileText className="h-4 w-4" />
                                     </Button>
                                   </TooltipTrigger>
-                                  <TooltipContent side="top">نسخة إدارة</TooltipContent>
+                                  <TooltipContent side="top">نسخة ادارية</TooltipContent>
                                 </Tooltip>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
@@ -859,7 +859,7 @@ function DeliveriesReturnsSearch() {
                                       <FileUser className="h-4 w-4" />
                                     </Button>
                                   </TooltipTrigger>
-                                  <TooltipContent side="top">نسخة عميل</TooltipContent>
+                                  <TooltipContent side="top">نسخة العميل</TooltipContent>
                                 </Tooltip>
                                 <Tooltip>
                                   <TooltipTrigger asChild>

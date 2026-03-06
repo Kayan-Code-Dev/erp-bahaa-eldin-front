@@ -3,6 +3,7 @@ import {
   getOrderCurrencyInfo,
   getOrderTotalsWithVat,
   getItemSubcategoryDisplay,
+  getOrderTypeLabel,
 } from "@/api/v2/orders/order.utils";
 import { OrderEmployeeName } from "@/components/custom/OrderEmployeeName";
 import { formatPhone } from "@/utils/formatPhone";
@@ -128,7 +129,7 @@ export function OrderInvoicePrint({
       : formatDate(new Date().toISOString());
 
   const printDate = formatDate(new Date().toISOString());
-  const printTime = new Date().toLocaleTimeString("en", { hour: "2-digit", minute: "2-digit" });
+  const printTime = new Date().toLocaleTimeString("en", { hour: "2-digit", minute: "2-digit", hour12: false });
 
   // Branch logo: use branch image if available, otherwise fallback to app logo
   const branchImage =
@@ -164,6 +165,11 @@ export function OrderInvoicePrint({
       <meta itemProp="name" content={`فاتورة - طلب رقم ${order.id}`} />
       <meta itemProp="dateCreated" content={order.created_at} />
       
+      {/* تاريخ الطباعة فوق الهيدر من اليسار */}
+      <div className="invoice-print-top-date w-full px-2 pb-0.5 text-left text-[8px] text-gray-600" dir="ltr">
+        تاريخ الطباعة: {printDate} - {printTime}
+      </div>
+      
       <header
         className="invoice-print-header w-full py-1.5 mb-1 text-white rounded-b shadow-sm"
         style={{ backgroundColor: HEADER_BG }}
@@ -185,7 +191,7 @@ export function OrderInvoicePrint({
               التاريخ: <span className="font-semibold">{invoiceDate}</span>
             </div>
             <div className="invoice-header-line text-[8px] font-normal text-white/95">
-              تاريخ الطباعة: <span className="font-semibold">{printDate} - {printTime}</span>
+              نوع الفاتورة: <span className="font-semibold">{getOrderTypeLabel(order.order_type)}</span>
             </div>
           </div>
           <div className="invoice-print-header-logo shrink-0 w-10 h-10 flex items-center justify-center rounded-full overflow-hidden bg-white shadow-md ring-2 ring-white/80">
@@ -284,6 +290,7 @@ export function OrderInvoicePrint({
           </table>
         </section>
 
+        {!hideItemPrices && (
         <section className="invoice-print-section mb-1">
           <h2 className="invoice-print-section-title text-[9px] font-bold text-gray-600 uppercase tracking-wider mb-0.5 pb-0.5 border-b border-gray-200">
             ملخص الفاتورة
@@ -391,6 +398,7 @@ export function OrderInvoicePrint({
             </tbody>
           </table>
         </section>
+        )}
 
         {hasAnyMeasurements(items) && (() => {
           const activeMeasurementKeys = MEASUREMENT_LABELS.filter(({ key }) =>
@@ -541,6 +549,15 @@ export function OrderInvoicePrint({
     [dir="ltr"] * {
       direction: ltr !important;
       text-align: left !important;
+    }
+    
+    /* ===== تاريخ الطباعة فوق الهيدر ===== */
+    .invoice-print-top-date {
+      font-size: 8px !important;
+      color: #4b5563 !important;
+      padding: 0 2mm 0.5mm !important;
+      text-align: left !important;
+      direction: ltr !important;
     }
     
     /* ===== الهيدر ===== */

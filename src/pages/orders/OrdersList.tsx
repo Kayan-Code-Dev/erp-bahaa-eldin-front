@@ -805,7 +805,7 @@ function OrdersList() {
                                         </Button>
                                       </TooltipTrigger>
                                       <TooltipContent side="top">
-                                        نسخة إدارة
+                                        نسخة ادارية
                                       </TooltipContent>
                                     </Tooltip>
                                     <Tooltip>
@@ -822,7 +822,7 @@ function OrdersList() {
                                         </Button>
                                       </TooltipTrigger>
                                       <TooltipContent side="top">
-                                        نسخة عميل
+                                        نسخة العميل
                                       </TooltipContent>
                                     </Tooltip>
                                     <Tooltip>

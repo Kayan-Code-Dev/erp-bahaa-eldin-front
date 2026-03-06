@@ -1,6 +1,6 @@
 import { TOrder } from "@/api/v2/orders/orders.types";
 import { OrderEmployeeName } from "@/components/custom/OrderEmployeeName";
-import { getOrderCurrencyInfo } from "@/api/v2/orders/order.utils";
+import { getOrderCurrencyInfo, getOrderTypeLabel, getItemReceiptDisplay } from "@/api/v2/orders/order.utils";
 import { formatPhone } from "@/utils/formatPhone";
 
 const HEADER_BG = "#5170ff";
@@ -59,6 +59,8 @@ export function OrderReceiptAckPrint({
       : "-";
   const paid = order.paid != null ? String(order.paid) : "-";
   const invoiceDate = order.created_at ? formatDate(order.created_at) : "-";
+  const printDate = formatDate(new Date().toISOString());
+  const printTime = new Date().toLocaleTimeString("en", { hour: "2-digit", minute: "2-digit", hour12: false });
 
   const branchImage =
     (order.inventory?.inventoriable as any)?.image_url ??
@@ -77,6 +79,11 @@ export function OrderReceiptAckPrint({
     >
       <meta itemProp="name" content={`إقرار استلام - طلب رقم ${order.id}`} />
       <meta itemProp="dateCreated" content={order.created_at} />
+      
+      {/* تاريخ الطباعة فوق الهيدر من اليسار */}
+      <div className="ack-print-top-date w-full px-2 pb-0.5 text-left text-[8px] text-gray-600" dir="ltr">
+        تاريخ الطباعة: {printDate} - {printTime}
+      </div>
       
       {/* Header — minimized */}
       <header
@@ -98,6 +105,9 @@ export function OrderReceiptAckPrint({
             </div>
             <div className="text-white/95 font-medium">
               التاريخ: <span className="font-semibold">{invoiceDate}</span>
+            </div>
+            <div className="text-white/95 font-medium">
+              نوع الفاتورة: <span className="font-semibold">{getOrderTypeLabel(order.order_type)}</span>
             </div>
           </div>
           <div className="ack-print-header-logo shrink-0 w-10 h-10 flex items-center justify-center rounded-full overflow-hidden bg-white shadow-md ring-2 ring-white/80">
@@ -144,17 +154,20 @@ export function OrderReceiptAckPrint({
           )}
         </section>
 
-        {/* 3. Numbered products list */}
+        {/* 3. Rental period */}
+        <p className="ack-print-rental text-[10px] text-gray-900 mb-1 min-w-0 wrap-break-word">
+          وذلك بتأجيره من تاريخ{" "}
+          <time className="font-semibold" dateTime={order.visit_datetime || undefined}>{startDate}</time> حتى تاريخ{" "}
+          <time className="font-semibold" dateTime={order.delivery_date || undefined}>{endDate}</time>
+        </p>
+
+        {/* 4. Products list: category subcategory (code) with numbering */}
         <section className="ack-print-items-list mb-1.5 text-[10px] text-gray-900 min-w-0">
-          <h2 className="sr-only">قائمة المنتجات</h2>
           {items.length > 0 ? (
-            <ol className="list-decimal list-inside space-y-1" itemProp="itemListElement" itemScope itemType="https://schema.org/ItemList">
+            <ol className="list-decimal list-inside space-y-0.5" itemProp="itemListElement" itemScope itemType="https://schema.org/ItemList">
               {items.map((item) => (
                 <li key={item.id} className="font-medium" itemProp="itemListElement" itemScope itemType="https://schema.org/Product">
-                  <span itemProp="name">{(item as { name?: string }).name ?? item.code ?? "-"}</span>
-                  {item.code && (
-                    <span className="text-gray-600 font-normal"> ({item.code})</span>
-                  )}
+                  <span itemProp="name">{getItemReceiptDisplay(item as Record<string, unknown>)}</span>
                 </li>
               ))}
             </ol>
@@ -162,13 +175,6 @@ export function OrderReceiptAckPrint({
             <p className="text-gray-500 font-normal">—</p>
           )}
         </section>
-
-        {/* 4. Rental period */}
-        <p className="ack-print-rental text-[10px] text-gray-900 mb-1 min-w-0 wrap-break-word">
-          وذلك بتأجيره من تاريخ{" "}
-          <time className="font-semibold" dateTime={order.visit_datetime || undefined}>{startDate}</time> حتى تاريخ{" "}
-          <time className="font-semibold" dateTime={order.delivery_date || undefined}>{endDate}</time>
-        </p>
 
         {/* 5. Receipt acknowledgment and deposit payment */}
         <p className="ack-print-deposit text-[10px] text-gray-900 mb-1.5 min-w-0 wrap-break-word">
@@ -234,7 +240,21 @@ export function OrderReceiptAckPrint({
       </div>
 
       <style>{`
+        .ack-print-top-date {
+          font-size: 8px;
+          color: #4b5563;
+          padding: 0 8px 2px;
+          text-align: left;
+          direction: ltr;
+        }
         @media print {
+          .ack-print-top-date {
+            font-size: 8px !important;
+            color: #4b5563 !important;
+            padding: 0 2mm 0.5mm !important;
+            text-align: left !important;
+            direction: ltr !important;
+          }
           @page { size: A5 portrait; margin: 6mm; }
           html, body { 
             margin: 0 !important; 

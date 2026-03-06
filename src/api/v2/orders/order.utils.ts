@@ -9,6 +9,17 @@ export const getOrderTypeLabel = (order_type: TOrder["order_type"]) => {
   return order_type ?? "—";
 };
 
+/** Get category display for order item (قسم المنتجات) */
+export function getItemCategoryDisplay(item: Record<string, unknown>): string {
+  const categoryName = item.category_name;
+  if (categoryName && String(categoryName).trim()) return String(categoryName).trim();
+  const category = item.category as { name?: string } | undefined;
+  if (category?.name) return category.name;
+  const categoryNames = item.category_names as string[] | undefined;
+  if (categoryNames?.length) return categoryNames.join("، ");
+  return "";
+}
+
 /** Get subcategory display for order item (منتج فرعي) */
 export function getItemSubcategoryDisplay(item: Record<string, unknown>): string {
   const subcategoryNames = item.subcategory_names as string[] | undefined;
@@ -21,6 +32,16 @@ export function getItemSubcategoryDisplay(item: Record<string, unknown>): string
   const subcategory = item.subcategory as { name?: string } | undefined;
   if (subcategory?.name) return subcategory.name;
   return "";
+}
+
+/** Format item for receipt acknowledgment: "category subcategory (code)" */
+export function getItemReceiptDisplay(item: Record<string, unknown>): string {
+  const category = getItemCategoryDisplay(item);
+  const subcategory = getItemSubcategoryDisplay(item);
+  const code = (item.code as string) || "-";
+  const parts = [category, subcategory].filter(Boolean);
+  if (parts.length === 0) return `(${code})`;
+  return `${parts.join(" ")} (${code})`;
 }
 
 export const getStatusVariant = (status: TOrder["status"] | string) => {
