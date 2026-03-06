@@ -627,7 +627,7 @@ function Payments() {
 
         {!isError && (
           <CardContent>
-            <div className="overflow-hidden rounded-md border">
+            <div className="table-responsive-wrapper">
               <Table>
                 <TableHeader>
                   <TableRow>

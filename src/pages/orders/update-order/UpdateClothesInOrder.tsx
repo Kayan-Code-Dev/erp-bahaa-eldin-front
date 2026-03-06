@@ -427,7 +427,7 @@ function UpdateClothesInOrder() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="overflow-hidden rounded-md border">
+            <div className="table-responsive-wrapper">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -648,7 +648,7 @@ function UpdateClothesInOrder() {
               يرجى اختيار تاريخ التسليم لعرض المنتجات
             </div>
           ) : isPending ? (
-            <div className="overflow-hidden rounded-md border">
+            <div className="table-responsive-wrapper">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -687,7 +687,7 @@ function UpdateClothesInOrder() {
               لا توجد منتجات متاحة للتاريخ المحدد
             </div>
           ) : (
-            <div className="overflow-hidden rounded-md border">
+            <div className="table-responsive-wrapper">
               <Table>
                 <TableHeader>
                   <TableRow>

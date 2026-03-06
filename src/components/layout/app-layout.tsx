@@ -21,7 +21,7 @@ function MainContent() {
       }}
     >
       <Header />
-      <div className="p-5 md:p-6 flex-1">
+      <div className="p-5 md:p-6 flex-1 min-w-0 w-full">
         <Outlet />
       </div>
     </div>

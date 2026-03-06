@@ -40,7 +40,8 @@ import { EntitySelect } from "@/components/custom/EntitySelect";
 
 const clothItemSchema = z.object({
   code: z.string().min(1, "كود الصنف مطلوب"),
-  name: z.string().min(1, "اسم الصنف مطلوب"),
+  category_id: z.string().min(1, "قسم المنتجات مطلوب"),
+  subcategory_id: z.string().min(1, "قسم المنتجات الفرعي مطلوب"),
   entity_type: z.enum(["branch", "factory", "workshop"], { required_error: "نوع المكان مطلوب" }),
   entity_id: z.string().min(1, "المكان مطلوب"),
   price: z.number().min(0, "السعر يجب أن يكون ≥ 0"),
@@ -53,8 +54,6 @@ const formSchema = z
     phone: z.string().optional(),
     address: z.string().optional(),
     add_order: z.boolean().default(false),
-    category_id: z.string().optional(),
-    subcategory_id: z.string().optional(),
     branch_id: z.string().optional(),
     order_date: z.string().optional(),
     total_amount: z.number().optional(),
@@ -65,8 +64,6 @@ const formSchema = z
   })
   .superRefine((data, ctx) => {
     if (!data.add_order) return;
-    if (!data.category_id?.length) ctx.addIssue({ code: "custom", message: "قسم المنتجات مطلوب", path: ["category_id"] });
-    if (!data.subcategory_id?.length) ctx.addIssue({ code: "custom", message: "قسم المنتجات الفرعي مطلوب", path: ["subcategory_id"] });
     if (!data.branch_id?.length) ctx.addIssue({ code: "custom", message: "الفرع مطلوب", path: ["branch_id"] });
     if (!data.order_date?.length) ctx.addIssue({ code: "custom", message: "تاريخ الطلبية مطلوب", path: ["order_date"] });
     if (data.total_amount == null || data.total_amount < 0) ctx.addIssue({ code: "custom", message: "الإجمالي ≥ 0", path: ["total_amount"] });
@@ -87,7 +84,8 @@ type FormValues = z.infer<typeof formSchema>;
 
 const defaultClothItem = {
   code: "",
-  name: "",
+  category_id: "",
+  subcategory_id: "",
   entity_type: "branch" as const,
   entity_id: "",
   price: 0,
@@ -108,8 +106,6 @@ function CreateSupplier() {
       phone: "",
       address: "",
       add_order: false,
-      category_id: "",
-      subcategory_id: "",
       branch_id: "",
       order_date: "",
       total_amount: 0,
@@ -121,7 +117,6 @@ function CreateSupplier() {
   });
 
   const addOrder = useWatch({ control: form.control, name: "add_order" });
-  const categoryId = useWatch({ control: form.control, name: "category_id" });
   const totalAmount = useWatch({ control: form.control, name: "total_amount" });
   const paymentAmount = useWatch({ control: form.control, name: "payment_amount" });
 
@@ -159,8 +154,6 @@ function CreateSupplier() {
               phone: "",
               address: "",
               add_order: false,
-              category_id: "",
-              subcategory_id: "",
               branch_id: "",
               order_date: "",
               total_amount: 0,
@@ -181,19 +174,21 @@ function CreateSupplier() {
 
     const clothes: TCreateSupplierClothItem[] = (values.clothes ?? []).map((c) => ({
       code: c.code,
-      name: c.name,
+      category_id: c.category_id ? Number(c.category_id) : undefined,
+      subcategory_id: c.subcategory_id ? Number(c.subcategory_id) : undefined,
       entity_type: c.entity_type as "branch" | "factory" | "workshop",
       entity_id: Number(c.entity_id),
       price: Number(c.price),
     }));
 
+    const firstCloth = values.clothes?.[0];
     const requestData: TCreateSupplierRequest = {
       name: values.name,
       code: values.code,
       ...(values.phone?.trim() && { phone: values.phone.trim() }),
       ...(values.address?.trim() && { address: values.address.trim() }),
-      category_id: Number(values.category_id),
-      subcategory_id: Number(values.subcategory_id),
+      category_id: firstCloth?.category_id ? Number(firstCloth.category_id) : 0,
+      subcategory_id: firstCloth?.subcategory_id ? Number(firstCloth.subcategory_id) : 0,
       branch_id: Number(values.branch_id),
       order_date: values.order_date!,
       total_amount: Number(values.total_amount),
@@ -210,8 +205,6 @@ function CreateSupplier() {
           name: "",
           code: "",
           add_order: false,
-          category_id: "",
-          subcategory_id: "",
           branch_id: "",
           order_date: "",
           total_amount: 0,
@@ -315,47 +308,6 @@ function CreateSupplier() {
 
               {addOrder && (
                 <>
-                  <div className="grid grid-cols-2 gap-4 border-t pt-4">
-                    <FormField
-                      control={form.control}
-                      name="category_id"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>قسم المنتجات</FormLabel>
-                          <FormControl>
-                            <CategoriesSelect
-                              value={field.value ?? ""}
-                              onChange={(id) => {
-                                field.onChange(id);
-                                form.setValue("subcategory_id", "");
-                              }}
-                              disabled={isPending}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="subcategory_id"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>قسم المنتجات الفرعي</FormLabel>
-                          <FormControl>
-                            <SubcategoriesSelect
-                              value={field.value ?? ""}
-                              onChange={field.onChange}
-                              category_id={categoryId ? Number(categoryId) : undefined}
-                              disabled={isPending || !categoryId}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
                   <FormField
                     control={form.control}
                     name="branch_id"
@@ -494,12 +446,44 @@ function CreateSupplier() {
                         />
                         <FormField
                           control={form.control}
-                          name={`clothes.${index}.name`}
+                          name={`clothes.${index}.category_id`}
                           render={({ field: f }) => (
                             <FormItem>
-                              <FormLabel>اسم الصنف</FormLabel>
+                              <FormLabel>قسم المنتجات</FormLabel>
                               <FormControl>
-                                <Input placeholder="اسم الصنف" {...f} />
+                                <CategoriesSelect
+                                  value={f.value ?? ""}
+                                  onChange={(id) => {
+                                    f.onChange(id);
+                                    form.setValue(`clothes.${index}.subcategory_id`, "");
+                                  }}
+                                  disabled={isPending}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`clothes.${index}.subcategory_id`}
+                          render={({ field: f }) => (
+                            <FormItem>
+                              <FormLabel>قسم المنتجات الفرعي</FormLabel>
+                              <FormControl>
+                                <SubcategoriesSelect
+                                  value={f.value ?? ""}
+                                  onChange={f.onChange}
+                                  category_id={
+                                    form.watch(`clothes.${index}.category_id`)
+                                      ? Number(form.watch(`clothes.${index}.category_id`))
+                                      : undefined
+                                  }
+                                  disabled={
+                                    isPending ||
+                                    !form.watch(`clothes.${index}.category_id`)
+                                  }
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>

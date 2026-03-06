@@ -354,7 +354,7 @@ export function OrderDetailsModal({ order, open, onOpenChange }: Props) {
               {orderData.items && orderData.items.length > 0 && (
                 <div className="modal-section">
                   <p className="modal-section-title">عناصر الطلب</p>
-                  <div className="overflow-hidden rounded-lg border border-border/60">
+                  <div className="table-responsive-wrapper">
                     <Table>
                       <TableHeader>
                         <TableRow>

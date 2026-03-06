@@ -512,7 +512,7 @@ function OrderDetails() {
                   const remainingTotal = Number(orderData.remaining ?? 0);
 
                   return (
-                    <div className="overflow-hidden rounded-md border">
+                    <div className="table-responsive-wrapper">
                       <Table>
                         <TableHeader>
                           <TableRow>

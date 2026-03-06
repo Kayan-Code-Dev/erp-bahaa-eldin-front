@@ -94,7 +94,7 @@ function OrderDetailsSkeleton() {
       {/* Order Items */}
       <div className="bg-white rounded-lg p-6 shadow-sm border-t">
         <Skeleton className="h-6 w-32 mb-3" />
-        <div className="overflow-hidden rounded-md border">
+        <div className="table-responsive-wrapper">
           <Table>
             <TableHeader>
               <TableRow>

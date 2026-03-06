@@ -115,7 +115,7 @@ export function OrderCustodiesTable({ orderId, clientId }: Props) {
   return (
     <div className="bg-white rounded-lg p-6 shadow-sm border-t">
       <h3 className="text-lg font-semibold mb-4">الضمانات</h3>
-      <div className="overflow-hidden rounded-md border">
+      <div className="table-responsive-wrapper">
         <Table>
           <TableHeader>
             <TableRow>

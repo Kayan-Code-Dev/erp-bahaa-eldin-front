@@ -143,7 +143,7 @@ export function WorkshopClothHistoryModal({
               <div>
                 <h3 className="text-lg font-semibold mb-4">سجل الأحداث</h3>
                 {data.history && data.history.length > 0 ? (
-                  <div className="overflow-hidden rounded-md border">
+                  <div className="table-responsive-wrapper">
                     <Table>
                       <TableHeader>
                         <TableRow>

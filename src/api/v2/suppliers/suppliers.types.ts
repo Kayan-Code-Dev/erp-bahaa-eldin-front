@@ -13,8 +13,10 @@ export type TCreateSupplierMinimalRequest = {
 
 export type TCreateSupplierClothItem = {
   code: string;
-  name: string;
+  name?: string;
   cloth_type_id?: number;
+  category_id?: number;
+  subcategory_id?: number;
   entity_type: "branch" | "factory" | "workshop";
   entity_id: number;
   price: number;

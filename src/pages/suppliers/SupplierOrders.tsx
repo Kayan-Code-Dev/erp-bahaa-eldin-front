@@ -197,7 +197,7 @@ function SupplierOrders() {
 
         {!isError && (
           <CardContent>
-            <div className="overflow-hidden rounded-md border">
+            <div className="table-responsive-wrapper">
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/50 hover:bg-muted/50">

@@ -626,7 +626,7 @@ function DeliveriesReturnsSearch() {
             </div>
           )}
 
-          <div className="overflow-x-auto rounded-md border">
+          <div className="table-responsive-wrapper">
             <Table className="min-w-[720px]">
               <TableHeader>
                 <TableRow>

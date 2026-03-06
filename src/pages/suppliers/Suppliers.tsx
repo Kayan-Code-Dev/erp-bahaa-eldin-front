@@ -144,7 +144,7 @@ function Suppliers() {
 
         {!isError && (
           <CardContent>
-            <div className="overflow-x-auto rounded-md border">
+            <div className="table-responsive-wrapper">
               <Table>
                 <TableHeader>
                   <TableRow>

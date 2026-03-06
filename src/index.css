@@ -231,4 +231,9 @@ body {
   .card-elevated {
     box-shadow: 0 1px 3px rgb(0 0 0 / 0.05), 0 4px 12px rgb(0 0 0 / 0.04);
   }
+
+  /* Responsive table wrapper - full width, adapts to sidebar */
+  .table-responsive-wrapper {
+    @apply w-full min-w-0 overflow-x-auto rounded-md border;
+  }
 }

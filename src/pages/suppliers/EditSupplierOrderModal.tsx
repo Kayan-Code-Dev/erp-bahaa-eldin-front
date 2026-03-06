@@ -58,13 +58,11 @@ const clothSchema = z.object({
   payment: z.number().min(0),
   notes: z.string().optional().nullable(),
   category_id: z.string().optional(),
-  subcategory_ids: z.array(z.string()).optional(),
+  subcategory_id: z.string().optional(),
 });
 
 const formSchema = z.object({
   supplier_id: z.string().min(1, { message: "المورد مطلوب" }),
-  category_id: z.string().optional(),
-  subcategory_id: z.string().optional(),
   branch_id: z.string().min(1, { message: "الفرع مطلوب" }),
   order_number: z.string().min(1, { message: "رقم الطلبية مطلوب" }),
   type: z.string().optional(),
@@ -92,8 +90,6 @@ const ORDER_STATUS_OPTIONS = [
 
 const EMPTY_FORM: FormValues = {
   supplier_id: "",
-  category_id: "",
-  subcategory_id: "",
   branch_id: "",
   order_number: "",
   type: "fabric",
@@ -122,7 +118,7 @@ function mapDetailToForm(d: TSupplierOrderDetailResponse): FormValues {
     payment: toNumber(c.payment),
     notes: c.notes ?? "",
     category_id: c.category_id != null ? String(c.category_id) : "",
-    subcategory_ids: (c.subcategory_ids ?? []).map(String),
+    subcategory_id: (c.subcategory_ids ?? [])[0] != null ? String((c.subcategory_ids ?? [])[0]) : "",
   }));
 
   const totalAmount = clothes.reduce((s, c) => s + c.price, 0);
@@ -130,8 +126,6 @@ function mapDetailToForm(d: TSupplierOrderDetailResponse): FormValues {
 
   return {
     supplier_id: String(d.supplier_id ?? ""),
-    category_id: d.category_id != null ? String(d.category_id) : "",
-    subcategory_id: d.subcategory_id != null ? String(d.subcategory_id) : "",
     branch_id: d.branch_id != null ? String(d.branch_id) : "",
     order_number: d.order_number ?? "",
     type: d.type ?? "fabric",
@@ -193,7 +187,6 @@ export function EditSupplierOrderModal({ order, open, onOpenChange }: Props) {
   });
 
   const watchedClothes = useWatch({ control: form.control, name: "clothes" });
-  const categoryId = form.watch("category_id");
 
   const totals = useMemo(() => {
     const list = watchedClothes ?? [];
@@ -223,18 +216,15 @@ export function EditSupplierOrderModal({ order, open, onOpenChange }: Props) {
           remaining: price - payment,
           notes: c.notes?.trim() || null,
           category_id: c.category_id ? Number(c.category_id) : undefined,
-          subcategory_ids: c.subcategory_ids?.length
-            ? c.subcategory_ids.map(Number)
-            : undefined,
+          subcategory_ids: c.subcategory_id ? [Number(c.subcategory_id)] : undefined,
         };
       });
 
+      const firstCloth = values.clothes?.[0];
       const payload: TUpdateSupplierOrderRequest = {
         supplier_id: Number(values.supplier_id),
-        category_id: values.category_id ? Number(values.category_id) : 0,
-        subcategory_id: values.subcategory_id
-          ? Number(values.subcategory_id)
-          : 0,
+        category_id: firstCloth?.category_id ? Number(firstCloth.category_id) : 0,
+        subcategory_id: firstCloth?.subcategory_id ? Number(firstCloth.subcategory_id) : 0,
         branch_id: Number(values.branch_id),
         order_number: values.order_number.trim(),
         type: values.type?.trim() || undefined,
@@ -330,50 +320,6 @@ export function EditSupplierOrderModal({ order, open, onOpenChange }: Props) {
                   </FormItem>
                 )}
               />
-
-              {/* Category / Subcategory */}
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="category_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>قسم المنتجات (اختياري)</FormLabel>
-                      <FormControl>
-                        <CategoriesSelect
-                          value={field.value ?? ""}
-                          onChange={(id) => {
-                            field.onChange(id);
-                            form.setValue("subcategory_id", "");
-                          }}
-                          disabled={isPending}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="subcategory_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>قسم فرعي (اختياري)</FormLabel>
-                      <FormControl>
-                        <SubcategoriesSelect
-                          value={field.value ?? ""}
-                          onChange={field.onChange}
-                          category_id={
-                            categoryId ? Number(categoryId) : undefined
-                          }
-                          disabled={isPending || !categoryId}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
 
               {/* Branch */}
               <FormField
@@ -619,8 +565,8 @@ export function EditSupplierOrderModal({ order, open, onOpenChange }: Props) {
                                   onChange={(id) => {
                                     f.onChange(id);
                                     form.setValue(
-                                      `clothes.${index}.subcategory_ids`,
-                                      [],
+                                      `clothes.${index}.subcategory_id`,
+                                      "",
                                     );
                                   }}
                                   disabled={isPending}
@@ -633,29 +579,28 @@ export function EditSupplierOrderModal({ order, open, onOpenChange }: Props) {
 
                         <FormField
                           control={form.control}
-                          name={`clothes.${index}.subcategory_ids`}
-                          render={({ field: f }) => {
-                            const clothCat = form.watch(
-                              `clothes.${index}.category_id`,
-                            );
-                            return (
-                              <FormItem>
-                                <FormLabel>أقسام فرعية (اختياري)</FormLabel>
-                                <FormControl>
-                                  <SubcategoriesSelect
-                                    multiple
-                                    value={f.value ?? []}
-                                    onChange={f.onChange}
-                                    category_id={
-                                      clothCat ? Number(clothCat) : undefined
-                                    }
-                                    disabled={isPending}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            );
-                          }}
+                          name={`clothes.${index}.subcategory_id`}
+                          render={({ field: f }) => (
+                            <FormItem>
+                              <FormLabel>قسم فرعي (اختياري)</FormLabel>
+                              <FormControl>
+                                <SubcategoriesSelect
+                                  value={f.value ?? ""}
+                                  onChange={f.onChange}
+                                  category_id={
+                                    form.watch(`clothes.${index}.category_id`)
+                                      ? Number(form.watch(`clothes.${index}.category_id`))
+                                      : undefined
+                                  }
+                                  disabled={
+                                    isPending ||
+                                    !form.watch(`clothes.${index}.category_id`)
+                                  }
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
                         />
 
                         <FormField
