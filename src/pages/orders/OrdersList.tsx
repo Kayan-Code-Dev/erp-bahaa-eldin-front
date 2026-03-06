@@ -341,8 +341,8 @@ function OrdersList() {
   };
 
   return (
-    <div dir="rtl">
-      <Card className="max-w-5xl 2xl:max-w-screen-2xl mx-auto">
+    <div dir="rtl" className="w-full">
+      <Card className="w-full">
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle>قائمة الطلبات</CardTitle>

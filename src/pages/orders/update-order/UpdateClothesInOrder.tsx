@@ -342,7 +342,7 @@ function UpdateClothesInOrder() {
   );
 
   return (
-    <div dir="rtl" className="space-y-6">
+    <div dir="rtl" className="w-full space-y-6">
       {/* Breadcrumbs */}
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Link to="/orders/list" className="hover:text-foreground transition-colors">

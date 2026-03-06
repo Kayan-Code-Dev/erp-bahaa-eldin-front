@@ -118,8 +118,8 @@ function WorkshopTransfers() {
   };
 
   return (
-    <div dir="rtl">
-      <Card>
+    <div dir="rtl" className="w-full">
+      <Card className="w-full">
         <CardHeader>
           <CardTitle>طلبات النقل الواردة للورشة رقم {workshopId}</CardTitle>
           <CardDescription>

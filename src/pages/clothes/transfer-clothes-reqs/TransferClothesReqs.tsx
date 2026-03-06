@@ -320,8 +320,8 @@ function TransferClothesReqs() {
   };
 
   return (
-    <div dir="rtl" className="space-y-6">
-      <Card>
+    <div dir="rtl" className="w-full space-y-6">
+      <Card className="w-full">
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle>طلبات نقل المنتجات</CardTitle>

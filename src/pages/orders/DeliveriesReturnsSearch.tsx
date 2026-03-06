@@ -337,8 +337,8 @@ function DeliveriesReturnsSearch() {
   };
 
   return (
-    <div dir="rtl">
-      <Card className="max-w-5xl 2xl:max-w-screen-2xl mx-auto">
+    <div dir="rtl" className="w-full">
+      <Card className="w-full">
         <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
             <CardTitle>بحث التسليمات والارجاعات</CardTitle>

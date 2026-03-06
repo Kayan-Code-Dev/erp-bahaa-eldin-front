@@ -268,10 +268,10 @@ function ClothesTableContent() {
   };
 
   return (
-    <>
+    <div className="w-full">
       {isError && <div className="text-red-500">{error.message}</div>}
 
-      <Card>
+      <Card className="w-full">
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle>المنتجات</CardTitle>
@@ -474,7 +474,7 @@ function ClothesTableContent() {
         confirmLabel="تأكيد الحذف"
         variant="destructive"
       />
-    </>
+    </div>
   );
 }
 

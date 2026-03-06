@@ -44,8 +44,8 @@ function Inventory() {
   const { data, isPending } = useGetInventoryItems(page);
 
   return (
-    <div dir="rtl">
-      <Card>
+    <div dir="rtl" className="w-full">
+      <Card className="w-full">
         <CardHeader>
           <CardTitle>مخزون الفرع</CardTitle>
           <CardDescription>

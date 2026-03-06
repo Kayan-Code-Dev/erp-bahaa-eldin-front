@@ -341,8 +341,8 @@ function DeliveriesList() {
   };
 
   return (
-    <div dir="rtl">
-      <Card className="max-w-screen-lg 2xl:max-w-screen-2xl mx-auto">
+    <div dir="rtl" className="w-full">
+      <Card className="w-full">
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle>إدارة التسليمات</CardTitle>

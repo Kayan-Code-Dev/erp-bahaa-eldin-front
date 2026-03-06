@@ -128,8 +128,8 @@ function OverdueEmployeeCustodies() {
   };
 
   return (
-    <div dir="rtl">
-      <Card>
+    <div dir="rtl" className="w-full">
+      <Card className="w-full">
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle>الضمانات المتأخرة</CardTitle>
