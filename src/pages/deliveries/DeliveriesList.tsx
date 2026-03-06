@@ -153,36 +153,35 @@ function DeliveriesList() {
     prevFormValuesRef.current = formValues;
   }, [formValues, page, setSearchParams]);
 
+  const headerSearch = searchParams.get("search") || undefined;
+
   const filters = useMemo(() => {
     const values = debouncedFormValues;
     return {
-      // Use filter fields as delivery date (delivery_date_*)
       delivery_date_from: values.date_from || undefined,
       delivery_date_to: values.date_to || undefined,
       client_id:
         values.client_id && values.client_id.trim() !== ""
           ? values.client_id
           : undefined,
+      search: headerSearch,
     };
-  }, [debouncedFormValues]);
+  }, [debouncedFormValues, headerSearch]);
 
   useEffect(() => {
     const params = new URLSearchParams(searchParams);
-
-    // Synchronize form values with URL (date_from/date_to)
     if (debouncedFormValues.date_from) params.set("date_from", debouncedFormValues.date_from);
     else params.delete("date_from");
-
     if (debouncedFormValues.date_to) params.set("date_to", debouncedFormValues.date_to);
     else params.delete("date_to");
-
     if (filters.client_id) params.set("client_id", String(filters.client_id));
     else params.delete("client_id");
-
+    if (headerSearch) params.set("search", headerSearch);
+    else params.delete("search");
     params.set("page", page.toString());
     params.set("per_page", per_page.toString());
     setSearchParams(params, { replace: true });
-  }, [debouncedFormValues, filters.client_id, page, per_page, searchParams, setSearchParams]);
+  }, [debouncedFormValues, filters.client_id, headerSearch, page, per_page, searchParams, setSearchParams]);
 
   // Data fetching
   const { data, isPending, isError, error, refetch } = useQuery(

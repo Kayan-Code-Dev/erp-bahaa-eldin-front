@@ -187,7 +187,6 @@ export function EditClothModal({ cloth, open, onOpenChange }: Props) {
               )}
             />
 
-            {/* المقاسات (كلها اختيارية) */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <FormField
                 control={form.control}
@@ -230,7 +229,6 @@ export function EditClothModal({ cloth, open, onOpenChange }: Props) {
               />
             </div>
 
-            {/* قسم المنتجات (اختياري) */}
             <FormField
               control={form.control}
               name="category_id"
@@ -256,7 +254,7 @@ export function EditClothModal({ cloth, open, onOpenChange }: Props) {
               name="subcategory_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>المنتج الفرعي (اختياري - واحد فقط)</FormLabel>
+                  <FormLabel>المنتج الفرعي</FormLabel>
                   <FormControl>
                     <SubcategoriesSelect
                       value={field.value ?? ""}

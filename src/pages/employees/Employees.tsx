@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Table,
@@ -50,7 +50,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import useDebounce from "@/hooks/useDebounce";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 
 const getEmploymentTypeLabel = (type: string) => {
   const labels: Record<string, string> = {
@@ -88,6 +88,7 @@ const getEmploymentStatusVariant = (
 };
 
 function Employees() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<TGetEmployeesParams>({
     page: 1,
@@ -101,7 +102,11 @@ function Employees() {
   );
 
   // Filter states
-  const [search, setSearch] = useState("");
+  const urlSearch = searchParams.get("search") || "";
+  const [search, setSearch] = useState(urlSearch);
+  useEffect(() => {
+    setSearch(urlSearch);
+  }, [urlSearch]);
   const [departmentId, setDepartmentId] = useState<string>("");
   const [jobTitleId, setJobTitleId] = useState<string>("");
   const [managerId, setManagerId] = useState<string>("");
@@ -224,7 +229,18 @@ function Employees() {
                 placeholder="ابحث بالاسم أو البريد الإلكتروني..."
                 value={search}
                 onChange={(e) => {
-                  setSearch(e.target.value);
+                  const v = e.target.value;
+                  setSearch(v);
+                  setSearchParams(
+                    (prev) => {
+                      const n = new URLSearchParams(prev);
+                      if (v.trim()) n.set("search", v.trim());
+                      else n.delete("search");
+                      n.set("page", "1");
+                      return n;
+                    },
+                    { replace: true }
+                  );
                   handleFilterChange();
                 }}
                 className="w-[250px]"

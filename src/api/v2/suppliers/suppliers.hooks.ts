@@ -31,10 +31,14 @@ const TWO_MINUTES = 1000 * 60 * 2;
 // Supplier queries
 // ---------------------------------------------------------------------------
 
-export const useGetSuppliersQueryOptions = (page: number, per_page: number) =>
+export const useGetSuppliersQueryOptions = (
+  page: number,
+  per_page: number,
+  search?: string
+) =>
   queryOptions({
-    queryKey: [SUPPLIERS_KEY, page, per_page],
-    queryFn: () => getSuppliers(page, per_page),
+    queryKey: [SUPPLIERS_KEY, page, per_page, search],
+    queryFn: () => getSuppliers(page, per_page, search),
     staleTime: FIVE_MINUTES,
   });
 

@@ -36,6 +36,7 @@ import { useSearchParams } from "react-router";
 function Clients() {
   const [searchParams] = useSearchParams();
   const page = Number(searchParams.get("page")) || 1;
+  const search = searchParams.get("search") || undefined;
 
   // Modal State
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -48,7 +49,7 @@ function Clients() {
   // Data Fetching
   const per_page = 10;
   const { data, isPending, isError, error } = useQuery(
-    useGetClientsQueryOptions(page, per_page)
+    useGetClientsQueryOptions(page, per_page, search)
   );
 
   // Export Mutation

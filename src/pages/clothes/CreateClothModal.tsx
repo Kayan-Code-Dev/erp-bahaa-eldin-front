@@ -147,7 +147,6 @@ export function CreateClothModal({ open, onOpenChange }: Props) {
             className="space-y-4"
             dir="rtl"
           >
-            {/* كود المنتج */}
             <FormField
               control={form.control}
               name="code"
@@ -162,7 +161,6 @@ export function CreateClothModal({ open, onOpenChange }: Props) {
               )}
             />
 
-            {/* المقاسات (كلها اختيارية) */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <FormField
                 control={form.control}
@@ -205,7 +203,6 @@ export function CreateClothModal({ open, onOpenChange }: Props) {
               />
             </div>
 
-            {/* قسم المنتجات (اختياري) */}
             <FormField
               control={form.control}
               name="category_id"
@@ -249,7 +246,6 @@ export function CreateClothModal({ open, onOpenChange }: Props) {
               )}
             />
 
-            {/* الحالة */}
             <FormField
               control={form.control}
               name="status"
@@ -279,7 +275,6 @@ export function CreateClothModal({ open, onOpenChange }: Props) {
               )}
             />
 
-            {/* المكان */}
             <EntitySelect
               mode="form"
               control={form.control}
@@ -290,7 +285,6 @@ export function CreateClothModal({ open, onOpenChange }: Props) {
               disabled={isPending}
             />
 
-            {/* ملاحظات (اختياري) */}
             <FormField
               control={form.control}
               name="notes"

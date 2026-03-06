@@ -164,6 +164,8 @@ function OrdersList() {
     delay: FILTER_DEBOUNCE_MS,
   });
 
+  const headerSearch = searchParams.get("search") || undefined;
+
   const filters = useMemo(() => {
     const v = debouncedFormValues;
     return {
@@ -178,8 +180,9 @@ function OrdersList() {
       delivery_date_to: v.delivery_date_to || undefined,
       return_date_from: v.return_date_from || undefined,
       return_date_to: v.return_date_to || undefined,
+      search: headerSearch && headerSearch.trim() !== "" ? headerSearch.trim() : undefined,
     };
-  }, [debouncedFormValues]);
+  }, [debouncedFormValues, headerSearch]);
 
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<TOrder | null>(null);

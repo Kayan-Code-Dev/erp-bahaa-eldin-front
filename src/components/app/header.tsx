@@ -10,6 +10,7 @@ import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useProfile } from "@/api/v2/account/account.hooks";
 import { useHasPermission } from "@/api/auth/auth.hooks";
+import { HeaderSearch } from "./HeaderSearch";
 
 function Header() {
   const logout = useAuthStore((s) => s.logout);
@@ -35,40 +36,14 @@ function Header() {
     .toUpperCase();
 
   return (
-    <header className="bg-white/95 backdrop-blur-sm border-b border-border/60 px-4 md:px-6 py-3 flex items-center justify-between shadow-sm">
-      <div className="flex items-center gap-2 md:order-2">
-        <Button
-          variant="ghost"
-          className="flex items-center gap-2"
-          onClick={handleLogout}
-        >
-          تسجيل خروج
-        </Button>
-      </div>
-
-      {/* Mobile menu button */}
-      <div className="md:hidden">
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <Menu className="h-5 w-5" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="right" className="p-0 w-64">
-            <SheetTitle className="sr-only">القائمة الجانبية</SheetTitle>
-            <SheetDescription className="sr-only">القائمة الجانبية للتنقل</SheetDescription>
-            <MobileSidebar />
-          </SheetContent>
-        </Sheet>
-      </div>
-
-      <div className="flex items-center gap-4 md:order-1">
+    <header className="sticky top-0 z-10 shrink-0 bg-white/98 backdrop-blur-md border-b border-slate-200/80 px-4 md:px-6 py-3 flex items-center gap-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+      <div className="flex items-center gap-3 flex-1 min-w-0">
         <button
           onClick={() => navigate("/account")}
-          className="rounded-full transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="rounded-full transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
           title="إعدادات الحساب"
         >
-          <Avatar className="h-9 w-9 cursor-pointer">
+          <Avatar className="h-9 w-9 cursor-pointer ring-1 ring-slate-200/60">
             <AvatarImage src={profile?.avatar_url ?? profile?.avatar ?? undefined} alt="صورة الحساب" />
             <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
               {userInitials}
@@ -76,6 +51,33 @@ function Header() {
           </Avatar>
         </button>
         {canViewNotifications && <NotificationBell />}
+        <div className="flex-1 min-w-[200px] max-w-[400px]">
+          <HeaderSearch />
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2 shrink-0">
+        <Button
+          variant="ghost"
+          className="hidden sm:inline-flex items-center gap-2"
+          onClick={handleLogout}
+        >
+          تسجيل خروج
+        </Button>
+        <div className="md:hidden">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="p-0 w-64">
+              <SheetTitle className="sr-only">القائمة الجانبية</SheetTitle>
+              <SheetDescription className="sr-only">القائمة الجانبية للتنقل</SheetDescription>
+              <MobileSidebar />
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
     </header>
   );

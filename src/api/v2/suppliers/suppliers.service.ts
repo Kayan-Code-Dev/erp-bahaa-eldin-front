@@ -72,11 +72,17 @@ export const updateSupplier = async (
   }
 };
 
-export const getSuppliers = async (page: number, per_page: number) => {
+export const getSuppliers = async (
+  page: number,
+  per_page: number,
+  search?: string
+) => {
   try {
+    const params: Record<string, string | number> = { page, per_page };
+    if (search?.trim()) params.search = search.trim();
     const { data: response } = await api.get<TSuppliersListResponse>(
       "/suppliers",
-      { params: { page, per_page } },
+      { params },
     );
     return response;
   } catch (error) {

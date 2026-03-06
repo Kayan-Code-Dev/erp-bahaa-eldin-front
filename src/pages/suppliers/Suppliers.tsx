@@ -61,8 +61,8 @@ function Suppliers() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const page = Number(searchParams.get("page")) || 1;
+  const search = searchParams.get("search") || undefined;
 
-  // Modal State
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isCreateOrderModalOpen, setIsCreateOrderModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -70,10 +70,9 @@ function Suppliers() {
     null
   );
 
-  // Data Fetching
   const per_page = 10;
   const { data, isPending, isError, error } = useQuery(
-    useGetSuppliersQueryOptions(page, per_page)
+    useGetSuppliersQueryOptions(page, per_page, search)
   );
 
   // Delete Mutation

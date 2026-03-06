@@ -74,6 +74,12 @@ function ClothesTableContent() {
   );
   const [showFilters, setShowFilters] = useState(false);
 
+  // Sync code filter from URL
+  const urlCode = searchParams.get("code") || "";
+  useEffect(() => {
+    setCodeFilter(urlCode);
+  }, [urlCode]);
+
   // Debounce filter values
   const debouncedCodeFilter = useDebounce({ value: codeFilter, delay: 500 });
   const debouncedCategoryId = useDebounce({ value: categoryId, delay: 300 });

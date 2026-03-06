@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/select";
 import { EditCashboxModal } from "./EditCashboxModal";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useSearchParams } from "react-router";
 
 function CashboxesTableSkeleton({ rows = 5 }: { rows?: number }) {
   return (
@@ -86,65 +87,72 @@ function CashboxesTableSkeleton({ rows = 5 }: { rows?: number }) {
 }
 
 function Cashboxes() {
-  const [page, setPage] = useState(1);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const page = Number(searchParams.get("page")) || 1;
+  const search = searchParams.get("search") || undefined;
   const [filters, setFilters] = useState<TCashboxesParams>({
     page: 1,
     per_page: 10,
   });
 
-  // Modal State
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedCashbox, setSelectedCashbox] = useState<TCashbox | null>(
     null
   );
 
-  // Filter states
   const [branchId, setBranchId] = useState<string>("");
   const [isActive, setIsActive] = useState<string>("");
 
-  // Build query params
   const queryParams: TCashboxesParams = useMemo(() => {
     const params: TCashboxesParams = {
       ...filters,
       page,
       per_page: 10,
     };
-
-    if (branchId) {
-      params.branch_id = Number(branchId);
-    }
-    if (isActive && isActive !== "all") {
-      params.is_active = isActive === "true";
-    }
-
+    if (branchId) params.branch_id = Number(branchId);
+    if (isActive && isActive !== "all") params.is_active = isActive === "true";
+    if (search?.trim()) params.search = search.trim();
     return params;
-  }, [filters, page, branchId, isActive]);
+  }, [filters, page, branchId, isActive, search]);
+
 
   const { data, isPending, isError, error } = useQuery(
     useGetCashboxesQueryOptions(queryParams)
   );
 
-  // --- Pagination Handlers ---
   const handlePreviousPage = () => {
-    setPage((prev) => Math.max(1, prev - 1));
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set("page", String(Math.max(1, page - 1)));
+      return next;
+    });
   };
   const handleNextPage = () => {
-    setPage((prev) => Math.min(prev + 1, data?.total_pages || 1));
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set("page", String(Math.min(page + 1, data?.total_pages || 1)));
+      return next;
+    });
   };
 
-  // --- Filter Handlers ---
   const handleFilterChange = () => {
-    setPage(1); // Reset to first page when filter changes
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set("page", "1");
+      return next;
+    });
   };
 
   const handleClearFilters = () => {
     setBranchId("");
     setIsActive("");
-    setFilters({
-      page: 1,
-      per_page: 10,
+    setFilters({ page: 1, per_page: 10 });
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set("page", "1");
+      next.delete("search");
+      return next;
     });
-    setPage(1);
   };
 
   // --- Modal Action Handlers ---

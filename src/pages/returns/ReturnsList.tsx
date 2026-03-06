@@ -133,6 +133,8 @@ function ReturnsList() {
     prevFormValuesRef.current = formValues;
   }, [formValues, page, setSearchParams]);
 
+  const headerSearch = searchParams.get("search") || undefined;
+
   const filters = useMemo(() => {
     const values = debouncedFormValues;
     const raw = values.client_id;
@@ -146,10 +148,10 @@ function ReturnsList() {
       date_to: values.date_to || undefined,
       client_id:
         clientId !== undefined && Number.isFinite(clientId) ? clientId : undefined,
+      search: headerSearch,
     };
-  }, [debouncedFormValues]);
+  }, [debouncedFormValues, headerSearch]);
 
-  // Update URL params when filters change (synchronize form values)
   useEffect(() => {
     const params = new URLSearchParams(searchParams);
     if (debouncedFormValues.date_from) params.set("date_from", debouncedFormValues.date_from);
@@ -158,10 +160,12 @@ function ReturnsList() {
     else params.delete("date_to");
     if (filters.client_id) params.set("client_id", String(filters.client_id));
     else params.delete("client_id");
+    if (headerSearch) params.set("search", headerSearch);
+    else params.delete("search");
     params.set("page", page.toString());
     params.set("per_page", per_page.toString());
     setSearchParams(params, { replace: true });
-  }, [debouncedFormValues, filters.client_id, page, per_page, searchParams, setSearchParams]);
+  }, [debouncedFormValues, filters.client_id, headerSearch, page, per_page, searchParams, setSearchParams]);
 
   // Data fetching
   const { data, isPending, isError, error, refetch } = useQuery(

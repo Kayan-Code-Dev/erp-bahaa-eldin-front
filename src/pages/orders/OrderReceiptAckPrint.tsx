@@ -80,7 +80,6 @@ export function OrderReceiptAckPrint({
       <meta itemProp="name" content={`إقرار استلام - طلب رقم ${order.id}`} />
       <meta itemProp="dateCreated" content={order.created_at} />
       
-      {/* تاريخ الطباعة فوق الهيدر من اليسار */}
       <div className="ack-print-top-date w-full px-2 pb-0.5 text-left text-[8px] text-gray-600" dir="ltr">
         تاريخ الطباعة: {printDate} - {printTime}
       </div>
@@ -213,7 +212,6 @@ export function OrderReceiptAckPrint({
         </section>
       </main>
 
-      {/* القواعد والتعليمات + الفوتر معاً أسفل الصفحة في نفس الصفحة */}
       <div className="ack-print-bottom mt-auto flex flex-col shrink-0 w-full">
         <aside className="ack-print-rules pt-1 pb-1 border-t border-gray-200 shrink-0 min-w-0 px-2">
           <h2 className="ack-print-rules-title text-[9px] font-bold text-gray-800 mb-0.5">

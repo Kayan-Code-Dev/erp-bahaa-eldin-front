@@ -9,7 +9,7 @@ export const getOrderTypeLabel = (order_type: TOrder["order_type"]) => {
   return order_type ?? "—";
 };
 
-/** Get category display for order item (قسم المنتجات) */
+/** Get category display for order item */
 export function getItemCategoryDisplay(item: Record<string, unknown>): string {
   const categoryName = item.category_name;
   if (categoryName && String(categoryName).trim()) return String(categoryName).trim();
@@ -20,7 +20,7 @@ export function getItemCategoryDisplay(item: Record<string, unknown>): string {
   return "";
 }
 
-/** Get subcategory display for order item (منتج فرعي) */
+/** Get subcategory display for order item */
 export function getItemSubcategoryDisplay(item: Record<string, unknown>): string {
   const subcategoryNames = item.subcategory_names as string[] | undefined;
   if (subcategoryNames?.length) return subcategoryNames.join("، ");

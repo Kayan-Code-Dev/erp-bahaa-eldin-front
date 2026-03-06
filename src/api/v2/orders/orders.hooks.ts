@@ -68,6 +68,7 @@ export const useGetOrdersQueryOptions = (
     return_date_from?: string;
     return_date_to?: string;
     employee_id?: string | number;
+    search?: string;
   },
 ) => {
   return queryOptions({

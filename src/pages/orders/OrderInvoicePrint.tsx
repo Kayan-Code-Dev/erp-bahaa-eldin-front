@@ -165,7 +165,6 @@ export function OrderInvoicePrint({
       <meta itemProp="name" content={`فاتورة - طلب رقم ${order.id}`} />
       <meta itemProp="dateCreated" content={order.created_at} />
       
-      {/* تاريخ الطباعة فوق الهيدر من اليسار */}
       <div className="invoice-print-top-date w-full px-2 pb-0.5 text-left text-[8px] text-gray-600" dir="ltr">
         تاريخ الطباعة: {printDate} - {printTime}
       </div>

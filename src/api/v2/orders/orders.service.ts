@@ -52,6 +52,7 @@ export const getOrders = async (
     return_date_to?: string;
     /** Filter by employee (who created the order) */
     employee_id?: string | number;
+    search?: string;
   },
 ) => {
   try {
@@ -113,6 +114,16 @@ export const getOrders = async (
     // Employee (who created the order)
     if (filters?.employee_id !== undefined && filters.employee_id !== "" && filters.employee_id != null) {
       params.employee_id = typeof filters.employee_id === "string" ? Number(filters.employee_id) : filters.employee_id;
+    }
+
+    // Quick search
+    if (filters?.search && filters.search.trim() !== "") {
+      const s = filters.search.trim();
+      if (/^\d+$/.test(s)) {
+        params.order_id = Number(s);
+      } else {
+        params.search = s;
+      }
     }
 
     const { data: responseData } = await api.get<TPaginationResponse<TOrder>>(

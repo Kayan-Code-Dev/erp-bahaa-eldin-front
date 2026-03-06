@@ -28,6 +28,7 @@ export type TCashboxesParams = {
   page?: number;
   is_active?: boolean;
   branch_id?: number;
+  search?: string;
 };
 
 export type TUpdateCashboxRequest = Partial<{
