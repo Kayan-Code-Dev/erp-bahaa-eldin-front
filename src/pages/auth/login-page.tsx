@@ -1,4 +1,7 @@
 import { useLoginMutationOptions } from "@/api/v2/auth/auth.hooks";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -11,13 +14,13 @@ import { Input } from "@/components/ui/input";
 import { useAuthStore } from "@/zustand-stores/auth.store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
+import { Eye, EyeOff, User } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router";
 import * as z from "zod";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 
+// Form Schema validation
 const formSchema = z.object({
   email: z.string().email({
     message: "البريد الإلكتروني غير صحيح",
@@ -36,6 +39,7 @@ const Login = () => {
   const login = useAuthStore((state) => state.login);
   const { mutate, isPending } = useMutation(useLoginMutationOptions());
 
+  // Initialize form
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -44,6 +48,7 @@ const Login = () => {
     },
   });
 
+  // Login handler
   const onSubmit = (data: FormValues) => {
     mutate(
       {
@@ -63,171 +68,180 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-950 to-slate-900 relative overflow-hidden flex items-center justify-center px-4 py-12" dir="rtl">
-      <style>{`
-        @keyframes shimmer { 0%{background-position:200% center} 100%{background-position:-200% center} }
-        @keyframes blob { 0%,100%{border-radius:60% 40% 30% 70%/60% 30% 70% 40%} 50%{border-radius:30% 60% 70% 40%/50% 60% 30% 60%} }
-        .shimmer-text { background: linear-gradient(90deg, #1e40af, #0ea5e9, #1e40af); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmer 3s linear infinite; }
-        .blob { animation: blob 8s ease-in-out infinite; }
-        .glass { background: rgba(255,255,255,0.08); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.15); }
-        .glass-card { background: rgba(255,255,255,0.95); backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.2); }
-        .text-gradient { background: linear-gradient(135deg, #1e3a8a, #0ea5e9, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-      `}</style>
-
-      {/* Background effects */}
-      <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(59,130,246,0.5) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(14,165,233,0.3) 0%, transparent 50%)' }} />
-      <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.05) 1px,transparent 1px)', backgroundSize: '40px 40px' }} />
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 blob" style={{ filter: 'blur(60px)' }} />
-      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-cyan-400/10 blob" style={{ filter: 'blur(50px)', animationDelay: '3s' }} />
-
-      <div className="relative z-10 w-full max-w-md">
-        {/* Back to home */}
-        <Link
-          to="/"
-          className="inline-flex items-center gap-2 text-white/70 hover:text-white text-sm font-medium mb-8 transition-colors duration-300"
-        >
-          <i className="ri-arrow-right-line text-lg" />
-          العودة للرئيسية
-        </Link>
-
-        <div className="glass-card rounded-3xl shadow-2xl overflow-hidden">
-          {/* Header */}
-          <div className="bg-gradient-to-l from-blue-900 to-blue-600 px-8 py-8 text-center">
-            <Link to="/" className="inline-flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 flex items-center justify-center rounded-xl overflow-hidden bg-white shadow-md">
-                <img src="/dressnmore-logo.jpg" alt="DressnMore" className="w-full h-full object-cover" />
-              </div>
-              <span className="text-2xl font-black text-white tracking-tight">DressnMore</span>
-            </Link>
-            <h1 className="text-xl font-bold text-white mb-2">تسجيل الدخول</h1>
-            <p className="text-white/80 text-sm">أدخل بياناتك للوصول إلى لوحة التحكم</p>
+    <div className="min-h-screen w-full bg-[linear-gradient(180deg,hsl(220_25%_98%)_0%,hsl(220_20%_96%)_50%,hsl(220_15%_94%)_100%)] flex items-center justify-center px-4 py-8">
+      <div className="w-full max-w-md space-y-6" dir="rtl">
+        {/* Logo + title */}
+        <div className="flex flex-col items-center gap-2 text-center">
+          <div className="h-16 w-16 rounded-full bg-white/95 border border-border/70 shadow-lg ring-2 ring-primary/10 flex items-center justify-center overflow-hidden">
+            <img
+              src="/dressnmore-logo.jpg"
+              alt="dressnmore logo"
+              className="w-full h-full object-cover"
+            />
           </div>
-
-          {/* Form */}
-          <div className="p-8">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5" dir="rtl">
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-right text-sm font-medium text-gray-700">
-                        البريد الإلكتروني
-                      </FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Input
-                            placeholder="example@dressnmore.com"
-                            className="pr-4 pl-11 text-right h-12 rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
-                            {...field}
-                          />
-                          <i className="ri-user-line absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg" />
-                        </div>
-                      </FormControl>
-                      <FormMessage className="text-right text-xs text-red-500" />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-right text-sm font-medium text-gray-700">
-                        كلمة المرور
-                      </FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Input
-                            type={showPassword ? "text" : "password"}
-                            placeholder="••••••••"
-                            className="pr-4 pl-11 h-12 rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
-                            {...field}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                            aria-label={showPassword ? "إخفاء كلمة السر" : "إظهار كلمة السر"}
-                          >
-                            <i className={`text-lg ${showPassword ? "ri-eye-off-line" : "ri-eye-line"}`} />
-                          </button>
-                        </div>
-                      </FormControl>
-                      <FormMessage className="text-right text-xs text-red-500" />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="flex items-center justify-between gap-2 text-xs">
-                  <span className="text-gray-500">جلسات آمنة ومشفرة</span>
-                  <Link
-                    to="/forget-password"
-                    className="text-blue-600 hover:text-blue-700 font-medium"
-                  >
-                    نسيت كلمة المرور؟
-                  </Link>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isPending}
-                  className="w-full h-12 rounded-xl bg-gradient-to-l from-blue-900 to-blue-500 text-white font-bold text-base hover:shadow-lg hover:shadow-blue-500/40 hover:scale-[1.02] transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {isPending ? (
-                    <>
-                      <i className="ri-loader-4-line animate-spin text-xl" />
-                      جاري التحقق...
-                    </>
-                  ) : (
-                    <>
-                      <i className="ri-login-box-line" />
-                      تسجيل الدخول
-                    </>
-                  )}
-                </button>
-              </form>
-            </Form>
-
-            <p className="mt-6 text-xs text-gray-500 text-center">
-              يتم تأمين البيانات وتشفيرها لحماية معلوماتك
+          <div className="space-y-1">
+            <h1 className="text-xl font-bold tracking-tight text-foreground">
+              تسجيل الدخول إلى Dressnmore ERP
+            </h1>
+            <p className="text-[12px] text-muted-foreground">
+              أدخل بيانات حسابك للوصول إلى لوحة التحكم وإدارة الفروع والورشة.
             </p>
           </div>
         </div>
-      </div>
 
-      {/* Login Error Dialog */}
-      <Dialog open={loginError} onOpenChange={setLoginError}>
-        <DialogContent className="max-w-md rounded-2xl p-6 text-center border-0 shadow-2xl" dir="rtl">
-          <div className="w-16 h-16 flex items-center justify-center bg-red-50 rounded-full mx-auto mb-4">
-            <i className="ri-error-warning-line text-red-500 text-3xl" />
-          </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">فشل تسجيل الدخول</h2>
-          <p className="mb-6 text-sm text-gray-500">
-            تأكد من صحة البريد الإلكتروني وكلمة المرور ثم حاول مرة أخرى.
-          </p>
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              onClick={() => setLoginError(false)}
-              className="flex-1 rounded-xl"
-            >
-              إلغاء
-            </Button>
-            <Button
-              onClick={() => {
-                form.reset();
-                setLoginError(false);
-              }}
-              className="flex-1 rounded-xl bg-gradient-to-l from-blue-900 to-blue-500"
-            >
-              إعادة المحاولة
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+        {/* Auth card */}
+        <Card className="border border-border/70 shadow-[0_4px_24px_rgb(0_0_0/0.08),0_8px_24px_rgb(0_0_0/0.06)] bg-white">
+            <CardContent className="pt-6 pb-7 px-6 md:px-7 flex flex-col gap-6">
+              <div className="flex flex-col gap-1 text-right">
+              <h2 className="text-lg md:text-xl font-semibold tracking-tight text-foreground">
+                بيانات الدخول
+              </h2>
+              <p className="text-[12px] text-muted-foreground">
+                البريد الإلكتروني وكلمة المرور المستخدمة لتفعيل حسابك في النظام.
+              </p>
+              </div>
+
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-5"
+                  dir="rtl"
+                >
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-right text-sm text-muted-foreground font-medium">
+                          اسم المستخدم
+                        </FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Input
+                              placeholder="example@dressnmore.com"
+                              className="pr-3 pl-9 text-right"
+                              {...field}
+                            />
+                            <User className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground/70" />
+                          </div>
+                        </FormControl>
+                        <FormMessage className="text-right text-[11px]" />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-right text-sm text-muted-foreground font-medium">
+                          كلمة المرور
+                        </FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Input
+                              type={showPassword ? "text" : "password"}
+                              placeholder="••••••••"
+                              className="pr-3 pl-9"
+                              {...field}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="absolute left-3 top-2.5 text-muted-foreground/70"
+                              aria-label={
+                                showPassword
+                                  ? "إخفاء كلمة السر"
+                                  : "إظهار كلمة السر"
+                              }
+                            >
+                              {showPassword ? (
+                                <EyeOff className="h-5 w-5" />
+                              ) : (
+                                <Eye className="h-5 w-5" />
+                              )}
+                            </button>
+                          </div>
+                        </FormControl>
+                        <FormMessage className="text-right text-[11px]" />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="flex items-center justify-between gap-2 text-[11px] md:text-xs">
+                    <span className="text-muted-foreground/80">
+                      يتم تأمين جلسات النظام تلقائيًا
+                    </span>
+                    <Button
+                      variant="link"
+                      className="p-0 h-auto text-[11px] md:text-xs text-primary hover:text-primary/90"
+                    >
+                      <Link to="/forget-password">نسيت كلمة المرور؟</Link>
+                    </Button>
+                  </div>
+
+                  <Button
+                    type="submit"
+                    className="w-full font-medium text-sm md:text-base py-3.5 shadow-md"
+                    variant="default"
+                    isLoading={isPending}
+                  >
+                    تسجيل الدخول إلى الحساب
+                  </Button>
+                </form>
+              </Form>
+
+              <p className="text-[11px] text-muted-foreground text-right">
+                يتم مراقبة الأنشطة لحماية بيانات العملاء والموردين، وتشفير حركة
+                البيانات بين المتصفح والخادم.
+              </p>
+            </CardContent>
+          </Card>
+
+        {/* Login Error Dialog */}
+        <Dialog open={loginError} onOpenChange={setLoginError}>
+          <DialogContent className="max-w-md rounded-lg flex flex-col items-center p-6 text-center">
+            <div className="bg-red-50 p-4 rounded-full mb-4">
+              <svg
+                className="h-12 w-12 text-red-500 mx-auto"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold mb-2">كلمة المرور غير صحيحة</h2>
+            <p className="mb-6 text-sm text-muted-foreground">
+              تأكد من صحة بيانات الدخول ثم حاول مرة أخرى.
+            </p>
+            <div className="flex gap-4 w-full">
+              <Button
+                variant="outline"
+                onClick={() => setLoginError(false)}
+                className="w-1/2"
+              >
+                إلغاء
+              </Button>
+              <Button
+                onClick={() => {
+                  form.reset();
+                  setLoginError(false);
+                }}
+                className="w-1/2"
+              >
+                إعادة المحاولة
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 };
