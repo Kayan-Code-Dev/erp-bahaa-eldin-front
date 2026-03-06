@@ -198,11 +198,11 @@ function ChooseClothes() {
   return (
     <div
       dir="rtl"
-      className="min-h-screen bg-[#f2f2f2] dark:bg-slate-950"
+      className="min-h-screen bg-[linear-gradient(180deg,hsl(220_20%_98%)_0%,hsl(220_14%_96%)_100%)] dark:bg-slate-950"
     >
       <div className="mx-auto max-w-7xl space-y-8 py-8 px-4 lg:px-8">
         {/* شريط الخطوات */}
-        <div className="sticky top-0 z-20 -mx-4 -mt-8 px-4 pt-8 pb-4 lg:-mx-8 lg:px-8 lg:pt-8 lg:pb-4 bg-[#f2f2f2] dark:bg-slate-950">
+        <div className="sticky top-0 z-20 -mx-4 -mt-8 px-4 pt-8 pb-4 lg:-mx-8 lg:px-8 lg:pt-8 lg:pb-4 bg-[linear-gradient(180deg,hsl(220_20%_98%)_0%,hsl(220_14%_96%)_100%)] dark:bg-slate-950">
           <OrderStepsStepper
             currentStep={2}
             stepState={{

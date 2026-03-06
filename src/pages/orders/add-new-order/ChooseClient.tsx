@@ -728,7 +728,7 @@ function ChooseClient() {
   };
 
   return (
-    <div dir="rtl" className="min-h-screen bg-[#f2f2f2] dark:bg-slate-950">
+    <div dir="rtl" className="min-h-screen bg-[linear-gradient(180deg,hsl(220_20%_98%)_0%,hsl(220_14%_96%)_100%)] dark:bg-slate-950">
       <div className="max-w-7xl mx-auto space-y-8 py-8 px-4 lg:px-8">
         <nav className="flex items-center gap-2 text-sm">
           <Link
@@ -741,7 +741,7 @@ function ChooseClient() {
           <span className="text-slate-900 dark:text-slate-100 font-semibold">إنشاء طلب إيجار جديد</span>
         </nav>
 
-        <div className="sticky top-0 z-20 -mx-4 -mt-8 px-4 pt-8 pb-4 lg:-mx-8 lg:px-8 lg:pt-8 lg:pb-4 bg-[#f2f2f2] dark:bg-slate-950">
+        <div className="sticky top-0 z-20 -mx-4 -mt-8 px-4 pt-8 pb-4 lg:-mx-8 lg:px-8 lg:pt-8 lg:pb-4 bg-[linear-gradient(180deg,hsl(220_20%_98%)_0%,hsl(220_14%_96%)_100%)] dark:bg-slate-950">
           <OrderStepsStepper
             currentStep={
               selectedClientFromList || selectedClient
