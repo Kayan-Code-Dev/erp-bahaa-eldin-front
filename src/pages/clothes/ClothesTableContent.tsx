@@ -38,7 +38,7 @@ import { useGetBranchesQueryOptions } from "@/api/v2/branches/branches.hooks";
 import { useGetFactoriesQueryOptions } from "@/api/v2/factories/factories.hooks";
 import { useGetWorkshopsQueryOptions } from "@/api/v2/workshop/workshops.hooks";
 import { Pencil, Trash2, RotateCcw, Filter } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router";
 import { ClothesTableSkeleton } from "./ClothesTableSkeleton";
 import { EditClothModal } from "./EditClothModal";
@@ -46,6 +46,8 @@ import { toast } from "sonner";
 
 function ClothesTableContent() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const searchParamsRef = useRef(searchParams);
+  searchParamsRef.current = searchParams;
   const page = Number(searchParams.get("page")) || 1;
   const per_page = 10;
 
@@ -164,40 +166,48 @@ function ClothesTableContent() {
     setSearchParams({ page: "1" });
   };
 
-  // Update URL params when debounced values change
+  // Update URL params when debounced values change (use ref to avoid loop from searchParams dependency)
   useEffect(() => {
-    const params = new URLSearchParams();
-    if (debouncedCodeFilter) params.set("code", debouncedCodeFilter);
-    if (debouncedCategoryId) params.set("category_id", debouncedCategoryId);
-    if (debouncedSubcategoryIds.length > 0)
-      params.set("subcat_id", debouncedSubcategoryIds.join(","));
-    if (debouncedEntityType) params.set("entity_type", debouncedEntityType);
-    if (debouncedEntityId) params.set("entity_id", debouncedEntityId);
+    const params = new URLSearchParams(searchParamsRef.current);
+    const prevCode = params.get("code") || null;
+    const prevCategoryId = params.get("category_id") || null;
+    const prevSubcatId =
+      params.get("subcat_id") || null;
+    const prevEntityType = params.get("entity_type") || null;
+    const prevEntityId = params.get("entity_id") || null;
 
-    // Only update if params have changed
-    const currentParams = new URLSearchParams(searchParams);
+    const newCode = debouncedCodeFilter || null;
+    const newCategoryId = debouncedCategoryId || null;
+    const newSubcatId =
+      debouncedSubcategoryIds.length > 0
+        ? debouncedSubcategoryIds.join(",")
+        : null;
+    const newEntityType = debouncedEntityType || null;
+    const newEntityId = debouncedEntityId || null;
+
     const paramsChanged =
-      currentParams.get("code") !== (debouncedCodeFilter || null) ||
-      currentParams.get("category_id") !== (debouncedCategoryId || null) ||
-      currentParams.get("subcat_id") !==
-        (debouncedSubcategoryIds.length > 0
-          ? debouncedSubcategoryIds.join(",")
-          : null) ||
-      currentParams.get("entity_type") !== (debouncedEntityType || null) ||
-      currentParams.get("entity_id") !== (debouncedEntityId || null);
+      prevCode !== newCode ||
+      prevCategoryId !== newCategoryId ||
+      prevSubcatId !== newSubcatId ||
+      prevEntityType !== newEntityType ||
+      prevEntityId !== newEntityId;
 
-    if (paramsChanged) {
-      // Reset to page 1 when filters change
-      if (page > 1) params.set("page", "1");
-      setSearchParams(params);
-    }
+    if (!paramsChanged) return;
+
+    const nextParams = new URLSearchParams();
+    if (newCode) nextParams.set("code", newCode);
+    if (newCategoryId) nextParams.set("category_id", newCategoryId);
+    if (newSubcatId) nextParams.set("subcat_id", newSubcatId);
+    if (newEntityType) nextParams.set("entity_type", newEntityType);
+    if (newEntityId) nextParams.set("entity_id", newEntityId);
+    nextParams.set("page", paramsChanged ? "1" : String(page));
+    setSearchParams(nextParams);
   }, [
     debouncedCodeFilter,
     debouncedCategoryId,
     debouncedSubcategoryIds,
     debouncedEntityType,
     debouncedEntityId,
-    searchParams,
     setSearchParams,
     page,
   ]);

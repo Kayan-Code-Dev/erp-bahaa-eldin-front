@@ -34,16 +34,22 @@ const SEARCH_CONFIG: Record<string, { param: string; placeholder: string }> = {
   "/clothes/transfer-clothes/requests": { param: "search", placeholder: "ابحث في طلبات النقل..." },
   "/factory": { param: "search", placeholder: "ابحث في المصانع..." },
   "/workshop": { param: "search", placeholder: "ابحث في الورش..." },
-  "/employees/employee-custodies": { param: "search", placeholder: "ابحث في العهد..." },
+  "/employees/custodies": { param: "search", placeholder: "ابحث في العهد..." },
 };
 
 const DEFAULT_CONFIG = { param: "search", placeholder: "بحث..." };
 
+/** Paths sorted by length descending so longer paths match first (e.g. /orders/search-deliveries-returns before /orders) */
+const SEARCH_CONFIG_KEYS_SORTED = (Object.keys(SEARCH_CONFIG) as string[]).sort(
+  (a, b) => b.length - a.length
+);
+
 function getSearchConfig(pathname: string): { param: string; placeholder: string } {
-  const exact = SEARCH_CONFIG[pathname];
+  const normalized = pathname.replace(/\/$/, "") || "/";
+  const exact = SEARCH_CONFIG[normalized];
   if (exact) return exact;
-  for (const [path, config] of Object.entries(SEARCH_CONFIG)) {
-    if (pathname.startsWith(path)) return config;
+  for (const path of SEARCH_CONFIG_KEYS_SORTED) {
+    if (normalized.startsWith(path)) return SEARCH_CONFIG[path];
   }
   return DEFAULT_CONFIG;
 }
@@ -66,9 +72,12 @@ export function HeaderSearch() {
   useEffect(() => {
     setSearchParams(
       (prev) => {
+        const current = prev.get(param) ?? "";
+        const nextVal = debouncedValue.trim();
+        if (current === nextVal) return prev;
         const next = new URLSearchParams(prev);
-        if (debouncedValue.trim()) {
-          next.set(param, debouncedValue.trim());
+        if (nextVal) {
+          next.set(param, nextVal);
           next.set("page", "1");
         } else {
           next.delete(param);

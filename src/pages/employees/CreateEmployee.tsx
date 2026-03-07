@@ -41,7 +41,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { RolesSelect } from "@/components/custom/roles-select";
-import { BranchesSelect as MultiBranchesSelect } from "@/components/custom/MultiBranchesSelect";
+import { BranchesSelect } from "@/components/custom/BranchesSelect";
 import { DatePicker } from "@/components/custom/DatePicker";
 import { EmployeesSelect } from "@/components/custom/EmployeesSelect";
 import { useCreateEmployeeQueryOptions } from "@/api/v2/employees/employees.hooks";
@@ -61,9 +61,7 @@ const formSchema = z.object({
     .min(6, { message: "كلمة المرور يجب أن تكون 6 أحرف على الأقل" }),
   hire_date: z.string().min(1, { message: "تاريخ التوظيف مطلوب" }),
 
-  branch_ids: z
-    .array(z.string())
-    .min(1, { message: "يجب اختيار فرع واحد على الأقل" }),
+  branch_id: z.string().min(1, { message: "يجب اختيار الفرع" }),
 
   roles: z.array(z.string()).optional(),
   manager_id: z.string().optional(),
@@ -91,7 +89,7 @@ const DEFAULT_VALUES: FormValues = {
   email: "",
   password: "",
   hire_date: "",
-  branch_ids: [],
+  branch_id: "",
   roles: [],
   manager_id: "",
   base_salary: "",
@@ -173,7 +171,7 @@ function CreateEmployee() {
       email: values.email,
       password: values.password,
       hire_date: values.hire_date,
-      branch_ids: values.branch_ids.map(Number),
+      branch_ids: [Number(values.branch_id)],
       roles: values.roles?.length ? values.roles.map(Number) : undefined,
       manager_id: values.manager_id ? Number(values.manager_id) : undefined,
       base_salary: Number(values.base_salary),
@@ -374,19 +372,18 @@ function CreateEmployee() {
                   )}
                 />
 
-                {/* Branches (required) */}
+                {/* Branch (required - single) */}
                 <FormField
                   control={form.control}
-                  name="branch_ids"
+                  name="branch_id"
                   render={({ field }) => (
                     <FormItem className="md:col-span-2">
                       <FormLabel>
-                        الفروع <span className="text-destructive">*</span>
+                        الفرع <span className="text-destructive">*</span>
                       </FormLabel>
                       <FormControl>
-                        <MultiBranchesSelect
-                          multi
-                          value={field.value || []}
+                        <BranchesSelect
+                          value={field.value ?? ""}
                           onChange={field.onChange}
                           disabled={isPending}
                         />
