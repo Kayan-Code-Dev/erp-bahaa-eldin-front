@@ -352,11 +352,13 @@ function CreateEmployee() {
                       <FormControl>
                         <DatePicker
                           value={
-                            field.value ? new Date(field.value) : undefined
+                            field.value
+                              ? parse(field.value, "yyyy-MM-dd", new Date())
+                              : undefined
                           }
                           onChange={(d) =>
                             field.onChange(
-                              d ? d.toISOString().split("T")[0] : "",
+                              d ? format(d, "yyyy-MM-dd") : "",
                             )
                           }
                           placeholder="اختر تاريخ التوظيف"
@@ -772,11 +774,13 @@ function CreateEmployee() {
                       <FormControl>
                         <DatePicker
                           value={
-                            field.value ? new Date(field.value) : undefined
+                            field.value
+                              ? parse(field.value, "yyyy-MM-dd", new Date())
+                              : undefined
                           }
                           onChange={(d) =>
                             field.onChange(
-                              d ? d.toISOString().split("T")[0] : "",
+                              d ? format(d, "yyyy-MM-dd") : "",
                             )
                           }
                           placeholder="اختر التاريخ"
