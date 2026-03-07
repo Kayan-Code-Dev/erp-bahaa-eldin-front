@@ -84,6 +84,7 @@ export function NotificationBell() {
         align="end"
         className="w-[380px] sm:w-[420px] p-0"
         sideOffset={8}
+        dir="rtl"
       >
         <div className="flex items-center justify-between px-4 py-3 border-b">
           <h3 className="font-semibold text-sm">الإشعارات</h3>

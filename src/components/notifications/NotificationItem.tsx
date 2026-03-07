@@ -164,6 +164,7 @@ export const NotificationItem = memo(function NotificationItem({
 
   return (
     <div
+      dir="rtl"
       className={cn(
         'relative group px-4 py-3 hover:bg-accent/50 transition-colors cursor-pointer',
         !notification.read && 'bg-accent/30'
@@ -241,9 +242,9 @@ export const NotificationItem = memo(function NotificationItem({
               ) : (
                 <>
                   {referenceTypeDisplay && (
-                    <span className="mr-2">
-                      النوع: {getNotificationTypeLabel(referenceTypeDisplay) || referenceTypeDisplay}
-                    </span>
+<span className="me-2">
+                                      النوع: {getNotificationTypeLabel(referenceTypeDisplay) || referenceTypeDisplay}
+                                    </span>
                   )}
                   {notification.data?.reference_id != null && (
                     <span>الرقم: {notification.data.reference_id}</span>
@@ -304,7 +305,7 @@ export const NotificationItem = memo(function NotificationItem({
                   onActionClick?.();
                 }}
               >
-                <ExternalLink className="h-3 w-3 mr-1" />
+                <ExternalLink className="h-3 w-3 me-1" />
                 عرض
               </Button>
             )}

@@ -197,6 +197,7 @@ const NotificationListItem = memo(function NotificationListItem({
 
   return (
     <div
+      dir="rtl"
       className={cn(
         'relative group px-4 py-3 hover:bg-accent/50 transition-colors cursor-pointer border-b last:border-b-0',
         !isRead && 'bg-accent/30'
@@ -272,7 +273,7 @@ const NotificationListItem = memo(function NotificationListItem({
               ) : (
                 <>
                   {referenceTypeDisplay && (
-                    <span className="mr-2">
+                    <span className="me-2">
                       النوع: {getNotificationTypeLabel(referenceTypeDisplay) || referenceTypeDisplay}
                     </span>
                   )}
@@ -424,7 +425,7 @@ function Notifications() {
                 onClick={handleMarkAllAsRead}
                 disabled={markAllAsReadMutation.isPending}
               >
-                <CheckCircle2 className="h-4 w-4 ml-2" />
+                <CheckCircle2 className="h-4 w-4 me-2" />
                 تحديد الكل كمقروء
               </Button>
             )}
