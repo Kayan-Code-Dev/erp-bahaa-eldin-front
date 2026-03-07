@@ -685,21 +685,29 @@ function DeliveriesReturnsSearch() {
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() =>
+                      onClick={() => {
                         form.reset({
                           order_id: "",
                           client_id: "",
                           employee_id: "",
                           cloth_name: "",
                           cloth_code: "",
+                          category_id: "",
+                          subcategory_id: "",
                           visit_date_from: "",
                           visit_date_to: "",
                           delivery_date_from: "",
                           delivery_date_to: "",
                           return_date_from: "",
                           return_date_to: "",
-                        })
-                      }
+                        });
+                        setSearchParams(() => {
+                          const next = new URLSearchParams();
+                          next.set("page", "1");
+                          next.set("per_page", String(per_page));
+                          return next;
+                        });
+                      }}
                     >
                       مسح الفلاتر
                     </Button>

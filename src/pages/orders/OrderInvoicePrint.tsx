@@ -139,14 +139,7 @@ export function OrderInvoicePrint({
   const effectiveLogoUrl = branchImage || logoUrl || "/dressnmore-logo.jpg";
 
   const { currency_symbol } = getOrderCurrencyInfo(order as any);
-  const {
-    subtotal,
-    vatAmount,
-    totalWithVat,
-    vatEnabled,
-    vatType,
-    vatValue,
-  } = getOrderTotalsWithVat(order as any);
+  const { totalWithVat } = getOrderTotalsWithVat(order as any);
 
   const paid = parseFloat(String((order as any).paid ?? 0).replace(/,/g, "")) || 0;
   const remaining =
@@ -302,54 +295,12 @@ export function OrderInvoicePrint({
                   className="invoice-print-td border-b border-gray-100 py-1 px-2 text-gray-700 font-semibold text-[9px] text-right"
                   style={{ width: "40%" }}
                 >
-                  السعر قبل الضريبة
+                  السعر
                 </th>
                 <td
                   className="invoice-print-td border-b border-gray-100 py-1 px-2 text-gray-900 font-semibold text-[9px]"
                   style={{
                     width: "60%",
-                    fontVariantNumeric: "tabular-nums",
-                    fontFamily: "'Segoe UI', Arial, sans-serif",
-                  }}
-                  dir="ltr"
-                >
-                  {subtotal.toLocaleString()} {currency_symbol}
-                </td>
-              </tr>
-              <tr>
-                <th
-                  scope="row"
-                  className="invoice-print-td border-b border-gray-100 py-1 px-2 text-gray-700 font-semibold text-[9px] text-right"
-                >
-                  قيمة الضريبة
-                </th>
-                <td
-                  className="invoice-print-td border-b border-gray-100 py-1 px-2 text-gray-900 font-semibold text-[9px]"
-                  style={{
-                    fontVariantNumeric: "tabular-nums",
-                    fontFamily: "'Segoe UI', Arial, sans-serif",
-                  }}
-                  dir="ltr"
-                >
-                  {vatEnabled && vatAmount > 0
-                    ? `${vatAmount.toLocaleString()} ${currency_symbol}${
-                        vatType === "percentage" && vatValue
-                          ? ` (${vatValue}%)`
-                          : ""
-                      }`
-                    : "لا يوجد"}
-                </td>
-              </tr>
-              <tr className="bg-gray-50/80">
-                <th
-                  scope="row"
-                  className="invoice-print-td border-b border-gray-100 py-1 px-2 text-gray-900 font-bold text-[9px] text-right"
-                >
-                  السعر بعد الضريبة
-                </th>
-                <td
-                  className="invoice-print-td border-b border-gray-100 py-1 px-2 text-gray-900 font-bold text-[9px]"
-                  style={{
                     fontVariantNumeric: "tabular-nums",
                     fontFamily: "'Segoe UI', Arial, sans-serif",
                   }}

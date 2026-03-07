@@ -58,7 +58,7 @@ import { OrdersTableSkeleton } from "@/pages/orders/OrdersTableSkeleton";
 import { OrderDetailsModal } from "@/pages/orders/OrderDetailsModal";
 import { CreateCustodyModal } from "@/pages/orders/CreateCustodyModal";
 import { CreatePaymentModal } from "@/pages/orders/CreatePaymentModal";
-import { getOrderTypeLabel, getStatusVariant, getStatusLabel } from "@/api/v2/orders/order.utils";
+import { getOrderTypeLabel, getStatusVariant, getStatusLabel, getItemListDisplay } from "@/api/v2/orders/order.utils";
 import { OrderEmployeeName } from "@/components/custom/OrderEmployeeName";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -132,6 +132,7 @@ function DeliveriesList() {
 
   const prevFormValuesRef = useRef<DeliveriesFilterFormValues | null>(null);
   const isInitialMount = useRef(true);
+  const skipNextSyncRef = useRef(false);
 
   useEffect(() => {
     if (isInitialMount.current) {
@@ -179,6 +180,19 @@ function DeliveriesList() {
   }, [debouncedFormValues, headerSearch]);
 
   useEffect(() => {
+    if (skipNextSyncRef.current) {
+      skipNextSyncRef.current = false;
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams();
+          next.set("page", prev.get("page") || "1");
+          next.set("per_page", prev.get("per_page") || per_page.toString());
+          return next;
+        },
+        { replace: true }
+      );
+      return;
+    }
     const params = new URLSearchParams(searchParams);
     if (debouncedFormValues.order_id?.trim()) params.set("order_id", debouncedFormValues.order_id.trim());
     else params.delete("order_id");
@@ -348,6 +362,7 @@ function DeliveriesList() {
   };
 
   const handleResetFilters = () => {
+    skipNextSyncRef.current = true;
     form.reset({
       order_id: "",
       client_id: "",
@@ -918,12 +933,7 @@ function DeliveriesList() {
                                 {" "}
                                 {order.items && order.items.length > 0
                                   ? order.items
-                                      .map((item) =>
-                                        item.code
-                                          ? `${(item as { name?: string }).name ?? item.code} (${item.code})`
-                                          : (item as { name?: string }).name ?? item.code
-                                      )
-                                      .filter(Boolean)
+                                      .map((item) => getItemListDisplay(item as Record<string, unknown>))
                                       .join("، ")
                                   : "-"}
                               </span>

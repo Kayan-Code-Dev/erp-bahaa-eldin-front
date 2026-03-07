@@ -127,6 +127,7 @@ function Payments() {
   // Reset page to 1 when filters change (but not on initial load)
   const prevFormValuesRef = useRef<FilterFormValues | null>(null);
   const isInitialMount = useRef(true);
+  const skipNextSyncRef = useRef(false);
   
   useEffect(() => {
     // Skip on initial mount
@@ -180,6 +181,19 @@ function Payments() {
 
   // Synchronize parameters with URL
   useEffect(() => {
+    if (skipNextSyncRef.current) {
+      skipNextSyncRef.current = false;
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams();
+          next.set("page", prev.get("page") || "1");
+          next.set("per_page", prev.get("per_page") || String(per_page));
+          return next;
+        },
+        { replace: true }
+      );
+      return;
+    }
     const next = new URLSearchParams();
     next.set("page", String(page));
     next.set("per_page", String(per_page));
@@ -239,6 +253,7 @@ function Payments() {
   };
 
   const handleResetFilters = () => {
+    skipNextSyncRef.current = true;
     form.reset({
       status: undefined,
       payment_type: undefined,

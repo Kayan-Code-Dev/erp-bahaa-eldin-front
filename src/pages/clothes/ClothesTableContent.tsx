@@ -156,18 +156,28 @@ function ClothesTableContent() {
   };
 
   // Reset all filters
+  const skipNextSyncRef = useRef(false);
   const handleResetFilters = () => {
+    skipNextSyncRef.current = true;
     setCodeFilter("");
     setCategoryId("");
     setSubcategoryIds([]);
     setEntityType(undefined);
     setEntityId("");
-    // Clear URL params and reset to page 1
     setSearchParams({ page: "1" });
   };
 
   // Update URL params when debounced values change (use ref to avoid loop from searchParams dependency)
   useEffect(() => {
+    if (skipNextSyncRef.current) {
+      skipNextSyncRef.current = false;
+      setSearchParams((prev) => {
+        const next = new URLSearchParams();
+        next.set("page", prev.get("page") || "1");
+        return next;
+      });
+      return;
+    }
     const params = new URLSearchParams(searchParamsRef.current);
     const prevCode = params.get("code") || null;
     const prevCategoryId = params.get("category_id") || null;

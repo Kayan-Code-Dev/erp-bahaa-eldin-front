@@ -4,7 +4,7 @@ import { ar } from "date-fns/locale";
 const ARABIC_NUMERALS = "٠١٢٣٤٥٦٧٨٩";
 const ENGLISH_NUMERALS = "0123456789";
 
-/** Converts Arabic-Indic numerals (٠-٩) to English (0-9) in a string */
+/** Converts Arabic-Indic digits (U+0660–U+0669) to ASCII digits (0-9) in a string */
 export function toEnglishNumerals(value: string | number | null | undefined): string {
   if (value === null || value === undefined) return "";
   const s = String(value);

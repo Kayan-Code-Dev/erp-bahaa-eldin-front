@@ -37,7 +37,7 @@ import { formatDate } from "@/utils/formatDate";
 import { formatPhone } from "@/utils/formatPhone";
 import { OrdersTableSkeleton } from "@/pages/orders/OrdersTableSkeleton";
 import { OrderDetailsModal } from "@/pages/orders/OrderDetailsModal";
-import { getOrderTypeLabel, getStatusVariant, getStatusLabel } from "@/api/v2/orders/order.utils";
+import { getOrderTypeLabel, getStatusVariant, getStatusLabel, getItemListDisplay } from "@/api/v2/orders/order.utils";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -142,7 +142,21 @@ function OverdueReturnsList() {
     };
   }, [debouncedFormValues, headerSearch]);
 
+  const skipNextSyncRef = useRef(false);
   useEffect(() => {
+    if (skipNextSyncRef.current) {
+      skipNextSyncRef.current = false;
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams();
+          next.set("page", prev.get("page") || "1");
+          next.set("per_page", prev.get("per_page") || per_page.toString());
+          return next;
+        },
+        { replace: true }
+      );
+      return;
+    }
     const params = new URLSearchParams(searchParams);
     if (filters.client_id) params.set("client_id", String(filters.client_id));
     else params.delete("client_id");
@@ -205,7 +219,8 @@ function OverdueReturnsList() {
   };
 
   const handleResetFilters = () => {
-    form.reset({ client_id: undefined });
+    skipNextSyncRef.current = true;
+    form.reset({ client_id: "" });
     setSearchParams({ page: "1", per_page: per_page.toString() });
   };
 
@@ -457,12 +472,7 @@ function OverdueReturnsList() {
                                 {" "}
                                 {order.items && order.items.length > 0
                                   ? order.items
-                                      .map((item) =>
-                                        item.code
-                                          ? `${(item as { name?: string }).name ?? item.code} (${item.code})`  
-                                          : (item as { name?: string }).name ?? item.code
-                                      )
-                                      .filter(Boolean)
+                                      .map((item) => getItemListDisplay(item as Record<string, unknown>))
                                       .join("، ")
                                   : "-"}
                               </span>
