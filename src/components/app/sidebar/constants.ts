@@ -232,6 +232,14 @@ export const sidebarLabels: SidebarLabel[] = [
         permissions: ["hr.deductions.view", "hr.deductions.create", "hr.deductions.approve"],
         iconComponent: createIcon(Minus),
       },
+      {
+        icon: null,
+        label: "كشف رواتب الموظفين",
+        path: "/employees/payroll",
+        level: 2,
+        permissions: ["hr.employees.view"],
+        iconComponent: createIcon(FileBarChart),
+      },
     ],
   },
   // 9. Permissions and Roles

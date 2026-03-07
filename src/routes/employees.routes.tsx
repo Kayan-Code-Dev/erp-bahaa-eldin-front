@@ -6,6 +6,7 @@ import EmployeeCustodies from "@/pages/employees/employee-custodies/EmployeeCust
 import OverdueEmployeeCustodies from "@/pages/employees/employee-custodies/OverdueEmployeeCustodies";
 import EmployeeDocuments from "@/pages/employees/employee-documents/EmployeeDocuments";
 import EmployeeDeductions from "@/pages/employees/employee-deductions/EmployeeDeductions";
+import EmployeePayrollSheet from "@/pages/employees/EmployeePayrollSheet";
 import PermissionProtectedRoute from "./PermissionProtectedRoute";
 
 export const employeesRoutes = () => {
@@ -31,6 +32,7 @@ export const employeesRoutes = () => {
       <Route path="custodies/overdue" element={<OverdueEmployeeCustodies />} />
       <Route path="employee-documents" element={<EmployeeDocuments />} />
       <Route path="employee-deductions" element={<EmployeeDeductions />} />
+      <Route path="payroll" element={<EmployeePayrollSheet />} />
     </Route>
   );
 };
