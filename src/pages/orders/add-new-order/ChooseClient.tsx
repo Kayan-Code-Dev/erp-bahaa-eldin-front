@@ -387,7 +387,6 @@ function ChooseClient() {
       dressSize: "",
     });
     toast.success("تم إضافة المنتج إلى الطلب");
-    // الانتقال إلى أعلى الشاشة لعرض المنتجات المختارة (المراجعة)
     setTimeout(() => {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }, 100);
@@ -787,7 +786,7 @@ function ChooseClient() {
         </div>
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_420px]">
-          {/* لوحة المنتجات المختارة - اليسار */}
+          {/* Selected products panel */}
           <aside className="w-full order-first lg:order-none lg:col-start-2 lg:row-start-1">
             <div className="sticky top-24 overflow-hidden rounded-3xl bg-white dark:bg-slate-900 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.08)] dark:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.4)] ring-1 ring-slate-200/80 dark:ring-slate-700/60">
               <div className="relative overflow-hidden bg-gradient-to-br from-[#5170ff] via-[#4a67f5] to-[#3d5ae0] px-8 py-8">
@@ -819,13 +818,13 @@ function ChooseClient() {
                   </div>
                 ) : (
                   <>
-                    {/* رأس الجدول */}
+                    {/* Table header */}
                     <div className="grid grid-cols-[1fr_auto_auto] gap-3 px-6 py-3 bg-slate-50 dark:bg-slate-800/50 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
                       <span>المنتج</span>
                       <span className="text-center">الكمية</span>
                       <span className="text-end min-w-[4rem]">المبلغ</span>
                     </div>
-                    {/* قائمة المنتجات */}
+                    {/* Products list */}
                     <div className="max-h-52 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
                       {selectedProducts.map((cloth) => {
                         const typeLabel =
@@ -885,7 +884,7 @@ function ChooseClient() {
                         );
                       })}
                     </div>
-                    {/* ملخص المبالغ */}
+                    {/* Totals */}
                     <div className="border-t-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-6 py-4 space-y-2.5">
                       <div className="flex justify-between items-center text-sm gap-4">
                         <span className="font-medium text-slate-600 dark:text-slate-400">الإجمالي</span>
@@ -902,7 +901,7 @@ function ChooseClient() {
                     </div>
                   </>
                 )}
-                {/* أزرار إنشاء الطلب والحفظ المؤقت */}
+                {/* Create order / Save draft buttons */}
                 <div className="flex flex-col gap-3 p-6 border-t border-slate-200 dark:border-slate-700">
                   <Button
                     variant="outline"
@@ -934,7 +933,7 @@ function ChooseClient() {
             </div>
           </aside>
 
-          {/* البطاقة الرئيسية */}
+          {/* Main card */}
         <Card className="overflow-hidden rounded-3xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.08)] dark:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.4)] ring-1 ring-slate-200/80 dark:ring-slate-700/60 lg:col-start-1 lg:row-start-1">
           <CardHeader className="border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-8 py-6">
             <CardTitle className="flex items-center gap-4 text-xl text-slate-900 dark:text-slate-100">
@@ -1038,7 +1037,7 @@ function ChooseClient() {
                   </div>
                 </section>
 
-                {/* بيانات العميل */}
+                {/* Client data */}
                 <section className="rounded-2xl bg-white dark:bg-slate-900 p-6 ring-1 ring-slate-200/60 dark:ring-slate-700/50" dir="rtl">
                   <div className="flex items-center gap-3 mb-5">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#5170ff]/10">
@@ -1358,7 +1357,7 @@ function ChooseClient() {
 
               {/* Right column: Product filters + Products table + Item details + Measurements */}
               <div className="space-y-6">
-                {/* فلترة المنتجات */}
+                {/* Product filters */}
                 <section className="rounded-2xl bg-white dark:bg-slate-900 p-6 ring-1 ring-slate-200/60 dark:ring-slate-700/50">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div className="flex items-center gap-3">
@@ -1432,7 +1431,7 @@ function ChooseClient() {
                   )}
                 </section>
 
-                {/* جدول المنتجات المتاحة */}
+                {/* Available products table */}
                 <section className="rounded-2xl bg-white dark:bg-slate-900 p-6 ring-1 ring-slate-200/60 dark:ring-slate-700/50">
                   <div className="flex items-center gap-3 mb-5">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#5170ff]/10">
@@ -1580,7 +1579,7 @@ function ChooseClient() {
                   </div>
                 </section>
 
-                {/* تفاصيل المنتج المختار والمقاسات */}
+                {/* Selected product details and measurements */}
                 <section className="rounded-2xl bg-white dark:bg-slate-900 p-6 ring-1 ring-slate-200/60 dark:ring-slate-700/50">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#5170ff]/10">
@@ -1617,7 +1616,7 @@ function ChooseClient() {
                     </div>
                   ) : (
                     <div className="space-y-6">
-                      {/* السعر والكمية */}
+                      {/* Price and quantity */}
                       <div className="rounded-xl bg-slate-50 dark:bg-slate-800/50 p-6 ring-1 ring-slate-200/50 dark:ring-slate-700/50 shadow-sm">
                         <div className="flex items-center gap-2 mb-5">
                           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#5170ff]/10">
@@ -1692,7 +1691,7 @@ function ChooseClient() {
                         </div>
                       </div>
 
-                      {/* الخصم */}
+                      {/* Discount */}
                       <div className="rounded-xl bg-slate-50 dark:bg-slate-800/50 p-6 ring-1 ring-slate-200/50 dark:ring-slate-700/50 shadow-sm">
                         <div className="flex items-center gap-2 mb-5">
                           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#5170ff]/10">
@@ -1749,7 +1748,7 @@ function ChooseClient() {
                         </div>
                       </div>
 
-                      {/* ملاحظات */}
+                      {/* Notes */}
                       <div className="rounded-xl bg-slate-50 dark:bg-slate-800/50 p-6 ring-1 ring-slate-200/50 dark:ring-slate-700/50 shadow-sm">
                         <div className="flex items-center gap-2 mb-5">
                           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#5170ff]/10">
@@ -1778,7 +1777,7 @@ function ChooseClient() {
                         </div>
                       </div>
 
-                      {/* المقاسات */}
+                      {/* Measurements */}
                       <div className="rounded-xl bg-slate-50 dark:bg-slate-800/50 p-6 ring-1 ring-slate-200/50 dark:ring-slate-700/50 shadow-sm">
                         <div className="flex items-center gap-2 mb-4">
                           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#5170ff]/10">
@@ -1826,7 +1825,7 @@ function ChooseClient() {
                         </div>
                       </div>
 
-                      {/* زر الإضافة */}
+                      {/* Add button */}
                       <div className="flex justify-center pt-2">
                         <Button
                           onClick={handleAddProduct}
@@ -1842,7 +1841,7 @@ function ChooseClient() {
               </div>
             </div>
 
-            {/* خصم على الطلب كاملاً (اختياري) - في الأخير */}
+            {/* Order-level discount (optional) */}
             <section className="rounded-2xl bg-white dark:bg-slate-900 p-6 ring-1 ring-slate-200/60 dark:ring-slate-700/50">
               <div className="flex items-center gap-3 mb-5">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#5170ff]/10">

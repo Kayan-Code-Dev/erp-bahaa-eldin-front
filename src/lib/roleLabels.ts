@@ -1,7 +1,4 @@
-/**
- * ترجمة أسماء الأدوار (roles) من الإنجليزية إلى العربية.
- * تُستخدم في صفحة إضافة/تعديل موظف وعرض تفاصيل الموظف.
- */
+/** Role names mapped to Arabic labels for display (e.g. employee form/details). */
 export const ROLE_NAME_TO_ARABIC: Record<string, string> = {
   general_manager: "الإدارة العامة",
   dashboard_manager: "إدارة لوحة التحكم",
@@ -32,9 +29,7 @@ export const ROLE_NAME_TO_ARABIC: Record<string, string> = {
   factories_manager_basic: "إدارة المصانع (أساسي)",
 };
 
-/**
- * إرجاع الاسم العربي للدور إن وُجد، وإلا الاسم الأصلي.
- */
+/** Returns Arabic label for role if found, otherwise the original name. */
 export function getRoleLabel(name: string | undefined | null): string {
   if (name == null || name === "") return "";
   return ROLE_NAME_TO_ARABIC[name] ?? name;

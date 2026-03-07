@@ -46,7 +46,6 @@ function formatSupplierCurrency(value: string | number | null | undefined): stri
   return `${num.toLocaleString("en-EG", { minimumFractionDigits: 2 })} ج.م`;
 }
 
-/** صافي الرصيد = إجمالي المشتريات - إجمالي المرتجعات */
 function getNetBalance(
   totalPurchases: string | number | null | undefined,
   totalRefunds: string | number | null | undefined
@@ -162,7 +161,7 @@ function Suppliers() {
                   ) : data && data.data.length > 0 ? (
                     data.data.map((supplier) => (
                       <TableRow key={supplier.id}>
-                        {/* العمود الأول: الرقم */}
+                        {/* Column: index */}
                         <TableCell
                           className="font-medium text-center cursor-pointer align-top pt-4"
                           onClick={() => handleViewSupplierOrders(supplier)}
@@ -170,7 +169,7 @@ function Suppliers() {
                           <p className="underline text-sm"><span dir="ltr" className="tabular-nums">#{toEnglishNumerals(supplier.id)}</span></p>
                         </TableCell>
 
-                        {/* العمود الثاني: بيانات المورد */}
+                        {/* Column: supplier */}
                         <TableCell className="align-top">
                           <div className="flex flex-col gap-1 text-sm text-right">
                             <p className="font-semibold text-gray-900">
@@ -200,7 +199,7 @@ function Suppliers() {
                           </div>
                         </TableCell>
 
-                        {/* العمود الثالث: المشتريات والمرتجعات (orders_count, refund_orders_count من الـ API) */}
+                        {/* Column: orders/refunds */}
                         <TableCell className="align-top">
                           <div className="flex flex-col gap-1 text-sm text-right">
                             <p className="font-semibold text-gray-900">
@@ -230,7 +229,7 @@ function Suppliers() {
                           </div>
                         </TableCell>
 
-                        {/* العمود الرابع: الحساب (total_order_amount, total_refund, total_remaining من الـ API) */}
+                        {/* Column: account */}
                         <TableCell className="align-top">
                           <div className="flex flex-col gap-1 text-sm text-right">
                             <p className="font-semibold text-gray-900">
@@ -261,7 +260,7 @@ function Suppliers() {
                           </div>
                         </TableCell>
 
-                        {/* العمود الخامس: الرصيد (total_payment, total_remaining من الـ API) */}
+                        {/* Column: balance */}
                         <TableCell className="align-top">
                           <div className="flex flex-col gap-1 text-sm text-right">
                             <p className="font-semibold text-gray-900">
@@ -279,7 +278,7 @@ function Suppliers() {
                           </div>
                         </TableCell>
 
-                        {/* العمود السادس: الإجراءات */}
+                        {/* Column: actions */}
                         <TableCell className="align-top pt-4">
                           <TooltipProvider delayDuration={300}>
                             <div className="flex flex-wrap items-center gap-1 justify-center">

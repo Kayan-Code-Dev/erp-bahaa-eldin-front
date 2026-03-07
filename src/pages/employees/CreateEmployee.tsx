@@ -243,7 +243,6 @@ function CreateEmployee() {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          {/* ───────────────── البيانات الأساسية ───────────────── */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center gap-2">
@@ -396,7 +395,6 @@ function CreateEmployee() {
             </CardContent>
           </Card>
 
-          {/* ───────────────── الصلاحيات والمدير ───────────────── */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center gap-2">
@@ -454,7 +452,6 @@ function CreateEmployee() {
             </CardContent>
           </Card>
 
-          {/* ───────────────── معلومات الراتب ───────────────── */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center gap-2">
@@ -641,7 +638,6 @@ function CreateEmployee() {
             </CardContent>
           </Card>
 
-          {/* ───────────────── جدول العمل ───────────────── */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center gap-2">

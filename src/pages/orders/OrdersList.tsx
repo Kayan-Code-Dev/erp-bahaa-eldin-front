@@ -549,7 +549,6 @@ function OrdersList() {
                       )}
                     />
 
-                    {/* Category (قسم المنتجات) */}
                     <FormField
                       control={form.control}
                       name="category_id"
@@ -571,7 +570,6 @@ function OrdersList() {
                       )}
                     />
 
-                    {/* Subcategory (قسم المنتجات الفرعي) */}
                     <FormField
                       control={form.control}
                       name="subcategory_id"

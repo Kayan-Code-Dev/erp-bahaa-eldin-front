@@ -95,7 +95,6 @@ function ChooseClothes() {
     }
   }, [client, navigate]);
 
-  // الانتقال التلقائي إلى المراجعة بعد اختيار المنتج بشكل كامل
   const canGoToReview =
     Boolean(client) &&
     Boolean(entityType) &&
@@ -201,7 +200,7 @@ function ChooseClothes() {
       className="min-h-screen bg-[linear-gradient(180deg,hsl(220_20%_98%)_0%,hsl(220_14%_96%)_100%)] dark:bg-slate-950"
     >
       <div className="mx-auto max-w-7xl space-y-8 py-8 px-4 lg:px-8">
-        {/* شريط الخطوات */}
+        {/* Steps */}
         <div className="sticky top-0 z-20 -mx-4 -mt-8 px-4 pt-8 pb-4 lg:-mx-8 lg:px-8 lg:pt-8 lg:pb-4 bg-[linear-gradient(180deg,hsl(220_20%_98%)_0%,hsl(220_14%_96%)_100%)] dark:bg-slate-950">
           <OrderStepsStepper
             currentStep={2}
@@ -237,10 +236,10 @@ function ChooseClothes() {
         </div>
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_420px]">
-          {/* لوحة الملخص - اليسار */}
+          {/* Summary panel */}
           <aside className="w-full order-first lg:order-none lg:col-start-2 lg:row-start-1">
             <div className="sticky top-24 overflow-hidden rounded-3xl bg-white dark:bg-slate-900 shadow-2xl shadow-slate-200/50 dark:shadow-black/30 ring-1 ring-slate-200/60 dark:ring-slate-700/50">
-              {/* رأس اللوحة */}
+              {/* Panel header */}
               <div className="relative overflow-hidden bg-gradient-to-br from-[#5170ff] to-[#3d5ae0] px-8 py-8">
                 <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.05\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50" />
                 <div className="relative flex items-center gap-5">
@@ -258,7 +257,7 @@ function ChooseClothes() {
                 </div>
               </div>
 
-              {/* قائمة المنتجات المختارة */}
+              {/* Selected products list */}
               <div className="border-b border-slate-200 dark:border-slate-700">
                 <div className="flex items-center justify-between gap-4 px-6 py-4 bg-slate-50 dark:bg-slate-800/50 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                   <span>الكود</span>
@@ -292,7 +291,7 @@ function ChooseClothes() {
                 </div>
               </div>
 
-              {/* زر المتابعة */}
+              {/* Continue button */}
               <div className="p-6">
                 <Button
                   onClick={handleContinue}
@@ -306,9 +305,9 @@ function ChooseClothes() {
             </div>
           </aside>
 
-          {/* المحتوى الرئيسي */}
+          {/* Main content */}
           <div className="min-w-0 lg:col-start-1 lg:row-start-1 space-y-6">
-            {/* معلومات العميل */}
+            {/* Client info */}
             {client && (
               <div className="overflow-hidden rounded-3xl bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/50 dark:shadow-black/30 ring-1 ring-slate-200/60 dark:ring-slate-700/50">
                 <div className="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-6 py-4">
@@ -360,7 +359,7 @@ function ChooseClothes() {
               </div>
             )}
 
-            {/* المكان والتاريخ */}
+            {/* Location and date */}
             <div className="overflow-hidden rounded-3xl bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/50 dark:shadow-black/30 ring-1 ring-slate-200/60 dark:ring-slate-700/50">
               <div className="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-6 py-4">
                 <div className="flex items-center gap-3">
@@ -403,7 +402,7 @@ function ChooseClothes() {
               </div>
             </div>
 
-            {/* جدول المنتجات المتاحة */}
+            {/* Available products table */}
             <div className="overflow-hidden rounded-3xl bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/50 dark:shadow-black/30 ring-1 ring-slate-200/60 dark:ring-slate-700/50">
               <div className="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-6 py-4">
                 <div className="flex items-center gap-3">

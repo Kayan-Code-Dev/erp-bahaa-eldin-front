@@ -375,7 +375,7 @@ const INVOICE_PRINT_STYLES = `
     /* Keep signature and footer on same page */
     .invoice-print-signature { page-break-before: avoid; }
     .invoice-print-footer { page-break-before: avoid; }
-    /* منع الصفحة الثانية الفارغة */
+    /* avoid blank second page */
     body > *:last-child { page-break-after: avoid !important; }
     .invoice-print-measurements-wrap {
       border: 1px solid #d1d5db !important;

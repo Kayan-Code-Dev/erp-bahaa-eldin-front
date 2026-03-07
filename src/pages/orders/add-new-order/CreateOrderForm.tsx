@@ -447,7 +447,7 @@ function CreateOrderForm() {
   return (
     <div dir="rtl" className="min-h-screen bg-[linear-gradient(180deg,hsl(220_20%_98%)_0%,hsl(220_14%_96%)_100%)] dark:bg-slate-950">
       <div className="mx-auto max-w-7xl space-y-8 py-8 px-4 lg:px-8">
-        {/* شريط الخطوات */}
+        {/* Steps */}
         <div className="sticky top-0 z-20 -mx-4 -mt-8 px-4 pt-8 pb-4 lg:-mx-8 lg:px-8 lg:pt-8 lg:pb-4 bg-[linear-gradient(180deg,hsl(220_20%_98%)_0%,hsl(220_14%_96%)_100%)] dark:bg-slate-950">
           <OrderStepsStepper
             currentStep={3}
@@ -460,10 +460,10 @@ function CreateOrderForm() {
         </div>
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_420px]">
-          {/* لوحة الفاتورة الاحترافية - في اليسار */}
+          {/* Invoice panel */}
           <aside className="w-full order-first lg:order-none lg:col-start-2 lg:row-start-1">
             <div className="sticky top-24 overflow-hidden rounded-3xl bg-white dark:bg-slate-900 shadow-2xl shadow-slate-200/50 dark:shadow-black/30 ring-1 ring-slate-200/60 dark:ring-slate-700/50">
-              {/* رأس الفاتورة */}
+              {/* Invoice header */}
               <div className="relative overflow-hidden bg-gradient-to-br from-[#5170ff] to-[#3d5ae0] px-8 py-8">
                 <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.05\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50" />
                 <div className="relative flex items-center gap-5">
@@ -481,7 +481,7 @@ function CreateOrderForm() {
                 </div>
               </div>
 
-              {/* جدول القطع */}
+              {/* Items table */}
               <div className="border-b border-slate-200 dark:border-slate-700">
                 <div className="flex items-center justify-between gap-4 px-6 py-4 bg-slate-50 dark:bg-slate-800/50 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                   <span>القطعة</span>
@@ -518,7 +518,7 @@ function CreateOrderForm() {
                 </div>
               </div>
 
-              {/* ملخص المبالغ */}
+              {/* Totals */}
               <div className="space-y-4 bg-slate-50 dark:bg-slate-800/50 px-6 py-6">
                 {hasOrderDiscount && orderDiscount > 0 && (
                   <div className="flex justify-between text-sm">
@@ -546,7 +546,7 @@ function CreateOrderForm() {
                 </div>
               </div>
 
-              {/* أزرار الإجراء */}
+              {/* Action buttons */}
               <div className="space-y-3 p-6">
                 <Button
                   type="button"
@@ -588,7 +588,7 @@ function CreateOrderForm() {
           <div className="min-w-0 lg:col-start-1 lg:row-start-1">
           <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            {/* بطاقة تفاصيل الطلب */}
+            {/* Order details card */}
             <div className="overflow-hidden rounded-3xl bg-white dark:bg-slate-900 shadow-2xl shadow-slate-200/50 dark:shadow-black/30 ring-1 ring-slate-200/60 dark:ring-slate-700/50">
               <div className="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-8 py-6">
                 <div className="flex items-center gap-5">
@@ -607,7 +607,7 @@ function CreateOrderForm() {
               </div>
 
               <div className="space-y-8 p-8">
-                {/* معلومات العميل */}
+                {/* Client info */}
                 {client && (
                   <section aria-label="معلومات العميل" className="rounded-2xl bg-slate-50 dark:bg-slate-800/50 p-6 ring-1 ring-slate-200/60 dark:ring-slate-700/50">
                     <div className="flex items-center gap-3 mb-5">
@@ -648,7 +648,7 @@ function CreateOrderForm() {
                   </section>
                 )}
 
-                {/* المدفوع وتاريخ التسليم */}
+                {/* Payment and delivery date */}
                 <section aria-label="Order details" className="rounded-2xl bg-slate-50 dark:bg-slate-800/50 p-6 ring-1 ring-slate-200/60 dark:ring-slate-700/50">
                   <div className="space-y-6">
                     <div className="flex items-center gap-3">
@@ -759,7 +759,7 @@ function CreateOrderForm() {
                   )}
                 </section>
 
-                {/* ملاحظات الطلب */}
+                {/* Order notes */}
                 <section aria-label="Order notes" className="rounded-2xl bg-slate-50 dark:bg-slate-800/50 p-6 ring-1 ring-slate-200/60 dark:ring-slate-700/50">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#5170ff]/10">
@@ -789,7 +789,7 @@ function CreateOrderForm() {
                   />
                 </section>
 
-                {/* تفاصيل القطع المختارة */}
+                {/* Selected items */}
                 <section aria-label="تفاصيل القطع المختارة" className="space-y-5">
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#5170ff]/10">
@@ -978,7 +978,7 @@ function CreateOrderForm() {
                   })}
                 </section>
 
-                {/* خصم على الطلب كاملاً */}
+                {/* Order discount */}
                 <section aria-label="خصم على الطلب" className="rounded-2xl bg-slate-50 dark:bg-slate-800/50 p-6 ring-1 ring-slate-200/60 dark:ring-slate-700/50">
                   <div className="flex items-center gap-3 mb-5">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#5170ff]/10">

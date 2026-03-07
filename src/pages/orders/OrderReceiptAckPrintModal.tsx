@@ -8,7 +8,7 @@ import { OrderReceiptAckPrint } from "./OrderReceiptAckPrint";
 import { useRef } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
-/** Receipt acknowledgment styles for A5 print — واجهة مستقلة عن الفاتورة */
+/** Receipt acknowledgment styles for A5 print */
 const ACK_PRINT_STYLES = `
   @page { 
     size: A5 portrait; 

@@ -203,9 +203,7 @@ export default function AccountSettings() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* الصورة الشخصية والشعار بجانب بعضهما */}
               <div className="flex flex-wrap gap-8 items-start">
-                {/* الصورة الشخصية */}
                 <div className="flex items-center gap-6">
                   <Avatar className="h-24 w-24 border-2 border-muted shrink-0">
                     <AvatarImage src={displayAvatarUrl ?? undefined} alt="الصورة الشخصية" />
@@ -251,7 +249,6 @@ export default function AccountSettings() {
                   </div>
                 </div>
 
-                {/* الشعار إلى اليسار من الصورة */}
                 <div className="flex items-center gap-6">
                   <div className="h-20 w-20 rounded-full border-2 border-dashed border-muted flex items-center justify-center bg-muted/40 overflow-hidden">
                     <img

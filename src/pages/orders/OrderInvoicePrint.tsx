@@ -474,27 +474,25 @@ export function OrderInvoicePrint({
       </footer>
 
       <style>{`
-  /* ===== تعريف حجم الصفحة ===== */
+  /* page size */
   @page {
     size: A5 portrait;
     margin: 4mm;
   }
   
   @media print {
-    /* ===== إخفاء كل شيء خارج الفاتورة ===== */
     body * { visibility: hidden; }
     .invoice-print-root, 
     .invoice-print-root * { visibility: visible; }
     
-    /* ===== الحاوية الرئيسية ===== */
     .invoice-print-root {
       position: absolute;
       left: 0;
       top: 0;
       width: 100%;
       max-width: 148mm;
-      height: 202mm !important;        /* يتناسب مع A5 بعد خصم الهوامش 4mm */
-      min-height: 0 !important;         /* إلغاء min-height */
+      height: 202mm !important;
+      min-height: 0 !important;
       padding: 0;
       margin: 0 auto;
       box-sizing: border-box;
@@ -507,10 +505,9 @@ export function OrderInvoicePrint({
       text-align: right !important;
       background: white;
       box-shadow: none;
-      overflow: hidden;                /* منع التدفق إلى صفحة جديدة */
+      overflow: hidden;
     }
     
-    /* ===== المحتوى الداخلي ===== */
     .invoice-print-header-inner,
     .invoice-print-content {
       max-width: 138mm;
@@ -520,7 +517,6 @@ export function OrderInvoicePrint({
       box-sizing: border-box;
     }
     
-    /* ===== جعل المحتوى يملأ الصفحة بالكامل ===== */
     .invoice-print-root {
       display: flex !important;
       flex-direction: column !important;
@@ -534,7 +530,6 @@ export function OrderInvoicePrint({
       max-height: none !important;
     }
     
-    /* ===== تنسيقات عامة ===== */
     * {
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
@@ -543,14 +538,12 @@ export function OrderInvoicePrint({
       font-family: 'Segoe UI', 'Cairo', Arial, sans-serif !important;
     }
     
-    /* ===== العناصر الإنجليزية ===== */
     [dir="ltr"], 
     [dir="ltr"] * {
       direction: ltr !important;
       text-align: left !important;
     }
     
-    /* ===== تاريخ الطباعة فوق الهيدر ===== */
     .invoice-print-top-date {
       font-size: 8px !important;
       color: #4b5563 !important;
@@ -559,13 +552,12 @@ export function OrderInvoicePrint({
       direction: ltr !important;
     }
     
-    /* ===== الهيدر ===== */
     .invoice-print-header { 
       padding: 1mm 0 !important; 
       margin-bottom: 1mm !important;
       background-color: #5170ff !important;
       border-radius: 2mm !important;
-      flex-shrink: 0 !important;        /* منع التقلص */
+      flex-shrink: 0 !important;
     }
     
     .invoice-print-header-inner { 
@@ -599,7 +591,6 @@ export function OrderInvoicePrint({
       object-fit: cover !important; 
     }
     
-    /* ===== عناوين الأقسام ===== */
     .invoice-print-section-title {
       font-size: 10px !important;
       font-weight: 700 !important;
@@ -610,7 +601,6 @@ export function OrderInvoicePrint({
       border-bottom: 1.5px solid #e5e7eb !important;
     }
     
-    /* ===== جدول البيانات ===== */
     .invoice-print-info-block { 
       margin-bottom: 1mm !important; 
       flex-shrink: 0 !important;
@@ -634,7 +624,6 @@ export function OrderInvoicePrint({
       color: #1f2937 !important;
     }
     
-    /* ===== جدول الأصناف ===== */
     .invoice-print-section.mb-5 {
       margin-bottom: 2mm !important;
       flex-shrink: 0 !important;
@@ -666,7 +655,6 @@ export function OrderInvoicePrint({
       background: #f9fafb !important;
     }
     
-    /* ===== جدول المقاسات ===== */
     .invoice-print-measurements-section {
       margin-bottom: 1mm !important;
       flex-shrink: 0 !important;
@@ -708,7 +696,6 @@ export function OrderInvoicePrint({
       border-left: 1px solid #f3f4f6 !important; 
     }
     
-    /* ===== ملاحظات العميل ===== */
     .invoice-print-notes-box {
       border: 1px solid #e5e7eb !important;
       border-radius: 2mm !important;
@@ -735,7 +722,6 @@ export function OrderInvoicePrint({
       white-space: pre-line !important;
     }
     
-    /* ===== التوقيع ===== */
     .invoice-print-signature {
       margin-top: 0 !important;
       padding-top: 1mm !important;
@@ -762,7 +748,6 @@ export function OrderInvoicePrint({
       border-bottom: 1px solid #9ca3af !important;
     }
     
-    /* ===== الفوتر (نفس إقرار الاستلام) ===== */
     .invoice-print-footer {
       background: #5170ff !important;
       color: white !important;
@@ -779,7 +764,6 @@ export function OrderInvoicePrint({
       overflow-wrap: break-word !important;
     }
     
-    /* ===== منع التقسيم - الفاتورة كلها في صفحة واحدة ===== */
     .invoice-print-root {
       page-break-after: avoid !important;
     }
@@ -788,12 +772,10 @@ export function OrderInvoicePrint({
       page-break-before: avoid !important;
     }
     
-    /* ===== تحسين ظهور الأرقام ===== */
     [style*="font-variant-numeric: tabular-nums"] {
       font-feature-settings: "tnum" !important;
     }
     
-    /* ===== إخفاء العناصر غير الضرورية ===== */
     .sr-only {
       position: absolute;
       width: 1px;
@@ -805,7 +787,6 @@ export function OrderInvoicePrint({
       border: 0;
     }
     
-    /* ===== تحسين الظهور في حالة وجود أكثر من صنف ===== */
     .invoice-print-table-items tbody tr:last-child td {
       border-bottom: none !important;
     }
@@ -814,7 +795,6 @@ export function OrderInvoicePrint({
       border-bottom: none !important;
     }
     
-    /* ===== ضمان عدم تجاوز المحتوى ===== */
     .invoice-print-td,
     .invoice-print-th {
       word-wrap: break-word !important;
@@ -822,7 +802,6 @@ export function OrderInvoicePrint({
       white-space: normal !important;
     }
     
-    /* ===== تحسين التباعد للصفوف الفردية ===== */
     .invoice-print-row-even {
       background: #f9fafb !important;
     }

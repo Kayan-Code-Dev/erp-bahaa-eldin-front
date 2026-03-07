@@ -244,7 +244,6 @@ function ClothesTableContent() {
     return labels[status] || status;
   };
 
-  /** عرض المقاسات من الحقل الموحد أو من الحقول المنفصلة */
   const getMeasurementsDisplay = (cloth: TClothResponse) => {
     if (cloth.measurements) return cloth.measurements;
     const parts = [
@@ -255,7 +254,6 @@ function ClothesTableContent() {
     return parts.length ? parts.join(" / ") : "-";
   };
 
-  /** عرض اسم المكان: من الـ API أو من خريطة الفروع/المصانع/الورش، وإلا نوع المكان (الرقم) */
   const getEntityDisplay = (cloth: TClothResponse) => {
     if (cloth.entity_name?.trim()) return cloth.entity_name.trim();
     const key = `${cloth.entity_type}-${cloth.entity_id}`;
@@ -316,7 +314,7 @@ function ClothesTableContent() {
         </CardHeader>
 
         <CardContent>
-          {/* Filters - مثل صفحة الفواتير */}
+          {/* Filters */}
           {showFilters && (
             <div className="mb-4 rounded-lg border bg-muted/30 p-4">
               <h3 className="mb-3 text-sm font-semibold text-foreground">الفلاتر</h3>
