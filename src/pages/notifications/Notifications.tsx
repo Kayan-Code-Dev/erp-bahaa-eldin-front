@@ -123,7 +123,7 @@ const NotificationListItem = memo(function NotificationListItem({
   const navigate = useNavigate();
   const isRead = !!notification.read_at;
   const priority = notification.priority || 'normal';
-  
+
   const timeAgo = useMemo(() => {
     return formatDistanceToNow(new Date(notification.created_at), {
       addSuffix: true,
@@ -310,10 +310,10 @@ const NotificationListItem = memo(function NotificationListItem({
                   {priority === 'urgent'
                     ? 'عاجل'
                     : priority === 'high'
-                    ? 'مهم'
-                    : priority === 'low'
-                    ? 'منخفض'
-                    : 'عادي'}
+                      ? 'مهم'
+                      : priority === 'low'
+                        ? 'منخفض'
+                        : 'عادي'}
                 </span>
               )}
 
@@ -407,46 +407,46 @@ function Notifications() {
 
   return (
     <div dir="rtl" className="container mx-auto p-4">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>الإشعارات</CardTitle>
-              <CardDescription>
-                {data?.meta.total
-                  ? `إجمالي الإشعارات: ${data.meta.total} (مقروء: ${data.meta.read}، غير مقروء: ${data.meta.unread})`
-                  : 'لا توجد إشعارات'}
-              </CardDescription>
+      <Tabs value={tab} onValueChange={(v) => {
+        setTab(v as 'all' | 'unread');
+        setPage(1);
+      }}>
+        <Card>
+          <CardHeader>
+            <div className="flex w-full items-center justify-between gap-4">
+              <TabsList className="shrink-0 self-center">
+                <TabsTrigger value="all">
+                  الكل ({data?.meta.total || 0})
+                </TabsTrigger>
+                <TabsTrigger value="unread">
+                  غير المقروء ({data?.meta.unread || 0})
+                </TabsTrigger>
+              </TabsList>
+              <div className="text-right shrink-0">
+                <CardTitle dir="rtl">الإشعارات</CardTitle>
+                <CardDescription>
+                  {data?.meta.total
+                    ? `إجمالي الإشعارات: ${data.meta.total} (مقروء: ${data.meta.read}، غير مقروء: ${data.meta.unread})`
+                    : 'لا توجد إشعارات'}
+                </CardDescription>
+                {data && data.meta.unread > 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-2"
+                    onClick={handleMarkAllAsRead}
+                    disabled={markAllAsReadMutation.isPending}
+                  >
+                    <CheckCircle2 className="h-4 w-4 me-2" />
+                    تحديد الكل كمقروء
+                  </Button>
+                )}
+              </div>
             </div>
-            {data && data.meta.unread > 0 && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleMarkAllAsRead}
-                disabled={markAllAsReadMutation.isPending}
-              >
-                <CheckCircle2 className="h-4 w-4 me-2" />
-                تحديد الكل كمقروء
-              </Button>
-            )}
-          </div>
-        </CardHeader>
+          </CardHeader>
 
-        <CardContent>
-          <Tabs value={tab} onValueChange={(v) => {
-            setTab(v as 'all' | 'unread');
-            setPage(1);
-          }}>
-            <TabsList className="mb-4">
-              <TabsTrigger value="all">
-                الكل ({data?.meta.total || 0})
-              </TabsTrigger>
-              <TabsTrigger value="unread">
-                غير المقروء ({data?.meta.unread || 0})
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value={tab} className="mt-0">
+          <CardContent>
+            <TabsContent value="all" className="mt-0">
               {isPending ? (
                 <div className="space-y-3">
                   {[...Array(5)].map((_, i) => (
@@ -482,52 +482,86 @@ function Notifications() {
                 </div>
               )}
             </TabsContent>
-          </Tabs>
-        </CardContent>
+            <TabsContent value="unread" className="mt-0">
+              {isPending ? (
+                <div className="space-y-3">
+                  {[...Array(5)].map((_, i) => (
+                    <Skeleton key={i} className="h-24 w-full" />
+                  ))}
+                </div>
+              ) : isError ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <Bell className="h-12 w-12 text-muted-foreground/40 mb-3" />
+                  <p className="text-sm text-muted-foreground">
+                    حدث خطأ في جلب الإشعارات
+                  </p>
+                </div>
+              ) : !data || data.data.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <Bell className="h-12 w-12 text-muted-foreground/40 mb-3" />
+                  <p className="text-sm text-muted-foreground">
+                    لا توجد إشعارات غير مقروءة
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-0 rounded-lg border">
+                  {data.data.map((notification) => (
+                    <NotificationListItem
+                      key={notification.id}
+                      notification={notification}
+                      onMarkAsRead={handleMarkAsRead}
+                      onDelete={handleDelete}
+                    />
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+          </CardContent>
 
-        {data && data.total > 0 && (
-          <CardFooter className="flex items-center justify-between">
-            <div className="text-sm text-muted-foreground">
-              عرض {data.data.length} من {data.total} إشعار
-            </div>
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationNext
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handlePreviousPage();
-                    }}
-                    aria-disabled={page === 1}
-                    className={
-                      page === 1 ? 'pointer-events-none opacity-50' : ''
-                    }
-                  />
-                </PaginationItem>
-                <PaginationItem className="font-medium">
-                  صفحة {page} من {data.total_pages}
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationPrevious
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleNextPage();
-                    }}
-                    aria-disabled={page === data.total_pages || isPending}
-                    className={
-                      page === data.total_pages || isPending
-                        ? 'pointer-events-none opacity-50'
-                        : ''
-                    }
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          </CardFooter>
-        )}
-      </Card>
+          {data && data.total > 0 && (
+            <CardFooter className="flex items-center justify-between">
+              <div className="text-sm text-muted-foreground">
+                عرض {data.data.length} من {data.total} إشعار
+              </div>
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleNextPage();
+                      }}
+                      aria-disabled={page === data.total_pages || isPending}
+                      className={
+                        page === data.total_pages || isPending
+                          ? 'pointer-events-none opacity-50'
+                          : ''
+                      }
+                    />
+                  </PaginationItem>
+                  <PaginationItem className="font-medium">
+                    صفحة {page} من {data.total_pages}
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationNext
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handlePreviousPage();
+                      }}
+                      aria-disabled={page === 1}
+                      className={
+                        page === 1 ? 'pointer-events-none opacity-50' : ''
+                      }
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </CardFooter>
+          )}
+        </Card>
+      </Tabs>
     </div>
   );
 }
