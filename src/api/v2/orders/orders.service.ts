@@ -41,6 +41,8 @@ export const getOrders = async (
     cloth_name?: string;
     /** Filter by item/cloth type code */
     cloth_code?: string;
+    category_id?: string | number;
+    subcategory_id?: string | number;
     /** Filter by rental date (visit_datetime) */
     visit_date_from?: string;
     visit_date_to?: string;
@@ -91,12 +93,34 @@ export const getOrders = async (
 
     // Item name
     if (filters?.cloth_name && filters.cloth_name.trim() !== "") {
-      params.cloth_name = filters.cloth_name.trim();
+      const clothName = filters.cloth_name.trim();
+      // Send compatible aliases because backend implementations vary by endpoint version
+      params.cloth_name = clothName;
+      params.item_name = clothName;
+      params.name = clothName;
     }
 
     // Item/cloth type code
     if (filters?.cloth_code && filters.cloth_code.trim() !== "") {
-      params.cloth_code = filters.cloth_code.trim();
+      const clothCode = filters.cloth_code.trim();
+      // Send compatible aliases because backend implementations vary by endpoint version
+      params.cloth_code = clothCode;
+      params.item_code = clothCode;
+      params.code = clothCode;
+    }
+
+    if (filters?.category_id !== undefined && filters.category_id !== "" && filters.category_id != null) {
+      const categoryId = typeof filters.category_id === "string" ? Number(filters.category_id) : filters.category_id;
+      if (Number.isFinite(categoryId)) {
+        params.category_id = categoryId;
+      }
+    }
+
+    if (filters?.subcategory_id !== undefined && filters.subcategory_id !== "" && filters.subcategory_id != null) {
+      const subcategoryId = typeof filters.subcategory_id === "string" ? Number(filters.subcategory_id) : filters.subcategory_id;
+      if (Number.isFinite(subcategoryId)) {
+        params.subcategory_id = subcategoryId;
+      }
     }
 
     // Rental dates

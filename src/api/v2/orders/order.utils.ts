@@ -44,6 +44,16 @@ export function getItemReceiptDisplay(item: Record<string, unknown>): string {
   return `${parts.join(" ")} (${code})`;
 }
 
+/** Format item for list/table display: "category subcategory (code)" */
+export function getItemListDisplay(item: Record<string, unknown>): string {
+  const category = getItemCategoryDisplay(item);
+  const subcategory = getItemSubcategoryDisplay(item);
+  const code = (item.code as string) || "-";
+  const parts = [category, subcategory].filter(Boolean);
+  if (parts.length === 0) return `(${code})`;
+  return `${parts.join(" ")} (${code})`;
+}
+
 export const getStatusVariant = (status: TOrder["status"] | string) => {
   switch (status) {
     case "paid":

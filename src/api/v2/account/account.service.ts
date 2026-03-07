@@ -6,7 +6,6 @@ import {
   TAccountProfile,
 } from "./account.types";
 
-/** عرض معلومات المستخدم من /me */
 export const getProfileApi = async (): Promise<TAccountProfile | undefined> => {
   try {
     const { data } = await api.get<TAccountProfile>("/me");
@@ -16,7 +15,6 @@ export const getProfileApi = async (): Promise<TAccountProfile | undefined> => {
   }
 };
 
-/** تعديل البروفايل (الاسم، البريد، الصورة) عبر /me */
 export const updateProfileApi = async (req: TUpdateProfileRequest) => {
   try {
     const hasAvatarFile = req.avatar instanceof File;

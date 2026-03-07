@@ -33,7 +33,6 @@ import { toast } from "sonner";
 import { CustomCalendar } from "@/components/custom/CustomCalendar";
 import { CategoriesSelect } from "@/components/custom/CategoriesSelect";
 import { SubcategoriesSelect } from "@/components/custom/SubcategoriesSelect";
-import { BranchesSelect } from "@/components/custom/BranchesSelect";
 import { EntitySelect } from "@/components/custom/EntitySelect";
 import { useWatch } from "react-hook-form";
 import * as React from "react";
@@ -46,6 +45,7 @@ const clothItemSchema = z.object({
   entity_type: z.enum(["branch", "factory", "workshop"], { required_error: "نوع المكان مطلوب" }),
   entity_id: z.string().min(1, "المكان مطلوب"),
   price: z.number().min(0, "السعر يجب أن يكون ≥ 0"),
+  payment: z.number().min(0, "المدفوع يجب أن يكون ≥ 0"),
 });
 
 const formSchema = z
@@ -55,7 +55,6 @@ const formSchema = z
     phone: z.string().optional(),
     address: z.string().optional(),
     add_order: z.boolean().default(false),
-    branch_id: z.string().optional(),
     order_date: z.string().optional(),
     total_amount: z.number().optional(),
     payment_amount: z.number().optional(),
@@ -65,12 +64,13 @@ const formSchema = z
   })
   .superRefine((data, ctx) => {
     if (!data.add_order) return;
-    if (!data.branch_id?.length) ctx.addIssue({ code: "custom", message: "الفرع مطلوب", path: ["branch_id"] });
     if (!data.order_date?.length) ctx.addIssue({ code: "custom", message: "تاريخ الطلبية مطلوب", path: ["order_date"] });
     if (data.total_amount == null || data.total_amount < 0) ctx.addIssue({ code: "custom", message: "الإجمالي ≥ 0", path: ["total_amount"] });
     if (data.payment_amount == null || data.payment_amount < 0) ctx.addIssue({ code: "custom", message: "المدفوع ≥ 0", path: ["payment_amount"] });
     if (data.remaining_payment == null || data.remaining_payment < 0) ctx.addIssue({ code: "custom", message: "المتبقي ≥ 0", path: ["remaining_payment"] });
     if (!data.clothes?.length) ctx.addIssue({ code: "custom", message: "يجب إضافة صنف واحد على الأقل", path: ["clothes"] });
+    const hasBranch = data.clothes?.some((c) => c.entity_type === "branch" && c.entity_id);
+    if (!hasBranch) ctx.addIssue({ code: "custom", message: "يجب اختيار الفرع في صنف واحد على الأقل", path: ["clothes"] });
     if (
       data.total_amount != null &&
       data.payment_amount != null &&
@@ -90,6 +90,7 @@ const defaultClothItem = {
   entity_type: "branch" as const,
   entity_id: "",
   price: 0,
+  payment: 0,
 };
 
 type Props = {
@@ -110,7 +111,6 @@ export function CreateSupplierModal({ open, onOpenChange }: Props) {
       phone: "",
       address: "",
       add_order: false,
-      branch_id: "",
       order_date: "",
       total_amount: 0,
       payment_amount: 0,
@@ -121,16 +121,19 @@ export function CreateSupplierModal({ open, onOpenChange }: Props) {
   });
 
   const addOrder = useWatch({ control: form.control, name: "add_order" });
-  const totalAmount = useWatch({ control: form.control, name: "total_amount" });
-  const paymentAmount = useWatch({ control: form.control, name: "payment_amount" });
+  const clothes = useWatch({ control: form.control, name: "clothes" });
 
   const { fields, append, remove } = useFieldArray({ control: form.control, name: "clothes" });
 
+  // حساب المجموع والمدفوع والمتبقي من الأصناف (مثل صفحة إنشاء طلبية)
   React.useEffect(() => {
-    if (addOrder && totalAmount != null && paymentAmount != null) {
-      form.setValue("remaining_payment", Math.max(0, totalAmount - paymentAmount));
-    }
-  }, [addOrder, totalAmount, paymentAmount, form]);
+    if (!addOrder || !Array.isArray(clothes) || clothes.length === 0) return;
+    const total = clothes.reduce((sum, c) => sum + (Number(c?.price) || 0), 0);
+    const payment = clothes.reduce((sum, c) => sum + (Number(c?.payment) || 0), 0);
+    form.setValue("total_amount", total);
+    form.setValue("payment_amount", payment);
+    form.setValue("remaining_payment", Math.max(0, total - payment));
+  }, [addOrder, clothes, form]);
 
   React.useEffect(() => {
     if (addOrder && fields.length === 0) {
@@ -148,7 +151,6 @@ export function CreateSupplierModal({ open, onOpenChange }: Props) {
         phone: "",
         address: "",
         add_order: false,
-        branch_id: "",
         order_date: "",
         total_amount: 0,
         payment_amount: 0,
@@ -182,7 +184,7 @@ export function CreateSupplierModal({ open, onOpenChange }: Props) {
       return;
     }
 
-    const clothes: TCreateSupplierClothItem[] = (values.clothes ?? []).map((c) => ({
+    const clothesPayload: TCreateSupplierClothItem[] = (values.clothes ?? []).map((c) => ({
       code: c.code,
       category_id: c.category_id ? Number(c.category_id) : undefined,
       subcategory_id: c.subcategory_id ? Number(c.subcategory_id) : undefined,
@@ -192,6 +194,10 @@ export function CreateSupplierModal({ open, onOpenChange }: Props) {
     }));
 
     const firstCloth = values.clothes?.[0];
+    const firstBranchCloth = (values.clothes ?? []).find((c) => c.entity_type === "branch");
+    const branchId =
+      firstBranchCloth?.entity_id ? Number(firstBranchCloth.entity_id) : 0;
+
     const requestData: TCreateSupplierRequest = {
       name: values.name,
       code: values.code,
@@ -199,13 +205,13 @@ export function CreateSupplierModal({ open, onOpenChange }: Props) {
       ...(values.address?.trim() && { address: values.address.trim() }),
       category_id: firstCloth?.category_id ? Number(firstCloth.category_id) : 0,
       subcategory_id: firstCloth?.subcategory_id ? Number(firstCloth.subcategory_id) : 0,
-      branch_id: Number(values.branch_id),
+      branch_id: branchId,
       order_date: values.order_date!,
       total_amount: Number(values.total_amount),
       payment_amount: Number(values.payment_amount),
       remaining_payment: Number(values.remaining_payment),
       notes: values.notes || undefined,
-      clothes,
+      clothes: clothesPayload,
     };
 
     mutateWithOrder.mutate(requestData, {
@@ -305,20 +311,6 @@ export function CreateSupplierModal({ open, onOpenChange }: Props) {
               <>
                 <FormField
                   control={form.control}
-                  name="branch_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>الفرع</FormLabel>
-                      <FormControl>
-                        <BranchesSelect value={field.value ?? ""} onChange={field.onChange} disabled={isPending} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
                   name="order_date"
                   render={({ field }) => (
                     <FormItem>
@@ -335,54 +327,6 @@ export function CreateSupplierModal({ open, onOpenChange }: Props) {
                     </FormItem>
                   )}
                 />
-
-                <div className="grid grid-cols-3 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="total_amount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>الإجمالي</FormLabel>
-                        <FormControl>
-                          <Input value={field.value ?? ""} onChange={(e) => {
-                            const val = e.target.value.replace(/[^0-9.]/g, "");
-                            field.onChange(val === "" ? 0 : Number(val) || 0);
-                          }} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="payment_amount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>المدفوع</FormLabel>
-                        <FormControl>
-                          <Input value={field.value ?? ""} onChange={(e) => {
-                            const val = e.target.value.replace(/[^0-9.]/g, "");
-                            field.onChange(val === "" ? 0 : Number(val) || 0);
-                          }} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="remaining_payment"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>المتبقي</FormLabel>
-                        <FormControl>
-                          <Input readOnly value={field.value ?? ""} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
 
                 <FormField
                   control={form.control}
@@ -472,10 +416,40 @@ export function CreateSupplierModal({ open, onOpenChange }: Props) {
                           <FormItem>
                             <FormLabel>السعر</FormLabel>
                             <FormControl>
-                              <Input value={f.value ?? ""} onChange={(e) => {
-                                const val = e.target.value.replace(/[^0-9.]/g, "");
-                                f.onChange(val === "" ? 0 : Number(val) || 0);
-                              }} />
+                              <Input
+                                type="text"
+                                inputMode="decimal"
+                                placeholder="0"
+                                value={f.value ?? ""}
+                                onChange={(e) => {
+                                  const val = e.target.value.replace(/[^0-9.]/g, "");
+                                  f.onChange(val === "" ? 0 : Number(val) || 0);
+                                }}
+                                disabled={isPending}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name={`clothes.${index}.payment`}
+                        render={({ field: f }) => (
+                          <FormItem>
+                            <FormLabel>المدفوع</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="text"
+                                inputMode="decimal"
+                                placeholder="0"
+                                value={f.value ?? ""}
+                                onChange={(e) => {
+                                  const val = e.target.value.replace(/[^0-9.]/g, "");
+                                  f.onChange(val === "" ? 0 : Number(val) || 0);
+                                }}
+                                disabled={isPending}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -504,6 +478,48 @@ export function CreateSupplierModal({ open, onOpenChange }: Props) {
                   {form.formState.errors.clothes?.message && (
                     <p className="text-sm text-destructive">{form.formState.errors.clothes.message}</p>
                   )}
+                </div>
+
+                <div className="grid grid-cols-3 gap-4 border-t pt-4">
+                  <FormField
+                    control={form.control}
+                    name="total_amount"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>المجموع</FormLabel>
+                        <FormControl>
+                          <Input readOnly value={field.value ?? ""} className="bg-muted/50" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="payment_amount"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>المدفوع</FormLabel>
+                        <FormControl>
+                          <Input readOnly value={field.value ?? ""} className="bg-muted/50" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="remaining_payment"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>المتبقي</FormLabel>
+                        <FormControl>
+                          <Input readOnly value={field.value ?? ""} className="bg-muted/50" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </>
             )}

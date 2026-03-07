@@ -45,7 +45,6 @@ export type SidebarLabel = {
   subItems?: SidebarLabel[];
   /** @deprecated use permissions */
   permission?: string;
-  /** عرض العنصر إذا كان المستخدم يملك أحد هذه الصلاحيات (صيغة API: module.action) */
   permissions?: string[];
   iconComponent?: React.ReactNode | null;
 };

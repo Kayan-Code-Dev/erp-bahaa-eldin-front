@@ -51,7 +51,7 @@ function Header() {
           </Avatar>
         </button>
         {canViewNotifications && <NotificationBell />}
-        <div className="flex-1 min-w-[200px] max-w-[400px]">
+        <div className="flex-1 min-w-[200px] max-w-[640px]">
           <HeaderSearch />
         </div>
       </div>

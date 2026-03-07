@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import { Outlet, useNavigate } from "react-router";
 
 type TProps = {
-  /** صلاحية واحدة أو مصفوفة — المستخدم يحتاج واحدة على الأقل */
   permission: string | string[];
 };
 

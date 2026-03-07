@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useSearchParams, useNavigate } from "react-router";
@@ -57,6 +57,7 @@ import { CreatePaymentModal } from "./CreatePaymentModal";
 import {
   getOrderCurrencyInfo,
   getOrderTypeLabel,
+  getItemListDisplay,
 } from "@/api/v2/orders/order.utils";
 import { OrderEmployeeName } from "@/components/custom/OrderEmployeeName";
 import {
@@ -87,6 +88,8 @@ import { Input } from "@/components/ui/input";
 import { CustomCalendar } from "@/components/custom/CustomCalendar";
 import { ClientsSelect } from "@/components/custom/ClientsSelect";
 import { EmployeesSelect } from "@/components/custom/EmployeesSelect";
+import { CategoriesSelect } from "@/components/custom/CategoriesSelect";
+import { SubcategoriesSelect } from "@/components/custom/SubcategoriesSelect";
 import useDebounce from "@/hooks/useDebounce";
 
 const ordersFilterSchema = z.object({
@@ -95,6 +98,8 @@ const ordersFilterSchema = z.object({
   employee_id: z.string().optional(),
   cloth_name: z.string().optional(),
   cloth_code: z.string().optional(),
+  category_id: z.string().optional(),
+  subcategory_id: z.string().optional(),
   visit_date_from: z.string().optional(),
   visit_date_to: z.string().optional(),
   delivery_date_from: z.string().optional(),
@@ -135,7 +140,7 @@ const getStatusLabel = (status: TOrder["status"]) => {
 };
 
 function DeliveriesReturnsSearch() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const page = Number(searchParams.get("page")) || 1;
   const per_page = 10;
@@ -149,6 +154,8 @@ function DeliveriesReturnsSearch() {
       employee_id: "",
       cloth_name: "",
       cloth_code: "",
+      category_id: "",
+      subcategory_id: "",
       visit_date_from: "",
       visit_date_to: "",
       delivery_date_from: "",
@@ -164,22 +171,54 @@ function DeliveriesReturnsSearch() {
     delay: FILTER_DEBOUNCE_MS,
   });
 
+  const headerSearch = searchParams.get("search") ?? undefined;
+  const urlCategoryId = searchParams.get("category_id") ?? "";
+  const urlSubcategoryId = searchParams.get("subcategory_id") ?? "";
+
   const filters = useMemo(() => {
     const v = debouncedFormValues;
+    const categoryId = urlCategoryId.trim() || (v.category_id?.trim() ? v.category_id : undefined);
+    const subcategoryId = urlSubcategoryId.trim() || (v.subcategory_id?.trim() ? v.subcategory_id : undefined);
     return {
       order_id: v.order_id && v.order_id.trim() !== "" ? v.order_id : undefined,
       client_id: v.client_id && v.client_id.trim() !== "" ? v.client_id : undefined,
       employee_id: v.employee_id && v.employee_id.trim() !== "" ? v.employee_id : undefined,
       cloth_name: v.cloth_name && v.cloth_name.trim() !== "" ? v.cloth_name : undefined,
       cloth_code: v.cloth_code && v.cloth_code.trim() !== "" ? v.cloth_code : undefined,
+      category_id: categoryId,
+      subcategory_id: subcategoryId,
       visit_date_from: v.visit_date_from || undefined,
       visit_date_to: v.visit_date_to || undefined,
       delivery_date_from: v.delivery_date_from || undefined,
       delivery_date_to: v.delivery_date_to || undefined,
       return_date_from: v.return_date_from || undefined,
       return_date_to: v.return_date_to || undefined,
+      search: headerSearch && headerSearch.trim() !== "" ? headerSearch.trim() : undefined,
     };
-  }, [debouncedFormValues]);
+  }, [debouncedFormValues, headerSearch, urlCategoryId, urlSubcategoryId]);
+
+  useEffect(() => {
+    form.setValue("category_id", urlCategoryId);
+    form.setValue("subcategory_id", urlSubcategoryId);
+  }, [urlCategoryId, urlSubcategoryId, form]);
+
+  const updateUrlCategorySubcategory = useCallback(
+    (categoryId: string, subcategoryId: string) => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          if (categoryId.trim()) next.set("category_id", categoryId);
+          else next.delete("category_id");
+          if (subcategoryId.trim()) next.set("subcategory_id", subcategoryId);
+          else next.delete("subcategory_id");
+          next.set("page", "1");
+          return next;
+        },
+        { replace: true }
+      );
+    },
+    [setSearchParams]
+  );
 
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<TOrder | null>(null);
@@ -497,6 +536,50 @@ function DeliveriesReturnsSearch() {
                     />
                     <FormField
                       control={form.control}
+                      name="category_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>قسم المنتجات</FormLabel>
+                          <FormControl>
+                            <CategoriesSelect
+                              value={field.value ?? ""}
+                              onChange={(value) => {
+                                field.onChange(value);
+                                form.setValue("subcategory_id", "");
+                                updateUrlCategorySubcategory(value ?? "", "");
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="subcategory_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>قسم المنتجات الفرعي</FormLabel>
+                          <FormControl>
+                            <SubcategoriesSelect
+                              value={field.value ?? ""}
+                              onChange={(value) => {
+                                field.onChange(value);
+                                updateUrlCategorySubcategory(form.watch("category_id") ?? "", value ?? "");
+                              }}
+                              category_id={
+                                form.watch("category_id")?.trim()
+                                  ? Number(form.watch("category_id"))
+                                  : undefined
+                              }
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
                       name="visit_date_from"
                       render={({ field }) => (
                         <FormItem>
@@ -747,10 +830,7 @@ function DeliveriesReturnsSearch() {
                                   {" "}
                                   {order.items && order.items.length > 0
                                     ? order.items
-                                        .map((item) =>
-                                          item.code ?? (item as { name?: string }).name
-                                        )
-                                        .filter(Boolean)
+                                        .map((item) => getItemListDisplay(item as Record<string, unknown>))
                                         .join("، ")
                                     : "-"}
                                 </span>

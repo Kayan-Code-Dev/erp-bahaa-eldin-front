@@ -64,7 +64,6 @@ export const useMyPermissions = () => {
   });
 };
 
-/** يتحقق من صلاحية واحدة أو أكثر — يكفي امتلاك واحدة */
 export const useHasPermission = (
   permission: string | string[]
 ): { hasPermission: boolean; isPending: boolean } => {

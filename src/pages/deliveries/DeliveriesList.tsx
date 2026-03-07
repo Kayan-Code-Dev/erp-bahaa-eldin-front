@@ -70,8 +70,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { CustomCalendar } from "@/components/custom/CustomCalendar";
 import { ClientsSelect } from "@/components/custom/ClientsSelect";
+import { EmployeesSelect } from "@/components/custom/EmployeesSelect";
 import useDebounce from "@/hooks/useDebounce";
 import {
   Tooltip,
@@ -94,17 +96,20 @@ function DeliveriesList() {
   const page = Number(searchParams.get("page")) || 1;
   const per_page = Number(searchParams.get("per_page")) || DEFAULT_PER_PAGE;
 
-  // Today's date in YYYY-MM-DD format as default filter
-  const today = new Date().toISOString().split("T")[0];
-  const initialDateFrom = searchParams.get("date_from") || today;
-  const initialDateTo = searchParams.get("date_to") || today;
-
   const form = useForm<DeliveriesFilterFormValues>({
     resolver: zodResolver(deliveriesFilterSchema),
     defaultValues: {
-      date_from: initialDateFrom,
-      date_to: initialDateTo,
-      client_id: searchParams.get("client_id") || undefined,
+      order_id: searchParams.get("order_id") || "",
+      client_id: searchParams.get("client_id") || "",
+      employee_id: searchParams.get("employee_id") || "",
+      cloth_name: searchParams.get("cloth_name") || "",
+      cloth_code: searchParams.get("cloth_code") || "",
+      visit_date_from: searchParams.get("visit_date_from") || "",
+      visit_date_to: searchParams.get("visit_date_to") || "",
+      delivery_date_from: searchParams.get("delivery_date_from") || "",
+      delivery_date_to: searchParams.get("delivery_date_to") || "",
+      return_date_from: searchParams.get("return_date_from") || "",
+      return_date_to: searchParams.get("return_date_to") || "",
     },
   });
 
@@ -158,30 +163,51 @@ function DeliveriesList() {
   const filters = useMemo(() => {
     const values = debouncedFormValues;
     return {
-      delivery_date_from: values.date_from || undefined,
-      delivery_date_to: values.date_to || undefined,
-      client_id:
-        values.client_id && values.client_id.trim() !== ""
-          ? values.client_id
-          : undefined,
-      search: headerSearch,
+      order_id: values.order_id?.trim() || undefined,
+      client_id: values.client_id?.trim() || undefined,
+      employee_id: values.employee_id?.trim() || undefined,
+      cloth_name: values.cloth_name?.trim() || undefined,
+      cloth_code: values.cloth_code?.trim() || undefined,
+      visit_date_from: values.visit_date_from || undefined,
+      visit_date_to: values.visit_date_to || undefined,
+      delivery_date_from: values.delivery_date_from || undefined,
+      delivery_date_to: values.delivery_date_to || undefined,
+      return_date_from: values.return_date_from || undefined,
+      return_date_to: values.return_date_to || undefined,
+      search: headerSearch?.trim() || undefined,
     };
   }, [debouncedFormValues, headerSearch]);
 
   useEffect(() => {
     const params = new URLSearchParams(searchParams);
-    if (debouncedFormValues.date_from) params.set("date_from", debouncedFormValues.date_from);
-    else params.delete("date_from");
-    if (debouncedFormValues.date_to) params.set("date_to", debouncedFormValues.date_to);
-    else params.delete("date_to");
-    if (filters.client_id) params.set("client_id", String(filters.client_id));
+    if (debouncedFormValues.order_id?.trim()) params.set("order_id", debouncedFormValues.order_id.trim());
+    else params.delete("order_id");
+    if (debouncedFormValues.client_id?.trim()) params.set("client_id", debouncedFormValues.client_id.trim());
     else params.delete("client_id");
+    if (debouncedFormValues.employee_id?.trim()) params.set("employee_id", debouncedFormValues.employee_id.trim());
+    else params.delete("employee_id");
+    if (debouncedFormValues.cloth_name?.trim()) params.set("cloth_name", debouncedFormValues.cloth_name.trim());
+    else params.delete("cloth_name");
+    if (debouncedFormValues.cloth_code?.trim()) params.set("cloth_code", debouncedFormValues.cloth_code.trim());
+    else params.delete("cloth_code");
+    if (debouncedFormValues.visit_date_from) params.set("visit_date_from", debouncedFormValues.visit_date_from);
+    else params.delete("visit_date_from");
+    if (debouncedFormValues.visit_date_to) params.set("visit_date_to", debouncedFormValues.visit_date_to);
+    else params.delete("visit_date_to");
+    if (debouncedFormValues.delivery_date_from) params.set("delivery_date_from", debouncedFormValues.delivery_date_from);
+    else params.delete("delivery_date_from");
+    if (debouncedFormValues.delivery_date_to) params.set("delivery_date_to", debouncedFormValues.delivery_date_to);
+    else params.delete("delivery_date_to");
+    if (debouncedFormValues.return_date_from) params.set("return_date_from", debouncedFormValues.return_date_from);
+    else params.delete("return_date_from");
+    if (debouncedFormValues.return_date_to) params.set("return_date_to", debouncedFormValues.return_date_to);
+    else params.delete("return_date_to");
     if (headerSearch) params.set("search", headerSearch);
     else params.delete("search");
     params.set("page", page.toString());
     params.set("per_page", per_page.toString());
     setSearchParams(params, { replace: true });
-  }, [debouncedFormValues, filters.client_id, headerSearch, page, per_page, searchParams, setSearchParams]);
+  }, [debouncedFormValues, headerSearch, page, per_page, searchParams, setSearchParams]);
 
   // Data fetching
   const { data, isPending, isError, error, refetch } = useQuery(
@@ -323,9 +349,17 @@ function DeliveriesList() {
 
   const handleResetFilters = () => {
     form.reset({
-      date_from: undefined,
-      date_to: undefined,
-      client_id: undefined,
+      order_id: "",
+      client_id: "",
+      employee_id: "",
+      cloth_name: "",
+      cloth_code: "",
+      visit_date_from: "",
+      visit_date_to: "",
+      delivery_date_from: "",
+      delivery_date_to: "",
+      return_date_from: "",
+      return_date_to: "",
     });
     setSearchParams({ page: "1", per_page: per_page.toString() });
   };
@@ -414,38 +448,15 @@ function DeliveriesList() {
               <h3 className="mb-3 text-sm font-semibold text-foreground">الفلاتر</h3>
               <Form {...form}>
                 <form className="space-y-4">
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
                     <FormField
                       control={form.control}
-                      name="date_from"
+                      name="order_id"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>تاريخ من</FormLabel>
+                          <FormLabel>رقم الفاتورة</FormLabel>
                           <FormControl>
-                            <CustomCalendar
-                              value={field.value}
-                              onChange={field.onChange}
-                              placeholder="اختر التاريخ من"
-                              disabled={isPending}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="date_to"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>تاريخ إلى</FormLabel>
-                          <FormControl>
-                            <CustomCalendar
-                              value={field.value}
-                              onChange={field.onChange}
-                              placeholder="اختر التاريخ إلى"
-                              disabled={isPending}
-                            />
+                            <Input placeholder="مثال: 123" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -461,6 +472,161 @@ function DeliveriesList() {
                             <ClientsSelect
                               value={field.value ?? ""}
                               onChange={field.onChange}
+                              disabled={isPending}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="employee_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>الموظف</FormLabel>
+                          <FormControl>
+                            <EmployeesSelect
+                              params={{ per_page: 20 }}
+                              value={field.value ?? ""}
+                              onChange={field.onChange}
+                              disabled={isPending}
+                              placeholder="اختر الموظف..."
+                              searchPlaceholder="ابحث عن موظف..."
+                              allowClear
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="cloth_name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>اسم الصنف</FormLabel>
+                          <FormControl>
+                            <Input placeholder="ابحث باسم الصنف" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="cloth_code"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>كود الصنف</FormLabel>
+                          <FormControl>
+                            <Input placeholder="ابحث بكود الصنف" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="visit_date_from"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>تاريخ التأجير من</FormLabel>
+                          <FormControl>
+                            <CustomCalendar
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder="اختر التاريخ"
+                              disabled={isPending}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="visit_date_to"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>تاريخ التأجير إلى</FormLabel>
+                          <FormControl>
+                            <CustomCalendar
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder="اختر التاريخ"
+                              disabled={isPending}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="delivery_date_from"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>تاريخ التسليم من</FormLabel>
+                          <FormControl>
+                            <CustomCalendar
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder="اختر التاريخ"
+                              disabled={isPending}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="delivery_date_to"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>تاريخ التسليم إلى</FormLabel>
+                          <FormControl>
+                            <CustomCalendar
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder="اختر التاريخ"
+                              disabled={isPending}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="return_date_from"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>تاريخ الاسترجاع من</FormLabel>
+                          <FormControl>
+                            <CustomCalendar
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder="اختر التاريخ"
+                              disabled={isPending}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="return_date_to"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>تاريخ الاسترجاع إلى</FormLabel>
+                          <FormControl>
+                            <CustomCalendar
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder="اختر التاريخ"
                               disabled={isPending}
                             />
                           </FormControl>
