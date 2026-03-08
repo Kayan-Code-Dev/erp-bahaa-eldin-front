@@ -33,6 +33,10 @@ import {
   useCurrenciesQueryOptions,
   useExportCurrenciesToCSVMutationOptions,
 } from "@/api/v2/content-managment/currency/currency.hooks";
+import {
+  parseFilenameFromContentDisposition,
+  downloadBlob,
+} from "@/api/api.utils";
 import { CreateCurrencyModal } from "./CreateCurrencyModal";
 import { EditCurrencyModal } from "./EditCurrencyModal";
 import { DeleteCurrencyModal } from "./DeleteCurrencyModal";
@@ -74,18 +78,10 @@ function Currencies() {
 
   const handleExport = () => {
     exportCurrenciesToCSV(undefined, {
-      onSuccess: (blob) => {
-        const url = window.URL.createObjectURL(new Blob([blob]));
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute(
-          "download",
-          `currencies-${new Date().toISOString().split("T")[0]}.csv`
-        );
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(url);
+      onSuccess: (result) => {
+        const filename =
+          parseFilenameFromContentDisposition(result.headers) || "currencies.xlsx";
+        downloadBlob(result.data, filename);
         toast.success("تم تصدير العملات بنجاح");
       },
       onError: (err: any) => {
@@ -114,7 +110,7 @@ function Currencies() {
               className="cursor-pointer"
             >
               <Download className="ml-2 h-4 w-4" />
-              {isExporting ? "جاري التصدير..." : "تصدير إلى CSV"}
+              {isExporting ? "جاري التصدير..." : "تصدير إلى Excel"}
             </Button>
             <Button
               onClick={() => setIsCreateModalOpen(true)}

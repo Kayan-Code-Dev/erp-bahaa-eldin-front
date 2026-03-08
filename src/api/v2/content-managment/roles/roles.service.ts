@@ -52,10 +52,13 @@ export const getRole = async (id: number) => {
   }
 };
 
-export const exportRolesToCSV = async () => {
+export const exportRolesToCSV = async (params?: Record<string, unknown>) => {
   try {
-    const { data } = await api.get(`/roles/export`, { responseType: "blob" });
-    return data;
+    const response = await api.get<Blob>(`/roles/export`, {
+      params,
+      responseType: "blob",
+    });
+    return { data: response.data, headers: response.headers };
   } catch (error) {
     populateError(error, "خطأ فى تصدير الصلاحيات");
   }

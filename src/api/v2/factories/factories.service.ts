@@ -68,10 +68,13 @@ export const deleteFactory = async (id: number) => {
 };
 
 
-export const exportFactoriesToCSV = async () => {
+export const exportFactoriesToCSV = async (params?: Record<string, unknown>) => {
   try {
-    const { data } = await api.get(`/factories/export`, { responseType: "blob" });
-    return data;
+    const response = await api.get<Blob>(`/factories/export`, {
+      params,
+      responseType: "blob",
+    });
+    return { data: response.data, headers: response.headers };
   } catch (error) {
     populateError(error, "خطأ فى تصدير المصانع");
   }

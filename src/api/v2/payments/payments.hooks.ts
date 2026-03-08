@@ -67,6 +67,7 @@ export const useMarkPaymentAsCanceledMutationOptions = () => {
 
 export const useExportPaymentsToCSVMutationOptions = () => {
   return mutationOptions({
-    mutationFn: () => exportPaymentsToCSV(),
+    mutationFn: (params?: Parameters<typeof exportPaymentsToCSV>[0]) =>
+      exportPaymentsToCSV(params),
   });
 };

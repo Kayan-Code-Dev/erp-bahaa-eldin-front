@@ -156,7 +156,8 @@ export const useReturnOrderFullMutationOptions = () => {
 
 export const useExportOrdersToCSVMutationOptions = () => {
   return mutationOptions({
-    mutationFn: () => exportOrdersToCSV(),
+    mutationFn: (filters?: Parameters<typeof exportOrdersToCSV>[0]) =>
+      exportOrdersToCSV(filters),
   });
 };
 

@@ -23,11 +23,16 @@ export type TCashbox = {
   };
 };
 
+/** Aligned with GET /api/v1/cashboxes index filters */
 export type TCashboxesParams = {
   per_page?: number;
   page?: number;
   is_active?: boolean;
   branch_id?: number;
+  initial_balance_min?: number;
+  initial_balance_max?: number;
+  current_balance_min?: number;
+  current_balance_max?: number;
   search?: string;
 };
 

@@ -98,3 +98,16 @@ export const payExpense = async (id: number) => {
     populateError(error, "خطأ فى تحديث حالة المصروف");
   }
 };
+
+/** Export expenses to Excel; same query params as expenses index. */
+export const exportExpensesToExcel = async (params?: TGetExpensesParams) => {
+  try {
+    const response = await api.get<Blob>("/expenses/export", {
+      params,
+      responseType: "blob",
+    });
+    return { data: response.data, headers: response.headers };
+  } catch (error) {
+    populateError(error, "خطأ فى تصدير المصروفات");
+  }
+};

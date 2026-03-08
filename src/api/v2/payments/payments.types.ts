@@ -57,6 +57,7 @@ export type TPayment = {
   };
 };
 
+/** Aligned with GET /api/v1/payments index filters */
 export type TGetPaymentsParams = {
   page?: number;
   per_page?: number;
@@ -64,13 +65,14 @@ export type TGetPaymentsParams = {
   payment_type?: TPaymentType;
   order_id?: number;
   client_id?: number;
+  employee_id?: number;
+  inventory_id?: number;
   date_from?: string;
   date_to?: string;
   amount_min?: number;
   amount_max?: number;
-  payment_date_from?: string;
-  payment_date_to?: string;
-  notes?: string;
-  // created_by?: number;
+  amount_from?: number;
+  amount_to?: number;
+  created_by?: number;
   search?: string;
 };

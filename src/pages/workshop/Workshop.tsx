@@ -28,6 +28,10 @@ import {
   useExportWorkshopsToCSVMutationOptions,
   useGetWorkshopsQueryOptions,
 } from "@/api/v2/workshop/workshops.hooks";
+import {
+  parseFilenameFromContentDisposition,
+  downloadBlob,
+} from "@/api/api.utils";
 import CustomPagination from "@/components/custom/CustomPagination";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link, useSearchParams } from "react-router";
@@ -64,18 +68,12 @@ function Workshop() {
     setIsDeleteModalOpen(true);
   };
 
-  // --- Export Handler ---
   const handleExport = () => {
     exportWorkshopsToCSV(undefined, {
-      onSuccess: (blob) => {
-        const url = window.URL.createObjectURL(new Blob([blob]));
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", `workshops-${new Date().toISOString().split("T")[0]}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(url);
+      onSuccess: (result) => {
+        const filename =
+          parseFilenameFromContentDisposition(result.headers) || "workshops.xlsx";
+        downloadBlob(result.data, filename);
         toast.success("تم تصدير الورش بنجاح");
       },
       onError: (error: any) => {
@@ -103,7 +101,7 @@ function Workshop() {
               disabled={isExporting}
             >
               <Download className="ml-2 h-4 w-4" />
-              {isExporting ? "جاري التصدير..." : "تصدير إلى CSV"}
+              {isExporting ? "جاري التصدير..." : "تصدير إلى Excel"}
             </Button>
             <Button onClick={() => setIsCreateModalOpen(true)}>
               <Plus className="ml-2 h-4 w-4" />

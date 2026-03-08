@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -40,7 +40,10 @@ import { Badge } from "@/components/ui/badge";
 import CustomPagination from "@/components/custom/CustomPagination";
 import { BranchesSelect } from "@/components/custom/BranchesSelect";
 import { CashboxesSelect } from "@/components/custom/CashboxesSelect";
-import { useGetExpensesQueryOptions } from "@/api/v2/expenses/expenses.hooks";
+import {
+  useGetExpensesQueryOptions,
+  useExportExpensesToExcelMutationOptions,
+} from "@/api/v2/expenses/expenses.hooks";
 import {
   ExpenseCategories,
   TExpense,
@@ -57,6 +60,7 @@ import {
   Check,
   X,
   DollarSign,
+  Download,
 } from "lucide-react";
 import { formatDate } from "@/utils/formatDate";
 import { CreateExpenseModal } from "./CreateExpenseModal";
@@ -67,6 +71,11 @@ import { CancelExpenseModal } from "./CancelExpenseModal";
 import { PayExpenseModal } from "./PayExpenseModal";
 import { ExpenseDetailsModal } from "./ExpenseDetailsModal";
 import { DatePicker } from "@/components/custom/DatePicker";
+import {
+  parseFilenameFromContentDisposition,
+  downloadBlob,
+} from "@/api/api.utils";
+import { toast } from "sonner";
 
 const STATUS_OPTIONS: { value: TExpenseStatus | "all"; label: string }[] = [
   { value: "all", label: "الكل" },
@@ -88,8 +97,12 @@ const filterSchema = z.object({
     .enum(["all", "pending", "approved", "paid", "cancelled"])
     .optional(),
   category: z.string().optional(),
+  subcategory: z.string().optional(),
   start_date: z.string().optional(),
   end_date: z.string().optional(),
+  amount_min: z.string().optional(),
+  amount_max: z.string().optional(),
+  reference_number: z.string().optional(),
   search: z.string().optional(),
   vendor: z.string().optional(),
 });
@@ -142,8 +155,12 @@ function Expenses() {
       cashbox_id: searchParams.get("cashbox_id") || undefined,
       status: (searchParams.get("status") as TExpenseStatus | "all") || "all",
       category: searchParams.get("category") || undefined,
+      subcategory: searchParams.get("subcategory") || undefined,
       start_date: searchParams.get("start_date") || undefined,
       end_date: searchParams.get("end_date") || undefined,
+      amount_min: searchParams.get("amount_min") || undefined,
+      amount_max: searchParams.get("amount_max") || undefined,
+      reference_number: searchParams.get("reference_number") || undefined,
       search: searchParams.get("search") || undefined,
       vendor: searchParams.get("vendor") || undefined,
     },
@@ -156,12 +173,21 @@ function Expenses() {
   const category = form.watch("category");
   const startDate = form.watch("start_date");
   const endDate = form.watch("end_date");
+  const subcategory = form.watch("subcategory");
+  const amountMin = form.watch("amount_min");
+  const amountMax = form.watch("amount_max");
+  const referenceNumber = form.watch("reference_number");
   const search = form.watch("search");
   const vendor = form.watch("vendor");
 
-  // Debounce only text inputs (search, vendor) to avoid object identity issues
+  // Debounce only text inputs to avoid object identity issues
   const debouncedSearch = useDebounce({ value: search, delay: 500 });
   const debouncedVendor = useDebounce({ value: vendor, delay: 500 });
+  const debouncedSubcategory = useDebounce({ value: subcategory, delay: 500 });
+  const debouncedReferenceNumber = useDebounce({
+    value: referenceNumber,
+    delay: 500,
+  });
 
   // Keep search params in sync with filters
   useEffect(() => {
@@ -175,6 +201,14 @@ function Expenses() {
       params.set("category", String(category));
     if (startDate) params.set("start_date", String(startDate));
     if (endDate) params.set("end_date", String(endDate));
+    if (debouncedSubcategory)
+      params.set("subcategory", String(debouncedSubcategory));
+    const amMin = amountMin?.trim();
+    const amMax = amountMax?.trim();
+    if (amMin) params.set("amount_min", amMin);
+    if (amMax) params.set("amount_max", amMax);
+    if (debouncedReferenceNumber)
+      params.set("reference_number", String(debouncedReferenceNumber));
     if (debouncedSearch) params.set("search", String(debouncedSearch));
     if (debouncedVendor) params.set("vendor", String(debouncedVendor));
 
@@ -187,12 +221,18 @@ function Expenses() {
     category,
     startDate,
     endDate,
+    debouncedSubcategory,
+    amountMin,
+    amountMax,
+    debouncedReferenceNumber,
     debouncedSearch,
     debouncedVendor,
     setSearchParams,
   ]);
 
   const queryParams: TGetExpensesParams = useMemo(() => {
+    const amMin = amountMin?.trim();
+    const amMax = amountMax?.trim();
     return {
       page,
       per_page,
@@ -201,8 +241,12 @@ function Expenses() {
       status:
         status && status !== "all" ? (status as TExpenseStatus) : undefined,
       category: category && category !== "all" ? category : undefined,
+      subcategory: debouncedSubcategory?.trim() || undefined,
       start_date: startDate || undefined,
       end_date: endDate || undefined,
+      amount_min: amMin ? Number(amMin) : undefined,
+      amount_max: amMax ? Number(amMax) : undefined,
+      reference_number: debouncedReferenceNumber?.trim() || undefined,
       search: (debouncedSearch as string | undefined) || undefined,
       vendor: (debouncedVendor as string | undefined) || undefined,
     };
@@ -213,8 +257,12 @@ function Expenses() {
     cashboxId,
     status,
     category,
+    debouncedSubcategory,
     startDate,
     endDate,
+    amountMin,
+    amountMax,
+    debouncedReferenceNumber,
     debouncedSearch,
     debouncedVendor,
   ]);
@@ -223,14 +271,39 @@ function Expenses() {
     useGetExpensesQueryOptions(queryParams)
   );
 
+  const { mutate: exportExpensesToExcel, isPending: isExporting } = useMutation(
+    useExportExpensesToExcelMutationOptions()
+  );
+
+  const handleExport = () => {
+    exportExpensesToExcel(queryParams, {
+      onSuccess: (result) => {
+        if (!result) return;
+        const filename =
+          parseFilenameFromContentDisposition(result.headers) || "expenses.xlsx";
+        downloadBlob(result.data, filename);
+        toast.success("تم تصدير المصروفات بنجاح");
+      },
+      onError: (error: any) => {
+        toast.error("خطأ أثناء تصدير المصروفات", {
+          description: error.message,
+        });
+      },
+    });
+  };
+
   const handleResetFilters = () => {
     form.reset({
       branch_id: undefined,
       cashbox_id: undefined,
       status: "all",
       category: undefined,
+      subcategory: undefined,
       start_date: undefined,
       end_date: undefined,
+      amount_min: undefined,
+      amount_max: undefined,
+      reference_number: undefined,
       search: undefined,
       vendor: undefined,
     });
@@ -278,6 +351,14 @@ function Expenses() {
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={handleExport}
+              disabled={isExporting}
+            >
+              <Download className="ml-2 h-4 w-4" />
+              {isExporting ? "جاري التصدير..." : "تصدير إلى Excel"}
+            </Button>
             <Button
               variant="outline"
               onClick={() => setShowFilters((prev) => !prev)}
@@ -394,6 +475,80 @@ function Expenses() {
                                 ))}
                               </SelectContent>
                             </Select>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="subcategory"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>الفئة الفرعية</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="الفئة الفرعية..."
+                                {...field}
+                                value={field.value || ""}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="reference_number"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>رقم مرجع</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="رقم الفاتورة/المرجع..."
+                                {...field}
+                                value={field.value || ""}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="amount_min"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>الحد الأدنى للمبلغ</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                min={0}
+                                step={0.01}
+                                placeholder="من..."
+                                {...field}
+                                value={field.value || ""}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="amount_max"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>الحد الأقصى للمبلغ</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                min={0}
+                                step={0.01}
+                                placeholder="إلى..."
+                                {...field}
+                                value={field.value || ""}
+                              />
+                            </FormControl>
                           </FormItem>
                         )}
                       />

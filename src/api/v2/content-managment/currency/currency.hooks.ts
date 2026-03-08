@@ -80,7 +80,8 @@ export const useInfiniteCurrenciesQueryOptions = (per_page: number) => {
 
 export const useExportCurrenciesToCSVMutationOptions = () => {
   return mutationOptions({
-    mutationFn: () => exportCurrenciesToCSV(),
+    mutationFn: (params?: Parameters<typeof exportCurrenciesToCSV>[0]) =>
+      exportCurrenciesToCSV(params),
   });
 };
 

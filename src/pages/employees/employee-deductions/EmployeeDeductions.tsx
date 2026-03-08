@@ -27,7 +27,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Eye, Pencil, Trash2, CheckCircle2, Plus, X, Clock, UserX } from "lucide-react";
+import { Eye, Filter, Pencil, Trash2, CheckCircle2, Plus, X, Clock, UserX } from "lucide-react";
 import { EmployeesSelect } from "@/components/custom/EmployeesSelect";
 import { EmployeeDeductionTypesSelect } from "@/components/custom/employee-deduction-types-select";
 import {
@@ -108,6 +108,8 @@ function EmployeeDeductions() {
     setPage(1);
   };
 
+  const [showFilters, setShowFilters] = useState(false);
+
   // Action handlers
   const handleOpenCreate = () => {
     setIsCreateModalOpen(true);
@@ -152,6 +154,13 @@ function EmployeeDeductions() {
             </CardDescription>
           </div>
           <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowFilters((prev) => !prev)}
+            >
+              <Filter className="ml-2 h-4 w-4" />
+              {showFilters ? "إخفاء الفلاتر" : "عرض الفلاتر"}
+            </Button>
             <Button onClick={handleOpenCreate}>
               <Plus className="ml-2 h-4 w-4" />
               إضافة خصم جديد
@@ -167,7 +176,7 @@ function EmployeeDeductions() {
           </div>
         </CardHeader>
 
-        {/* Filters */}
+        {showFilters && (
         <CardContent className="space-y-4 border-b pb-4">
           <div className="flex flex-wrap items-center gap-4">
             {/* Employee Filter */}
@@ -223,6 +232,7 @@ function EmployeeDeductions() {
             </Button>
           </div>
         </CardContent>
+        )}
 
         {isError && (
           <CardContent>

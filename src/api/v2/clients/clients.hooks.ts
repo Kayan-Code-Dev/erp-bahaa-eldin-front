@@ -12,14 +12,19 @@ import {
   getClients,
   updateClient,
 } from "./clients.service";
+import type { TGetClientsParams } from "./clients.service";
 import { TUpdateClientRequest } from "./clients.types";
 
 export const CLIENTS_KEY = "clients";
 
-export const useGetClientsQueryOptions = (page: number, per_page: number, search?: string) => {
+export const useGetClientsQueryOptions = (
+  page: number,
+  per_page: number,
+  params?: TGetClientsParams
+) => {
   return queryOptions({
-    queryKey: [CLIENTS_KEY, page, per_page, search],
-    queryFn: () => getClients(page, per_page, search),
+    queryKey: [CLIENTS_KEY, page, per_page, params],
+    queryFn: () => getClients(page, per_page, params),
     staleTime: 1000 * 60 * 5,
   });
 };
@@ -69,10 +74,13 @@ export const useGetClientByIdQueryOptions = (id: number) => {
   });
 };
 
-export const useGetInfiniteClientsQueryOptions = (per_page: number, search?: string) => {
+export const useGetInfiniteClientsQueryOptions = (
+  per_page: number,
+  params?: TGetClientsParams
+) => {
   return infiniteQueryOptions({
-    queryKey: [CLIENTS_KEY, "infinite", search],
-    queryFn: ({ pageParam = 1 }) => getClients(pageParam, per_page, search),
+    queryKey: [CLIENTS_KEY, "infinite", params],
+    queryFn: ({ pageParam = 1 }) => getClients(pageParam, per_page, params),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
       if (!lastPage) return undefined;
@@ -88,6 +96,7 @@ export const useGetInfiniteClientsQueryOptions = (per_page: number, search?: str
 
 export const useExportClientsToCSVMutationOptions = () => {
   return mutationOptions({
-    mutationFn: () => exportClientsToCSV(),
+    mutationFn: (params?: Parameters<typeof exportClientsToCSV>[0]) =>
+      exportClientsToCSV(params),
   });
 };

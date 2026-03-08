@@ -102,10 +102,13 @@ export const rejectPartialTransferClothes = async (
   }
 };
 
-export const exportTransferClothesToCSV = async () => {
+export const exportTransferClothesToCSV = async (params?: Record<string, unknown>) => {
   try {
-    const { data } = await api.get(`/transfers/export`, { responseType: "blob" });
-    return data;
+    const response = await api.get<Blob>(`/transfers/export`, {
+      params,
+      responseType: "blob",
+    });
+    return { data: response.data, headers: response.headers };
   } catch (error) {
     populateError(error, "خطأ فى تصدير طلبات التحويل ");
   }

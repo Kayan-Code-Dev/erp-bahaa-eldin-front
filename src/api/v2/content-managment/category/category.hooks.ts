@@ -79,6 +79,7 @@ export const useInfiniteCategoriesQueryOptions = (per_page: number) => {
 
 export const useExportCategoriesToCSVMutationOptions = () => {
   return mutationOptions({
-    mutationFn: () => exportCategoriesToCSV(),
+    mutationFn: (params?: Parameters<typeof exportCategoriesToCSV>[0]) =>
+      exportCategoriesToCSV(params),
   });
 };

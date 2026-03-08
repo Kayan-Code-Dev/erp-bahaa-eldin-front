@@ -18,6 +18,8 @@ import {
   getSupplierOrder,
   addPaymentToSupplierOrder,
   returnSupplierOrder,
+  exportSuppliersToExcel,
+  exportSupplierOrdersToExcel,
 } from "./suppliers.service";
 import { TUpdateSupplierRequest, TUpdateSupplierOrderRequest } from "./suppliers.types";
 
@@ -100,6 +102,18 @@ export const useDeleteSupplierMutationOptions = () => {
     },
   });
 };
+
+export const useExportSuppliersToExcelMutationOptions = () =>
+  mutationOptions({
+    mutationFn: (params?: Parameters<typeof exportSuppliersToExcel>[0]) =>
+      exportSuppliersToExcel(params),
+  });
+
+export const useExportSupplierOrdersToExcelMutationOptions = () =>
+  mutationOptions({
+    mutationFn: (params?: Parameters<typeof exportSupplierOrdersToExcel>[0]) =>
+      exportSupplierOrdersToExcel(params),
+  });
 
 // ---------------------------------------------------------------------------
 // Supplier Order queries

@@ -62,10 +62,13 @@ export const deleteCountryApi = async (id: number) => {
 };
 
 
-export const exportCountriesToCSV = async () => {
+export const exportCountriesToCSV = async (params?: Record<string, unknown>) => {
   try {
-    const { data } = await api.get(`/countries/export`, { responseType: "blob" });
-    return data;
+    const response = await api.get<Blob>(`/countries/export`, {
+      params,
+      responseType: "blob",
+    });
+    return { data: response.data, headers: response.headers };
   } catch (error) {
     populateError(error, "خطأ فى تصدير الدول");
   }

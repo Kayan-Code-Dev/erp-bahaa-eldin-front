@@ -45,8 +45,13 @@ import {
   useMarkPaymentAsCanceledMutationOptions,
 } from "@/api/v2/payments/payments.hooks";
 import { TPayment, TPaymentStatus, TPaymentType, TGetPaymentsParams } from "@/api/v2/payments/payments.types";
+import {
+  parseFilenameFromContentDisposition,
+  downloadBlob,
+} from "@/api/api.utils";
 import CustomPagination from "@/components/custom/CustomPagination";
 import { ClientsSelect } from "@/components/custom/ClientsSelect";
+import { EmployeesSelect } from "@/components/custom/EmployeesSelect";
 import { PaymentDetailsModal } from "./PaymentDetailsModal";
 import { formatDate } from "@/utils/formatDate";
 import useDebounce from "@/hooks/useDebounce";
@@ -71,12 +76,12 @@ const filterSchema = z.object({
   payment_type: z.enum(["all", "initial", "fee", "normal"]).optional(),
   client_id: z.string().optional(),
   order_id: z.string().optional(),
+  employee_id: z.string().optional(),
+  inventory_id: z.string().optional(),
   date_from: z.string().optional(),
   date_to: z.string().optional(),
   amount_min: z.string().optional(),
   amount_max: z.string().optional(),
-  payment_date_from: z.string().optional(),
-  payment_date_to: z.string().optional(),
   notes: z.string().optional(),
   search: z.string().optional(),
 });
@@ -98,12 +103,12 @@ function Payments() {
       payment_type: (searchParams.get("payment_type") as TPaymentType | "all") || undefined,
       client_id: searchParams.get("client_id") || undefined,
       order_id: searchParams.get("order_id") || undefined,
+      employee_id: searchParams.get("employee_id") || undefined,
+      inventory_id: searchParams.get("inventory_id") || undefined,
       date_from: searchParams.get("date_from") || undefined,
       date_to: searchParams.get("date_to") || undefined,
       amount_min: searchParams.get("amount_min") || undefined,
       amount_max: searchParams.get("amount_max") || undefined,
-      payment_date_from: searchParams.get("payment_date_from") || undefined,
-      payment_date_to: searchParams.get("payment_date_to") || undefined,
       notes: searchParams.get("notes") || undefined,
       search: searchParams.get("search") || undefined,
     },
@@ -159,6 +164,8 @@ function Payments() {
     const values = debouncedFormValues;
     const orderIdNum = values.order_id?.trim() ? Number(values.order_id) : NaN;
     const clientIdNum = values.client_id?.trim() ? Number(values.client_id) : NaN;
+    const employeeIdNum = values.employee_id?.trim() ? Number(values.employee_id) : NaN;
+    const inventoryIdNum = values.inventory_id?.trim() ? Number(values.inventory_id) : NaN;
     const amountMinNum = values.amount_min?.trim() ? Number(values.amount_min) : NaN;
     const amountMaxNum = values.amount_max?.trim() ? Number(values.amount_max) : NaN;
     return {
@@ -168,12 +175,12 @@ function Payments() {
       payment_type: (values.payment_type && values.payment_type !== "all" ? values.payment_type : undefined) as TPaymentType | undefined,
       order_id: Number.isFinite(orderIdNum) ? orderIdNum : undefined,
       client_id: Number.isFinite(clientIdNum) ? clientIdNum : undefined,
+      employee_id: Number.isFinite(employeeIdNum) ? employeeIdNum : undefined,
+      inventory_id: Number.isFinite(inventoryIdNum) ? inventoryIdNum : undefined,
       date_from: values.date_from?.trim() || undefined,
       date_to: values.date_to?.trim() || undefined,
       amount_min: Number.isFinite(amountMinNum) ? amountMinNum : undefined,
       amount_max: Number.isFinite(amountMaxNum) ? amountMaxNum : undefined,
-      payment_date_from: values.payment_date_from?.trim() || undefined,
-      payment_date_to: values.payment_date_to?.trim() || undefined,
       notes: values.notes?.trim() || undefined,
       search: values.search?.trim() || undefined,
     };
@@ -201,12 +208,12 @@ function Payments() {
     if (params.payment_type) next.set("payment_type", params.payment_type);
     if (params.client_id != null) next.set("client_id", String(params.client_id));
     if (params.order_id != null) next.set("order_id", String(params.order_id));
+    if (params.employee_id != null) next.set("employee_id", String(params.employee_id));
+    if (params.inventory_id != null) next.set("inventory_id", String(params.inventory_id));
     if (params.date_from) next.set("date_from", params.date_from);
     if (params.date_to) next.set("date_to", params.date_to);
     if (params.amount_min != null) next.set("amount_min", String(params.amount_min));
     if (params.amount_max != null) next.set("amount_max", String(params.amount_max));
-    if (params.payment_date_from) next.set("payment_date_from", params.payment_date_from);
-    if (params.payment_date_to) next.set("payment_date_to", params.payment_date_to);
     if (params.notes) next.set("notes", params.notes);
     if (params.search) next.set("search", params.search);
     setSearchParams(next, { replace: true });
@@ -259,30 +266,25 @@ function Payments() {
       payment_type: undefined,
       client_id: undefined,
       order_id: undefined,
+      employee_id: undefined,
+      inventory_id: undefined,
       date_from: undefined,
       date_to: undefined,
       amount_min: undefined,
       amount_max: undefined,
-      payment_date_from: undefined,
-      payment_date_to: undefined,
       notes: undefined,
       search: undefined,
     });
     setSearchParams({ page: "1", per_page: String(per_page) });
   };
 
-  // --- Export Handler ---
+  // --- Export Handler (same params as list; filename from Content-Disposition) ---
   const handleExport = () => {
-    exportPaymentsToCSV(undefined, {
-      onSuccess: (blob) => {
-        const url = window.URL.createObjectURL(new Blob([blob]));
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", `payments-${new Date().toISOString().split("T")[0]}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(url);
+    exportPaymentsToCSV(params, {
+      onSuccess: (result) => {
+        const filename =
+          parseFilenameFromContentDisposition(result.headers) || "payments.xlsx";
+        downloadBlob(result.data, filename);
         toast.success("تم تصدير المدفوعات بنجاح");
       },
       onError: (error: any) => {
@@ -349,7 +351,7 @@ function Payments() {
               disabled={isExporting}
             >
               <Download className="ml-2 h-4 w-4" />
-              {isExporting ? "جاري التصدير..." : "تصدير إلى CSV"}
+              {isExporting ? "جاري التصدير..." : "تصدير إلى Excel"}
             </Button>
             <Button
               variant="outline"
@@ -484,13 +486,53 @@ function Payments() {
                         )}
                       />
 
-                      {/* Date From */}
+                      {/* Employee (order's employee) */}
+                      <FormField
+                        control={form.control}
+                        name="employee_id"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>الموظف</FormLabel>
+                            <FormControl>
+                              <EmployeesSelect
+                                value={field.value || ""}
+                                onChange={(value) => field.onChange(value || undefined)}
+                                placeholder="جميع الموظفين"
+                                allowClear={true}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Inventory/Branch ID (order's inventory) */}
+                      <FormField
+                        control={form.control}
+                        name="inventory_id"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>رقم المخزن/الفرع</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="معرف المخزن..."
+                                value={field.value || ""}
+                                onChange={(e) => {
+                                  const val = e.target.value.replace(/[^0-9]/g, "");
+                                  field.onChange(val || "");
+                                }}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Payment date range (API: date_from, date_to) */}
                       <FormField
                         control={form.control}
                         name="date_from"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>تاريخ من</FormLabel>
+                            <FormLabel>تاريخ الدفع من</FormLabel>
                             <FormControl>
                               <Input
                                 type="date"
@@ -502,13 +544,12 @@ function Payments() {
                         )}
                       />
 
-                      {/* Date To */}
                       <FormField
                         control={form.control}
                         name="date_to"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>تاريخ إلى</FormLabel>
+                            <FormLabel>تاريخ الدفع إلى</FormLabel>
                             <FormControl>
                               <Input
                                 type="date"
@@ -556,42 +597,6 @@ function Payments() {
                                   const val = e.target.value.replace(/[^0-9.]/g, "");
                                   field.onChange(val || "");
                                 }}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-
-                      {/* Payment Date From */}
-                      <FormField
-                        control={form.control}
-                        name="payment_date_from"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>تاريخ الدفع من</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="date"
-                                {...field}
-                                value={field.value || ""}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-
-                      {/* Payment Date To */}
-                      <FormField
-                        control={form.control}
-                        name="payment_date_to"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>تاريخ الدفع إلى</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="date"
-                                {...field}
-                                value={field.value || ""}
                               />
                             </FormControl>
                           </FormItem>

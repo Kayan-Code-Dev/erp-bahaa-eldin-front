@@ -68,17 +68,29 @@ export type TExpense = {
 
 export type TExpenseStatus = "pending" | "approved" | "paid" | "cancelled";
 
+/** Aligned with GET /api/v1/expenses index filters */
 export type TGetExpensesParams = {
   page?: number;
   per_page?: number;
   branch_id?: number;
   cashbox_id?: number;
   category?: string;
+  subcategory?: string;
   status?: TExpenseStatus;
   start_date?: string;
   end_date?: string;
-  search?: string;
+  date_from?: string;
+  date_to?: string;
+  amount_min?: number;
+  amount_max?: number;
+  amount_from?: number;
+  amount_to?: number;
   vendor?: string;
+  reference_number?: string;
+  created_by?: number;
+  approved_by?: number;
+  transaction_id?: number;
+  search?: string;
 };
 
 export type TCreateExpenseRequest = {

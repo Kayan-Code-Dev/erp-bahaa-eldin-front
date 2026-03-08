@@ -30,6 +30,10 @@ import {
   useDeleteCategoryMutationOptions,
   useExportCategoriesToCSVMutationOptions,
 } from "@/api/v2/content-managment/category/category.hooks";
+import {
+  parseFilenameFromContentDisposition,
+  downloadBlob,
+} from "@/api/api.utils";
 import { useSearchParams } from "react-router";
 import CustomPagination from "@/components/custom/CustomPagination";
 
@@ -85,18 +89,12 @@ function Categories() {
     }
   };
 
-  // --- Export Handler ---
   const handleExport = () => {
     exportCategoriesToCSV(undefined, {
-      onSuccess: (blob) => {
-        const url = window.URL.createObjectURL(new Blob([blob]));
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", `categories-${new Date().toISOString().split("T")[0]}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(url);
+      onSuccess: (result) => {
+        const filename =
+          parseFilenameFromContentDisposition(result.headers) || "categories.xlsx";
+        downloadBlob(result.data, filename);
         toast.success("تم تصدير أقسام المنتجات بنجاح");
       },
       onError: (error: any) => {
@@ -124,7 +122,7 @@ function Categories() {
               disabled={isExporting}
             >
               <Download className="ml-2 h-4 w-4" />
-              {isExporting ? "جاري التصدير..." : "تصدير إلى CSV"}
+              {isExporting ? "جاري التصدير..." : "تصدير إلى Excel"}
             </Button>
             <Button onClick={() => setIsCreateModalOpen(true)}>
               <Plus className="ml-2 h-4 w-4" />

@@ -15,9 +15,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Download, Pencil, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { Download, Filter, Pencil, Plus, Trash2, X } from "lucide-react";
+import { useState, useMemo } from "react";
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { ClientsTableSkeleton } from "./ClientsTableSkeleton";
 import { CreateClientModal } from "./CreateClientModal";
 import { EditClientModal } from "./EditClientModal";
@@ -28,15 +30,22 @@ import {
   useGetClientsQueryOptions,
 } from "@/api/v2/clients/clients.hooks";
 import { TClientResponse } from "@/api/v2/clients/clients.types";
+import {
+  parseFilenameFromContentDisposition,
+  downloadBlob,
+} from "@/api/api.utils";
 import { formatPhone } from "@/utils/formatPhone";
 import CustomPagination from "@/components/custom/CustomPagination";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router";
 
 function Clients() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const page = Number(searchParams.get("page")) || 1;
   const search = searchParams.get("search") || undefined;
+  const source = searchParams.get("source") || undefined;
+  const dateOfBirthFrom = searchParams.get("date_of_birth_from") || undefined;
+  const dateOfBirthTo = searchParams.get("date_of_birth_to") || undefined;
 
   // Modal State
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -45,11 +54,22 @@ function Clients() {
   const [selectedClient, setSelectedClient] = useState<TClientResponse | null>(
     null
   );
+  const [showFilters, setShowFilters] = useState(false);
+
+  const listParams = useMemo(
+    () => ({
+      ...(search ? { search } : {}),
+      ...(source ? { source } : {}),
+      ...(dateOfBirthFrom ? { date_of_birth_from: dateOfBirthFrom } : {}),
+      ...(dateOfBirthTo ? { date_of_birth_to: dateOfBirthTo } : {}),
+    }),
+    [search, source, dateOfBirthFrom, dateOfBirthTo]
+  );
 
   // Data Fetching
   const per_page = 10;
   const { data, isPending, isError, error } = useQuery(
-    useGetClientsQueryOptions(page, per_page, search)
+    useGetClientsQueryOptions(page, per_page, Object.keys(listParams).length ? listParams : undefined)
   );
 
   // Export Mutation
@@ -67,18 +87,34 @@ function Clients() {
     setIsDeleteModalOpen(true);
   };
 
-  // --- Export Handler ---
+  const setFilter = (key: string, value: string) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (value?.trim()) next.set(key, value.trim());
+      else next.delete(key);
+      next.set("page", "1");
+      return next;
+    });
+  };
+
+  const clearFilters = () => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.delete("search");
+      next.delete("source");
+      next.delete("date_of_birth_from");
+      next.delete("date_of_birth_to");
+      next.set("page", "1");
+      return next;
+    });
+  };
+
   const handleExport = () => {
-    exportClientsToCSV(undefined, {
-      onSuccess: (blob) => {
-        const url = window.URL.createObjectURL(new Blob([blob]));
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", `clients-${new Date().toISOString().split("T")[0]}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(url);
+    exportClientsToCSV(listParams, {
+      onSuccess: (result) => {
+        const filename =
+          parseFilenameFromContentDisposition(result.headers) || "clients.xlsx";
+        downloadBlob(result.data, filename);
         toast.success("تم تصدير العملاء بنجاح");
       },
       onError: (error: any) => {
@@ -102,11 +138,18 @@ function Clients() {
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
+              onClick={() => setShowFilters((prev) => !prev)}
+            >
+              <Filter className="ml-2 h-4 w-4" />
+              {showFilters ? "إخفاء الفلاتر" : "عرض الفلاتر"}
+            </Button>
+            <Button
+              variant="outline"
               onClick={handleExport}
               disabled={isExporting}
             >
               <Download className="ml-2 h-4 w-4" />
-              {isExporting ? "جاري التصدير..." : "تصدير إلى CSV"}
+              {isExporting ? "جاري التصدير..." : "تصدير إلى Excel"}
             </Button>
             <Button onClick={() => setIsCreateModalOpen(true)}>
               <Plus className="ml-2 h-4 w-4" />
@@ -114,6 +157,53 @@ function Clients() {
             </Button>
           </div>
         </CardHeader>
+
+        {showFilters && (
+        <CardContent className="border-b pb-4">
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Label>بحث:</Label>
+              <Input
+                placeholder="اسم، هوية، هاتف..."
+                value={search ?? ""}
+                onChange={(e) => setFilter("search", e.target.value)}
+                className="w-[200px]"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Label>المصدر:</Label>
+              <Input
+                placeholder="مصدر العميل"
+                value={source ?? ""}
+                onChange={(e) => setFilter("source", e.target.value)}
+                className="w-[160px]"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Label>تاريخ الميلاد من:</Label>
+              <Input
+                type="date"
+                value={dateOfBirthFrom ?? ""}
+                onChange={(e) => setFilter("date_of_birth_from", e.target.value)}
+                className="w-[160px]"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Label>إلى:</Label>
+              <Input
+                type="date"
+                value={dateOfBirthTo ?? ""}
+                onChange={(e) => setFilter("date_of_birth_to", e.target.value)}
+                className="w-[160px]"
+              />
+            </div>
+            <Button variant="outline" size="sm" onClick={clearFilters}>
+              <X className="ml-2 h-4 w-4" />
+              مسح الفلاتر
+            </Button>
+          </div>
+        </CardContent>
+        )}
 
         {isError && (
           <CardContent>

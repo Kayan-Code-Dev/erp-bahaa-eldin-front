@@ -10,6 +10,19 @@ import {
 import { populateError } from "@/api/api.utils";
 import { TPaginationResponse } from "@/api/api-common.types";
 
+/** Export employees to Excel; same query params as employees index. */
+export const exportEmployeesToExcel = async (params?: TGetEmployeesParams) => {
+  try {
+    const response = await api.get<Blob>("/employees/export", {
+      params,
+      responseType: "blob",
+    });
+    return { data: response.data, headers: response.headers };
+  } catch (error) {
+    populateError(error, "خطأ فى تصدير الموظفين");
+  }
+};
+
 export const createEmployee = async (data: TCreateEmployeeRequest) => {
   try {
     await api.post("/employees", data);

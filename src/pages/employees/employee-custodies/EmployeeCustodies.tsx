@@ -22,6 +22,7 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import {
   Eye,
+  Filter,
   Pencil,
   Trash2,
   Plus,
@@ -164,6 +165,8 @@ function EmployeeCustodies() {
     setSearchParams({ page: "1" });
   };
 
+  const [showFilters, setShowFilters] = useState(false);
+
   // --- Modal Action Handlers ---
   const handleOpenCreate = () => {
     setIsCreateModalOpen(true);
@@ -228,6 +231,13 @@ function EmployeeCustodies() {
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowFilters((prev) => !prev)}
+            >
+              <Filter className="ml-2 h-4 w-4" />
+              {showFilters ? "إخفاء الفلاتر" : "عرض الفلاتر"}
+            </Button>
             <Button variant="outline">
               <Link to="/employees/custodies/overdue">
                 الضمانات المتأخرة
@@ -240,7 +250,7 @@ function EmployeeCustodies() {
           </div>
         </CardHeader>
 
-        {/* Filters */}
+        {showFilters && (
         <CardContent className="space-y-4 border-b pb-4">
           <div className="flex flex-wrap items-center gap-4">
             {/* Employee Filter */}
@@ -303,6 +313,7 @@ function EmployeeCustodies() {
             </Button>
           </div>
         </CardContent>
+        )}
 
         {isError && (
           <CardContent>

@@ -87,6 +87,7 @@ export const useGetInifiniteSubcategoriesQueryOptions = (
 
 export const useExportSubcategoriesToCSVMutationOptions = () => {
   return mutationOptions({
-    mutationFn: () => exportSubcategoriesToCSV(),
+    mutationFn: (params?: Parameters<typeof exportSubcategoriesToCSV>[0]) =>
+      exportSubcategoriesToCSV(params),
   });
 };

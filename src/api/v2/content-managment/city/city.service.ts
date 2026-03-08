@@ -59,10 +59,13 @@ export const deleteCityApi = async (id: number) => {
   }
 };
 
-export const exportCitiesToCSV = async () => {
+export const exportCitiesToCSV = async (params?: Record<string, unknown>) => {
   try {
-    const { data } = await api.get(`/cities/export`, { responseType: "blob" });
-    return data;
+    const response = await api.get<Blob>(`/cities/export`, {
+      params,
+      responseType: "blob",
+    });
+    return { data: response.data, headers: response.headers };
   } catch (error) {
     populateError(error, "خطأ فى تصدير المدن");
   }

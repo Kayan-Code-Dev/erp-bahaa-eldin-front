@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Table,
   TableHeader,
@@ -24,11 +24,15 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { Eye, Pencil, X } from "lucide-react";
+import { Download, Eye, Filter, Pencil, X } from "lucide-react";
 import { Link } from "react-router";
-import { useGetCashboxesQueryOptions } from "@/api/v2/cashboxes/cashboxes.hooks";
+import {
+  useGetCashboxesQueryOptions,
+  useExportCashboxesToExcelMutationOptions,
+} from "@/api/v2/cashboxes/cashboxes.hooks";
 import { TCashboxesParams, TCashbox } from "@/api/v2/cashboxes/cashboxes.types";
 import { BranchesSelect } from "@/components/custom/BranchesSelect";
 import {
@@ -41,6 +45,11 @@ import {
 import { EditCashboxModal } from "./EditCashboxModal";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSearchParams } from "react-router";
+import {
+  parseFilenameFromContentDisposition,
+  downloadBlob,
+} from "@/api/api.utils";
+import { toast } from "sonner";
 
 function CashboxesTableSkeleton({ rows = 5 }: { rows?: number }) {
   return (
@@ -102,6 +111,11 @@ function Cashboxes() {
 
   const [branchId, setBranchId] = useState<string>("");
   const [isActive, setIsActive] = useState<string>("");
+  const [initialBalanceMin, setInitialBalanceMin] = useState<string>("");
+  const [initialBalanceMax, setInitialBalanceMax] = useState<string>("");
+  const [currentBalanceMin, setCurrentBalanceMin] = useState<string>("");
+  const [currentBalanceMax, setCurrentBalanceMax] = useState<string>("");
+  const [showFilters, setShowFilters] = useState(false);
 
   const queryParams: TCashboxesParams = useMemo(() => {
     const params: TCashboxesParams = {
@@ -112,13 +126,51 @@ function Cashboxes() {
     if (branchId) params.branch_id = Number(branchId);
     if (isActive && isActive !== "all") params.is_active = isActive === "true";
     if (search?.trim()) params.search = search.trim();
+    const ibMin = initialBalanceMin?.trim();
+    const ibMax = initialBalanceMax?.trim();
+    const cbMin = currentBalanceMin?.trim();
+    const cbMax = currentBalanceMax?.trim();
+    if (ibMin) params.initial_balance_min = Number(ibMin);
+    if (ibMax) params.initial_balance_max = Number(ibMax);
+    if (cbMin) params.current_balance_min = Number(cbMin);
+    if (cbMax) params.current_balance_max = Number(cbMax);
     return params;
-  }, [filters, page, branchId, isActive, search]);
+  }, [
+    filters,
+    page,
+    branchId,
+    isActive,
+    search,
+    initialBalanceMin,
+    initialBalanceMax,
+    currentBalanceMin,
+    currentBalanceMax,
+  ]);
 
 
   const { data, isPending, isError, error } = useQuery(
     useGetCashboxesQueryOptions(queryParams)
   );
+
+  const { mutate: exportCashboxesToExcel, isPending: isExporting } =
+    useMutation(useExportCashboxesToExcelMutationOptions());
+
+  const handleExport = () => {
+    exportCashboxesToExcel(queryParams, {
+      onSuccess: (result) => {
+        if (!result) return;
+        const filename =
+          parseFilenameFromContentDisposition(result.headers) || "cashboxes.xlsx";
+        downloadBlob(result.data, filename);
+        toast.success("تم تصدير الصناديق بنجاح");
+      },
+      onError: (error: any) => {
+        toast.error("خطأ أثناء تصدير الصناديق", {
+          description: error.message,
+        });
+      },
+    });
+  };
 
   const handlePreviousPage = () => {
     setSearchParams((prev) => {
@@ -146,6 +198,10 @@ function Cashboxes() {
   const handleClearFilters = () => {
     setBranchId("");
     setIsActive("");
+    setInitialBalanceMin("");
+    setInitialBalanceMax("");
+    setCurrentBalanceMin("");
+    setCurrentBalanceMax("");
     setFilters({ page: 1, per_page: 10 });
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
@@ -171,9 +227,26 @@ function Cashboxes() {
               عرض وتعديل وإدارة الصناديق في النظام.
             </CardDescription>
           </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowFilters((prev) => !prev)}
+            >
+              <Filter className="ml-2 h-4 w-4" />
+              {showFilters ? "إخفاء الفلاتر" : "عرض الفلاتر"}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleExport}
+              disabled={isExporting}
+            >
+              <Download className="ml-2 h-4 w-4" />
+              {isExporting ? "جاري التصدير..." : "تصدير إلى Excel"}
+            </Button>
+          </div>
         </CardHeader>
 
-        {/* Filters */}
+        {showFilters && (
         <CardContent className="space-y-4 border-b pb-4">
           <div className="flex flex-wrap items-center gap-4">
             {/* Branch Filter */}
@@ -211,12 +284,67 @@ function Cashboxes() {
               </Select>
             </div>
 
+            {/* Balance range filters */}
+            <div className="flex items-center gap-2">
+              <Label>الرصيد الأولي من:</Label>
+              <Input
+                type="number"
+                step={0.01}
+                placeholder="من"
+                value={initialBalanceMin}
+                onChange={(e) => {
+                  setInitialBalanceMin(e.target.value);
+                  handleFilterChange();
+                }}
+                className="w-[100px]"
+              />
+              <Label>إلى:</Label>
+              <Input
+                type="number"
+                step={0.01}
+                placeholder="إلى"
+                value={initialBalanceMax}
+                onChange={(e) => {
+                  setInitialBalanceMax(e.target.value);
+                  handleFilterChange();
+                }}
+                className="w-[100px]"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Label>الرصيد الحالي من:</Label>
+              <Input
+                type="number"
+                step={0.01}
+                placeholder="من"
+                value={currentBalanceMin}
+                onChange={(e) => {
+                  setCurrentBalanceMin(e.target.value);
+                  handleFilterChange();
+                }}
+                className="w-[100px]"
+              />
+              <Label>إلى:</Label>
+              <Input
+                type="number"
+                step={0.01}
+                placeholder="إلى"
+                value={currentBalanceMax}
+                onChange={(e) => {
+                  setCurrentBalanceMax(e.target.value);
+                  handleFilterChange();
+                }}
+                className="w-[100px]"
+              />
+            </div>
+
             <Button variant="outline" size="sm" onClick={handleClearFilters}>
               <X className="ml-2 h-4 w-4" />
               مسح الفلاتر
             </Button>
           </div>
         </CardContent>
+        )}
 
         {isError && (
           <CardContent>

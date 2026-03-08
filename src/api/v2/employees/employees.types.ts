@@ -113,17 +113,23 @@ export type TGetEmployeesParams = {
   page?: number;
   per_page?: number;
   search?: string;
+  id?: number | string;
+  user_id?: number;
   department_id?: number;
   job_title_id?: number;
   manager_id?: number;
-  employment_type?: TEmploymentType;
   level?:
+    | "master_manager"
     | "branches_manager"
-    | "workshop_manager"
-    | "factory_manager"
+    | "branch_manager"
     | "employee";
   branch_id?: number;
+  employment_type?: TEmploymentType;
   employment_status?: TEmploymentStatus;
+  hire_date_from?: string;
+  hire_date_to?: string;
+  termination_date_from?: string;
+  termination_date_to?: string;
 };
 
 export type TUpdateEmployeeRequest = Partial<{

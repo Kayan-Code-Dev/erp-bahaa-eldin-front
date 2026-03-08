@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Banknote, Building2, FileBarChart, Users, Wallet, X } from "lucide-react";
+import { Banknote, Building2, FileBarChart, Filter, Users, Wallet, X } from "lucide-react";
 import { useGetBranchesQueryOptions } from "@/api/v2/branches/branches.hooks";
 import { useGetEmployeesQueryOptions } from "@/api/v2/employees/employees.hooks";
 import {
@@ -136,6 +136,8 @@ function EmployeePayrollSheet() {
     setSearchParams({ page: "1" }, { replace: true });
   };
 
+  const [showFilters, setShowFilters] = useState(false);
+
   const handleBranchChange = (value: string) => {
     setSelectedBranchId(value);
     setPage(1);
@@ -201,22 +203,34 @@ function EmployeePayrollSheet() {
               عرض الموظفين حسب الفرع مع إجراءات صرف الراتب وصرف السلفة.
             </CardDescription>
           </div>
-          <div className="flex items-center gap-2">
-            <Label htmlFor="branch_filter" className="text-sm font-medium whitespace-nowrap">
-              الفرع:
-            </Label>
-            <BranchesSelect
-              value={selectedBranchId}
-              onChange={(value) => {
-                handleBranchChange(value);
-                handleFilterChange();
-              }}
-              className="w-[240px]"
-            />
-            <Button variant="outline" size="sm" onClick={handleClearFilters}>
-              <X className="ml-2 h-4 w-4" />
-              مسح الفلاتر
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowFilters((prev) => !prev)}
+            >
+              <Filter className="ml-2 h-4 w-4" />
+              {showFilters ? "إخفاء الفلاتر" : "عرض الفلاتر"}
             </Button>
+            {showFilters && (
+              <>
+                <Label htmlFor="branch_filter" className="text-sm font-medium whitespace-nowrap">
+                  الفرع:
+                </Label>
+                <BranchesSelect
+                  value={selectedBranchId}
+                  onChange={(value) => {
+                    handleBranchChange(value);
+                    handleFilterChange();
+                  }}
+                  className="w-[240px]"
+                />
+                <Button variant="outline" size="sm" onClick={handleClearFilters}>
+                  <X className="ml-2 h-4 w-4" />
+                  مسح الفلاتر
+                </Button>
+              </>
+            )}
           </div>
         </CardHeader>
 

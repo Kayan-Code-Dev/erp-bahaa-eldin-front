@@ -15,9 +15,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Download, Pencil, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { Download, Filter, Pencil, Plus, Trash2, X } from "lucide-react";
+import { useState, useMemo } from "react";
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { BranchesTableSkeleton } from "./BranchesTableSkeleton";
 import { CreateBranchModal } from "./CreateBranchModal";
 import { EditBranchModal } from "./EditBranchModal";
@@ -28,14 +37,28 @@ import {
   useGetBranchesQueryOptions,
 } from "@/api/v2/branches/branches.hooks";
 import { TBranchResponse } from "@/api/v2/branches/branches.types";
+import {
+  parseFilenameFromContentDisposition,
+  downloadBlob,
+} from "@/api/api.utils";
 import { ControlledConfirmationModal } from "@/components/custom/ControlledConfirmationModal";
 import CustomPagination from "@/components/custom/CustomPagination";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router";
 
 function BranchManger() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const page = Number(searchParams.get("page")) || 1;
+  const search = searchParams.get("search") || undefined;
+  const vatEnabledParam = searchParams.get("vat_enabled");
+
+  const listParams = useMemo(() => {
+    const p: { search?: string; vat_enabled?: boolean } = {};
+    if (search?.trim()) p.search = search.trim();
+    if (vatEnabledParam === "true") p.vat_enabled = true;
+    if (vatEnabledParam === "false") p.vat_enabled = false;
+    return Object.keys(p).length ? p : undefined;
+  }, [search, vatEnabledParam]);
 
   // Modal State
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -44,15 +67,36 @@ function BranchManger() {
   const [selectedBranch, setSelectedBranch] = useState<TBranchResponse | null>(
     null
   );
+  const [showFilters, setShowFilters] = useState(false);
 
   const { mutate: exportBranchesToCSV, isPending: isExporting } = useMutation(
     useExportBranchesToCSVQueryOptions()
   );
 
+  const setFilter = (key: string, value: string) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (value !== "" && value !== "all") next.set(key, value);
+      else next.delete(key);
+      next.set("page", "1");
+      return next;
+    });
+  };
+
+  const clearFilters = () => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.delete("search");
+      next.delete("vat_enabled");
+      next.set("page", "1");
+      return next;
+    });
+  };
+
   // Data Fetching
   const per_page = 10;
   const { data, isPending, isError, error } = useQuery(
-    useGetBranchesQueryOptions(page, per_page)
+    useGetBranchesQueryOptions(page, per_page, listParams)
   );
 
   // Mutations
@@ -87,18 +131,13 @@ function BranchManger() {
     }
   };
 
-  // --- Export Handler ---
   const handleExport = () => {
-    exportBranchesToCSV(undefined, {
-      onSuccess: (blob) => {
-        const url = window.URL.createObjectURL(new Blob([blob]));
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", `branches-${new Date().toISOString().split("T")[0]}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(url);
+    exportBranchesToCSV(listParams, {
+      onSuccess: (result) => {
+        if (!result) return;
+        const filename =
+          parseFilenameFromContentDisposition(result.headers) || "branches.xlsx";
+        downloadBlob(result.data, filename);
         toast.success("تم تصدير الفروع بنجاح");
       },
       onError: (error: any) => {
@@ -122,11 +161,18 @@ function BranchManger() {
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
+              onClick={() => setShowFilters((prev) => !prev)}
+            >
+              <Filter className="ml-2 h-4 w-4" />
+              {showFilters ? "إخفاء الفلاتر" : "عرض الفلاتر"}
+            </Button>
+            <Button
+              variant="outline"
               onClick={handleExport}
               disabled={isExporting}
             >
               <Download className="ml-2 h-4 w-4" />
-              {isExporting ? "جاري التصدير..." : "تصدير إلى CSV"}
+              {isExporting ? "جاري التصدير..." : "تصدير إلى Excel"}
             </Button>
             <Button onClick={() => setIsCreateModalOpen(true)}>
               <Plus className="ml-2 h-4 w-4" />
@@ -134,6 +180,42 @@ function BranchManger() {
             </Button>
           </div>
         </CardHeader>
+
+        {showFilters && (
+        <CardContent className="border-b pb-4">
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Label>بحث:</Label>
+              <Input
+                placeholder="اسم، كود، هاتف، عملة..."
+                value={search ?? ""}
+                onChange={(e) => setFilter("search", e.target.value)}
+                className="w-[220px]"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Label>ضريبة القيمة المضافة:</Label>
+              <Select
+                value={vatEnabledParam ?? "all"}
+                onValueChange={(v) => setFilter("vat_enabled", v)}
+              >
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="الكل" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">الكل</SelectItem>
+                  <SelectItem value="true">مفعّل</SelectItem>
+                  <SelectItem value="false">غير مفعّل</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button variant="outline" size="sm" onClick={clearFilters}>
+              <X className="ml-2 h-4 w-4" />
+              مسح الفلاتر
+            </Button>
+          </div>
+        </CardContent>
+        )}
 
         {isError && (
           <CardContent>

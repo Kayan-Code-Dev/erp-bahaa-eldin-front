@@ -83,6 +83,7 @@ export const useGetRolesInfiniteQueryOptions = (per_page: number) => {
 
 export const useExportRolesToCSVMutationOptions = () => {
   return mutationOptions({
-    mutationFn: () => exportRolesToCSV(),
+    mutationFn: (params?: Parameters<typeof exportRolesToCSV>[0]) =>
+      exportRolesToCSV(params),
   });
 };

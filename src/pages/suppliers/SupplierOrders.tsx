@@ -16,7 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Plus, RotateCcw, Banknote, X } from "lucide-react";
+import { Pencil, Plus, RotateCcw, Banknote, X, Download } from "lucide-react";
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useNavigate, useSearchParams } from "react-router";
@@ -27,12 +27,17 @@ import {
   useGetSupplierOrdersBySupplierIdQueryOptions,
   useGetSupplierQueryOptions,
   useReturnSupplierOrderMutationOptions,
+  useExportSupplierOrdersToExcelMutationOptions,
 } from "@/api/v2/suppliers/suppliers.hooks";
 import { TSupplierOrderResponse } from "@/api/v2/suppliers/suppliers.types";
 import CustomPagination from "@/components/custom/CustomPagination";
 import { formatDate, toEnglishNumerals } from "@/utils/formatDate";
 import { ControlledConfirmationModal } from "@/components/custom/ControlledConfirmationModal";
 
+import {
+  parseFilenameFromContentDisposition,
+  downloadBlob,
+} from "@/api/api.utils";
 import { SupplierOrdersTableSkeleton } from "./SupplierOrdersTableSkeleton";
 import { EditSupplierOrderModal } from "./EditSupplierOrderModal";
 import { AddPaymentToSupplierOrderModal } from "./AddPaymentToSupplierOrderModal";
@@ -94,6 +99,28 @@ function SupplierOrders() {
   const { mutate: returnOrder, isPending: isReturning } = useMutation(
     useReturnSupplierOrderMutationOptions(),
   );
+  const { mutate: exportSupplierOrdersToExcel, isPending: isExporting } =
+    useMutation(useExportSupplierOrdersToExcelMutationOptions());
+
+  const handleExport = () => {
+    const params =
+      supplierId > 0 ? { supplier_id: supplierId } : undefined;
+    exportSupplierOrdersToExcel(params, {
+      onSuccess: (result) => {
+        if (!result) return;
+        const filename =
+          parseFilenameFromContentDisposition(result.headers) ||
+          "supplier-orders.xlsx";
+        downloadBlob(result.data, filename);
+        toast.success("تم تصدير طلبيات الموردين بنجاح");
+      },
+      onError: (error: any) => {
+        toast.error("خطأ أثناء تصدير طلبيات الموردين", {
+          description: error.message,
+        });
+      },
+    });
+  };
 
   // ---- queries ----
   const allQuery = useQuery(useGetSupplierOrdersQueryOptions(page, per_page));
@@ -169,6 +196,14 @@ function SupplierOrders() {
           </div>
 
           <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={handleExport}
+              disabled={isExporting}
+            >
+              <Download className="ml-2 h-4 w-4" />
+              {isExporting ? "جاري التصدير..." : "تصدير إلى Excel"}
+            </Button>
             {supplierId > 0 && (
               <Button
                 variant="outline"

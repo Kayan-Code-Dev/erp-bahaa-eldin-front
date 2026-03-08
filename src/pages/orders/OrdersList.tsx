@@ -59,6 +59,10 @@ import {
   getOrderTypeLabel,
   getItemListDisplay,
 } from "@/api/v2/orders/order.utils";
+import {
+  parseFilenameFromContentDisposition,
+  downloadBlob,
+} from "@/api/api.utils";
 import { OrderEmployeeName } from "@/components/custom/OrderEmployeeName";
 import {
   AlertDialog,
@@ -354,18 +358,14 @@ function OrdersList() {
   const canDeleteOrder = (o: TOrder) =>
     o.status === "canceled" || o.status === "created";
 
-  // --- Export Handler ---
+  // --- Export Handler (same filters as list; filename from Content-Disposition) ---
   const handleExport = () => {
-    exportOrdersToCSV(undefined, {
-      onSuccess: (blob) => {
-        const url = window.URL.createObjectURL(new Blob([blob]));
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", `orders-${new Date().toISOString().split("T")[0]}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(url);
+    exportOrdersToCSV(filters, {
+      onSuccess: (result) => {
+        if (!result) return;
+        const filename =
+          parseFilenameFromContentDisposition(result.headers) || "orders.xlsx";
+        downloadBlob(result.data, filename);
         toast.success("تم تصدير الطلبات بنجاح");
       },
       onError: (error: { message?: string }) => {
@@ -440,7 +440,7 @@ function OrdersList() {
               disabled={isExporting}
             >
               <Download className="ml-2 h-4 w-4" />
-              {isExporting ? "جاري التصدير..." : "تصدير إلى CSV"}
+              {isExporting ? "جاري التصدير..." : "تصدير إلى Excel"}
             </Button>
           </div>
         </CardHeader>

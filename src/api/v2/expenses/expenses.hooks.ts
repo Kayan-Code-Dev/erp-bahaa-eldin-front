@@ -19,6 +19,7 @@ import {
   getExpenseSummary,
   payExpense,
   updateExpense,
+  exportExpensesToExcel,
 } from "./expenses.service";
 import { TPaginationResponse } from "@/api/api-common.types";
 
@@ -223,3 +224,9 @@ export const usePayExpenseMutationOptions = () => {
     },
   });
 };
+
+export const useExportExpensesToExcelMutationOptions = () =>
+  mutationOptions({
+    mutationFn: (params?: Parameters<typeof exportExpensesToExcel>[0]) =>
+      exportExpensesToExcel(params),
+  });

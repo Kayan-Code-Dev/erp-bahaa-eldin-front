@@ -78,6 +78,7 @@ export const useInfiniteCitiesQueryOptions = (per_page: number) => {
 
 export const useExportCitiesToCSVMutationOptions = () => {
   return mutationOptions({
-    mutationFn: () => exportCitiesToCSV(),
+    mutationFn: (params?: Parameters<typeof exportCitiesToCSV>[0]) =>
+      exportCitiesToCSV(params),
   });
 };

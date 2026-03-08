@@ -91,6 +91,10 @@ import { EmployeesSelect } from "@/components/custom/EmployeesSelect";
 import { CategoriesSelect } from "@/components/custom/CategoriesSelect";
 import { SubcategoriesSelect } from "@/components/custom/SubcategoriesSelect";
 import useDebounce from "@/hooks/useDebounce";
+import {
+  parseFilenameFromContentDisposition,
+  downloadBlob,
+} from "@/api/api.utils";
 
 const ordersFilterSchema = z.object({
   order_id: z.string().optional(),
@@ -355,16 +359,11 @@ function DeliveriesReturnsSearch() {
     o.status === "canceled" || o.status === "created";
 
   const handleExport = () => {
-    exportOrdersToCSV(undefined, {
-      onSuccess: (blob) => {
-        const url = window.URL.createObjectURL(new Blob([blob]));
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", `deliveries-returns-${new Date().toISOString().split("T")[0]}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(url);
+    exportOrdersToCSV(filters, {
+      onSuccess: (result) => {
+        const filename =
+          parseFilenameFromContentDisposition(result.headers) || "deliveries-returns.xlsx";
+        downloadBlob(result.data, filename);
         toast.success("تم تصدير البيانات بنجاح");
       },
       onError: (error: { message?: string }) => {

@@ -55,10 +55,14 @@ export const markPaymentAsCanceled = async (id: number) => {
 };
 
 
-export const exportPaymentsToCSV = async () => {
+/** Export payments to Excel; same query params as payments index. Returns blob + headers for filename from Content-Disposition. */
+export const exportPaymentsToCSV = async (params?: TGetPaymentsParams) => {
   try {
-    const { data } = await api.get(`/payments/export`, { responseType: "blob" });
-    return data;
+    const response = await api.get<Blob>(`/payments/export`, {
+      params,
+      responseType: "blob",
+    });
+    return { data: response.data, headers: response.headers };
   } catch (error) {
     populateError(error, "خطأ فى تصدير المدفوعات");
   }

@@ -33,7 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Eye, Pencil, Trash2, Download, CheckCircle2, XCircle, Plus, X, Loader2 } from "lucide-react";
+import { Eye, Filter, Pencil, Trash2, Download, CheckCircle2, XCircle, Plus, X, Loader2 } from "lucide-react";
 import { EmployeesSelect } from "@/components/custom/EmployeesSelect";
 import { EmployeeDocumentTypesSelect } from "@/components/custom/EmployeeDocumentTypesSelect";
 import {
@@ -124,6 +124,8 @@ function EmployeeDocuments() {
     setPage(1);
   };
 
+  const [showFilters, setShowFilters] = useState(false);
+
   // Action handlers
   const handleOpenCreate = () => {
     setIsCreateModalOpen(true);
@@ -188,13 +190,22 @@ function EmployeeDocuments() {
               عرض وإدارة وثائق الموظفين في النظام.
             </CardDescription>
           </div>
-          <Button onClick={handleOpenCreate}>
-            <Plus className="ml-2 h-4 w-4" />
-            إضافة وثيقة جديدة
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowFilters((prev) => !prev)}
+            >
+              <Filter className="ml-2 h-4 w-4" />
+              {showFilters ? "إخفاء الفلاتر" : "عرض الفلاتر"}
+            </Button>
+            <Button onClick={handleOpenCreate}>
+              <Plus className="ml-2 h-4 w-4" />
+              إضافة وثيقة جديدة
+            </Button>
+          </div>
         </CardHeader>
 
-        {/* Filters */}
+        {showFilters && (
         <CardContent className="space-y-4 border-b pb-4">
           <div className="flex flex-wrap items-center gap-4">
             {/* Employee Filter */}
@@ -276,6 +287,7 @@ function EmployeeDocuments() {
             </Button>
           </div>
         </CardContent>
+        )}
 
         {isError && (
           <CardContent>

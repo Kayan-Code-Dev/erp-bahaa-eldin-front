@@ -21,7 +21,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Banknote, Plus, Trash2 } from "lucide-react";
+import { Banknote, Download, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { SuppliersTableSkeleton } from "./SuppliersTableSkeleton";
@@ -32,8 +32,13 @@ import { DeleteSupplierModal } from "./DeleteSupplierModal";
 import {
   useGetSuppliersQueryOptions,
   useDeleteSupplierMutationOptions,
+  useExportSuppliersToExcelMutationOptions,
 } from "@/api/v2/suppliers/suppliers.hooks";
 import { TSupplierResponse } from "@/api/v2/suppliers/suppliers.types";
+import {
+  parseFilenameFromContentDisposition,
+  downloadBlob,
+} from "@/api/api.utils";
 import CustomPagination from "@/components/custom/CustomPagination";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useSearchParams, useNavigate } from "react-router";
@@ -78,6 +83,29 @@ function Suppliers() {
   const { mutate: deleteSupplier, isPending: isDeleting } = useMutation(
     useDeleteSupplierMutationOptions()
   );
+  const { mutate: exportSuppliersToExcel, isPending: isExporting } = useMutation(
+    useExportSuppliersToExcelMutationOptions()
+  );
+
+  const handleExport = () => {
+    exportSuppliersToExcel(
+      search?.trim() ? { search: search.trim() } : undefined,
+      {
+        onSuccess: (result) => {
+          if (!result) return;
+          const filename =
+            parseFilenameFromContentDisposition(result.headers) || "suppliers.xlsx";
+          downloadBlob(result.data, filename);
+          toast.success("تم تصدير الموردين بنجاح");
+        },
+        onError: (error: any) => {
+          toast.error("خطأ أثناء تصدير الموردين", {
+            description: error.message,
+          });
+        },
+      }
+    );
+  };
 
   // --- Modal Action Handlers ---
   const handleOpenDelete = (supplier: TSupplierResponse) => {
@@ -116,6 +144,14 @@ function Suppliers() {
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={handleExport}
+              disabled={isExporting}
+            >
+              <Download className="ml-2 h-4 w-4" />
+              {isExporting ? "جاري التصدير..." : "تصدير إلى Excel"}
+            </Button>
             <Button variant="outline" onClick={() => navigate("/suppliers/orders")}>
               طلبيات الموردين
             </Button>

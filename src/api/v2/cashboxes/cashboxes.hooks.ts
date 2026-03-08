@@ -11,6 +11,7 @@ import {
   getCashboxes,
   recalculateCashbox,
   updateCashbox,
+  exportCashboxesToExcel,
 } from "./cashboxes.service";
 import { TCashboxesParams, TUpdateCashboxRequest } from "./cashboxes.types";
 
@@ -88,3 +89,9 @@ export const useGetInfiniteCashboxesQueryOptions = (per_page: number) => {
     },
   });
 };
+
+export const useExportCashboxesToExcelMutationOptions = () =>
+  mutationOptions({
+    mutationFn: (params?: Parameters<typeof exportCashboxesToExcel>[0]) =>
+      exportCashboxesToExcel(params),
+  });

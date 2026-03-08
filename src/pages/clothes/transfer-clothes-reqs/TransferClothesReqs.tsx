@@ -44,6 +44,10 @@ import {
   useExportTransferClothesToCSVMutationOptions,
 } from "@/api/v2/clothes/transfer-clothes/transfer-clothes.hooks";
 import {
+  parseFilenameFromContentDisposition,
+  downloadBlob,
+} from "@/api/api.utils";
+import {
   TTransferClothesItem,
   TTransferClothesStatus,
 } from "@/api/v2/clothes/transfer-clothes/transfer-clothes.types";
@@ -291,21 +295,12 @@ function TransferClothesReqs() {
     );
   };
 
-  // --- Export Handler ---
   const handleExport = () => {
     exportTransferClothesToCSV(undefined, {
-      onSuccess: (blob) => {
-        const url = window.URL.createObjectURL(new Blob([blob]));
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute(
-          "download",
-          `transfer-clothes-${new Date().toISOString().split("T")[0]}.csv`
-        );
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(url);
+      onSuccess: (result) => {
+        const filename =
+          parseFilenameFromContentDisposition(result.headers) || "transfers.xlsx";
+        downloadBlob(result.data, filename);
         toast.success("تم تصدير طلبات نقل المنتجات بنجاح");
       },
       onError: (error: any) => {
@@ -335,7 +330,7 @@ function TransferClothesReqs() {
             disabled={isExporting}
           >
             <Download className="ml-2 h-4 w-4" />
-            {isExporting ? "جاري التصدير..." : "تصدير إلى CSV"}
+            {isExporting ? "جاري التصدير..." : "تصدير إلى Excel"}
           </Button>
         </CardHeader>
 

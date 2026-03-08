@@ -102,6 +102,7 @@ export const useGetClothesUnavailableDaysRangesbyIdsQueryOptions = (
 
 export const useExportClothesToCSVMutationOptions = () => {
   return mutationOptions({
-    mutationFn: () => exportClothesToCSV(),
+    mutationFn: (params?: Parameters<typeof exportClothesToCSV>[0]) =>
+      exportClothesToCSV(params),
   });
 };

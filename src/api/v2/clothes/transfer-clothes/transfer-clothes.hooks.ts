@@ -121,6 +121,7 @@ export const useRejectPartialTransferClothesMutationOptions = () => {
 
 export const useExportTransferClothesToCSVMutationOptions = () => {
   return mutationOptions({
-    mutationFn: () => exportTransferClothesToCSV(),
+    mutationFn: (params?: Parameters<typeof exportTransferClothesToCSV>[0]) =>
+      exportTransferClothesToCSV(params),
   });
 };

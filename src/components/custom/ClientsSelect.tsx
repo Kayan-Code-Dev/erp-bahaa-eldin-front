@@ -28,7 +28,7 @@ export function ClientsSelect({ value, onChange, disabled }: Props) {
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useInfiniteQuery({
-      ...useGetInfiniteClientsQueryOptions(10, debouncedSearch || undefined),
+      ...useGetInfiniteClientsQueryOptions(10, debouncedSearch ? { search: debouncedSearch } : undefined),
       enabled: hasPermission,
     });
 

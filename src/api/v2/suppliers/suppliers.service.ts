@@ -129,6 +129,19 @@ export const getSuppliersList = async (): Promise<
   }
 };
 
+/** Export suppliers to Excel; same query params as suppliers index. */
+export const exportSuppliersToExcel = async (params?: Record<string, unknown>) => {
+  try {
+    const response = await api.get<Blob>("/suppliers/export", {
+      params,
+      responseType: "blob",
+    });
+    return { data: response.data, headers: response.headers };
+  } catch (error) {
+    populateError(error, "خطأ فى تصدير الموردين");
+  }
+};
+
 // ---------------------------------------------------------------------------
 // Supplier Orders
 // ---------------------------------------------------------------------------
@@ -142,6 +155,21 @@ export const getSupplierOrders = async (page: number, per_page: number) => {
     return response;
   } catch (error) {
     populateError(error, "خطأ فى جلب طلبيات الموردين");
+  }
+};
+
+/** Export supplier orders to Excel; same query params as index (e.g. supplier_id). */
+export const exportSupplierOrdersToExcel = async (
+  params?: Record<string, unknown>
+) => {
+  try {
+    const response = await api.get<Blob>("/supplier-orders/export", {
+      params,
+      responseType: "blob",
+    });
+    return { data: response.data, headers: response.headers };
+  } catch (error) {
+    populateError(error, "خطأ فى تصدير طلبيات الموردين");
   }
 };
 

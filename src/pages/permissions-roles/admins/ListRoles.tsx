@@ -1,5 +1,6 @@
 import { useRolesList } from "@/api/permissions-roles/admins/roles/roles.hooks";
 import { useState, useMemo } from "react";
+import { useMutation } from "@tanstack/react-query";
 import {
   Table,
   TableHeader,
@@ -26,13 +27,19 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, Pencil, Trash2 } from "lucide-react";
+import { Search, Pencil, Trash2, Download } from "lucide-react";
 import { ROLES, TRoleItem } from "@/api/permissions-roles/admins/roles/roles.types";
 import { EditRoleModal } from "./EditRoleModal";
 import { DeleteRoleModal } from "./DeleteRoleModal";
 import { ViewPermissionsModal } from "./ViewPermissionsModal";
 import { useMyPermissions } from "@/api/auth/auth.hooks";
 import { DELETE_ROLE, UPDATE_ROLE } from "@/lib/permissions.helper";
+import { useExportRolesToCSVMutationOptions } from "@/api/v2/content-managment/roles/roles.hooks";
+import {
+  parseFilenameFromContentDisposition,
+  downloadBlob,
+} from "@/api/api.utils";
+import { toast } from "sonner";
 
 // --- Constants ---
 const PAGE_SIZE = 10; // How many items to show per page
@@ -100,17 +107,46 @@ function ListRoles() {
     setIsViewModalOpen(true);
   };
 
+  const { mutate: exportRolesToCSV, isPending: isExporting } = useMutation(
+    useExportRolesToCSVMutationOptions()
+  );
+  const handleExport = () => {
+    exportRolesToCSV(undefined, {
+      onSuccess: (result) => {
+        if (!result) return;
+        const filename =
+          parseFilenameFromContentDisposition(result.headers) || "roles.xlsx";
+        downloadBlob(result.data, filename);
+        toast.success("تم تصدير الأدوار بنجاح");
+      },
+      onError: (error: any) => {
+        toast.error("خطأ أثناء تصدير الأدوار", {
+          description: error.message,
+        });
+      },
+    });
+  };
+
   return (
     <div dir="rtl" className="w-full">
       <Card className="w-full">
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-row items-center justify-between gap-4 flex-wrap">
           <div>
             <CardTitle>إدارة الأدوار</CardTitle>
             <CardDescription>
               عرض وتعديل الأدوار والصلاحيات المرتبطة بها.
             </CardDescription>
           </div>
-          <div className="relative w-full max-w-sm">
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={handleExport}
+              disabled={isExporting}
+            >
+              <Download className="ml-2 h-4 w-4" />
+              {isExporting ? "جاري التصدير..." : "تصدير إلى Excel"}
+            </Button>
+            <div className="relative w-full max-w-sm">
             <Input
               placeholder="ابحث باسم الدور..."
               className="pr-10"
@@ -121,6 +157,7 @@ function ListRoles() {
               }}
             />
             <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            </div>
           </div>
         </CardHeader>
 

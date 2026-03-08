@@ -82,15 +82,36 @@ export const updateBranch = async (id: number, data: TUpdateBranchRequest) => {
   }
 };
 
-export const getBranches = async (page: number, per_page: number) => {
+/** Optional filters for GET /api/v1/branches (index) */
+export type TGetBranchesParams = {
+  search?: string;
+  id?: number | string;
+  address_id?: number;
+  vat_enabled?: boolean;
+};
+
+export const getBranches = async (
+  page: number,
+  per_page: number,
+  params?: TGetBranchesParams
+) => {
   try {
+    const query: Record<string, string | number | boolean | undefined> = {
+      page,
+      per_page,
+      ...(params?.search != null && params.search !== ""
+        ? { search: params.search }
+        : {}),
+      ...(params?.id != null ? { id: params.id } : {}),
+      ...(params?.address_id != null ? { address_id: params.address_id } : {}),
+      ...(params?.vat_enabled !== undefined
+        ? { vat_enabled: params.vat_enabled }
+        : {}),
+    };
     const { data: response } = await api.get<
       TPaginationResponse<TBranchResponse>
     >("/branches", {
-      params: {
-        page,
-        per_page,
-      },
+      params: query,
     });
     return response;
   } catch (error) {
@@ -120,13 +141,13 @@ export const deleteBranch = async (id: number) => {
   }
 };
 
-// download csv file of branches
-export const exportBranchesToCSV = async () => {
+export const exportBranchesToCSV = async (params?: Record<string, unknown>) => {
   try {
-    const { data } = await api.get(`/branches/export`, {
+    const response = await api.get<Blob>(`/branches/export`, {
+      params,
       responseType: "blob",
     });
-    return data;
+    return { data: response.data, headers: response.headers };
   } catch (error) {
     populateError(error, "خطأ فى تصدير الفروع");
   }

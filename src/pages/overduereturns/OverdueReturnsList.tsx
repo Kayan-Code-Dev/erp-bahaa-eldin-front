@@ -53,6 +53,10 @@ import useDebounce from "@/hooks/useDebounce";
 import { ReturnOrderSelectItemsModal } from "@/pages/returns/ReturnOrderSelectItemsModal";
 import { OrderEmployeeName } from "@/components/custom/OrderEmployeeName";
 import {
+  parseFilenameFromContentDisposition,
+  downloadBlob,
+} from "@/api/api.utils";
+import {
   DEFAULT_PER_PAGE,
   FILTER_DEBOUNCE_MS,
   OVERDUE_RETURNS_FILTER,
@@ -193,21 +197,12 @@ function OverdueReturnsList() {
     setOrderToReturn(order);
   };
 
-  // --- Export Handler ---
   const handleExport = () => {
-    exportOrdersToCSV(undefined, {
-      onSuccess: (blob) => {
-        const url = window.URL.createObjectURL(new Blob([blob]));
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute(
-          "download",
-          `overdue-returns-${new Date().toISOString().split("T")[0]}.csv`
-        );
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(url);
+    exportOrdersToCSV(filters, {
+      onSuccess: (result) => {
+        const filename =
+          parseFilenameFromContentDisposition(result.headers) || "overdue-returns.xlsx";
+        downloadBlob(result.data, filename);
         toast.success("تم تصدير الارجاعات المتأخرة بنجاح");
       },
       onError: (error: any) => {
@@ -254,7 +249,7 @@ function OverdueReturnsList() {
               disabled={isExporting}
             >
               <Download className="ml-2 h-4 w-4" />
-              {isExporting ? "جاري التصدير..." : "تصدير إلى CSV"}
+              {isExporting ? "جاري التصدير..." : "تصدير إلى Excel"}
             </Button>
           </div>
         </CardHeader>

@@ -156,10 +156,13 @@ export const getWorkshopClothHistory = async (
 };
 
 
-export const exportWorkshopsToCSV = async () => {
+export const exportWorkshopsToCSV = async (params?: Record<string, unknown>) => {
   try {
-    const { data } = await api.get(`/workshops/export`, { responseType: "blob" });
-    return data;
+    const response = await api.get<Blob>(`/workshops/export`, {
+      params,
+      responseType: "blob",
+    });
+    return { data: response.data, headers: response.headers };
   } catch (error) {
     populateError(error, "خطأ فى تصدير الورش");
   }

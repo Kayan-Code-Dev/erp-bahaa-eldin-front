@@ -1,3 +1,36 @@
+/**
+ * Parse filename from Content-Disposition header (e.g. attachment; filename="orders_2026-03-08.xlsx").
+ * Used for export endpoints that return binary XLSX.
+ */
+export function parseFilenameFromContentDisposition(headers: unknown): string | undefined {
+  if (!headers || typeof headers !== "object") return undefined;
+  const raw =
+    "content-disposition" in headers && typeof (headers as Record<string, string>)["content-disposition"] === "string"
+      ? (headers as Record<string, string>)["content-disposition"]
+      : "get" in headers && typeof (headers as { get: (n: string) => unknown }).get === "function"
+        ? (headers as { get: (n: string) => unknown }).get("content-disposition")
+        : undefined;
+  const str = typeof raw === "string" ? raw : undefined;
+  if (!str) return undefined;
+  const match = str.split("filename=")?.[1]?.replace(/^["']|["']$/g, "")?.trim();
+  return match || undefined;
+}
+
+/**
+ * Trigger browser download of a blob (e.g. Excel export).
+ * Uses optional filename from API Content-Disposition, or fallback.
+ */
+export function downloadBlob(blob: Blob, filename?: string): void {
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename?.trim() || "export.xlsx";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.URL.revokeObjectURL(url);
+}
+
 export const resolveError = (error: any) => {
   if (error.response) {
     let msg =

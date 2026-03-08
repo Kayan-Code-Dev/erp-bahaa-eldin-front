@@ -65,10 +65,13 @@ export const deleteCategoryApi = async (id: number) => {
   }
 };
 
-export const exportCategoriesToCSV = async () => {
+export const exportCategoriesToCSV = async (params?: Record<string, unknown>) => {
   try {
-    const { data } = await api.get(`/categories/export`, { responseType: "blob" });
-    return data;
+    const response = await api.get<Blob>(`/categories/export`, {
+      params,
+      responseType: "blob",
+    });
+    return { data: response.data, headers: response.headers };
   } catch (error) {
     populateError(error, "خطأ فى تصدير أقسام المنتجات");
   }

@@ -22,134 +22,104 @@ export const createOrder = async (
   }
 };
 
+export type TOrderListFilters = {
+  status?: string;
+  order_id?: string | number;
+  date_from?: string;
+  date_to?: string;
+  returned?: boolean;
+  overdue?: boolean;
+  delayed?: boolean;
+  client_id?: string | number;
+  cloth_name?: string;
+  cloth_code?: string;
+  category_id?: string | number;
+  subcategory_id?: string | number;
+  visit_date_from?: string;
+  visit_date_to?: string;
+  delivery_date_from?: string;
+  delivery_date_to?: string;
+  return_date_from?: string;
+  return_date_to?: string;
+  employee_id?: string | number;
+  search?: string;
+};
+
+function buildOrderListParams(
+  filters?: TOrderListFilters,
+  options?: { page?: number; per_page?: number }
+): Record<string, string | number | boolean> {
+  const params: Record<string, string | number | boolean> = {};
+  if (options?.page != null) params.page = options.page;
+  if (options?.per_page != null) params.per_page = options.per_page;
+  if (filters?.status) params.status = filters.status;
+  if (filters?.date_from) params.date_from = filters.date_from;
+  if (filters?.date_to) params.date_to = filters.date_to;
+  if (filters?.returned === true) params.returned = 1;
+  if (filters?.overdue === true) params.overdue = 1;
+  if (filters?.delayed === true) params.delayed = true;
+  if (filters?.delayed === false) params.delayed = false;
+  if (filters?.order_id !== undefined && filters.order_id !== "" && filters.order_id != null) {
+    const normalizedOrderId =
+      typeof filters.order_id === "string" ? Number(filters.order_id) : filters.order_id;
+    if (Number.isFinite(normalizedOrderId as number)) {
+      params.id = normalizedOrderId;
+      params.order_id = normalizedOrderId;
+    }
+  }
+  const clientId =
+    filters?.client_id !== undefined && filters?.client_id !== "" && filters?.client_id != null
+      ? typeof filters.client_id === "string"
+        ? Number(filters.client_id)
+        : filters.client_id
+      : undefined;
+  if (clientId != null && Number.isFinite(clientId)) params.client_id = clientId;
+  if (filters?.cloth_name?.trim()) {
+    const clothName = filters.cloth_name.trim();
+    params.cloth_name = clothName;
+    params.item_name = clothName;
+    params.name = clothName;
+  }
+  if (filters?.cloth_code?.trim()) {
+    const clothCode = filters.cloth_code.trim();
+    params.cloth_code = clothCode;
+    params.item_code = clothCode;
+    params.code = clothCode;
+  }
+  if (filters?.category_id !== undefined && filters.category_id !== "" && filters.category_id != null) {
+    const categoryId = typeof filters.category_id === "string" ? Number(filters.category_id) : filters.category_id;
+    if (Number.isFinite(categoryId)) params.category_id = categoryId;
+  }
+  if (filters?.subcategory_id !== undefined && filters.subcategory_id !== "" && filters.subcategory_id != null) {
+    const subcategoryId = typeof filters.subcategory_id === "string" ? Number(filters.subcategory_id) : filters.subcategory_id;
+    if (Number.isFinite(subcategoryId)) params.subcategory_id = subcategoryId;
+  }
+  // API doc: visit_from, visit_to (visit_datetime range)
+  if (filters?.visit_date_from) params.visit_from = filters.visit_date_from;
+  if (filters?.visit_date_to) params.visit_to = filters.visit_date_to;
+  // API doc: delivery_from, delivery_to
+  if (filters?.delivery_date_from) params.delivery_from = filters.delivery_date_from;
+  if (filters?.delivery_date_to) params.delivery_to = filters.delivery_date_to;
+  if (filters?.return_date_from) params.return_date_from = filters.return_date_from;
+  if (filters?.return_date_to) params.return_date_to = filters.return_date_to;
+  if (filters?.employee_id !== undefined && filters.employee_id !== "" && filters.employee_id != null) {
+    params.employee_id = typeof filters.employee_id === "string" ? Number(filters.employee_id) : filters.employee_id;
+  }
+  if (filters?.search?.trim()) {
+    const s = filters.search.trim();
+    if (/^\d+$/.test(s)) params.order_id = Number(s);
+    else params.search = s;
+  }
+  return params;
+}
+
 export const getOrders = async (
   page: number,
   per_page: number,
-  filters?: {
-    status?: string;
-    /** Filter by invoice number */
-    order_id?: string | number;
-    /** General date filter (if available in API) */
-    date_from?: string;
-    date_to?: string;
-    returned?: boolean;
-    overdue?: boolean;
-    delayed?: boolean;
-    /** Filter by client */
-    client_id?: string | number;
-    /** Filter by item name */
-    cloth_name?: string;
-    /** Filter by item/cloth type code */
-    cloth_code?: string;
-    category_id?: string | number;
-    subcategory_id?: string | number;
-    /** Filter by rental date (visit_datetime) */
-    visit_date_from?: string;
-    visit_date_to?: string;
-    /** Filter by delivery date (delivery_date) */
-    delivery_date_from?: string;
-    delivery_date_to?: string;
-    /** Filter by return/occasion date (occasion_datetime) */
-    return_date_from?: string;
-    return_date_to?: string;
-    /** Filter by employee (who created the order) */
-    employee_id?: string | number;
-    search?: string;
-  },
+  filters?: TOrderListFilters
 ) => {
   try {
-    const params: Record<string, string | number | boolean> = { page, per_page };
-    if (filters?.status) params.status = filters.status;
-
-    // General date filters (already existing)
-    if (filters?.date_from) params.date_from = filters.date_from;
-    if (filters?.date_to) params.date_to = filters.date_to;
-
-    if (filters?.returned === true) params.returned = 1;
-    if (filters?.overdue === true) params.overdue = 1;
-    if (filters?.delayed === true) params.delayed = true;
-    if (filters?.delayed === false) params.delayed = false;
-
-    // Invoice number (sent as both id and order_id to match backend)
-    if (filters?.order_id !== undefined && filters.order_id !== "" && filters.order_id != null) {
-      const normalizedOrderId =
-        typeof filters.order_id === "string" ? Number(filters.order_id) : filters.order_id;
-      if (Number.isFinite(normalizedOrderId as number)) {
-        params.id = normalizedOrderId;
-        params.order_id = normalizedOrderId;
-      }
-    }
-
-    // Client — only send when valid number (avoid client_id=NaN)
-    const clientId =
-      filters?.client_id !== undefined && filters?.client_id !== "" && filters?.client_id != null
-        ? typeof filters.client_id === "string"
-          ? Number(filters.client_id)
-          : filters.client_id
-        : undefined;
-    if (clientId != null && Number.isFinite(clientId)) {
-      params.client_id = clientId;
-    }
-
-    // Item name
-    if (filters?.cloth_name && filters.cloth_name.trim() !== "") {
-      const clothName = filters.cloth_name.trim();
-      // Send compatible aliases because backend implementations vary by endpoint version
-      params.cloth_name = clothName;
-      params.item_name = clothName;
-      params.name = clothName;
-    }
-
-    // Item/cloth type code
-    if (filters?.cloth_code && filters.cloth_code.trim() !== "") {
-      const clothCode = filters.cloth_code.trim();
-      // Send compatible aliases because backend implementations vary by endpoint version
-      params.cloth_code = clothCode;
-      params.item_code = clothCode;
-      params.code = clothCode;
-    }
-
-    if (filters?.category_id !== undefined && filters.category_id !== "" && filters.category_id != null) {
-      const categoryId = typeof filters.category_id === "string" ? Number(filters.category_id) : filters.category_id;
-      if (Number.isFinite(categoryId)) {
-        params.category_id = categoryId;
-      }
-    }
-
-    if (filters?.subcategory_id !== undefined && filters.subcategory_id !== "" && filters.subcategory_id != null) {
-      const subcategoryId = typeof filters.subcategory_id === "string" ? Number(filters.subcategory_id) : filters.subcategory_id;
-      if (Number.isFinite(subcategoryId)) {
-        params.subcategory_id = subcategoryId;
-      }
-    }
-
-    // Rental dates
-    if (filters?.visit_date_from) params.visit_date_from = filters.visit_date_from;
-    if (filters?.visit_date_to) params.visit_date_to = filters.visit_date_to;
-
-    // Delivery dates -> sent as delivery_from / delivery_to as per API
-    if (filters?.delivery_date_from) params.delivery_from = filters.delivery_date_from;
-    if (filters?.delivery_date_to) params.delivery_to = filters.delivery_date_to;
-
-    // Return/Occasion dates
-    if (filters?.return_date_from) params.return_date_from = filters.return_date_from;
-    if (filters?.return_date_to) params.return_date_to = filters.return_date_to;
-
-    // Employee (who created the order)
-    if (filters?.employee_id !== undefined && filters.employee_id !== "" && filters.employee_id != null) {
-      params.employee_id = typeof filters.employee_id === "string" ? Number(filters.employee_id) : filters.employee_id;
-    }
-
-    // Quick search
-    if (filters?.search && filters.search.trim() !== "") {
-      const s = filters.search.trim();
-      if (/^\d+$/.test(s)) {
-        params.order_id = Number(s);
-      } else {
-        params.search = s;
-      }
-    }
-
+    const params = buildOrderListParams(filters, { page, per_page });
     const { data: responseData } = await api.get<TPaginationResponse<TOrder>>(
       `/orders`,
       { params },
@@ -339,10 +309,15 @@ export const returnOrderItem = async (
   }
 };
 
-export const exportOrdersToCSV = async () => {
+/** Export orders to Excel; uses same query params as order index. Returns blob + headers for filename from Content-Disposition. */
+export const exportOrdersToCSV = async (filters?: TOrderListFilters) => {
   try {
-    const { data } = await api.get(`/orders/export`, { responseType: "blob" });
-    return data;
+    const params = buildOrderListParams(filters);
+    const response = await api.get<Blob>(`/orders/export`, {
+      params,
+      responseType: "blob",
+    });
+    return { data: response.data, headers: response.headers };
   } catch (error) {
     populateError(error, "خطأ فى تصدير الطلبات");
   }

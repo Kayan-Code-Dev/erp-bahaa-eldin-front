@@ -175,6 +175,7 @@ export const useGetWorkshopClothHistoryQueryOptions = (
 
 export const useExportWorkshopsToCSVMutationOptions = () => {
   return mutationOptions({
-    mutationFn: () => exportWorkshopsToCSV(),
+    mutationFn: (params?: Parameters<typeof exportWorkshopsToCSV>[0]) =>
+      exportWorkshopsToCSV(params),
   });
 };

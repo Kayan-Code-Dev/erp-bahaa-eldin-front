@@ -7,15 +7,43 @@ import {
   TUpdateClientRequest,
 } from "./clients.types";
 
+/** Optional filters for GET /api/v1/clients (index) */
+export type TGetClientsParams = {
+  search?: string;
+  id?: number | string;
+  address_id?: number;
+  source?: string;
+  date_of_birth_from?: string;
+  date_of_birth_to?: string;
+};
+
 export const getClients = async (
   page: number,
   per_page: number,
-  search?: string
+  params?: TGetClientsParams
 ) => {
   try {
+    const query: Record<string, string | number | undefined> = {
+      page,
+      per_page,
+      ...(params?.search != null && params.search !== ""
+        ? { search: params.search }
+        : {}),
+      ...(params?.id != null ? { id: params.id } : {}),
+      ...(params?.address_id != null ? { address_id: params.address_id } : {}),
+      ...(params?.source != null && params.source !== ""
+        ? { source: params.source }
+        : {}),
+      ...(params?.date_of_birth_from
+        ? { date_of_birth_from: params.date_of_birth_from }
+        : {}),
+      ...(params?.date_of_birth_to
+        ? { date_of_birth_to: params.date_of_birth_to }
+        : {}),
+    };
     const { data } = await api.get<TPaginationResponse<TClientResponse>>(
       "/clients",
-      { params: { page, per_page, search } }
+      { params: query }
     );
     return data;
   } catch (error) {
@@ -64,10 +92,13 @@ export const getClient = async (id: number) => {
   }
 };
 
-export const exportClientsToCSV = async () => {
+export const exportClientsToCSV = async (params?: Record<string, unknown>) => {
   try {
-    const { data } = await api.get(`/clients/export`, { responseType: "blob" });
-    return data;
+    const response = await api.get<Blob>(`/clients/export`, {
+      params,
+      responseType: "blob",
+    });
+    return { data: response.data, headers: response.headers };
   } catch (error) {
     populateError(error, "خطأ فى تصدير العملاء");
   }

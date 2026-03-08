@@ -80,6 +80,7 @@ export const useInfiniteCountriesQueryOptions = (per_page: number) => {
 
 export const useExportCountriesToCSVMutationOptions = () => {
   return mutationOptions({
-    mutationFn: () => exportCountriesToCSV(),
+    mutationFn: (params?: Parameters<typeof exportCountriesToCSV>[0]) =>
+      exportCountriesToCSV(params),
   });
 };

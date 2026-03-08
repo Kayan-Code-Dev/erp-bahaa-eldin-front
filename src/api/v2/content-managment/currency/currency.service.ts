@@ -64,12 +64,13 @@ export const deleteCurrencyApi = async (id: number) => {
   }
 };
 
-export const exportCurrenciesToCSV = async () => {
+export const exportCurrenciesToCSV = async (params?: Record<string, unknown>) => {
   try {
-    const { data } = await api.get(`/currencies/export`, {
+    const response = await api.get<Blob>(`/currencies/export`, {
+      params,
       responseType: "blob",
     });
-    return data;
+    return { data: response.data, headers: response.headers };
   } catch (error) {
     populateError(error, "خطأ فى تصدير العملات");
   }

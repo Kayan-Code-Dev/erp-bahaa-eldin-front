@@ -85,3 +85,16 @@ export const getCashboxByBranchId = async (branchId: number) => {
     populateError(error, "خطأ فى جلب الصناديق بالفرع");
   }
 };
+
+/** Export cashboxes to Excel; same query params as cashboxes index. */
+export const exportCashboxesToExcel = async (params?: TCashboxesParams) => {
+  try {
+    const response = await api.get<Blob>("/cashboxes/export", {
+      params,
+      responseType: "blob",
+    });
+    return { data: response.data, headers: response.headers };
+  } catch (error) {
+    populateError(error, "خطأ فى تصدير الصناديق");
+  }
+};

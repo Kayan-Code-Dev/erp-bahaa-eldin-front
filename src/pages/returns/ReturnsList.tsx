@@ -60,6 +60,10 @@ import { EmployeesSelect } from "@/components/custom/EmployeesSelect";
 import useDebounce from "@/hooks/useDebounce";
 import { OrderEmployeeName } from "@/components/custom/OrderEmployeeName";
 import { ReturnOrderSelectItemsModal } from "./ReturnOrderSelectItemsModal";
+import {
+  parseFilenameFromContentDisposition,
+  downloadBlob,
+} from "@/api/api.utils";
 import { DEFAULT_PER_PAGE, FILTER_DEBOUNCE_MS, RETURNS_FILTER } from "./constants";
 import {
   returnsFilterSchema,
@@ -226,21 +230,12 @@ function ReturnsList() {
     setOrderToReturn(order);
   };
 
-  // --- Export Handler ---
   const handleExport = () => {
-    exportOrdersToCSV(undefined, {
-      onSuccess: (blob) => {
-        const url = window.URL.createObjectURL(new Blob([blob]));
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute(
-          "download",
-          `returns-${new Date().toISOString().split("T")[0]}.csv`
-        );
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(url);
+    exportOrdersToCSV(filters, {
+      onSuccess: (result) => {
+        const filename =
+          parseFilenameFromContentDisposition(result.headers) || "returns.xlsx";
+        downloadBlob(result.data, filename);
         toast.success("تم تصدير الارجاعات بنجاح");
       },
       onError: (error: any) => {
@@ -298,7 +293,7 @@ function ReturnsList() {
               disabled={isExporting}
             >
               <Download className="ml-2 h-4 w-4" />
-              {isExporting ? "جاري التصدير..." : "تصدير إلى CSV"}
+              {isExporting ? "جاري التصدير..." : "تصدير إلى Excel"}
             </Button>
           </div>
         </CardHeader>

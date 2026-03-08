@@ -11,6 +11,7 @@ import {
   updateEmployee,
   getEmployeeAssignments,
   terminateEmployee,
+  exportEmployeesToExcel,
 } from "./employees.service";
 import {
   TGetEmployeesParams,
@@ -106,3 +107,9 @@ export const useTerminateEmployeeQueryOptions = () => {
     },
   });
 };
+
+export const useExportEmployeesToExcelMutationOptions = () =>
+  mutationOptions({
+    mutationFn: (params?: Parameters<typeof exportEmployeesToExcel>[0]) =>
+      exportEmployeesToExcel(params),
+  });

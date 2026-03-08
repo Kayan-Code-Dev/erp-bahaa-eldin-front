@@ -12,14 +12,19 @@ import {
   getBranches,
   updateBranch,
 } from "./branches.service";
+import type { TGetBranchesParams } from "./branches.service";
 import { TCreateBranchRequest, TUpdateBranchRequest } from "./branches.types";
 
 export const BRANCHES_KEY = "branches";
 
-export const useGetBranchesQueryOptions = (page: number, per_page: number) => {
+export const useGetBranchesQueryOptions = (
+  page: number,
+  per_page: number,
+  params?: TGetBranchesParams
+) => {
   return queryOptions({
-    queryKey: [BRANCHES_KEY, page, per_page],
-    queryFn: () => getBranches(page, per_page),
+    queryKey: [BRANCHES_KEY, page, per_page, params],
+    queryFn: () => getBranches(page, per_page, params),
     staleTime: 1000 * 60 * 5,
   });
 };
@@ -63,10 +68,13 @@ export const useGetBranchQueryOptions = (id: number) => {
   });
 };
 
-export const useGetInfiniteBranchesQueryOptions = (per_page: number) => {
+export const useGetInfiniteBranchesQueryOptions = (
+  per_page: number,
+  params?: TGetBranchesParams
+) => {
   return infiniteQueryOptions({
-    queryKey: [BRANCHES_KEY, "infinite"],
-    queryFn: ({ pageParam = 1 }) => getBranches(pageParam, per_page),
+    queryKey: [BRANCHES_KEY, "infinite", params],
+    queryFn: ({ pageParam = 1 }) => getBranches(pageParam, per_page, params),
     initialPageParam: 1,
     staleTime: 1000 * 60 * 5,
     getNextPageParam: (lastPage) => {
@@ -80,6 +88,7 @@ export const useGetInfiniteBranchesQueryOptions = (per_page: number) => {
 
 export const useExportBranchesToCSVQueryOptions = () => {
   return mutationOptions({
-    mutationFn: () => exportBranchesToCSV(),
+    mutationFn: (params?: Parameters<typeof exportBranchesToCSV>[0]) =>
+      exportBranchesToCSV(params),
   });
 };

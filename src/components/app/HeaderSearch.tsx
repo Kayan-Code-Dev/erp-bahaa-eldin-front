@@ -1,71 +1,14 @@
-import { Suspense, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useLocation, useSearchParams } from "react-router";
 import { Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import useDebounce from "@/hooks/useDebounce";
-import { CategoriesSelect } from "@/components/custom/CategoriesSelect";
-import { SubcategoriesSelect } from "@/components/custom/SubcategoriesSelect";
-
-/** Route-specific search config: URL param name and placeholder */
-const SEARCH_CONFIG: Record<string, { param: string; placeholder: string }> = {
-  "/orders/list": { param: "search", placeholder: "ابحث برقم الفاتورة أو الكود أو الاسم أو القسم..." },
-  "/clients": { param: "search", placeholder: "ابحث باسم العميل أو الهاتف..." },
-  "/clothes/list": { param: "code", placeholder: "ابحث بكود المنتج..." },
-  "/employees/list": { param: "search", placeholder: "ابحث بالاسم أو البريد الإلكتروني..." },
-  "/payments": { param: "search", placeholder: "ابحث في المدفوعات..." },
-  "/deliveries": { param: "search", placeholder: "ابحث في التسليمات..." },
-  "/returns": { param: "search", placeholder: "ابحث في الإرجاعات..." },
-  "/overdue-returns": { param: "search", placeholder: "ابحث في الإرجاعات المتأخرة..." },
-  "/orders/search-deliveries-returns": { param: "search", placeholder: "ابحث في التسليمات والإرجاعات أو القسم..." },
-  "/suppliers": { param: "search", placeholder: "ابحث باسم المورد..." },
-  "/suppliers/orders": { param: "search", placeholder: "ابحث في طلبيات الموردين..." },
-  "/expenses": { param: "search", placeholder: "ابحث في المصروفات..." },
-  "/cashboxes": { param: "search", placeholder: "ابحث في الصناديق..." },
-  "/inventory/branches-managers": { param: "search", placeholder: "ابحث في المخزون..." },
-  "/inventory/branches": { param: "search", placeholder: "ابحث في مخزون الفروع..." },
-  "/inventory/employees": { param: "search", placeholder: "ابحث في مخزون الموظفين..." },
-  "/content/categories": { param: "search", placeholder: "ابحث في الأقسام..." },
-  "/content/sub-categories": { param: "search", placeholder: "ابحث في الأقسام الفرعية..." },
-  "/content/countries": { param: "search", placeholder: "ابحث في الدول..." },
-  "/content/cities": { param: "search", placeholder: "ابحث في المدن..." },
-  "/content/currencies": { param: "search", placeholder: "ابحث في العملات..." },
-  "/hr/admins/list": { param: "search", placeholder: "ابحث في المسؤولين..." },
-  "/hr/branch-managers/all-branches-managers": { param: "search", placeholder: "ابحث في مديري الفروع..." },
-  "/hr/branch-managers/branches": { param: "search", placeholder: "ابحث في الفروع..." },
-  "/branch": { param: "search", placeholder: "ابحث في الفروع..." },
-  "/clothes/transfer-clothes/requests": { param: "search", placeholder: "ابحث في طلبات النقل..." },
-  "/factory": { param: "search", placeholder: "ابحث في المصانع..." },
-  "/workshop": { param: "search", placeholder: "ابحث في الورش..." },
-  "/employees/custodies": { param: "search", placeholder: "ابحث في العهد..." },
-};
-
-const DEFAULT_CONFIG = { param: "search", placeholder: "بحث..." };
-
-/** Paths sorted by length descending so longer paths match first (e.g. /orders/search-deliveries-returns before /orders) */
-const SEARCH_CONFIG_KEYS_SORTED = (Object.keys(SEARCH_CONFIG) as string[]).sort(
-  (a, b) => b.length - a.length
-);
-
-function getSearchConfig(pathname: string): { param: string; placeholder: string } {
-  const normalized = pathname.replace(/\/$/, "") || "/";
-  const exact = SEARCH_CONFIG[normalized];
-  if (exact) return exact;
-  for (const path of SEARCH_CONFIG_KEYS_SORTED) {
-    if (normalized.startsWith(path)) return SEARCH_CONFIG[path];
-  }
-  return DEFAULT_CONFIG;
-}
-
-/** Show category/subcategory filters in header for orders list and deliveries/returns search */
-function isOrdersSearchPath(pathname: string): boolean {
-  const normalized = pathname.replace(/\/$/, "") || "/";
-  return normalized === "/orders/list" || normalized.startsWith("/orders/search-deliveries-returns");
-}
+import { getSearchConfigForPath } from "@/api/api-index-filters";
 
 export function HeaderSearch() {
   const { pathname } = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const config = getSearchConfig(pathname);
+  const config = getSearchConfigForPath(pathname);
   const param = config.param;
   const placeholder = config.placeholder;
 
@@ -103,34 +46,7 @@ export function HeaderSearch() {
     setSearchParams(next, { replace: true });
   }, [param, searchParams, setSearchParams]);
 
-  const showCategoryFilters = isOrdersSearchPath(pathname);
-  const urlCategoryId = searchParams.get("category_id") ?? "";
-  const urlSubcategoryId = searchParams.get("subcategory_id") ?? "";
-
-  const handleCategoryChange = useCallback(
-    (value: string) => {
-      const next = new URLSearchParams(searchParams);
-      if (value.trim()) next.set("category_id", value);
-      else next.delete("category_id");
-      next.delete("subcategory_id");
-      next.set("page", "1");
-      setSearchParams(next, { replace: true });
-    },
-    [searchParams, setSearchParams]
-  );
-
-  const handleSubcategoryChange = useCallback(
-    (value: string) => {
-      const next = new URLSearchParams(searchParams);
-      if (value.trim()) next.set("subcategory_id", value);
-      else next.delete("subcategory_id");
-      next.set("page", "1");
-      setSearchParams(next, { replace: true });
-    },
-    [searchParams, setSearchParams]
-  );
-
-  const searchBox = (
+  return (
     <div
       className={cn(
         "group flex items-center gap-3 rounded-xl px-4 h-10 transition-all duration-200",
@@ -160,38 +76,4 @@ export function HeaderSearch() {
       ) : null}
     </div>
   );
-
-  if (showCategoryFilters) {
-    return (
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full min-w-0 max-w-[620px]">
-        {searchBox}
-        <div className="flex gap-2 shrink-0 min-w-0">
-          <Suspense
-            fallback={
-              <div className="h-10 w-[140px] rounded-xl bg-slate-100 animate-pulse border border-slate-200/60" />
-            }
-          >
-            <div className="w-[140px] min-w-0">
-              <CategoriesSelect value={urlCategoryId} onChange={handleCategoryChange} />
-            </div>
-          </Suspense>
-          <Suspense
-            fallback={
-              <div className="h-10 w-[140px] rounded-xl bg-slate-100 animate-pulse border border-slate-200/60" />
-            }
-          >
-            <div className="w-[140px] min-w-0">
-              <SubcategoriesSelect
-                value={urlSubcategoryId}
-                onChange={handleSubcategoryChange}
-                category_id={urlCategoryId.trim() ? Number(urlCategoryId) : undefined}
-              />
-            </div>
-          </Suspense>
-        </div>
-      </div>
-    );
-  }
-
-  return searchBox;
 }

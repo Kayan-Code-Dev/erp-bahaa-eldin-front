@@ -83,6 +83,7 @@ export const useGetInfiniteFactoriesQueryOptions = (
 
 export const useExportFactoriesToCSVMutationOptions = () => {
   return mutationOptions({
-    mutationFn: () => exportFactoriesToCSV(),
+    mutationFn: (params?: Parameters<typeof exportFactoriesToCSV>[0]) =>
+      exportFactoriesToCSV(params),
   });
 };

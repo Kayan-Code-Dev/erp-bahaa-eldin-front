@@ -6,6 +6,10 @@ import { toast } from "sonner";
 import ClothesTableContent from "./ClothesTableContent";
 import { CreateClothModal } from "./CreateClothModal";
 import { useExportClothesToCSVMutationOptions } from "@/api/v2/clothes/clothes.hooks";
+import {
+  parseFilenameFromContentDisposition,
+  downloadBlob,
+} from "@/api/api.utils";
 
 function Clothes() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -15,18 +19,12 @@ function Clothes() {
     useExportClothesToCSVMutationOptions()
   );
 
-  // --- Export Handler ---
   const handleExport = () => {
     exportClothesToCSV(undefined, {
-      onSuccess: (blob) => {
-        const url = window.URL.createObjectURL(new Blob([blob]));
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", `products-${new Date().toISOString().split("T")[0]}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(url);
+      onSuccess: (result) => {
+        const filename =
+          parseFilenameFromContentDisposition(result.headers) || "clothes.xlsx";
+        downloadBlob(result.data, filename);
         toast.success("تم تصدير المنتجات بنجاح");
       },
       onError: (error: any) => {
@@ -53,7 +51,7 @@ function Clothes() {
             disabled={isExporting}
           >
             <Download className="ml-2 h-4 w-4" />
-            {isExporting ? "جاري التصدير..." : "تصدير إلى CSV"}
+            {isExporting ? "جاري التصدير..." : "تصدير إلى Excel"}
           </Button>
           <Button onClick={() => setIsCreateModalOpen(true)}>
             <Plus className="ml-2 h-4 w-4" />

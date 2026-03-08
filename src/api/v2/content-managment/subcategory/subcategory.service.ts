@@ -63,10 +63,13 @@ export const deleteSubcategoryApi = async (id: number) => {
 };
 
 
-export const exportSubcategoriesToCSV = async () => {
+export const exportSubcategoriesToCSV = async (params?: Record<string, unknown>) => {
   try {
-    const { data } = await api.get(`/subcategories/export`, { responseType: "blob" });
-    return data;
+    const response = await api.get<Blob>(`/subcategories/export`, {
+      params,
+      responseType: "blob",
+    });
+    return { data: response.data, headers: response.headers };
   } catch (error) {
     populateError(error, "خطأ فى تصدير أقسام المنتجات الفرعية");
   }
