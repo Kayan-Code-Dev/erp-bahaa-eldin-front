@@ -98,8 +98,7 @@ export const updatePasswordApi = async (req: TUpdatePasswordRequest) => {
 };
 
 export const getMyPermissionsApi = async () => {
-  // لا يوجد مسار backend للصلاحيات في هذا الـ API،
-  // لذلك نقرأها مباشرة من بيانات تسجيل الدخول المخزنة محليًا.
+  // No backend permissions endpoint; read from stored login data.
   const { loginData } = useAuthStore.getState();
   return loginData?.permissions ?? [];
 };

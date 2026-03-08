@@ -76,7 +76,7 @@ function ClothesTableContent() {
   );
   const [showFilters, setShowFilters] = useState(false);
 
-  // Sync code filter from URL (الهيدر يستخدم باراميتر search)
+  // Sync code filter from URL (header uses search param)
   const urlSearch = searchParams.get("search") || searchParams.get("code") || "";
   useEffect(() => {
     setCodeFilter(urlSearch);

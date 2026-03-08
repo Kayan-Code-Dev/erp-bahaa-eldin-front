@@ -125,7 +125,7 @@ export function CreateSupplierModal({ open, onOpenChange }: Props) {
 
   const { fields, append, remove } = useFieldArray({ control: form.control, name: "clothes" });
 
-  // حساب المجموع والمدفوع والمتبقي من الأصناف (مثل صفحة إنشاء طلبية)
+  // Compute total, paid, remaining from items (same as create order page)
   React.useEffect(() => {
     if (!addOrder || !Array.isArray(clothes) || clothes.length === 0) return;
     const total = clothes.reduce((sum, c) => sum + (Number(c?.price) || 0), 0);

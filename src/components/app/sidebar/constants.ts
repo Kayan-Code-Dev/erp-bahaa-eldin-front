@@ -237,7 +237,7 @@ export const sidebarLabels: SidebarLabel[] = [
         label: "كشف رواتب الموظفين",
         path: "/employees/payroll",
         level: 2,
-        permissions: ["hr.employees.view"],
+        permissions: ["hr.employees.view", "hr.payroll.view"],
         iconComponent: createIcon(FileBarChart),
       },
     ],

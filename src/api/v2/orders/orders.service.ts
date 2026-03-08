@@ -226,7 +226,7 @@ export const updateOrderPayment = async (id: number, amount: number) => {
 };
 
 /**
- * إرجاع الطلب بالكامل: POST /orders/:id/return
+ * Return full order: POST /orders/:id/return
  * Body: { items: [ { cloth_id, status, notes?, photo? } ] }
  */
 export const returnOrderFull = async (
