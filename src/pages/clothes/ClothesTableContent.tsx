@@ -59,7 +59,7 @@ function ClothesTableContent() {
   );
 
   // Filter states - initialize from URL params
-  const [codeFilter, setCodeFilter] = useState(() => searchParams.get("code") || "");
+  const [codeFilter, setCodeFilter] = useState(() => searchParams.get("search") || searchParams.get("code") || "");
   const [categoryId, setCategoryId] = useState(
     () => searchParams.get("category_id") || ""
   );
@@ -76,11 +76,11 @@ function ClothesTableContent() {
   );
   const [showFilters, setShowFilters] = useState(false);
 
-  // Sync code filter from URL
-  const urlCode = searchParams.get("code") || "";
+  // Sync code filter from URL (الهيدر يستخدم باراميتر search)
+  const urlSearch = searchParams.get("search") || searchParams.get("code") || "";
   useEffect(() => {
-    setCodeFilter(urlCode);
-  }, [urlCode]);
+    setCodeFilter(urlSearch);
+  }, [urlSearch]);
 
   // Debounce filter values
   const debouncedCodeFilter = useDebounce({ value: codeFilter, delay: 500 });
@@ -179,7 +179,7 @@ function ClothesTableContent() {
       return;
     }
     const params = new URLSearchParams(searchParamsRef.current);
-    const prevCode = params.get("code") || null;
+    const prevCode = params.get("search") || params.get("code") || null;
     const prevCategoryId = params.get("category_id") || null;
     const prevSubcatId =
       params.get("subcat_id") || null;
@@ -205,7 +205,7 @@ function ClothesTableContent() {
     if (!paramsChanged) return;
 
     const nextParams = new URLSearchParams();
-    if (newCode) nextParams.set("code", newCode);
+    if (newCode) nextParams.set("search", newCode);
     if (newCategoryId) nextParams.set("category_id", newCategoryId);
     if (newSubcatId) nextParams.set("subcat_id", newSubcatId);
     if (newEntityType) nextParams.set("entity_type", newEntityType);

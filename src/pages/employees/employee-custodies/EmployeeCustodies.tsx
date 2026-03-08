@@ -250,70 +250,70 @@ function EmployeeCustodies() {
           </div>
         </CardHeader>
 
-        {showFilters && (
-        <CardContent className="space-y-4 border-b pb-4">
-          <div className="flex flex-wrap items-center gap-4">
-            {/* Employee Filter */}
-            <div className="flex items-center gap-2">
-              <Label htmlFor="employee_filter">الموظف:</Label>
-              <EmployeesSelect
-                params={{ per_page: 10 }}
-                value={employeeId}
-                onChange={(value) => {
-                  setEmployeeId(value || "");
-                  handleFilterChange();
-                }}
-                placeholder="جميع الموظفين"
-                className="w-[200px]"
-                allowClear={true}
-              />
-            </div>
+        {showFilters ? (
+          <CardContent className="space-y-4 border-b pb-4">
+            <div className="flex flex-wrap items-center gap-4">
+              {/* Employee Filter */}
+              <div className="flex items-center gap-2">
+                <Label htmlFor="employee_filter">الموظف:</Label>
+                <EmployeesSelect
+                  params={{ per_page: 10 }}
+                  value={employeeId}
+                  onChange={(value) => {
+                    setEmployeeId(value || "");
+                    handleFilterChange();
+                  }}
+                  placeholder="جميع الموظفين"
+                  className="w-[200px]"
+                  allowClear={true}
+                />
+              </div>
 
-            {/* Type Filter */}
-            <div className="flex items-center gap-2">
-              <Label htmlFor="type_filter">نوع الضمان:</Label>
-              <EmployeeCustodyTypesSelect
-                value={type}
-                onChange={(value) => {
-                  setType(value || "");
-                  handleFilterChange();
-                }}
-                placeholder="جميع الأنواع"
-                className="w-[200px]"
-                allowClear={true}
-              />
-            </div>
+              {/* Type Filter */}
+              <div className="flex items-center gap-2">
+                <Label htmlFor="type_filter">نوع الضمان:</Label>
+                <EmployeeCustodyTypesSelect
+                  value={type}
+                  onChange={(value) => {
+                    setType(value || "");
+                    handleFilterChange();
+                  }}
+                  placeholder="جميع الأنواع"
+                  className="w-[200px]"
+                  allowClear={true}
+                />
+              </div>
 
-            {/* Status Filter */}
-            <div className="flex items-center gap-2">
-              <Label htmlFor="status_filter">الحالة:</Label>
-              <Select
-                value={status}
-                onValueChange={(value) => {
-                  setStatus(value);
-                  handleFilterChange();
-                }}
-              >
-                <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="جميع الحالات" />
-                </SelectTrigger>
-                <SelectContent>
-                  {STATUS_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+              {/* Status Filter */}
+              <div className="flex items-center gap-2">
+                <Label htmlFor="status_filter">الحالة:</Label>
+                <Select
+                  value={status}
+                  onValueChange={(value) => {
+                    setStatus(value);
+                    handleFilterChange();
+                  }}
+                >
+                  <SelectTrigger className="w-[150px]">
+                    <SelectValue placeholder="جميع الحالات" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {STATUS_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <Button variant="outline" size="sm" onClick={handleClearFilters}>
-              <X className="ml-2 h-4 w-4" />
-              مسح الفلاتر
-            </Button>
-          </div>
-        </CardContent>
-        )}
+              <Button variant="outline" size="sm" onClick={handleClearFilters}>
+                <X className="ml-2 h-4 w-4" />
+                مسح الفلاتر
+              </Button>
+            </div>
+          </CardContent>
+        ) : null}
 
         {isError && (
           <CardContent>

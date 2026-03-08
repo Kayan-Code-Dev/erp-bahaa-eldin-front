@@ -22,6 +22,7 @@ function Clothes() {
   const handleExport = () => {
     exportClothesToCSV(undefined, {
       onSuccess: (result) => {
+        if (!result) return;
         const filename =
           parseFilenameFromContentDisposition(result.headers) || "clothes.xlsx";
         downloadBlob(result.data, filename);

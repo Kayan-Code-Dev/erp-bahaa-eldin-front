@@ -72,6 +72,7 @@ function Factory() {
   const handleExport = () => {
     exportFactoriesToCSV(undefined, {
       onSuccess: (result) => {
+        if (!result) return;
         const filename =
           parseFilenameFromContentDisposition(result.headers) || "factories.xlsx";
         downloadBlob(result.data, filename);

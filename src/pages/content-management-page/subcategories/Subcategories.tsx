@@ -83,6 +83,7 @@ function Subcategories() {
   const handleExport = () => {
     exportSubcategoriesToCSV(undefined, {
       onSuccess: (result) => {
+        if (!result) return;
         const filename =
           parseFilenameFromContentDisposition(result.headers) || "subcategories.xlsx";
         downloadBlob(result.data, filename);

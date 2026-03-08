@@ -106,9 +106,7 @@ function buildOrderListParams(
     params.employee_id = typeof filters.employee_id === "string" ? Number(filters.employee_id) : filters.employee_id;
   }
   if (filters?.search?.trim()) {
-    const s = filters.search.trim();
-    if (/^\d+$/.test(s)) params.order_id = Number(s);
-    else params.search = s;
+    params.search = filters.search.trim();
   }
   return params;
 }

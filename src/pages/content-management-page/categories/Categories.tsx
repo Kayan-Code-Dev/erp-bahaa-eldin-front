@@ -92,6 +92,7 @@ function Categories() {
   const handleExport = () => {
     exportCategoriesToCSV(undefined, {
       onSuccess: (result) => {
+        if (!result) return;
         const filename =
           parseFilenameFromContentDisposition(result.headers) || "categories.xlsx";
         downloadBlob(result.data, filename);

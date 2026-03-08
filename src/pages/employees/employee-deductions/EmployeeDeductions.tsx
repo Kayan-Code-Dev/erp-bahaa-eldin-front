@@ -176,63 +176,63 @@ function EmployeeDeductions() {
           </div>
         </CardHeader>
 
-        {showFilters && (
-        <CardContent className="space-y-4 border-b pb-4">
-          <div className="flex flex-wrap items-center gap-4">
-            {/* Employee Filter */}
-            <div className="flex items-center gap-2">
-              <Label htmlFor="employee_filter">الموظف:</Label>
-              <EmployeesSelect
-                params={{ per_page: 10 }}
-                value={employeeId}
-                onChange={(value) => {
-                  setEmployeeId(value || "");
-                  handleFilterChange();
-                }}
-                placeholder="جميع الموظفين"
-                className="w-[250px]"
-                allowClear={true}
-              />
-            </div>
+        {showFilters ? (
+          <CardContent className="space-y-4 border-b pb-4">
+            <div className="flex flex-wrap items-center gap-4">
+              {/* Employee Filter */}
+              <div className="flex items-center gap-2">
+                <Label htmlFor="employee_filter">الموظف:</Label>
+                <EmployeesSelect
+                  params={{ per_page: 10 }}
+                  value={employeeId}
+                  onChange={(value) => {
+                    setEmployeeId(value || "");
+                    handleFilterChange();
+                  }}
+                  placeholder="جميع الموظفين"
+                  className="w-[250px]"
+                  allowClear={true}
+                />
+              </div>
 
-            {/* Type Filter */}
-            <div className="flex items-center gap-2">
-              <Label htmlFor="type_filter">نوع الخصم:</Label>
-              <EmployeeDeductionTypesSelect
-                value={type}
-                onChange={(value) => {
-                  setType(value || "");
-                  handleFilterChange();
-                }}
-                placeholder="جميع الأنواع"
-                className="w-[250px]"
-                allowClear={true}
-              />
-            </div>
+              {/* Type Filter */}
+              <div className="flex items-center gap-2">
+                <Label htmlFor="type_filter">نوع الخصم:</Label>
+                <EmployeeDeductionTypesSelect
+                  value={type}
+                  onChange={(value) => {
+                    setType(value || "");
+                    handleFilterChange();
+                  }}
+                  placeholder="جميع الأنواع"
+                  className="w-[250px]"
+                  allowClear={true}
+                />
+              </div>
 
-            {/* Period Filter */}
-            <div className="flex items-center gap-2">
-              <Label htmlFor="period_filter">الفترة:</Label>
-              <Input
-                id="period_filter"
-                type="month"
-                value={period}
-                onChange={(e) => {
-                  setPeriod(e.target.value);
-                  handleFilterChange();
-                }}
-                className="w-[200px]"
-                placeholder="YYYY-MM"
-              />
-            </div>
+              {/* Period Filter */}
+              <div className="flex items-center gap-2">
+                <Label htmlFor="period_filter">الفترة:</Label>
+                <Input
+                  id="period_filter"
+                  type="month"
+                  value={period}
+                  onChange={(e) => {
+                    setPeriod(e.target.value);
+                    handleFilterChange();
+                  }}
+                  className="w-[200px]"
+                  placeholder="YYYY-MM"
+                />
+              </div>
 
-            <Button variant="outline" size="sm" onClick={handleClearFilters}>
-              <X className="ml-2 h-4 w-4" />
-              مسح الفلاتر
-            </Button>
-          </div>
-        </CardContent>
-        )}
+              <Button variant="outline" size="sm" onClick={handleClearFilters}>
+                <X className="ml-2 h-4 w-4" />
+                مسح الفلاتر
+              </Button>
+            </div>
+          </CardContent>
+        ) : null}
 
         {isError && (
           <CardContent>

@@ -112,6 +112,7 @@ function Clients() {
   const handleExport = () => {
     exportClientsToCSV(listParams, {
       onSuccess: (result) => {
+        if (!result) return;
         const filename =
           parseFilenameFromContentDisposition(result.headers) || "clients.xlsx";
         downloadBlob(result.data, filename);

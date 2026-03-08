@@ -181,41 +181,41 @@ function BranchManger() {
           </div>
         </CardHeader>
 
-        {showFilters && (
-        <CardContent className="border-b pb-4">
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Label>بحث:</Label>
-              <Input
-                placeholder="اسم، كود، هاتف، عملة..."
-                value={search ?? ""}
-                onChange={(e) => setFilter("search", e.target.value)}
-                className="w-[220px]"
-              />
+        {showFilters ? (
+          <CardContent className="border-b pb-4">
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Label>بحث:</Label>
+                <Input
+                  placeholder="اسم، كود، هاتف، عملة..."
+                  value={search ?? ""}
+                  onChange={(e) => setFilter("search", e.target.value)}
+                  className="w-[220px]"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Label>ضريبة القيمة المضافة:</Label>
+                <Select
+                  value={vatEnabledParam ?? "all"}
+                  onValueChange={(v) => setFilter("vat_enabled", v)}
+                >
+                  <SelectTrigger className="w-[140px]">
+                    <SelectValue placeholder="الكل" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">الكل</SelectItem>
+                    <SelectItem value="true">مفعّل</SelectItem>
+                    <SelectItem value="false">غير مفعّل</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button variant="outline" size="sm" onClick={clearFilters}>
+                <X className="ml-2 h-4 w-4" />
+                مسح الفلاتر
+              </Button>
             </div>
-            <div className="flex items-center gap-2">
-              <Label>ضريبة القيمة المضافة:</Label>
-              <Select
-                value={vatEnabledParam ?? "all"}
-                onValueChange={(v) => setFilter("vat_enabled", v)}
-              >
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="الكل" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">الكل</SelectItem>
-                  <SelectItem value="true">مفعّل</SelectItem>
-                  <SelectItem value="false">غير مفعّل</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <Button variant="outline" size="sm" onClick={clearFilters}>
-              <X className="ml-2 h-4 w-4" />
-              مسح الفلاتر
-            </Button>
-          </div>
-        </CardContent>
-        )}
+          </CardContent>
+        ) : null}
 
         {isError && (
           <CardContent>

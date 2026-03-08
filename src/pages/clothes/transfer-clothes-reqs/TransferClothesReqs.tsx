@@ -298,6 +298,7 @@ function TransferClothesReqs() {
   const handleExport = () => {
     exportTransferClothesToCSV(undefined, {
       onSuccess: (result) => {
+        if (!result) return;
         const filename =
           parseFilenameFromContentDisposition(result.headers) || "transfers.xlsx";
         downloadBlob(result.data, filename);

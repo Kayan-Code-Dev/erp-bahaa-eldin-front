@@ -181,8 +181,7 @@ function Payments() {
       date_to: values.date_to?.trim() || undefined,
       amount_min: Number.isFinite(amountMinNum) ? amountMinNum : undefined,
       amount_max: Number.isFinite(amountMaxNum) ? amountMaxNum : undefined,
-      notes: values.notes?.trim() || undefined,
-      search: values.search?.trim() || undefined,
+      search: values.search?.trim() || values.notes?.trim() || undefined,
     };
   }, [page, per_page, debouncedFormValues]);
 
@@ -214,7 +213,6 @@ function Payments() {
     if (params.date_to) next.set("date_to", params.date_to);
     if (params.amount_min != null) next.set("amount_min", String(params.amount_min));
     if (params.amount_max != null) next.set("amount_max", String(params.amount_max));
-    if (params.notes) next.set("notes", params.notes);
     if (params.search) next.set("search", params.search);
     setSearchParams(next, { replace: true });
   }, [params, page, per_page, setSearchParams]);
@@ -282,6 +280,7 @@ function Payments() {
   const handleExport = () => {
     exportPaymentsToCSV(params, {
       onSuccess: (result) => {
+        if (!result) return;
         const filename =
           parseFilenameFromContentDisposition(result.headers) || "payments.xlsx";
         downloadBlob(result.data, filename);
@@ -495,6 +494,7 @@ function Payments() {
                             <FormLabel>الموظف</FormLabel>
                             <FormControl>
                               <EmployeesSelect
+                                params={{ per_page: 10 }}
                                 value={field.value || ""}
                                 onChange={(value) => field.onChange(value || undefined)}
                                 placeholder="جميع الموظفين"

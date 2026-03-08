@@ -71,6 +71,7 @@ function Workshop() {
   const handleExport = () => {
     exportWorkshopsToCSV(undefined, {
       onSuccess: (result) => {
+        if (!result) return;
         const filename =
           parseFilenameFromContentDisposition(result.headers) || "workshops.xlsx";
         downloadBlob(result.data, filename);

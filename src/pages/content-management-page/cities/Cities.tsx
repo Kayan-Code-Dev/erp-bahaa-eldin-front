@@ -83,6 +83,7 @@ function Cities() {
   const handleExport = () => {
     exportCitiesToCSV(undefined, {
       onSuccess: (result) => {
+        if (!result) return;
         const filename =
           parseFilenameFromContentDisposition(result.headers) || "cities.xlsx";
         downloadBlob(result.data, filename);

@@ -361,6 +361,7 @@ function DeliveriesReturnsSearch() {
   const handleExport = () => {
     exportOrdersToCSV(filters, {
       onSuccess: (result) => {
+        if (!result) return;
         const filename =
           parseFilenameFromContentDisposition(result.headers) || "deliveries-returns.xlsx";
         downloadBlob(result.data, filename);

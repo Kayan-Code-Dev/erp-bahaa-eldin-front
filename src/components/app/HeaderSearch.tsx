@@ -3,48 +3,48 @@ import { useLocation, useSearchParams } from "react-router";
 import { Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import useDebounce from "@/hooks/useDebounce";
-import { getSearchConfigForPath } from "@/api/api-index-filters";
+import { getHeaderSearchPlaceholder } from "@/api/api-index-filters";
+
+const HEADER_SEARCH_PARAM = "search";
 
 export function HeaderSearch() {
   const { pathname } = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const config = getSearchConfigForPath(pathname);
-  const param = config.param;
-  const placeholder = config.placeholder;
+  const placeholder = getHeaderSearchPlaceholder(pathname);
 
-  const initialValue = searchParams.get(param) ?? "";
+  const initialValue = searchParams.get(HEADER_SEARCH_PARAM) ?? "";
   const [localValue, setLocalValue] = useState(initialValue);
   const debouncedValue = useDebounce({ value: localValue, delay: 400 });
 
   useEffect(() => {
-    setLocalValue(searchParams.get(param) ?? "");
-  }, [pathname, param, searchParams]);
+    setLocalValue(searchParams.get(HEADER_SEARCH_PARAM) ?? "");
+  }, [pathname, searchParams]);
 
   useEffect(() => {
     setSearchParams(
       (prev) => {
-        const current = prev.get(param) ?? "";
+        const current = prev.get(HEADER_SEARCH_PARAM) ?? "";
         const nextVal = debouncedValue.trim();
         if (current === nextVal) return prev;
         const next = new URLSearchParams(prev);
         if (nextVal) {
-          next.set(param, nextVal);
+          next.set(HEADER_SEARCH_PARAM, nextVal);
           next.set("page", "1");
         } else {
-          next.delete(param);
+          next.delete(HEADER_SEARCH_PARAM);
         }
         return next;
       },
       { replace: true }
     );
-  }, [debouncedValue, param, setSearchParams]);
+  }, [debouncedValue, setSearchParams]);
 
   const handleClear = useCallback(() => {
     setLocalValue("");
     const next = new URLSearchParams(searchParams);
-    next.delete(param);
+    next.delete(HEADER_SEARCH_PARAM);
     setSearchParams(next, { replace: true });
-  }, [param, searchParams, setSearchParams]);
+  }, [searchParams, setSearchParams]);
 
   return (
     <div

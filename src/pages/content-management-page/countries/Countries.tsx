@@ -81,6 +81,7 @@ function Countries() {
   const handleExport = () => {
     exportCountriesToCSV(undefined, {
       onSuccess: (result) => {
+        if (!result) return;
         const filename =
           parseFilenameFromContentDisposition(result.headers) || "countries.xlsx";
         downloadBlob(result.data, filename);

@@ -79,6 +79,7 @@ function Currencies() {
   const handleExport = () => {
     exportCurrenciesToCSV(undefined, {
       onSuccess: (result) => {
+        if (!result) return;
         const filename =
           parseFilenameFromContentDisposition(result.headers) || "currencies.xlsx";
         downloadBlob(result.data, filename);

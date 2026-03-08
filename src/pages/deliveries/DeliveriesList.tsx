@@ -344,6 +344,7 @@ function DeliveriesList() {
   const handleExport = () => {
     exportOrdersToCSV(filters, {
       onSuccess: (result) => {
+        if (!result) return;
         const filename =
           parseFilenameFromContentDisposition(result.headers) || "deliveries.xlsx";
         downloadBlob(result.data, filename);

@@ -1,12 +1,17 @@
 /**
  * API Index Filters – aligned with backend GET list/index endpoints.
  * Used by HeaderSearch and list pages to sync URL params and API query params.
+ * Header search uses only the "search" query param on all pages.
  */
 
 export type SearchConfig = {
   param: string;
   placeholder: string;
 };
+
+export function getHeaderSearchPlaceholder(pathname: string): string {
+  return getSearchConfigForPath(pathname).placeholder;
+}
 
 /** Route path (exact or prefix) → search config. Longer paths first for prefix match. */
 export const API_INDEX_SEARCH_CONFIG: Record<string, SearchConfig> = {
@@ -66,8 +71,8 @@ export const API_INDEX_SEARCH_CONFIG: Record<string, SearchConfig> = {
       "ابحث برقم المصنع، الكود، الاسم، جهة الاتصال، الهاتف، البريد، الملاحظات أو الحالة...",
   },
   "/clothes/list": {
-    param: "code",
-    placeholder: "ابحث بكود المنتج...",
+    param: "search",
+    placeholder: "ابحث بكود المنتج أو الاسم...",
   },
   "/deliveries": {
     param: "search",
