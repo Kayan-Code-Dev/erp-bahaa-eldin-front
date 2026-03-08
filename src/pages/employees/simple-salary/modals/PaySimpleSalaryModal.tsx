@@ -31,6 +31,7 @@ import { usePaySimpleSalaryMutationOptions } from "@/api/simple-salary/simple-sa
 import {
   PAYMENT_METHODS,
   PAYMENT_METHOD_LABELS,
+  type TSimpleSalaryPayRequest,
   type TSimpleSalarySummary,
 } from "@/api/simple-salary/simple-salary.types";
 import { CashboxesSelect } from "@/components/custom/CashboxesSelect";
@@ -63,7 +64,8 @@ export function PaySimpleSalaryModal({
   });
 
   const amount = form.watch("amount");
-  const amountNum = amount != null && amount !== "" ? Number(amount) : null;
+  const amountNum =
+    amount != null && typeof amount === "number" && amount > 0 ? amount : null;
   const isOverRemaining =
     amountNum != null &&
     amountNum > 0 &&
@@ -76,7 +78,7 @@ export function PaySimpleSalaryModal({
       toast.error("اختر الصندوق");
       return;
     }
-    const body = {
+    const body: TSimpleSalaryPayRequest = {
       employee_id: summary.employee.id,
       period: summary.period,
       cashbox_id: cashboxId,
@@ -85,7 +87,7 @@ export function PaySimpleSalaryModal({
       notes: values.notes || undefined,
     };
     if (values.amount != null && values.amount > 0) {
-      (body as { amount: number }).amount = values.amount;
+      body.amount = values.amount;
     }
     mutation.mutate(body, {
       onSuccess: (result) => {
