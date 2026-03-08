@@ -412,9 +412,9 @@ function Notifications() {
         setPage(1);
       }}>
         <Card>
-          <CardHeader>
-            <div className="flex w-full items-center justify-between gap-4">
-              <TabsList className="shrink-0 self-center">
+          <CardHeader className="pb-2">
+            <div className="flex w-full items-start justify-between gap-6">
+              <TabsList className="shrink-0">
                 <TabsTrigger value="all">
                   الكل ({data?.meta.total || 0})
                 </TabsTrigger>
@@ -422,9 +422,11 @@ function Notifications() {
                   غير المقروء ({data?.meta.unread || 0})
                 </TabsTrigger>
               </TabsList>
-              <div className="text-right shrink-0">
-                <CardTitle dir="rtl">الإشعارات</CardTitle>
-                <CardDescription>
+              <div className="min-w-0 shrink-0 text-right">
+                <CardTitle dir="rtl" className="text-lg font-semibold">
+                  الإشعارات
+                </CardTitle>
+                <CardDescription className="mt-1">
                   {data?.meta.total
                     ? `إجمالي الإشعارات: ${data.meta.total} (مقروء: ${data.meta.read}، غير مقروء: ${data.meta.unread})`
                     : 'لا توجد إشعارات'}
@@ -433,7 +435,7 @@ function Notifications() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="mt-2"
+                    className="mt-3"
                     onClick={handleMarkAllAsRead}
                     disabled={markAllAsReadMutation.isPending}
                   >
@@ -519,11 +521,11 @@ function Notifications() {
           </CardContent>
 
           {data && data.total > 0 && (
-            <CardFooter className="flex items-center justify-between">
-              <div className="text-sm text-muted-foreground">
+            <CardFooter className="flex flex-nowrap items-center justify-between gap-4 border-t pt-4">
+              <div className="text-sm text-muted-foreground text-right shrink-0">
                 عرض {data.data.length} من {data.total} إشعار
               </div>
-              <Pagination>
+              <Pagination className="shrink-0">
                 <PaginationContent>
                   <PaginationItem>
                     <PaginationPrevious
