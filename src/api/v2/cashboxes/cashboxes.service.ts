@@ -2,12 +2,12 @@ import {
   TCachboxDailySummary,
   TCachboxRecalculateResponse,
   TCashboxesParams,
+  TCashbox,
   TUpdateCashboxRequest,
 } from "./cashboxes.types";
 import { api } from "@/api/api-contants";
 import { populateError } from "@/api/api.utils";
 import { TPaginationResponse } from "@/api/api-common.types";
-import { TCashbox } from "./cashboxes.types";
 import { TBranchResponse } from "../branches/branches.types";
 
 export const getCashboxes = async (params: TCashboxesParams) => {

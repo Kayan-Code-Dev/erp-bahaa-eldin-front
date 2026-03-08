@@ -11,8 +11,8 @@ import {
   getClient,
   getClients,
   updateClient,
+  type TGetClientsParams,
 } from "./clients.service";
-import type { TGetClientsParams } from "./clients.service";
 import { TUpdateClientRequest } from "./clients.types";
 
 export const CLIENTS_KEY = "clients";
@@ -61,13 +61,6 @@ export const useDeleteClientMutationOptions = () => {
 };
 
 export const useGetClientQueryOptions = (id: number) => {
-  return queryOptions({
-    queryKey: [CLIENTS_KEY, id],
-    queryFn: () => getClient(id),
-  });
-};
-
-export const useGetClientByIdQueryOptions = (id: number) => {
   return queryOptions({
     queryKey: [CLIENTS_KEY, id],
     queryFn: () => getClient(id),

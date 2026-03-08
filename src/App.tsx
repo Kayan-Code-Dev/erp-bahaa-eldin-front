@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
 import AppLayout from "@/components/layout/app-layout";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Route, Routes } from "react-router";
 import { Toaster } from "sonner";
 import PermissionProtectedRoute from "./routes/PermissionProtectedRoute";
@@ -31,7 +32,7 @@ const AccountSettings = lazy(() => import("./pages/account/AccountSettings"));
 
 function App() {
   return (
-    <>
+    <ErrorBoundary>
       <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>}>
       <Routes>
         {/* Public marketing landing page */}
@@ -125,7 +126,7 @@ function App() {
       </Routes>
       </Suspense>
       <Toaster />
-    </>
+    </ErrorBoundary>
   );
 }
 

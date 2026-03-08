@@ -11,8 +11,8 @@ import {
   getBranch,
   getBranches,
   updateBranch,
+  type TGetBranchesParams,
 } from "./branches.service";
-import type { TGetBranchesParams } from "./branches.service";
 import { TCreateBranchRequest, TUpdateBranchRequest } from "./branches.types";
 
 export const BRANCHES_KEY = "branches";

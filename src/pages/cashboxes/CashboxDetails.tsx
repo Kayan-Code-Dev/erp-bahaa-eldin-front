@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Card,
   CardHeader,
@@ -13,12 +13,13 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, Calendar, RefreshCw } from "lucide-react";
-import { useGetCashboxQueryOptions } from "@/api/v2/cashboxes/cashboxes.hooks";
+import {
+  useGetCashboxQueryOptions,
+  useRecalculateCashboxMutationOptions,
+  CASHBOXES_KEY,
+} from "@/api/v2/cashboxes/cashboxes.hooks";
 import { CashboxDailySummaryModal } from "./CashboxDailySummaryModal";
-import { useRecalculateCashboxMutationOptions } from "@/api/v2/cashboxes/cashboxes.hooks";
 import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
-import { CASHBOXES_KEY } from "@/api/v2/cashboxes/cashboxes.hooks";
 import { formatDate } from "@/utils/formatDate";
 
 function CashboxDetailsSkeleton() {

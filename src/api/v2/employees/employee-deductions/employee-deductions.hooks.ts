@@ -9,8 +9,7 @@ import {
   getEmployeeDeductionTypes,
   updateEmployeeDeduction,
 } from "./employee-deductions.service";
-import { mutationOptions, queryOptions } from "@tanstack/react-query";
-import { useQueryClient } from "@tanstack/react-query";
+import { mutationOptions, queryOptions, useQueryClient } from "@tanstack/react-query";
 import {
   TGetEmployeeDeductionsParams,
   TUpdateEmployeeDeductionRequest,

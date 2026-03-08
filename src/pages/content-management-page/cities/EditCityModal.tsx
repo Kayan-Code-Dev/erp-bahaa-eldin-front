@@ -21,9 +21,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { TCity } from "@/api/v2/content-managment/city/city.types";
+import { TCity, TUpdateCityRequest } from "@/api/v2/content-managment/city/city.types";
 import { useUpdateCityMutationOptions } from "@/api/v2/content-managment/city/city.hooks";
-import { TUpdateCityRequest } from "@/api/v2/content-managment/city/city.types";
 import { toast } from "sonner";
 import { CountriesSelect } from "@/components/custom/CountriesSelect";
 

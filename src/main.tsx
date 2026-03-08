@@ -42,24 +42,22 @@ if (import.meta.env.DEV) {
   const originalLog = console.log;
   const originalInfo = console.info;
   
+  // Only suppress known Chrome extension / browser noise; do not hide app errors.
   const shouldSuppress = (message: string): boolean => {
     return (
-      message.includes('[Violation]') ||
-      message.includes('Violation') ||
-      message.includes('scheduler.development.js') ||
-      message.includes("'message' handler took") ||
       message.includes('message channel closed') ||
       message.includes('asynchronous response') ||
       message.includes('listener indicated')
     );
   };
-  
+
   console.warn = (...args: any[]) => {
     const message = args.map(arg => String(arg)).join(' ');
     if (shouldSuppress(message)) return;
     originalWarn.apply(console, args);
   };
-  
+
+  // Never suppress console.error for generic "Violation" to avoid hiding real errors.
   console.error = (...args: any[]) => {
     const message = args.map(arg => String(arg)).join(' ');
     if (shouldSuppress(message)) return;
@@ -71,7 +69,7 @@ if (import.meta.env.DEV) {
     if (shouldSuppress(message)) return;
     originalLog.apply(console, args);
   };
-  
+
   console.info = (...args: any[]) => {
     const message = args.map(arg => String(arg)).join(' ');
     if (shouldSuppress(message)) return;

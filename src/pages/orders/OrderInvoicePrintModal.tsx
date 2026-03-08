@@ -5,6 +5,7 @@ import { Printer } from "lucide-react";
 import { TOrder } from "@/api/v2/orders/orders.types";
 import { useGetOrderDetailsQueryOptions } from "@/api/v2/orders/orders.hooks";
 import { OrderInvoicePrint } from "./OrderInvoicePrint";
+import { sanitizePrintHtml } from "@/lib/print-utils";
 import { useRef } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -430,6 +431,7 @@ export function OrderInvoicePrintModal({
     if (!printContent) return;
     const printWindow = window.open("", "_blank");
     if (!printWindow) return;
+    const bodyHtml = sanitizePrintHtml(printContent.innerHTML);
     printWindow.document.write(`
       <!DOCTYPE html>
       <html dir="rtl">
@@ -439,7 +441,7 @@ export function OrderInvoicePrintModal({
           <style>${INVOICE_PRINT_STYLES}</style>
         </head>
         <body>
-          ${printContent.innerHTML}
+          ${bodyHtml}
         </body>
       </html>
     `);

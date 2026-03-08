@@ -33,7 +33,7 @@ api.interceptors.response.use(
   },
   (error) => {
     const { logout } = useAuthStore.getState();
-    if (error.response.status === 401) {
+    if (error.response?.status === 401) {
       logout();
     }
     if (import.meta.env.MODE === "development") {

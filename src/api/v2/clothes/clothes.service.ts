@@ -1,5 +1,7 @@
 import {
   TClothesUnavailableDaysRangesResponse,
+  TClothesAvailableForDateResponse,
+  TClothResponse,
   TCreateClothesRequest,
   TGetClothesRequestParams,
   TUpdateClothesRequest,
@@ -7,10 +9,6 @@ import {
 import { api } from "@/api/api-contants";
 import { populateError } from "@/api/api.utils";
 import { TPaginationResponse } from "@/api/api-common.types";
-import {
-  TClothesAvailableForDateResponse,
-  TClothResponse,
-} from "./clothes.types";
 import { TEntity } from "@/lib/types/entity.types";
 
 export const getClothes = async (params: TGetClothesRequestParams) => {
