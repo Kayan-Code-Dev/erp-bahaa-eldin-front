@@ -165,23 +165,23 @@ export default function SimpleSalary() {
 
           {!isError && (
             <>
-              <div className="overflow-x-auto">
-                <Table>
+              <div className="overflow-x-auto border-t border-border/60 bg-background">
+                <Table className="w-full text-sm">
                   <TableHeader>
                     <TableRow className="border-b border-border/80 bg-muted/30 hover:bg-muted/30">
-                      <TableHead className="h-11 w-14 px-4 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      <TableHead className="h-11 w-14 px-4 text-center text-[11px] font-semibold tracking-wider text-muted-foreground">
                         #
                       </TableHead>
-                      <TableHead className="h-11 px-4 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      <TableHead className="h-11 px-4 text-right text-[11px] font-semibold tracking-wider text-muted-foreground">
                         كود الموظف
                       </TableHead>
-                      <TableHead className="h-11 px-4 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      <TableHead className="h-11 px-4 text-right text-[11px] font-semibold tracking-wider text-muted-foreground">
                         اسم الموظف
                       </TableHead>
-                      <TableHead className="h-11 px-4 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      <TableHead className="h-11 px-4 text-right text-[11px] font-semibold tracking-wider text-muted-foreground">
                         الراتب الأساسي
                       </TableHead>
-                      <TableHead className="h-11 min-w-[140px] px-4 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      <TableHead className="h-11 min-w-[140px] px-4 text-center text-[11px] font-semibold tracking-wider text-muted-foreground">
                         الإجراءات
                       </TableHead>
                     </TableRow>
@@ -194,13 +194,13 @@ export default function SimpleSalary() {
                             <TableCell className="h-14 px-4 text-center">
                               <span className="inline-block h-4 w-6 animate-pulse rounded bg-muted" />
                             </TableCell>
-                            <TableCell className="px-4 text-center">
+                            <TableCell className="px-4 text-right">
                               <span className="inline-block h-4 w-16 animate-pulse rounded bg-muted" />
                             </TableCell>
-                            <TableCell className="px-4 text-center">
+                            <TableCell className="px-4 text-right">
                               <span className="inline-block h-4 w-24 animate-pulse rounded bg-muted" />
                             </TableCell>
-                            <TableCell className="px-4 text-center">
+                            <TableCell className="px-4 text-right">
                               <span className="inline-block h-4 w-14 animate-pulse rounded bg-muted" />
                             </TableCell>
                             <TableCell className="px-4 text-center">
@@ -227,13 +227,13 @@ export default function SimpleSalary() {
                           <TableCell className="px-4 py-3 text-center text-sm font-medium tabular-nums text-foreground">
                             {(page - 1) * PER_PAGE + idx + 1}
                           </TableCell>
-                          <TableCell className="px-4 py-3 text-center font-mono text-sm text-foreground">
+                          <TableCell className="px-4 py-3 text-right font-mono text-sm text-foreground">
                             {emp.employee_code}
                           </TableCell>
-                          <TableCell className="px-4 py-3 text-center text-sm text-foreground">
+                          <TableCell className="px-4 py-3 text-right text-sm text-foreground">
                             {emp.user?.name ?? "—"}
                           </TableCell>
-                          <TableCell className="px-4 py-3 text-center text-sm font-medium tabular-nums text-foreground">
+                          <TableCell className="px-4 py-3 text-right text-sm font-medium tabular-nums text-foreground">
                             {formatMoney(emp.base_salary)}
                           </TableCell>
                           <TableCell className="px-4 py-3 text-center">
