@@ -165,7 +165,7 @@ export const sidebarLabels: SidebarLabel[] = [
       },
     ],
   },
-  // 6. Cashbox
+  // 6. Cashbox & transactions
   {
     icon: null,
     label: "الخزنة",
@@ -173,6 +173,24 @@ export const sidebarLabels: SidebarLabel[] = [
     level: 1,
     permissions: ["cashbox.view", "cashbox.manage", "cashbox.recalculate", "transactions.view", "transactions.reverse"],
     iconComponent: createIcon(Banknote),
+    subItems: [
+      {
+        icon: null,
+        label: "الخزنة",
+        path: "/cashboxes",
+        level: 2,
+        permissions: ["cashbox.view", "cashbox.manage", "cashbox.recalculate"],
+        iconComponent: createIcon(Banknote, 18),
+      },
+      {
+        icon: null,
+        label: "كشف المعاملات",
+        path: "/cashboxes/transactions",
+        level: 2,
+        permissions: ["transactions.view"],
+        iconComponent: createIcon(ArrowRightLeft, 18),
+      },
+    ],
   },
   // 7. Clients
   {
