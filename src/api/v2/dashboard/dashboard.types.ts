@@ -11,112 +11,133 @@ export type TDashboardPeriod = {
   to: string;
 };
 
+// --- Activity ---
 export type TDashboardActivity = {
-  by_action: {
-    created?: number;
-    updated?: number;
-    deleted?: number;
-    login?: number;
-    login_failed?: number;
-  };
-  by_entity_type: {
-    [key: string]: number;
-  };
-  period: TDashboardPeriod;
   total_activities: number;
+  by_action: Record<string, number>;
+  by_entity_type: Record<string, number>;
+  period: TDashboardPeriod;
 };
 
-export type TDashboardBusiness = {
-  clients: {
-    active_clients: number;
-    growth_rate: number;
-    new_clients: number;
-    period: TDashboardPeriod;
-    total_clients: number;
-  };
+// --- Business: Sales ---
+export type TDashboardSales = {
+  total_revenue: number;
+  order_count: number;
+  average_order_value: number;
+  by_status: Record<string, { count: number; revenue: number }>;
+  period: TDashboardPeriod;
 };
 
+// --- Business: Clients ---
+export type TDashboardClients = {
+  new_clients: number;
+  total_clients: number;
+  active_clients: number;
+  growth_rate: number;
+  period: TDashboardPeriod;
+};
+
+// --- Business: Payments ---
+export type TDashboardPayments = {
+  total_payments: number;
+  payment_count: number;
+  by_method: Record<string, { count: number; total: number }>;
+  period: TDashboardPeriod;
+};
+
+// --- Business: Inventory ---
+export type TDashboardInventory = {
+  total_items: number;
+  available: number;
+  out_of_branch: number;
+  utilization_rate: number;
+};
+
+// --- Business: Financial ---
 export type TDashboardFinancial = {
+  total_income: number;
+  total_expenses: number;
+  profit: number;
+  profit_margin: number;
   cashbox_balances: Array<{
     cashbox_id: number;
     name: string;
     balance: number;
   }>;
   period: TDashboardPeriod;
-  profit: number;
-  profit_margin: number;
-  total_expenses: number;
-  total_income: number;
 };
 
-export type TDashboardInventory = {
-  available: number;
-  out_of_branch: number;
-  total_items: number;
-  utilization_rate: number;
+export type TDashboardBusiness = {
+  sales: TDashboardSales;
+  clients: TDashboardClients;
+  payments: TDashboardPayments;
+  inventory: TDashboardInventory;
+  financial: TDashboardFinancial;
 };
 
-export type TDashboardPayments = {
-  by_method: {
-    initial?: { count: number; total: number };
-    normal?: { count: number; total: number };
-    [key: string]: { count: number; total: number } | undefined;
-  };
-  payment_count: number;
+// --- HR: Attendance ---
+export type TDashboardAttendance = {
+  total_records: number;
+  present_days: number;
+  absent_days: number;
+  late_arrivals: number;
+  leave_days: number;
+  attendance_rate: number;
   period: TDashboardPeriod;
-  total_payments: number;
 };
 
-export type TDashboardSales = {
-  average_order_value: number;
-  by_status: {
-    canceled?: { count: number; revenue: number };
-    created?: { count: number; revenue: number };
-    delivered?: { count: number; revenue: number };
-    paid?: { count: number; revenue: number };
-    partially_paid?: { count: number; revenue: number };
-    [key: string]: { count: number; revenue: number } | undefined;
-  };
-  order_count: number;
+// --- HR: Payroll ---
+export type TDashboardPayroll = {
+  total_payroll: number;
+  payroll_count: number;
+  average_salary: number;
+  by_status: Record<string, { count: number; total: number }>;
   period: TDashboardPeriod;
-  total_revenue: number;
+};
+
+// --- HR: Employee activity ---
+export type TMostActiveEmployee = {
+  user_id: number;
+  employee_id: number;
+  employee_name: string;
+  activity_count: number;
+};
+
+export type TDashboardEmployeeActivity = {
+  most_active_employees: TMostActiveEmployee[];
+  period: TDashboardPeriod;
+};
+
+// --- HR: Trends ---
+export type TAttendanceTrendItem = {
+  date: string;
+  total: number;
+  present: number;
+  attendance_rate: number;
+};
+
+export type TPayrollTrendItem = {
+  date: string;
+  total_payroll: number;
+  payroll_count: number;
+};
+
+export type TDashboardTrends = {
+  attendance_trends: TAttendanceTrendItem[];
+  payroll_trends: TPayrollTrendItem[];
+  period: TDashboardPeriod;
 };
 
 export type TDashboardHR = {
-  attendance: {
-    absent_days: number;
-    attendance_rate: number;
-    late_arrivals: number;
-    leave_days: number;
-    period: TDashboardPeriod;
-    present_days: number;
-    total_records: number;
-  };
-  employee_activity: {
-    most_active_employees: any[];
-    period: TDashboardPeriod;
-  };
-  payroll: {
-    average_salary: number;
-    by_status: any[];
-    payroll_count: number;
-    period: TDashboardPeriod;
-    total_payroll: number;
-  };
-  trends: {
-    attendance_trends: any[];
-    payroll_trends: any[];
-    period: TDashboardPeriod;
-  };
+  attendance: TDashboardAttendance;
+  payroll: TDashboardPayroll;
+  employee_activity: TDashboardEmployeeActivity;
+  trends: TDashboardTrends;
 };
 
 export type TDashboardOverviewResponse = {
   activity: TDashboardActivity;
   business: TDashboardBusiness;
-  financial: TDashboardFinancial;
-  inventory: TDashboardInventory;
-  payments: TDashboardPayments;
-  sales: TDashboardSales;
   hr: TDashboardHR;
   generated_at: string;
 };
