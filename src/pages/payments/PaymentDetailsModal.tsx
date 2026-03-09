@@ -42,12 +42,30 @@ const getPaymentTypeLabel = (type: string) => {
   return typeMap[type] || type;
 };
 
-const getClientName = (client: {
-  first_name: string;
-  middle_name: string;
-  last_name: string;
-}) => {
-  return `${client.first_name} ${client.middle_name} ${client.last_name}`.trim();
+const formatMoney = (value: number | string | null | undefined) => {
+  if (value === null || value === undefined) return "—";
+  const num = typeof value === "number" ? value : Number(value);
+  if (Number.isNaN(num)) return String(value);
+  return `${num.toLocaleString("en-US", { minimumFractionDigits: 2 })} ج.م`;
+};
+
+const getClientName = (
+  client:
+    | {
+        name?: string;
+        first_name?: string;
+        middle_name?: string;
+        last_name?: string;
+      }
+    | null
+    | undefined
+) => {
+  if (!client) return "—";
+  if (typeof client.name === "string" && client.name.trim()) return client.name.trim();
+  const parts = [client.first_name, client.middle_name, client.last_name].filter(
+    Boolean
+  ) as string[];
+  return parts.length ? parts.join(" ").trim() : "—";
 };
 
 export function PaymentDetailsModal({ payment, open, onOpenChange }: Props) {
@@ -77,7 +95,7 @@ export function PaymentDetailsModal({ payment, open, onOpenChange }: Props) {
             <div className="space-y-2">
               <Label className="text-muted-foreground">المبلغ</Label>
               <p className="font-medium text-lg">
-                {payment.amount.toLocaleString()} ج.م
+                {formatMoney(payment.amount)}
               </p>
             </div>
 
@@ -125,9 +143,9 @@ export function PaymentDetailsModal({ payment, open, onOpenChange }: Props) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-muted-foreground">تاريخ الميلاد</Label>
+                  <Label className="text-muted-foreground">مصدر العميل</Label>
                   <p className="font-medium">
-                    {payment.order.client.date_of_birth}
+                    {payment.order.client.source ?? "—"}
                   </p>
                 </div>
               </div>
@@ -147,9 +165,66 @@ export function PaymentDetailsModal({ payment, open, onOpenChange }: Props) {
                 <div className="space-y-2">
                   <Label className="text-muted-foreground">إجمالي الطلب</Label>
                   <p className="font-medium">
-                    {payment.order.total_price.toLocaleString()} ج.م
+                    {formatMoney(payment.order.total_price)}
                   </p>
                 </div>
+
+                <div className="space-y-2">
+                  <Label className="text-muted-foreground">حالة الطلب</Label>
+                  <p className="font-medium">
+                    {payment.order.status}
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-muted-foreground">إجمالي المدفوع</Label>
+                  <p className="font-medium">
+                    {formatMoney(payment.order.paid)}
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-muted-foreground">المتبقي على الطلب</Label>
+                  <p className="font-medium">
+                    {formatMoney(payment.order.remaining)}
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-muted-foreground">تاريخ التسليم</Label>
+                  <p className="font-medium">
+                    {payment.order.delivery_date
+                      ? formatDate(payment.order.delivery_date)
+                      : "—"}
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-muted-foreground">تاريخ المناسبة</Label>
+                  <p className="font-medium">
+                    {payment.order.occasion_datetime
+                      ? formatDate(payment.order.occasion_datetime)
+                      : "—"}
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-muted-foreground">تاريخ الزيارة</Label>
+                  <p className="font-medium">
+                    {payment.order.visit_datetime
+                      ? formatDate(payment.order.visit_datetime)
+                      : "—"}
+                  </p>
+                </div>
+
+                {payment.order.order_notes && (
+                  <div className="space-y-2 md:col-span-2">
+                    <Label className="text-muted-foreground">ملاحظات الطلب</Label>
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                      {payment.order.order_notes}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           )}

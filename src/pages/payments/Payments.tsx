@@ -652,7 +652,6 @@ function Payments() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="text-center">#</TableHead>
-                    <TableHead className="text-center">رقم الطلب</TableHead>
                     <TableHead className="text-center">العميل</TableHead>
                     <TableHead className="text-center">المبلغ</TableHead>
                     <TableHead className="text-center">الحالة</TableHead>
@@ -667,7 +666,7 @@ function Payments() {
                   {isPending ? (
                     <TableRow>
                       <TableCell
-                        colSpan={9}
+                        colSpan={8}
                         className="py-10 text-center text-muted-foreground"
                       >
                         جاري التحميل...
@@ -678,9 +677,6 @@ function Payments() {
                       <TableRow key={payment.id}>
                         <TableCell className="text-center">
                           {payment.id}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {payment.order_id}
                         </TableCell>
                         <TableCell className="text-center">
                           {payment.order?.client
@@ -758,7 +754,7 @@ function Payments() {
                   ) : (
                     <TableRow>
                       <TableCell
-                        colSpan={9}
+                        colSpan={8}
                         className="py-10 text-center text-muted-foreground"
                       >
                         لا توجد مدفوعات لعرضها.
