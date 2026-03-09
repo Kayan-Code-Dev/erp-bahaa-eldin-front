@@ -36,6 +36,7 @@ import { useGetPaymentByIdQueryOptions } from "@/api/v2/payments/payments.hooks"
 import { useGetExpenseByIdQueryOptions } from "@/api/v2/expenses/expenses.hooks";
 import { PaymentDetailsModal } from "@/pages/payments/PaymentDetailsModal";
 import { ExpenseDetailsModal } from "@/pages/expenses/ExpenseDetailsModal";
+import { CashboxTransactionDetailsModal } from "./CashboxTransactionDetailsModal";
 
 const PER_PAGE_DEFAULT = 15;
 
@@ -72,6 +73,10 @@ function CashboxTransactions() {
   );
   const [isPaymentDetailsOpen, setIsPaymentDetailsOpen] = useState(false);
   const [isExpenseDetailsOpen, setIsExpenseDetailsOpen] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] =
+    useState<TTransaction | null>(null);
+  const [isTransactionDetailsOpen, setIsTransactionDetailsOpen] =
+    useState(false);
 
   const page = Number(searchParams.get("page")) || 1;
   const per_page = Number(searchParams.get("per_page")) || PER_PAGE_DEFAULT;
@@ -96,25 +101,26 @@ function CashboxTransactions() {
     useGetTransactionsQueryOptions(params)
   );
 
-  const { data: paymentDetails } = useQuery(
+  const paymentQueryOptions =
     selectedPaymentId != null
       ? useGetPaymentByIdQueryOptions(selectedPaymentId)
       : {
           queryKey: ["payment-details-disabled"],
-          queryFn: async () => undefined,
+          queryFn: async () => undefined as undefined,
           enabled: false,
-        }
-  );
+        };
 
-  const { data: expenseDetails } = useQuery(
+  const expenseQueryOptions =
     selectedExpenseId != null
       ? useGetExpenseByIdQueryOptions(selectedExpenseId)
       : {
           queryKey: ["expense-details-disabled"],
-          queryFn: async () => undefined,
+          queryFn: async () => undefined as undefined,
           enabled: false,
-        }
-  );
+        };
+
+  const { data: paymentDetails } = useQuery(paymentQueryOptions);
+  const { data: expenseDetails } = useQuery(expenseQueryOptions);
 
   const handlePageChange = (nextPage: number) => {
     setSearchParams((prev) => {
@@ -170,6 +176,15 @@ function CashboxTransactions() {
     setIsPaymentDetailsOpen(false);
     setSelectedExpenseId(id);
     setIsExpenseDetailsOpen(true);
+  };
+
+  const handleOpenTransactionDetails = (tx: TTransaction) => {
+    setSelectedPaymentId(null);
+    setSelectedExpenseId(null);
+    setIsPaymentDetailsOpen(false);
+    setIsExpenseDetailsOpen(false);
+    setSelectedTransaction(tx);
+    setIsTransactionDetailsOpen(true);
   };
 
   return (
@@ -283,7 +298,6 @@ function CashboxTransactions() {
                     <TableHead className="text-center">الصندوق</TableHead>
                     <TableHead className="text-center">نوع الحركة</TableHead>
                     <TableHead className="text-center">التصنيف</TableHead>
-                    <TableHead className="text-center">الوصف</TableHead>
                     <TableHead className="text-center">المبلغ</TableHead>
                     <TableHead className="text-center">
                       الرصيد قبل الحركة
@@ -299,7 +313,7 @@ function CashboxTransactions() {
                   {isPending ? (
                     <TableRow>
                       <TableCell
-                        colSpan={11}
+                        colSpan={10}
                         className="py-10 text-center text-muted-foreground"
                       >
                         جاري تحميل كشف المعاملات...
@@ -335,11 +349,6 @@ function CashboxTransactions() {
                         </TableCell>
                         <TableCell className="text-center">
                           {getCategoryLabel(tx.category)}
-                        </TableCell>
-                        <TableCell className="text-center max-w-[260px]">
-                          <span className="line-clamp-2">
-                            {tx.description || "—"}
-                          </span>
                         </TableCell>
                         <TableCell className="text-center font-medium">
                           {formatMoney(tx.amount)}
@@ -379,7 +388,14 @@ function CashboxTransactions() {
                               <Eye className="h-4 w-4" />
                             </Button>
                           ) : (
-                            "—"
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              title="تفاصيل الحركة"
+                              onClick={() => handleOpenTransactionDetails(tx)}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
                           )}
                         </TableCell>
                       </TableRow>
@@ -387,7 +403,7 @@ function CashboxTransactions() {
                   ) : (
                     <TableRow>
                       <TableCell
-                        colSpan={11}
+                        colSpan={10}
                         className="py-10 text-center text-muted-foreground"
                       >
                         لا توجد معاملات لعرضها.
@@ -462,6 +478,16 @@ function CashboxTransactions() {
           expense={expenseDetails ?? null}
         />
       )}
+
+      {/* Generic transaction details (للمعاملات غير المرتبطة مباشرة بدفعة أو مصروف) */}
+      <CashboxTransactionDetailsModal
+        open={isTransactionDetailsOpen}
+        onOpenChange={(open) => {
+          setIsTransactionDetailsOpen(open);
+          if (!open) setSelectedTransaction(null);
+        }}
+        transaction={selectedTransaction}
+      />
     </div>
   );
 }
