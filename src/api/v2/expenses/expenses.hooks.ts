@@ -16,6 +16,7 @@ import {
   createExpense,
   deleteExpense,
   getExpenses,
+  getExpenseById,
   getExpenseSummary,
   payExpense,
   updateExpense,
@@ -29,6 +30,14 @@ export const useGetExpensesQueryOptions = (params: TGetExpensesParams) => {
   return queryOptions({
     queryKey: [EXPENSES_KEY, params],
     queryFn: () => getExpenses(params),
+    staleTime: 1000 * 60 * 5,
+  });
+};
+
+export const useGetExpenseByIdQueryOptions = (id: number) => {
+  return queryOptions({
+    queryKey: [EXPENSES_KEY, id],
+    queryFn: () => getExpenseById(id),
     staleTime: 1000 * 60 * 5,
   });
 };

@@ -247,6 +247,114 @@ export function PaymentDetailsModal({ payment, open, onOpenChange }: Props) {
             </div>
           )}
 
+          {/* Cashbox Snapshot */}
+          {(payment.cashbox_id != null ||
+            payment.cashbox_balance_before != null ||
+            payment.cashbox_balance_after != null ||
+            payment.cashbox_snapshot_meta) && (
+            <div className="border-t pt-4">
+              <h3 className="font-semibold mb-3">معلومات الخزنة</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-muted-foreground">الصندوق</Label>
+                  <p className="font-medium">
+                    {payment.cashbox_snapshot_meta?.cashbox_name ??
+                      (payment.cashbox_id != null
+                        ? `#${payment.cashbox_id}`
+                        : "—")}
+                  </p>
+                </div>
+
+                {payment.cashbox_balance_before != null && (
+                  <div className="space-y-2">
+                    <Label className="text-muted-foreground">
+                      الرصيد قبل الدفعة
+                    </Label>
+                    <p className="font-medium">
+                      {formatMoney(payment.cashbox_balance_before)}
+                    </p>
+                  </div>
+                )}
+
+                {payment.cashbox_balance_after != null && (
+                  <div className="space-y-2">
+                    <Label className="text-muted-foreground">
+                      الرصيد بعد الدفعة
+                    </Label>
+                    <p className="font-medium">
+                      {formatMoney(payment.cashbox_balance_after)}
+                    </p>
+                  </div>
+                )}
+
+                {payment.cashbox_daily_income_total != null && (
+                  <div className="space-y-2">
+                    <Label className="text-muted-foreground">
+                      إجمالي إيرادات اليوم للصندوق
+                    </Label>
+                    <p className="font-medium">
+                      {formatMoney(payment.cashbox_daily_income_total)}
+                    </p>
+                  </div>
+                )}
+
+                {payment.cashbox_daily_expense_total != null && (
+                  <div className="space-y-2">
+                    <Label className="text-muted-foreground">
+                      إجمالي مصروفات اليوم للصندوق
+                    </Label>
+                    <p className="font-medium">
+                      {formatMoney(payment.cashbox_daily_expense_total)}
+                    </p>
+                  </div>
+                )}
+
+                {payment.cashbox_snapshot_meta && (
+                  <>
+                    <div className="space-y-2">
+                      <Label className="text-muted-foreground">
+                        رصيد بداية اليوم
+                      </Label>
+                      <p className="font-medium">
+                        {formatMoney(payment.cashbox_snapshot_meta.opening_balance)}
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-muted-foreground">
+                        رصيد نهاية اليوم
+                      </Label>
+                      <p className="font-medium">
+                        {formatMoney(payment.cashbox_snapshot_meta.closing_balance)}
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-muted-foreground">صافي التغير</Label>
+                      <p className="font-medium">
+                        {formatMoney(payment.cashbox_snapshot_meta.net_change)}
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-muted-foreground">
+                        عدد المعاملات في اليوم
+                      </Label>
+                      <p className="font-medium">
+                        {payment.cashbox_snapshot_meta.transaction_count}
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-muted-foreground">
+                        عدد عكس المعاملات
+                      </Label>
+                      <p className="font-medium">
+                        {payment.cashbox_snapshot_meta.reversal_count}
+                      </p>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Notes */}
           {payment.notes && (
             <div className="border-t pt-4">

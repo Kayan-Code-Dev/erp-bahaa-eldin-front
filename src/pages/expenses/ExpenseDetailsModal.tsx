@@ -40,6 +40,13 @@ type Props = {
   expense: TExpense | null;
 };
 
+const formatMoney = (value: number | string | null | undefined) => {
+  if (value === null || value === undefined) return "—";
+  const num = typeof value === "number" ? value : Number(value);
+  if (Number.isNaN(num)) return String(value);
+  return `${num.toLocaleString("en-US", { minimumFractionDigits: 2 })} ج.م`;
+};
+
 export function ExpenseDetailsModal({
   open,
   onOpenChange,
@@ -71,7 +78,9 @@ export function ExpenseDetailsModal({
                 </div>
                 <div className="modal-detail-row">
                   <span className="modal-detail-label">المبلغ</span>
-                  <span className="modal-detail-value">{expense.amount} ج.م</span>
+                  <span className="modal-detail-value">
+                    {formatMoney(expense.amount)}
+                  </span>
                 </div>
                 <div className="modal-detail-row">
                   <span className="modal-detail-label">تاريخ المصروف</span>
@@ -107,6 +116,14 @@ export function ExpenseDetailsModal({
                   <span className="modal-detail-label">تاريخ آخر تحديث</span>
                   <span className="modal-detail-value">{formatDate(expense.updated_at)}</span>
                 </div>
+                {expense.paid_at && (
+                  <div className="modal-detail-row">
+                    <span className="modal-detail-label">تاريخ الدفع</span>
+                    <span className="modal-detail-value">
+                      {formatDate(expense.paid_at)}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -130,6 +147,115 @@ export function ExpenseDetailsModal({
                 {expense.creator?.name} ({expense.creator?.email})
               </p>
             </div>
+
+            {(expense.cashbox_balance_before != null ||
+              expense.cashbox_balance_after != null ||
+              expense.cashbox_snapshot_meta) && (
+              <div className="modal-section">
+                <p className="modal-section-title">معلومات الخزنة</p>
+                <div className="space-y-0">
+                  <div className="modal-detail-row">
+                    <span className="modal-detail-label">الصندوق</span>
+                    <span className="modal-detail-value">
+                      {expense.cashbox?.name ?? "—"}
+                    </span>
+                  </div>
+
+                  {expense.cashbox_balance_before != null && (
+                    <div className="modal-detail-row">
+                      <span className="modal-detail-label">
+                        الرصيد قبل المصروف
+                      </span>
+                      <span className="modal-detail-value">
+                        {formatMoney(expense.cashbox_balance_before)}
+                      </span>
+                    </div>
+                  )}
+
+                  {expense.cashbox_balance_after != null && (
+                    <div className="modal-detail-row">
+                      <span className="modal-detail-label">
+                        الرصيد بعد المصروف
+                      </span>
+                      <span className="modal-detail-value">
+                        {formatMoney(expense.cashbox_balance_after)}
+                      </span>
+                    </div>
+                  )}
+
+                  {expense.cashbox_daily_income_total != null && (
+                    <div className="modal-detail-row">
+                      <span className="modal-detail-label">
+                        إجمالي إيرادات اليوم للصندوق
+                      </span>
+                      <span className="modal-detail-value">
+                        {formatMoney(expense.cashbox_daily_income_total)}
+                      </span>
+                    </div>
+                  )}
+
+                  {expense.cashbox_daily_expense_total != null && (
+                    <div className="modal-detail-row">
+                      <span className="modal-detail-label">
+                        إجمالي مصروفات اليوم للصندوق
+                      </span>
+                      <span className="modal-detail-value">
+                        {formatMoney(expense.cashbox_daily_expense_total)}
+                      </span>
+                    </div>
+                  )}
+
+                  {expense.cashbox_snapshot_meta && (
+                    <>
+                      <div className="modal-detail-row">
+                        <span className="modal-detail-label">
+                          رصيد بداية اليوم
+                        </span>
+                        <span className="modal-detail-value">
+                          {formatMoney(
+                            expense.cashbox_snapshot_meta.opening_balance
+                          )}
+                        </span>
+                      </div>
+                      <div className="modal-detail-row">
+                        <span className="modal-detail-label">
+                          رصيد نهاية اليوم
+                        </span>
+                        <span className="modal-detail-value">
+                          {formatMoney(
+                            expense.cashbox_snapshot_meta.closing_balance
+                          )}
+                        </span>
+                      </div>
+                      <div className="modal-detail-row">
+                        <span className="modal-detail-label">
+                          صافي التغير
+                        </span>
+                        <span className="modal-detail-value">
+                          {formatMoney(expense.cashbox_snapshot_meta.net_change)}
+                        </span>
+                      </div>
+                      <div className="modal-detail-row">
+                        <span className="modal-detail-label">
+                          عدد المعاملات في اليوم
+                        </span>
+                        <span className="modal-detail-value">
+                          {expense.cashbox_snapshot_meta.transaction_count}
+                        </span>
+                      </div>
+                      <div className="modal-detail-row">
+                        <span className="modal-detail-label">
+                          عدد عكس المعاملات
+                        </span>
+                        <span className="modal-detail-value">
+                          {expense.cashbox_snapshot_meta.reversal_count}
+                        </span>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <p className="text-center text-sm text-muted-foreground">

@@ -27,13 +27,15 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { ArrowDownCircle, ArrowUpCircle, Filter } from "lucide-react";
+import { ArrowDownCircle, ArrowUpCircle, Eye, Filter } from "lucide-react";
 import { CashboxesSelect } from "@/components/custom/CashboxesSelect";
-import {
-  useGetTransactionsQueryOptions,
-} from "@/api/v2/transactions/transactions.hooks";
+import { useGetTransactionsQueryOptions } from "@/api/v2/transactions/transactions.hooks";
 import { TTransaction } from "@/api/v2/transactions/transactions.types";
 import { formatDateTime } from "@/utils/formatDate";
+import { useGetPaymentByIdQueryOptions } from "@/api/v2/payments/payments.hooks";
+import { useGetExpenseByIdQueryOptions } from "@/api/v2/expenses/expenses.hooks";
+import { PaymentDetailsModal } from "@/pages/payments/PaymentDetailsModal";
+import { ExpenseDetailsModal } from "@/pages/expenses/ExpenseDetailsModal";
 
 const PER_PAGE_DEFAULT = 15;
 
@@ -62,6 +64,14 @@ const getCategoryLabel = (category: TTransaction["category"]) => {
 function CashboxTransactions() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [showFilters, setShowFilters] = useState(false);
+  const [selectedPaymentId, setSelectedPaymentId] = useState<number | null>(
+    null
+  );
+  const [selectedExpenseId, setSelectedExpenseId] = useState<number | null>(
+    null
+  );
+  const [isPaymentDetailsOpen, setIsPaymentDetailsOpen] = useState(false);
+  const [isExpenseDetailsOpen, setIsExpenseDetailsOpen] = useState(false);
 
   const page = Number(searchParams.get("page")) || 1;
   const per_page = Number(searchParams.get("per_page")) || PER_PAGE_DEFAULT;
@@ -84,6 +94,26 @@ function CashboxTransactions() {
 
   const { data, isPending, isError, error } = useQuery(
     useGetTransactionsQueryOptions(params)
+  );
+
+  const { data: paymentDetails } = useQuery(
+    selectedPaymentId != null
+      ? useGetPaymentByIdQueryOptions(selectedPaymentId)
+      : {
+          queryKey: ["payment-details-disabled"],
+          queryFn: async () => undefined,
+          enabled: false,
+        }
+  );
+
+  const { data: expenseDetails } = useQuery(
+    selectedExpenseId != null
+      ? useGetExpenseByIdQueryOptions(selectedExpenseId)
+      : {
+          queryKey: ["expense-details-disabled"],
+          queryFn: async () => undefined,
+          enabled: false,
+        }
   );
 
   const handlePageChange = (nextPage: number) => {
@@ -127,6 +157,20 @@ function CashboxTransactions() {
 
   const totalPages = data?.total_pages ?? 1;
   const total = data?.total ?? 0;
+
+  const handleOpenPaymentDetails = (id: number) => {
+    setSelectedExpenseId(null);
+    setIsExpenseDetailsOpen(false);
+    setSelectedPaymentId(id);
+    setIsPaymentDetailsOpen(true);
+  };
+
+  const handleOpenExpenseDetails = (id: number) => {
+    setSelectedPaymentId(null);
+    setIsPaymentDetailsOpen(false);
+    setSelectedExpenseId(id);
+    setIsExpenseDetailsOpen(true);
+  };
 
   return (
     <div dir="rtl" className="w-full">
@@ -245,13 +289,14 @@ function CashboxTransactions() {
                       الرصيد بعد الحركة
                     </TableHead>
                     <TableHead className="text-center">المستخدم</TableHead>
+                    <TableHead className="text-center">التفاصيل</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {isPending ? (
                     <TableRow>
                       <TableCell
-                        colSpan={9}
+                        colSpan={10}
                         className="py-10 text-center text-muted-foreground"
                       >
                         جاري تحميل كشف المعاملات...
@@ -302,12 +347,41 @@ function CashboxTransactions() {
                         <TableCell className="text-center">
                           {tx.creator?.name ?? "—"}
                         </TableCell>
+                        <TableCell className="text-center">
+                          {tx.reference_type?.includes("Payment") &&
+                          tx.reference_id ? (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              title="تفاصيل الدفعة"
+                              onClick={() =>
+                                handleOpenPaymentDetails(tx.reference_id as number)
+                              }
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          ) : tx.reference_type?.includes("Expense") &&
+                            tx.reference_id ? (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              title="تفاصيل المصروف"
+                              onClick={() =>
+                                handleOpenExpenseDetails(tx.reference_id as number)
+                              }
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          ) : (
+                            "—"
+                          )}
+                        </TableCell>
                       </TableRow>
                     ))
                   ) : (
                     <TableRow>
                       <TableCell
-                        colSpan={9}
+                        colSpan={10}
                         className="py-10 text-center text-muted-foreground"
                       >
                         لا توجد معاملات لعرضها.
@@ -359,6 +433,29 @@ function CashboxTransactions() {
           </Pagination>
         </CardFooter>
       </Card>
+      {/* Payment Details from transactions */}
+      {isPaymentDetailsOpen && paymentDetails && (
+        <PaymentDetailsModal
+          payment={paymentDetails}
+          open={isPaymentDetailsOpen}
+          onOpenChange={(open) => {
+            setIsPaymentDetailsOpen(open);
+            if (!open) setSelectedPaymentId(null);
+          }}
+        />
+      )}
+
+      {/* Expense Details from transactions */}
+      {isExpenseDetailsOpen && (
+        <ExpenseDetailsModal
+          open={isExpenseDetailsOpen}
+          onOpenChange={(open) => {
+            setIsExpenseDetailsOpen(open);
+            if (!open) setSelectedExpenseId(null);
+          }}
+          expense={expenseDetails ?? null}
+        />
+      )}
     </div>
   );
 }

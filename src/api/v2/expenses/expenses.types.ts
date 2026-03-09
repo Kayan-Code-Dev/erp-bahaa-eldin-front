@@ -53,7 +53,26 @@ export type TExpense = {
   notes: string;
   status: TExpenseStatus;
   approved_at: string | null;
+  /** عندما يتم دفع المصروف فعلياً */
+  paid_at?: string | null;
   transaction_id: number | null;
+  /** Cashbox snapshot fields (قد تكون null للبيانات القديمة) */
+  cashbox_balance_before?: number | null;
+  cashbox_balance_after?: number | null;
+  cashbox_daily_income_total?: number | null;
+  cashbox_daily_expense_total?: number | null;
+  cashbox_snapshot_meta?: {
+    date: string;
+    cashbox_id: number;
+    cashbox_name: string;
+    opening_balance: number;
+    total_income: number;
+    total_expense: number;
+    net_change: number;
+    closing_balance: number;
+    transaction_count: number;
+    reversal_count: number;
+  } | null;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;

@@ -21,6 +21,15 @@ export const getExpenses = async (params: TGetExpensesParams) => {
   }
 };
 
+export const getExpenseById = async (id: number) => {
+  try {
+    const { data } = await api.get<TExpense>(`/expenses/${id}`);
+    return data;
+  } catch (error) {
+    populateError(error, "خطأ فى جلب المصروف");
+  }
+};
+
 export const createExpense = async (data: TCreateExpenseRequest) => {
   try {
     const { data: responseData } = await api.post<TExpense>("/expenses", data);

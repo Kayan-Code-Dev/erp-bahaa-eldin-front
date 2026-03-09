@@ -28,6 +28,25 @@ export type TPayment = {
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
+  /** Cashbox snapshot fields (may be null for legacy payments) */
+  cashbox_id?: number | null;
+  transaction_id?: number | null;
+  cashbox_balance_before?: number | null;
+  cashbox_balance_after?: number | null;
+  cashbox_daily_income_total?: number | null;
+  cashbox_daily_expense_total?: number | null;
+  cashbox_snapshot_meta?: {
+    date: string;
+    cashbox_id: number;
+    cashbox_name: string;
+    opening_balance: number;
+    total_income: number;
+    total_expense: number;
+    net_change: number;
+    closing_balance: number;
+    transaction_count: number;
+    reversal_count: number;
+  } | null;
   order: {
     id: number;
     client_id: number;
