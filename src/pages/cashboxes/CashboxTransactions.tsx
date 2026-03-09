@@ -39,11 +39,11 @@ import { ExpenseDetailsModal } from "@/pages/expenses/ExpenseDetailsModal";
 
 const PER_PAGE_DEFAULT = 15;
 
-const formatMoney = (value: number | null | undefined) => {
-  if (value == null) return "—";
-  return `${Number(value).toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-  })} ج.م`;
+const formatMoney = (value: number | string | null | undefined): string => {
+  if (value === null || value === undefined) return "—";
+  const num = typeof value === "number" ? value : Number(value);
+  if (Number.isNaN(num)) return String(value);
+  return `${num.toLocaleString("en-US", { minimumFractionDigits: 2 })} ج.م`;
 };
 
 const getCategoryLabel = (category: TTransaction["category"]) => {
@@ -286,6 +286,9 @@ function CashboxTransactions() {
                     <TableHead className="text-center">الوصف</TableHead>
                     <TableHead className="text-center">المبلغ</TableHead>
                     <TableHead className="text-center">
+                      الرصيد قبل الحركة
+                    </TableHead>
+                    <TableHead className="text-center">
                       الرصيد بعد الحركة
                     </TableHead>
                     <TableHead className="text-center">المستخدم</TableHead>
@@ -296,7 +299,7 @@ function CashboxTransactions() {
                   {isPending ? (
                     <TableRow>
                       <TableCell
-                        colSpan={10}
+                        colSpan={11}
                         className="py-10 text-center text-muted-foreground"
                       >
                         جاري تحميل كشف المعاملات...
@@ -342,6 +345,9 @@ function CashboxTransactions() {
                           {formatMoney(tx.amount)}
                         </TableCell>
                         <TableCell className="text-center">
+                          {formatMoney(tx.cashbox_balance_before)}
+                        </TableCell>
+                        <TableCell className="text-center">
                           {formatMoney(tx.balance_after)}
                         </TableCell>
                         <TableCell className="text-center">
@@ -381,7 +387,7 @@ function CashboxTransactions() {
                   ) : (
                     <TableRow>
                       <TableCell
-                        colSpan={10}
+                        colSpan={11}
                         className="py-10 text-center text-muted-foreground"
                       >
                         لا توجد معاملات لعرضها.

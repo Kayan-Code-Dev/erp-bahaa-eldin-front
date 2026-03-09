@@ -45,13 +45,16 @@ export type TExpense = {
   cashbox_id: number;
   branch_id: number;
   category: string;
-  amount: number;
+  subcategory?: string | null;
+  /** API returns amount as a string, but can be treated as number in UI */
+  amount: number | string;
   expense_date: string;
   vendor: string;
   reference_number: string;
   description: string;
   notes: string;
   status: TExpenseStatus;
+  approved_by?: number | null;
   approved_at: string | null;
   /** عندما يتم دفع المصروف فعلياً */
   paid_at?: string | null;
@@ -83,6 +86,11 @@ export type TExpense = {
     name: string;
     email: string;
   };
+  approver?: {
+    id: number;
+    name: string;
+    email: string;
+  } | null;
 };
 
 export type TExpenseStatus = "pending" | "approved" | "paid" | "cancelled";

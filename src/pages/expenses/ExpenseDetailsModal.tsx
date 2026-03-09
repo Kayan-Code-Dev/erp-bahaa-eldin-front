@@ -142,10 +142,19 @@ export function ExpenseDetailsModal({
             )}
 
             <div className="modal-section">
-              <p className="modal-section-title">أنشئ بواسطة</p>
-              <p className="text-sm text-foreground">
-                {expense.creator?.name} ({expense.creator?.email})
-              </p>
+              <p className="modal-section-title">المستخدمون</p>
+              <div className="space-y-1 text-sm text-foreground">
+                <p>
+                  <span className="font-medium">أنشئ بواسطة: </span>
+                  {expense.creator?.name} ({expense.creator?.email})
+                </p>
+                {expense.approver && (
+                  <p>
+                    <span className="font-medium">تمت الموافقة بواسطة: </span>
+                    {expense.approver.name} ({expense.approver.email})
+                  </p>
+                )}
+              </div>
             </div>
 
             {(expense.cashbox_balance_before != null ||
