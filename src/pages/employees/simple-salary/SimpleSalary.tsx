@@ -36,7 +36,7 @@ const PER_PAGE = 15;
 
 function formatMoney(value: number | null | undefined): string {
   if (value == null) return "—";
-  return `${Number(value).toLocaleString("ar-EG", { minimumFractionDigits: 2 })}`;
+  return `${Number(value).toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
 }
 
 export default function SimpleSalary() {
@@ -97,27 +97,27 @@ export default function SimpleSalary() {
     <div dir="rtl" className="min-h-0 w-full flex-1">
       <div className="w-full space-y-6 px-4 py-6 sm:px-6 lg:px-8">
         <Card className="overflow-hidden rounded-xl border shadow-sm">
-          <CardHeader className="space-y-1 border-b border-border/80 bg-muted/20 px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-            <div className="space-y-1.5">
+          <CardHeader className="space-y-2 border-b border-border/80 bg-muted/20 px-6 py-5">
+            <div className="flex flex-wrap items-center gap-3">
               <CardTitle className="flex items-center gap-2.5 text-xl font-semibold tracking-tight">
                 <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   <FileBarChart className="h-5 w-5" />
                 </span>
                 كشف رواتب الموظفين
               </CardTitle>
-              <CardDescription className="text-sm text-muted-foreground">
-                عرض الموظفين وإجراء عمليات الراتب من عمود الإجراءات في كل صف.
-              </CardDescription>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowFilters((prev) => !prev)}
+                className="ms-auto mt-1 h-8 gap-1.5 px-3 text-xs sm:mt-0"
+              >
+                <Filter className="ml-1 h-3.5 w-3.5" />
+                {showFilters ? "إخفاء الفلاتر" : "عرض الفلاتر"}
+              </Button>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowFilters((prev) => !prev)}
-              className="mt-2 shrink-0 sm:mt-0"
-            >
-              <Filter className="ml-2 h-4 w-4" />
-              {showFilters ? "إخفاء الفلاتر" : "عرض الفلاتر"}
-            </Button>
+            <CardDescription className="text-sm text-muted-foreground">
+              عرض الموظفين وإجراء عمليات الراتب من عمود الإجراءات في كل صف.
+            </CardDescription>
           </CardHeader>
 
           {showFilters && (

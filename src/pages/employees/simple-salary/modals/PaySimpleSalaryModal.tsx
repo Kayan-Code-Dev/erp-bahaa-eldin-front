@@ -111,7 +111,7 @@ export function PaySimpleSalaryModal({
           <DialogDescription className="mt-1 text-sm text-muted-foreground">
             {summary.employee.name} — {summary.period} — المتبقي:{" "}
             <span className="font-semibold tabular-nums text-foreground">
-              {remaining.toLocaleString("ar-EG", { minimumFractionDigits: 2 })} ج.م
+              {remaining.toLocaleString("en-US", { minimumFractionDigits: 2 })} ج.م
             </span>
           </DialogDescription>
         </DialogHeader>
@@ -182,7 +182,7 @@ export function PaySimpleSalaryModal({
                   </FormControl>
                   {isOverRemaining && (
                     <p className="text-xs font-medium text-destructive">
-                      المبلغ يتجاوز المتبقي ({remaining.toLocaleString("ar-EG")}).
+                      المبلغ يتجاوز المتبقي ({remaining.toLocaleString("en-US")}).
                     </p>
                   )}
                   <FormMessage />

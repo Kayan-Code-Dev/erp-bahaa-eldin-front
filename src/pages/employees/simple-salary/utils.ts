@@ -3,5 +3,5 @@ export function formatSimpleSalaryMoney(
   value: number | null | undefined
 ): string {
   if (value == null) return "—";
-  return `${Number(value).toLocaleString("ar-EG", { minimumFractionDigits: 2 })}`;
+  return `${Number(value).toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
 }
