@@ -21,6 +21,7 @@ export const employeesRoutes = () => {
             "hr.custody.view",
             "hr.documents.view",
             "hr.deductions.view",
+            "hr.payroll.view",
           ]}
         />
       }
