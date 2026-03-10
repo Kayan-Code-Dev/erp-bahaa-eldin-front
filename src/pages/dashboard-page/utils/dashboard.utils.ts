@@ -1,6 +1,3 @@
-/**
- * تنسيق الأرقام والعملات والنسب للوحة التحكم
- */
 export function fmtNum(value: number | undefined | null): string {
   if (value === undefined || value === null || Number.isNaN(value)) return "—";
   return Number(value).toLocaleString("en-US");

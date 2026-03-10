@@ -5,11 +5,7 @@ type ChartContainerProps = {
   children: React.ReactNode;
   height?: string | number;
   className?: string;
-  /**
-   * عند true: يملأ ارتفاع الأب (flex) مع حد أدنى — ليتوازن مع بطاقة مجاورة أطول.
-   */
   fillParent?: boolean;
-  /** مع fillParent: الحد الأدنى للارتفاع بالبكسل */
   minHeight?: number;
 };
 

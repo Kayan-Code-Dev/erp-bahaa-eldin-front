@@ -1,7 +1,6 @@
 type EmptyChartStateProps = {
   icon: React.ReactNode;
   message: string;
-  /** ارتفاع المنطقة بالبكسل (افتراضي 200) */
   minHeight?: number;
   title?: string;
   className?: string;

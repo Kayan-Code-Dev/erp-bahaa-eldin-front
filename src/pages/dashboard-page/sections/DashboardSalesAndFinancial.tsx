@@ -22,7 +22,6 @@ export function DashboardSalesAndFinancial({
         description="توزيع الطلبات والإيرادات والمصروفات"
         className="mt-10"
       />
-      {/* items-stretch + نفس min-height — المخطط يملأ البطاقة (fillHeight) ليطابق ارتفاع بطاقة المالية */}
       <section className="mt-4 grid grid-cols-1 items-stretch gap-6 lg:grid-cols-12 lg:auto-rows-fr">
         <Card className="flex min-h-[560px] flex-col overflow-hidden rounded-2xl border bg-card/80 shadow-sm backdrop-blur-sm lg:col-span-8">
           <CardHeader className="shrink-0 pb-2">

@@ -10,14 +10,10 @@ type DashboardGridCardProps = {
   title: React.ReactNode;
   description?: React.ReactNode;
   children: React.ReactNode;
-  /** ارتفاع أدنى موحّد لمحتوى المخطط داخل البطاقة */
   contentMinHeight?: number;
   className?: string;
 };
 
-/**
- * غلاف بطاقة للشبكة: ارتفاع متساوٍ في الصف + محتوى يملأ المساحة بدون فراغات غريبة.
- */
 export function DashboardGridCard({
   title,
   description,
@@ -36,7 +32,6 @@ export function DashboardGridCard({
         )}
       </CardHeader>
       <CardContent className="flex min-h-0 flex-col pt-0">
-        {/* minHeight فقط بدون flex-1 حتى لا تتمدد البطاقة لأعلى من المحتوى */}
         <div className="flex min-h-0 flex-col" style={{ minHeight: contentMinHeight }}>
           {children}
         </div>

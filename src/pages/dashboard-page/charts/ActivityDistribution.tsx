@@ -35,10 +35,6 @@ type ActivityDistributionProps = {
   activity: TDashboardActivity | undefined;
 };
 
-/**
- * عرض توزيع النشاط كقائمة مرتبة مع شريط نسبة لكل فئة —
- * أوضح من الدونات عند وجود عدد كبير من الفئات.
- */
 export function ActivityDistribution({ activity }: ActivityDistributionProps) {
   const items = buildActivityItems(activity);
   const totalActivities = activity?.total_activities ?? items.reduce((s, i) => s + i.value, 0);
@@ -58,7 +54,6 @@ export function ActivityDistribution({ activity }: ActivityDistributionProps) {
 
   return (
     <div className="flex flex-col gap-2">
-      {/* ملخص علوي — مضغوط */}
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-muted/20 px-2 py-1.5 text-xs">
         <span className="text-muted-foreground">إجمالي النشاطات</span>
         <span className="font-semibold tabular-nums">{fmtNum(totalActivities)}</span>
@@ -68,7 +63,6 @@ export function ActivityDistribution({ activity }: ActivityDistributionProps) {
         </span>
       </div>
 
-      {/* قائمة بحد أقصى للارتفاع — تمرير عند كثرة الفئات */}
       <div className="max-h-52 overflow-y-auto rounded-lg border border-border/60 bg-muted/10">
         <ul className="divide-y divide-border/50 p-1.5">
           {items.map((item, index) => {

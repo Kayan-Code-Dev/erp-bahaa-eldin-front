@@ -85,8 +85,6 @@ export function DashboardDistributions({
   );
 
   const n = blocks.length;
-  // شبكة ديناميكية: بدون أعمدة فارغة — 1 بطاقة تملأ العرض، 2 بنصفين، 3 بثلاثة أعمدة
-  /* items-start + auto-rows-auto: كل بطاقة بارتفاع المحتوى فقط — بدون تمدد لموازاة أطول بطاقة */
   const gridClass =
     n === 1
       ? "grid grid-cols-1"

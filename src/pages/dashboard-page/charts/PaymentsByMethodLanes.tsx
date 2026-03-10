@@ -1,7 +1,3 @@
-/**
- * عرض المدفوعات حسب النوع بشكل شرائح نسبية (Proportional Lanes).
- * مكوّن مخصص للوحة التحكم فقط — لا يعتمد على نفس أنواع المخططات المستخدمة في الصفحات الأخرى.
- */
 import { Banknote } from "lucide-react";
 import { EmptyChartState } from "../components/EmptyChartState";
 import { CHART_COLORS, PAYMENT_METHOD_LABELS } from "../constants/dashboard.constants";
@@ -23,27 +19,27 @@ function buildLanes(payments: TDashboardPayments | undefined): LaneItem[] {
   const sumTotal = entries.reduce((s, [, info]) => s + (info?.total ?? 0), 0);
   const sumCount = entries.reduce((s, [, info]) => s + (info?.count ?? 0), 0);
   const useAmounts = sumTotal > 0;
+  const lanes: LaneItem[] = [];
 
-  return entries
-    .map(([method, info], i) => {
-      const count = info?.count ?? 0;
-      const total = info?.total ?? 0;
-      const denominator = useAmounts ? sumTotal : sumCount > 0 ? sumCount : 1;
-      const numerator = useAmounts ? total : count;
-      if (numerator <= 0 && count <= 0) return null;
-      const percentOfTotal =
-        denominator > 0 ? Math.min(100, Math.round((numerator / denominator) * 1000) / 10) : 0;
-      return {
-        key: method,
-        label: PAYMENT_METHOD_LABELS[method] ?? method,
-        count,
-        total,
-        fill: CHART_COLORS[i % CHART_COLORS.length],
-        percentOfTotal: percentOfTotal || (count > 0 ? 1 : 0),
-      };
-    })
-    .filter((d): d is LaneItem => d != null)
-    .sort((a, b) => (b.total || b.count) - (a.total || a.count));
+  entries.forEach(([method, info], i) => {
+    const count = info?.count ?? 0;
+    const total = info?.total ?? 0;
+    const denominator = useAmounts ? sumTotal : sumCount > 0 ? sumCount : 1;
+    const numerator = useAmounts ? total : count;
+    if (numerator <= 0 && count <= 0) return;
+    const percentOfTotal =
+      denominator > 0 ? Math.min(100, Math.round((numerator / denominator) * 1000) / 10) : 0;
+    lanes.push({
+      key: method,
+      label: PAYMENT_METHOD_LABELS[method] ?? method,
+      count,
+      total,
+      fill: String(CHART_COLORS[i % CHART_COLORS.length]),
+      percentOfTotal: percentOfTotal || (count > 0 ? 1 : 0),
+    });
+  });
+
+  return lanes.sort((a, b) => (b.total || b.count) - (a.total || a.count));
 }
 
 type PaymentsByMethodLanesProps = {
@@ -70,7 +66,6 @@ export function PaymentsByMethodLanes({ payments }: PaymentsByMethodLanesProps) 
 
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-border/60 bg-muted/10 p-3">
-      {/* ملخص علوي — مضغوط */}
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-border/50 pb-2">
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <Banknote className="h-4 w-4 shrink-0" />
@@ -88,7 +83,6 @@ export function PaymentsByMethodLanes({ payments }: PaymentsByMethodLanesProps) 
         </div>
       </div>
 
-      {/* الشرائح — بدون تمدد؛ تمرير عند كثرة الأنواع */}
       <ul className="flex max-h-40 flex-col gap-2 overflow-y-auto">
         {lanes.map((lane) => (
           <li key={lane.key} className="space-y-1">
