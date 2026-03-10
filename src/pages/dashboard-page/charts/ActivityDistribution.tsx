@@ -53,7 +53,7 @@ export function ActivityDistribution({ activity }: ActivityDistributionProps) {
   const maxValue = items[0]?.value ?? 1;
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex h-full min-h-0 flex-col gap-2">
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-muted/20 px-2 py-1.5 text-xs">
         <span className="text-muted-foreground">إجمالي النشاطات</span>
         <span className="font-semibold tabular-nums">{fmtNum(totalActivities)}</span>

@@ -55,7 +55,7 @@ export function PaymentsByMethodLanes({ payments }: PaymentsByMethodLanesProps) 
         icon={<Banknote className="h-12 w-12 text-muted-foreground/50" />}
         message="لا توجد بيانات مدفوعات للفترة"
         title="المدفوعات حسب النوع"
-        className="min-h-0 flex-1 justify-center"
+        className="h-full min-h-[200px] flex-1 justify-center"
         minHeight={200}
       />
     );

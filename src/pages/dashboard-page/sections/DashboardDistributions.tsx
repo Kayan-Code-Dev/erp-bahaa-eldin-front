@@ -45,7 +45,7 @@ export function DashboardDistributions({
           </>
         }
         description="حسب نوع الكيان أو الإجراء — مرتب حسب العدد مع نسبة كل فئة"
-        contentMinHeight={220}
+        contentMinHeight={270}
       >
         <ActivityDistribution activity={activity} />
       </DashboardGridCard>
@@ -62,7 +62,7 @@ export function DashboardDistributions({
           </>
         }
         description={`حلقات نسبية — معدل الاستخدام ${fmtPct(inventory?.utilization_rate)}`}
-        contentMinHeight={220}
+        contentMinHeight={270}
       >
         <InventoryRadialChart inventory={inventory} />
       </DashboardGridCard>
@@ -78,7 +78,7 @@ export function DashboardDistributions({
         </>
       }
       description="شرائح نسبية — عرض توزيع كل نوع دفع مع المبلغ وعدد العمليات"
-      contentMinHeight={220}
+      contentMinHeight={270}
     >
       <PaymentsByMethodLanes payments={payments} />
     </DashboardGridCard>
@@ -89,8 +89,8 @@ export function DashboardDistributions({
     n === 1
       ? "grid grid-cols-1"
       : n === 2
-        ? "grid grid-cols-1 items-start gap-6 md:grid-cols-2"
-        : "grid grid-cols-1 items-start gap-6 md:grid-cols-2 lg:grid-cols-3";
+        ? "grid grid-cols-1 gap-6 md:grid-cols-2 md:items-stretch md:auto-rows-fr"
+        : "grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 lg:items-stretch lg:auto-rows-fr";
 
   return (
     <>
