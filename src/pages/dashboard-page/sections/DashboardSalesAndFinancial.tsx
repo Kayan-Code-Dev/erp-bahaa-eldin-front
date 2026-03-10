@@ -22,7 +22,8 @@ export function DashboardSalesAndFinancial({
         description="توزيع الطلبات والإيرادات والمصروفات"
         className="mt-10"
       />
-      <section className="mt-4 grid grid-cols-1 gap-6 lg:grid-cols-3">
+      {/* items-start حتى لا يمتد العمود الأيمن ليملأ ارتفاع الصف عند قلة محتوى البطاقة المالية */}
+      <section className="mt-4 grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
         <Card className="overflow-hidden rounded-2xl border bg-card/80 shadow-sm backdrop-blur-sm lg:col-span-2">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">المبيعات حسب الحالة</CardTitle>

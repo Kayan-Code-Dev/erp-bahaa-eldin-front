@@ -13,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { DollarSign } from "lucide-react";
 import { SummaryRow } from "../components/SummaryRow";
 import { fmtCur, fmtPct } from "../utils/dashboard.utils";
@@ -37,8 +38,11 @@ function buildFinancialChartData(financial: TDashboardFinancial | undefined): Fi
 export function FinancialSummaryCard({ financial }: FinancialSummaryCardProps) {
   const chartData = buildFinancialChartData(financial);
 
+  const cashboxes = financial?.cashbox_balances;
+  const cashboxCount = cashboxes?.length ?? 0;
+
   return (
-    <Card className="overflow-hidden rounded-2xl border bg-card/80 shadow-sm backdrop-blur-sm">
+    <Card className="flex flex-col overflow-hidden rounded-2xl border bg-card/80 shadow-sm backdrop-blur-sm lg:self-start">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-lg">
           <DollarSign className="h-5 w-5 text-muted-foreground" />
@@ -48,20 +52,19 @@ export function FinancialSummaryCard({ financial }: FinancialSummaryCardProps) {
           مقارنة إجمالي الإيرادات والمصروفات
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="flex gap-3 rounded-xl bg-muted/50 p-3">
-            <SummaryRow
-              label="إيرادات"
-              value={fmtCur(financial?.total_income)}
-              accent="text-emerald-600 dark:text-emerald-400"
-            />
-            <SummaryRow
-              label="مصروفات"
-              value={fmtCur(financial?.total_expenses)}
-              accent="text-red-600 dark:text-red-400"
-            />
-          </div>
+      <CardContent className="space-y-4">
+        <div className="flex gap-3 rounded-xl bg-muted/50 p-3">
+          <SummaryRow
+            label="إيرادات"
+            value={fmtCur(financial?.total_income)}
+            accent="text-emerald-600 dark:text-emerald-400"
+          />
+          <SummaryRow
+            label="مصروفات"
+            value={fmtCur(financial?.total_expenses)}
+            accent="text-red-600 dark:text-red-400"
+          />
+        </div>
           <SummaryRow
             label="الربح"
             value={fmtCur(financial?.profit)}
@@ -87,25 +90,36 @@ export function FinancialSummaryCard({ financial }: FinancialSummaryCardProps) {
               </ResponsiveContainer>
             </div>
           )}
-          {financial?.cashbox_balances && financial.cashbox_balances.length > 0 && (
+          {cashboxes && cashboxCount > 0 && (
             <div className="border-t pt-3">
-              <p className="mb-2 text-xs font-semibold text-muted-foreground">
-                أرصدة الصناديق
-              </p>
-              <ul className="space-y-1.5">
-                {financial.cashbox_balances.map((cb) => (
-                  <li
-                    key={cb.cashbox_id}
-                    className="flex justify-between rounded-lg bg-muted/50 px-3 py-2 text-sm"
-                  >
-                    <span className="font-medium">{cb.name}</span>
-                    <span className="tabular-nums">{fmtCur(cb.balance)}</span>
-                  </li>
-                ))}
-              </ul>
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <p className="text-xs font-semibold text-muted-foreground">
+                  أرصدة الصناديق
+                </p>
+                <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium tabular-nums text-muted-foreground">
+                  {cashboxCount}
+                </span>
+              </div>
+              {/* ارتفاع ثابت + تمرير حتى لا تمتد البطاقة وتكبّر الصف بجانب مخطط المبيعات */}
+              <ScrollArea className="h-44 rounded-lg border border-border/60 bg-muted/20 pr-1">
+                <ul className="space-y-1 p-1.5">
+                  {cashboxes.map((cb) => (
+                    <li
+                      key={cb.cashbox_id}
+                      className="flex items-center justify-between gap-2 rounded-md bg-background/80 px-2.5 py-1.5 text-sm shadow-sm"
+                    >
+                      <span className="min-w-0 flex-1 truncate font-medium" title={cb.name}>
+                        {cb.name}
+                      </span>
+                      <span className="shrink-0 tabular-nums text-xs font-semibold">
+                        {fmtCur(cb.balance)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </ScrollArea>
             </div>
           )}
-        </div>
       </CardContent>
     </Card>
   );
