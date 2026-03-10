@@ -29,7 +29,7 @@ export function KpiCard({
 
   return (
     <Card
-      className={`rounded-2xl border border-border border-l-4 ${borderColor} shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 bg-card`}
+      className={`h-full rounded-2xl border border-border border-l-4 ${borderColor} shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 bg-card`}
     >
       <CardContent className="p-5">
         <div className="flex items-start justify-between gap-3">

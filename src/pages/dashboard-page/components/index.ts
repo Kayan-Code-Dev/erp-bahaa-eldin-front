@@ -8,3 +8,5 @@ export { DashboardHeader } from "./DashboardHeader";
 export { DashboardFilters } from "./DashboardFilters";
 export { DashboardSkeleton } from "./DashboardSkeleton";
 export { DashboardError } from "./DashboardError";
+export { DashboardFooter } from "./DashboardFooter";
+export { DashboardGridCard } from "./DashboardGridCard";

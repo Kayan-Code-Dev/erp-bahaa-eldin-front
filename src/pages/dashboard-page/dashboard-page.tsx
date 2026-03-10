@@ -1,12 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { useGetDashboardOverviewQueryOptions } from "@/api/v2/dashboard/dashboard.hooks";
-import { useDashboardFilters } from "./hooks/useDashboardFilters";
+import { useDashboardFilters } from "./hooks/index";
 import {
   DashboardHeader,
   DashboardFilters,
   DataContextStrip,
   DashboardSkeleton,
   DashboardError,
+  DashboardFooter,
 } from "./components/index";
 import {
   DashboardKpis,
@@ -91,11 +92,7 @@ function DashboardPage() {
 
             <DashboardHRSection hr={data.hr} />
 
-            <footer className="mt-10 border-t border-border pt-6">
-              <p className="text-center text-xs text-muted-foreground">
-                لوحة التحكم — البيانات تعكس الفترة والفلاتر المحددة
-              </p>
-            </footer>
+            <DashboardFooter />
           </>
         )}
       </div>

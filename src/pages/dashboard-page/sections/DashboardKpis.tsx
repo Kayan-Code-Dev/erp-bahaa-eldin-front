@@ -49,7 +49,7 @@ export function DashboardKpis({
         title="مؤشرات الأداء"
         description="نظرة سريعة على المؤشرات الرئيسية للفترة المحددة"
       />
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 items-stretch gap-5 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
           icon={<ShoppingBag className="h-6 w-6 text-amber-600" aria-hidden />}
           iconBg="bg-amber-500/10"

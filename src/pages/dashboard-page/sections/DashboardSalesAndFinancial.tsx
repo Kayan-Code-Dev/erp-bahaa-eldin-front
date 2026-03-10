@@ -22,20 +22,28 @@ export function DashboardSalesAndFinancial({
         description="توزيع الطلبات والإيرادات والمصروفات"
         className="mt-10"
       />
-      {/* items-start حتى لا يمتد العمود الأيمن ليملأ ارتفاع الصف عند قلة محتوى البطاقة المالية */}
-      <section className="mt-4 grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
-        <Card className="overflow-hidden rounded-2xl border bg-card/80 shadow-sm backdrop-blur-sm lg:col-span-2">
-          <CardHeader className="pb-2">
+      {/* items-stretch + نفس min-height — المخطط يملأ البطاقة (fillHeight) ليطابق ارتفاع بطاقة المالية */}
+      <section className="mt-4 grid grid-cols-1 items-stretch gap-6 lg:grid-cols-12 lg:auto-rows-fr">
+        <Card className="flex min-h-[560px] flex-col overflow-hidden rounded-2xl border bg-card/80 shadow-sm backdrop-blur-sm lg:col-span-8">
+          <CardHeader className="shrink-0 pb-2">
             <CardTitle className="text-lg">المبيعات حسب الحالة</CardTitle>
             <CardDescription className="text-right">
-              عدد الطلبات والإيرادات (بالآلاف) حسب حالة الطلب
+              أعمدة + خط: عدد الطلبات وإيرادات الآلاف حسب الحالة
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <SalesByStatusChart data={salesChartData} />
+          <CardContent className="flex min-h-0 flex-1 flex-col pb-4">
+            <div className="flex min-h-0 flex-1 flex-col">
+              <SalesByStatusChart
+                data={salesChartData}
+                fillHeight
+                fillMinHeight={500}
+              />
+            </div>
           </CardContent>
         </Card>
-        <FinancialSummaryCard financial={financial} />
+        <div className="flex min-h-[560px] lg:col-span-4">
+          <FinancialSummaryCard financial={financial} />
+        </div>
       </section>
     </>
   );

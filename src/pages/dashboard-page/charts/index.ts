@@ -5,6 +5,7 @@ export { FinancialSummaryCard } from "./FinancialSummaryCard";
 export { DonutChart } from "./DonutChart";
 export { ActivityDistribution } from "./ActivityDistribution";
 export type { DonutDataItem } from "./DonutChart";
-export { PaymentsByMethodChart } from "./PaymentsByMethodChart";
+export { InventoryRadialChart } from "./InventoryRadialChart";
+export { PaymentsByMethodLanes } from "./PaymentsByMethodLanes";
 export { AttendanceTrendChart, PayrollTrendChart } from "./TrendCharts";
 export type { AttendanceTrendPoint, PayrollTrendPoint } from "./TrendCharts";

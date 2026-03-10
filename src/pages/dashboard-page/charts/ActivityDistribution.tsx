@@ -1,4 +1,3 @@
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { CHART_COLORS } from "../constants/dashboard.constants";
 import { fmtNum, fmtPct } from "../utils/dashboard.utils";
 import type { TDashboardActivity } from "@/api/v2/dashboard/dashboard.types";
@@ -49,6 +48,8 @@ export function ActivityDistribution({ activity }: ActivityDistributionProps) {
       <EmptyChartState
         icon={<Activity className="h-12 w-12 text-muted-foreground/50" />}
         message="لا توجد بيانات نشاط"
+        className="min-h-0 flex-1 justify-center"
+        minHeight={200}
       />
     );
   }
@@ -56,9 +57,9 @@ export function ActivityDistribution({ activity }: ActivityDistributionProps) {
   const maxValue = items[0]?.value ?? 1;
 
   return (
-    <div className="space-y-3">
-      {/* ملخص علوي — غير معجوج */}
-      <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-muted/20 px-3 py-2 text-sm">
+    <div className="flex flex-col gap-2">
+      {/* ملخص علوي — مضغوط */}
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-muted/20 px-2 py-1.5 text-xs">
         <span className="text-muted-foreground">إجمالي النشاطات</span>
         <span className="font-semibold tabular-nums">{fmtNum(totalActivities)}</span>
         <span className="text-muted-foreground">عدد الفئات</span>
@@ -67,13 +68,13 @@ export function ActivityDistribution({ activity }: ActivityDistributionProps) {
         </span>
       </div>
 
-      {/* قائمة قابلة للتمرير — كل صف: اسم + عدد + نسبة + شريط نسبي */}
-      <ScrollArea className="h-72 rounded-lg border border-border/60 bg-muted/10">
-        <ul className="divide-y divide-border/50 p-2">
+      {/* قائمة بحد أقصى للارتفاع — تمرير عند كثرة الفئات */}
+      <div className="max-h-52 overflow-y-auto rounded-lg border border-border/60 bg-muted/10">
+        <ul className="divide-y divide-border/50 p-1.5">
           {items.map((item, index) => {
             const barWidth = maxValue > 0 ? (item.value / maxValue) * 100 : 0;
             return (
-              <li key={`${item.name}-${index}`} className="py-2.5 first:pt-1">
+              <li key={`${item.name}-${index}`} className="py-1.5 first:pt-0.5">
                 <div className="flex items-start justify-between gap-2">
                   <span
                     className="min-w-0 flex-1 wrap-break-word text-right text-sm font-medium leading-snug"
@@ -105,7 +106,7 @@ export function ActivityDistribution({ activity }: ActivityDistributionProps) {
             );
           })}
         </ul>
-      </ScrollArea>
+      </div>
     </div>
   );
 }

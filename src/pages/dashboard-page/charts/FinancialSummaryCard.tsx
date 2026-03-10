@@ -1,11 +1,5 @@
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Cell,
-} from "recharts";
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
+import { CHART_TOOLTIP_STYLE } from "../constants/dashboard.constants";
 import {
   Card,
   CardContent,
@@ -42,18 +36,18 @@ export function FinancialSummaryCard({ financial }: FinancialSummaryCardProps) {
   const cashboxCount = cashboxes?.length ?? 0;
 
   return (
-    <Card className="flex flex-col overflow-hidden rounded-2xl border bg-card/80 shadow-sm backdrop-blur-sm lg:self-start">
-      <CardHeader className="pb-2">
+    <Card className="flex h-full w-full min-h-[560px] flex-col overflow-hidden rounded-2xl border bg-card/80 shadow-sm backdrop-blur-sm">
+      <CardHeader className="shrink-0 pb-2">
         <CardTitle className="flex items-center gap-2 text-lg">
           <DollarSign className="h-5 w-5 text-muted-foreground" />
           الإيرادات والمصروفات
         </CardTitle>
         <CardDescription className="text-right">
-          مقارنة إجمالي الإيرادات والمصروفات
+          دائرة توزيع — إيرادات مقابل مصروفات ثم الأرصدة
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex gap-3 rounded-xl bg-muted/50 p-3">
+      <CardContent className="flex min-h-0 flex-1 flex-col space-y-4">
+        <div className="flex shrink-0 gap-3 rounded-xl bg-muted/50 p-3">
           <SummaryRow
             label="إيرادات"
             value={fmtCur(financial?.total_income)}
@@ -71,27 +65,39 @@ export function FinancialSummaryCard({ financial }: FinancialSummaryCardProps) {
             accent="text-emerald-600 dark:text-emerald-400"
           />
           <SummaryRow label="هامش الربح" value={fmtPct(financial?.profit_margin)} />
+          {/* مخطط دائري للإيرادات/المصروفات — شكل مختلف عن الأعمدة في باقي الأقسام */}
           {chartData.length > 0 && (
-            <div className="h-[160px]">
+            <div className="h-[180px]">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={chartData}
-                  layout="vertical"
-                  margin={{ top: 0, right: 8, left: 50, bottom: 0 }}
-                >
-                  <XAxis type="number" hide />
-                  <YAxis type="category" dataKey="name" width={50} tick={{ fontSize: 11 }} />
-                  <Bar dataKey="value" radius={[0, 4, 4, 0]}>
+                <PieChart>
+                  <Pie
+                    data={chartData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={40}
+                    outerRadius={65}
+                    paddingAngle={2}
+                    label={false}
+                  >
                     {chartData.map((_, i) => (
-                      <Cell key={i} fill={chartData[i].fill} />
+                      <Cell key={i} fill={chartData[i].fill} stroke="var(--card)" strokeWidth={2} />
                     ))}
-                  </Bar>
-                </BarChart>
+                  </Pie>
+                  <Tooltip
+                    formatter={(value) =>
+                      value != null ? Number(value).toLocaleString("en-US") : ""
+                    }
+                    contentStyle={CHART_TOOLTIP_STYLE}
+                  />
+                  <Legend layout="horizontal" verticalAlign="bottom" align="center" />
+                </PieChart>
               </ResponsiveContainer>
             </div>
           )}
           {cashboxes && cashboxCount > 0 && (
-            <div className="border-t pt-3">
+            <div className="mt-auto min-h-0 border-t pt-3">
               <div className="mb-2 flex items-center justify-between gap-2">
                 <p className="text-xs font-semibold text-muted-foreground">
                   أرصدة الصناديق
