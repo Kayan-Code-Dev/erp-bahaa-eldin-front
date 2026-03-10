@@ -49,7 +49,9 @@ export function AttendanceTrendChart({ data }: AttendanceTrendChartProps) {
             <XAxis dataKey="date" tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} />
             <YAxis tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} />
             <Tooltip
-              formatter={(value: number) => `${Number(value).toFixed(1)}%`}
+              formatter={(value) =>
+                value != null ? `${Number(value).toFixed(1)}%` : ""
+              }
               contentStyle={CHART_TOOLTIP_STYLE}
             />
             <Area

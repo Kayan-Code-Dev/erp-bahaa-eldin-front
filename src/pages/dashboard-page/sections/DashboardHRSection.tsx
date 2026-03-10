@@ -51,6 +51,9 @@ function mapPayrollTrend(
 export function DashboardHRSection({ hr }: DashboardHRSectionProps) {
   const attTrend = mapAttendanceTrend(hr?.trends?.attendance_trends);
   const payTrend = mapPayrollTrend(hr?.trends?.payroll_trends);
+  const mostActiveEmployees = hr?.employee_activity?.most_active_employees;
+  const hasMostActive =
+    Array.isArray(mostActiveEmployees) && mostActiveEmployees.length > 0;
 
   return (
     <>
@@ -138,7 +141,7 @@ export function DashboardHRSection({ hr }: DashboardHRSectionProps) {
               )}
             </TabsContent>
             <TabsContent value="activity" className="space-y-4">
-              {hr?.employee_activity?.most_active_employees?.length > 0 ? (
+              {hasMostActive && mostActiveEmployees ? (
                 <div className="overflow-hidden rounded-xl border">
                   <Table>
                     <TableHeader>
@@ -148,7 +151,7 @@ export function DashboardHRSection({ hr }: DashboardHRSectionProps) {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {hr.employee_activity.most_active_employees.map((emp) => (
+                      {mostActiveEmployees.map((emp) => (
                         <TableRow key={emp.user_id}>
                           <TableCell className="text-right font-medium">
                             {emp.employee_name}

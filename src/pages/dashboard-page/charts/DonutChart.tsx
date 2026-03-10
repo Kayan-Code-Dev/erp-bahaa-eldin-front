@@ -39,7 +39,12 @@ export function DonutChart({
             paddingAngle={2}
             label={
               labelFormatter
-                ? ({ name, value, percent }) => labelFormatter(name, value, percent * 100)
+                ? ({ name, value, percent }) =>
+                    labelFormatter(
+                      String(name ?? ""),
+                      Number(value ?? 0),
+                      (typeof percent === "number" ? percent : 0) * 100
+                    )
                 : undefined
             }
           >
@@ -48,7 +53,9 @@ export function DonutChart({
             ))}
           </Pie>
           <Tooltip
-            formatter={(value: number) => value.toLocaleString("en-US")}
+            formatter={(value) =>
+              value != null ? Number(value).toLocaleString("en-US") : ""
+            }
             contentStyle={CHART_TOOLTIP_STYLE}
           />
         </PieChart>

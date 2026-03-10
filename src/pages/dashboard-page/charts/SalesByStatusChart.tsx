@@ -54,7 +54,9 @@ export function SalesByStatusChart({ data }: SalesByStatusChartProps) {
             tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
           />
           <Tooltip
-            formatter={(value: number) => value.toLocaleString("en-US")}
+            formatter={(value) =>
+              value != null ? Number(value).toLocaleString("en-US") : ""
+            }
             contentStyle={CHART_TOOLTIP_STYLE}
           />
           <Legend />

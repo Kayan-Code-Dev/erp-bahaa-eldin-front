@@ -7,13 +7,13 @@ import {
   DataContextStrip,
   DashboardSkeleton,
   DashboardError,
-} from "./components";
+} from "./components/index";
 import {
   DashboardKpis,
   DashboardSalesAndFinancial,
   DashboardDistributions,
   DashboardHRSection,
-} from "./sections";
+} from "./sections/index";
 
 function DashboardPage() {
   const {

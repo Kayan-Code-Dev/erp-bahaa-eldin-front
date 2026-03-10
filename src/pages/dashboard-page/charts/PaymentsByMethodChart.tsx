@@ -44,7 +44,9 @@ export function PaymentsByMethodChart({ payments }: PaymentsByMethodChartProps) 
           <XAxis type="number" tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} />
           <YAxis type="category" dataKey="name" width={52} tick={{ fontSize: 10 }} />
           <Tooltip
-            formatter={(value: number) => value.toLocaleString("en-US")}
+            formatter={(value) =>
+              value != null ? Number(value).toLocaleString("en-US") : ""
+            }
             contentStyle={CHART_TOOLTIP_STYLE}
           />
           <Bar dataKey="عدد" name="عدد العمليات" radius={[0, 4, 4, 0]}>

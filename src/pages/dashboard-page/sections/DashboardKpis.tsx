@@ -14,7 +14,6 @@ import { fmtCur, fmtNum, fmtPct } from "../utils/dashboard.utils";
 import type {
   TDashboardActivity,
   TDashboardSales,
-  TDashboardClients,
   TDashboardInventory,
   TDashboardPayments,
 } from "@/api/v2/dashboard/dashboard.types";
