@@ -8,8 +8,8 @@ import {
 import { Activity, Package, Banknote } from "lucide-react";
 import { SectionHeader } from "../components/SectionHeader";
 import { DonutChart } from "../charts/DonutChart";
+import { ActivityDistribution } from "../charts/ActivityDistribution";
 import { PaymentsByMethodChart } from "../charts/PaymentsByMethodChart";
-import { CHART_COLORS } from "../constants/dashboard.constants";
 import { fmtPct } from "../utils/dashboard.utils";
 import type {
   TDashboardActivity,
@@ -17,21 +17,7 @@ import type {
   TDashboardPayments,
 } from "@/api/v2/dashboard/dashboard.types";
 import type { DonutDataItem } from "../charts/DonutChart";
-
-function buildActivityDonutData(
-  activity: TDashboardActivity | undefined
-): DonutDataItem[] {
-  const from = activity?.by_entity_type ?? activity?.by_action ?? {};
-  const entries = Object.entries(from);
-  if (entries.length === 0) return [];
-  return entries
-    .map(([name, value], i) => ({
-      name: name.length > 12 ? name.slice(0, 12) + "…" : name,
-      value: value ?? 0,
-      fill: CHART_COLORS[i % CHART_COLORS.length],
-    }))
-    .filter((d) => d.value > 0);
-}
+import { CHART_COLORS } from "../constants/dashboard.constants";
 
 function buildInventoryDonutData(
   inventory: TDashboardInventory | undefined
@@ -56,8 +42,9 @@ export function DashboardDistributions({
   inventory,
   payments,
 }: DashboardDistributionsProps) {
-  const activityData = buildActivityDonutData(activity);
   const inventoryData = buildInventoryDonutData(inventory);
+  const activityFrom = activity?.by_entity_type ?? activity?.by_action ?? {};
+  const hasActivityBreakdown = Object.values(activityFrom).some((v) => (v ?? 0) > 0);
 
   return (
     <>
@@ -67,7 +54,7 @@ export function DashboardDistributions({
         className="mt-10"
       />
       <section className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {activityData.length > 0 && (
+        {hasActivityBreakdown && (
           <Card className="overflow-hidden rounded-2xl border bg-card/80 shadow-sm backdrop-blur-sm">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-lg">
@@ -75,16 +62,11 @@ export function DashboardDistributions({
                 توزيع النشاط
               </CardTitle>
               <CardDescription className="text-right">
-                حسب نوع الكيان أو الإجراء
+                حسب نوع الكيان أو الإجراء — مرتب حسب العدد مع نسبة كل فئة
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <DonutChart
-                data={activityData}
-                emptyIcon={<Activity className="h-12 w-12 text-muted-foreground/50" />}
-                emptyMessage="لا توجد بيانات نشاط"
-                labelFormatter={(name, _value, percent) => `${name} ${percent.toFixed(0)}%`}
-              />
+              <ActivityDistribution activity={activity} />
             </CardContent>
           </Card>
         )}
