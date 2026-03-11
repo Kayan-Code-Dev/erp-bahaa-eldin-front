@@ -759,15 +759,7 @@ function DeliveriesList() {
                               </span>
                             </p>
                             <p className="text-gray-700">
-                              الفرح:{" "}
-                              <span className="font-medium">
-                                {order.visit_datetime
-                                  ? formatDate(order.visit_datetime)
-                                  : "-"}
-                              </span>
-                            </p>
-                            <p className="text-gray-700">
-                              تسليم:{" "}
+                              استلام:{" "}
                               <span className="font-medium">
                                 {order.delivery_date
                                   ? formatDate(order.delivery_date)
@@ -775,10 +767,18 @@ function DeliveriesList() {
                               </span>
                             </p>
                             <p className="text-gray-700">
-                              استرجاع:{" "}
+                              الفرح:{" "}
                               <span className="font-medium">
                                 {order.occasion_datetime
                                   ? formatDate(order.occasion_datetime)
+                                  : "-"}
+                              </span>
+                            </p>
+                            <p className="text-gray-700">
+                              استرجاع:{" "}
+                              <span className="font-medium">
+                                {order.visit_datetime
+                                  ? formatDate(order.visit_datetime)
                                   : "-"}
                               </span>
                             </p>

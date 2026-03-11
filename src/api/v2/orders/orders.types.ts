@@ -121,8 +121,9 @@ export type TOrder = {
   status: TOrderPaymentStatus;
   paid: string;
   remaining: string;
+  /** الارجاع (موعد الاسترجاع) — returned by create/update/get. */
   visit_datetime: string;
-  /** Delivery date (Y-m-d H:i:s) */
+  /** الاستلام (موعد الاستلام) — returned by create/update/get. */
   delivery_date?: string | null;
   /** Occasion date and time for rental orders */
   occasion_datetime?: string | null;
@@ -240,8 +241,9 @@ export type TCreateOrderRequest = {
   employee_id?: number;
   entity_type: TEntity;
   entity_id: number;
+  /** الاستلام (Y-m-d H:i:s) */
   delivery_date: string;
-  /** Receive date/time (Y-m-d H:i:s) */
+  /** الارجاع (Y-m-d H:i:s) */
   visit_datetime?: string;
   /** At order level for rental orders (Y-m-d H:i:s) */
   occasion_datetime?: string;
@@ -261,8 +263,9 @@ export type TCreateOrderWithNewClientRequest = {
   employee_id?: number;
   entity_type: TEntity;
   entity_id: number;
+  /** الاستلام (Y-m-d H:i:s) */
   delivery_date: string;
-  /** Receive date/time (Y-m-d H:i:s) */
+  /** الارجاع (Y-m-d H:i:s) */
   visit_datetime?: string;
   /** At order level for rental orders (Y-m-d H:i:s) */
   occasion_datetime?: string;

@@ -191,7 +191,7 @@ export function PaymentDetailsModal({ payment, open, onOpenChange }: Props) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-muted-foreground">تاريخ التسليم</Label>
+                  <Label className="text-muted-foreground">موعد الاستلام</Label>
                   <p className="font-medium">
                     {payment.order.delivery_date
                       ? formatDate(payment.order.delivery_date)
@@ -209,7 +209,7 @@ export function PaymentDetailsModal({ payment, open, onOpenChange }: Props) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-muted-foreground">تاريخ الزيارة</Label>
+                  <Label className="text-muted-foreground">موعد الاسترجاع</Label>
                   <p className="font-medium">
                     {payment.order.visit_datetime
                       ? formatDate(payment.order.visit_datetime)

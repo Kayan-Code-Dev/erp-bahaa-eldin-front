@@ -632,12 +632,12 @@ function UpdateOrder() {
                   name="visit_datetime"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>تاريخ ووقت الزيارة</FormLabel>
+                      <FormLabel>موعد الاسترجاع</FormLabel>
                       <FormControl>
                         <SimpleDateTimePicker
                           value={field.value}
                           onChange={field.onChange}
-                          placeholder="اختر تاريخ ووقت الزيارة"
+                          placeholder="اختر موعد الاسترجاع"
                         />
                       </FormControl>
                       <FormMessage />
@@ -903,7 +903,7 @@ function UpdateOrder() {
                             name={`items.${index}.delivery_date`}
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>تاريخ التسليم</FormLabel>
+                                <FormLabel>موعد استرجاع الصنف</FormLabel>
                                 <FormControl>
                                   {isLoadingUnavailableDaysRanges ? (
                                     <Loader2Icon className="h-4 w-4 animate-spin" />
@@ -911,7 +911,7 @@ function UpdateOrder() {
                                     <DatePicker
                                       value={field.value}
                                       onChange={field.onChange}
-                                      placeholder="اختر تاريخ التسليم"
+                                      placeholder="اختر موعد الاسترجاع"
                                       allowPastDates={false}
                                       disabledRanges={getClothesUnavailableDaysRanges(
                                         cloth?.id ?? 0

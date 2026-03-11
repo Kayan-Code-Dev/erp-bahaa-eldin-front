@@ -352,7 +352,7 @@ function OrderDetails() {
                   موعد الاستلام
                 </p>
                 <p className="text-lg">
-                  {formatDate(orderData.visit_datetime)}
+                  {orderData.delivery_date ? formatDate(orderData.delivery_date) : "-"}
                 </p>
               </div>
               <div>
@@ -360,7 +360,7 @@ function OrderDetails() {
                   موعد الاسترجاع
                 </p>
                 <p className="text-lg">
-                  {orderData.delivery_date ? formatDate(orderData.delivery_date) : "-"}
+                  {orderData.visit_datetime ? formatDate(orderData.visit_datetime) : "-"}
                 </p>
               </div>
               <div>

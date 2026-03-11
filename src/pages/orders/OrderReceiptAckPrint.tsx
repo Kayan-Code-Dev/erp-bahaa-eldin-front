@@ -51,12 +51,12 @@ export function OrderReceiptAckPrint({
       }).filter(Boolean).join(" - ")
     : null;
   const items = order.items ?? [];
-  const startDate = order.visit_datetime ? formatDate(order.visit_datetime) : "-";
-  const endDate = order.delivery_date
+  const startDate = order.delivery_date
     ? formatDate(order.delivery_date)
     : (items[0] as { delivery_date?: string })?.delivery_date
       ? formatDate((items[0] as { delivery_date: string }).delivery_date)
       : "-";
+  const endDate = order.visit_datetime ? formatDate(order.visit_datetime) : "-";
   const paid = order.paid != null ? String(order.paid) : "-";
   const invoiceDate = order.created_at ? formatDate(order.created_at) : "-";
   const printDate = formatDate(new Date().toISOString());
@@ -156,8 +156,8 @@ export function OrderReceiptAckPrint({
         {/* 3. Rental period */}
         <p className="ack-print-rental text-[10px] text-gray-900 mb-1 min-w-0 wrap-break-word">
           وذلك بتأجيره من تاريخ{" "}
-          <time className="font-semibold" dateTime={order.visit_datetime || undefined}>{startDate}</time> حتى تاريخ{" "}
-          <time className="font-semibold" dateTime={order.delivery_date || undefined}>{endDate}</time>
+          <time className="font-semibold" dateTime={order.delivery_date || undefined}>{startDate}</time> حتى تاريخ{" "}
+          <time className="font-semibold" dateTime={order.visit_datetime || undefined}>{endDate}</time>
         </p>
 
         {/* 4. Products list: category subcategory (code) with numbering */}

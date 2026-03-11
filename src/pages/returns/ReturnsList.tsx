@@ -602,15 +602,7 @@ function ReturnsList() {
                               </span>
                             </p>
                             <p className="font-semibold text-gray-900">
-                              تأجير:{" "}
-                              <span className="font-normal text-gray-700">
-                                {order.visit_datetime
-                                  ? formatDate(order.visit_datetime)
-                                  : "-"}
-                              </span>
-                            </p>
-                            <p className="font-semibold text-gray-900">
-                              تسليم:{" "}
+                              استلام:{" "}
                               <span className="font-normal text-gray-700">
                                 {order.delivery_date
                                   ? formatDate(order.delivery_date)
@@ -618,10 +610,18 @@ function ReturnsList() {
                               </span>
                             </p>
                             <p className="font-semibold text-gray-900">
-                              استرجاع:{" "}
+                              الفرح:{" "}
                               <span className="font-normal text-gray-700">
                                 {order.occasion_datetime
                                   ? formatDate(order.occasion_datetime)
+                                  : "-"}
+                              </span>
+                            </p>
+                            <p className="font-semibold text-gray-900">
+                              استرجاع:{" "}
+                              <span className="font-normal text-gray-700">
+                                {order.visit_datetime
+                                  ? formatDate(order.visit_datetime)
                                   : "-"}
                               </span>
                             </p>

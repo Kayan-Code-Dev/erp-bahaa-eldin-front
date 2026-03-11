@@ -826,10 +826,10 @@ function OrdersList() {
                           </p>
 
                           <p className="font-semibold text-gray-900">
-                            تسليم:{" "}
+                            استلام:{" "}
                             <span className="font-normal text-gray-700" dir="ltr">
-                              {order.visit_datetime
-                                ? toEnglishNumerals(formatDate(order.visit_datetime))
+                              {order.delivery_date
+                                ? toEnglishNumerals(formatDate(order.delivery_date))
                                 : "-"}
                             </span>
                           </p>
@@ -844,8 +844,8 @@ function OrdersList() {
                           <p className="font-semibold text-gray-900">
                             استرجاع:{" "}
                             <span className="font-normal text-gray-700" dir="ltr">
-                              {order.delivery_date
-                                ? toEnglishNumerals(formatDate(order.delivery_date))
+                              {order.visit_datetime
+                                ? toEnglishNumerals(formatDate(order.visit_datetime))
                                 : "-"}
                             </span>
                           </p>

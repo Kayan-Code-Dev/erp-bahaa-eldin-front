@@ -133,8 +133,8 @@ function ChooseClient() {
 
   const [entityType, setEntityType] = useState<TEntity | undefined>("branch");
   const [entityId, setEntityId] = useState<string>("");
-  const [deliveryDate, setDeliveryDate] = useState<Date | undefined>(); // Return date
-  const [receiveDate, setReceiveDate] = useState<Date | undefined>(); // visit_datetime = Receive date
+  const [deliveryDate, setDeliveryDate] = useState<Date | undefined>(); // استرجاع → visit_datetime
+  const [receiveDate, setReceiveDate] = useState<Date | undefined>(); // استلام → delivery_date
   const [branchDate, setBranchDate] = useState<Date | undefined>(); // Occasion/wedding date
   const [employeeId, setEmployeeId] = useState<string>(""); // Employee who created the invoice
 
@@ -535,8 +535,8 @@ function ChooseClient() {
       ...(employeeId && { employee_id: Number(employeeId) }),
       entity_type: entityType!,
       entity_id: Number(entityId),
-      delivery_date: deliveryDate ? format(deliveryDate, "yyyy-MM-dd HH:mm:ss") : format(new Date(), "yyyy-MM-dd HH:mm:ss"),
-      ...(receiveDate && { visit_datetime: format(receiveDate, "yyyy-MM-dd HH:mm:ss") }),
+      delivery_date: receiveDate ? format(receiveDate, "yyyy-MM-dd HH:mm:ss") : format(new Date(), "yyyy-MM-dd HH:mm:ss"),
+      ...(deliveryDate && { visit_datetime: format(deliveryDate, "yyyy-MM-dd HH:mm:ss") }),
       ...(orderLevelOccasionDatetime && { occasion_datetime: orderLevelOccasionDatetime }),
       ...(orderLevelDaysOfRent != null && { days_of_rent: orderLevelDaysOfRent }),
       order_notes: selectedProducts.map((p) => p.notes).filter(Boolean).join(" - ") || undefined,
@@ -577,8 +577,8 @@ function ChooseClient() {
       ...(employeeId && { employee_id: Number(employeeId) }),
       entity_type: entityType!,
       entity_id: Number(entityId),
-      delivery_date: deliveryDate ? format(deliveryDate, "yyyy-MM-dd HH:mm:ss") : format(new Date(), "yyyy-MM-dd HH:mm:ss"),
-      ...(receiveDate && { visit_datetime: format(receiveDate, "yyyy-MM-dd HH:mm:ss") }),
+      delivery_date: receiveDate ? format(receiveDate, "yyyy-MM-dd HH:mm:ss") : format(new Date(), "yyyy-MM-dd HH:mm:ss"),
+      ...(deliveryDate && { visit_datetime: format(deliveryDate, "yyyy-MM-dd HH:mm:ss") }),
       ...(orderLevelOccasionDatetime && { occasion_datetime: orderLevelOccasionDatetime }),
       ...(orderLevelDaysOfRent != null && { days_of_rent: orderLevelDaysOfRent }),
       order_notes: selectedProducts.map((p) => p.notes).filter(Boolean).join(" - ") || undefined,

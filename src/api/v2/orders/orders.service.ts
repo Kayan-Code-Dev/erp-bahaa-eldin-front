@@ -11,9 +11,10 @@ import {
   TAddPaymentRequest,
 } from "./orders.types";
 
+/** Creates order. Response (الارجاع) includes visit_datetime (الارجاع) and delivery_date (الاستلام). */
 export const createOrder = async (
   data: TCreateOrderRequest | TCreateOrderWithNewClientRequest
-) => {
+): Promise<TOrder | undefined> => {
   try {
     const { data: responseData } = await api.post<TOrder>(`/orders`, data);
     return responseData;
