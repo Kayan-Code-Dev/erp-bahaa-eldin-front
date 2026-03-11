@@ -184,10 +184,9 @@ function ChooseClient() {
   const debouncedEntityId = useDebounce({ value: entityId, delay: 300 });
 
   const queryParams = useMemo(() => {
-    const params: any = {
+    const params: Record<string, unknown> = {
       page: 1,
       per_page: 10,
-      status: "ready_for_rent",
     };
     if (debouncedProductCodeFilter) params.code = debouncedProductCodeFilter;
     if (debouncedCategoryId) params.category_id = Number(debouncedCategoryId);
