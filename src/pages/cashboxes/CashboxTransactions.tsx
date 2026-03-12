@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {
   Card,
   CardContent,
@@ -27,9 +28,13 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { ArrowDownCircle, ArrowUpCircle, Eye, Filter } from "lucide-react";
+import { ArrowDownCircle, ArrowUpCircle, Download, Eye, Filter } from "lucide-react";
 import { CashboxesSelect } from "@/components/custom/CashboxesSelect";
-import { useGetTransactionsQueryOptions } from "@/api/v2/transactions/transactions.hooks";
+import {
+  useExportTransactionsToCSVMutationOptions,
+  useGetTransactionsQueryOptions,
+} from "@/api/v2/transactions/transactions.hooks";
+import { parseFilenameFromContentDisposition, downloadBlob } from "@/api/api.utils";
 import { TTransaction } from "@/api/v2/transactions/transactions.types";
 import { formatDateTime } from "@/utils/formatDate";
 import { useGetPaymentByIdQueryOptions } from "@/api/v2/payments/payments.hooks";
@@ -100,6 +105,27 @@ function CashboxTransactions() {
   const { data, isPending, isError, error } = useQuery(
     useGetTransactionsQueryOptions(params)
   );
+
+  const { mutate: exportTransactionsToCSV, isPending: isExporting } = useMutation(
+    useExportTransactionsToCSVMutationOptions()
+  );
+
+  const handleExport = () => {
+    exportTransactionsToCSV(params, {
+      onSuccess: (result) => {
+        if (!result) return;
+        const filename =
+          parseFilenameFromContentDisposition(result.headers) ||
+          "cashbox-transactions.xlsx";
+        downloadBlob(result.data, filename);
+        toast.success("تم تصدير كشف المعاملات بنجاح");
+      },
+      onError: (err: unknown) => {
+        const message = err instanceof Error ? err.message : "خطأ أثناء التصدير.";
+        toast.error("خطأ أثناء تصدير كشف المعاملات.", { description: message });
+      },
+    });
+  };
 
   const paymentQueryOptions =
     selectedPaymentId != null
@@ -198,16 +224,29 @@ function CashboxTransactions() {
               بالخزائن.
             </CardDescription>
           </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => setShowFilters((prev) => !prev)}
-            className="ms-auto mt-2 h-8 gap-1.5 px-3 text-xs sm:mt-0"
-          >
-            <Filter className="ml-1 h-3.5 w-3.5" />
-            {showFilters ? "إخفاء الفلاتر" : "عرض الفلاتر"}
-          </Button>
+          <div className="ms-auto mt-2 flex gap-2 sm:mt-0">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleExport}
+              disabled={isExporting}
+              className="h-8 gap-1.5 px-3 text-xs"
+            >
+              <Download className="ml-1 h-3.5 w-3.5" />
+              {isExporting ? "جاري التصدير..." : "تصدير إلى Excel"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setShowFilters((prev) => !prev)}
+              className="h-8 gap-1.5 px-3 text-xs"
+            >
+              <Filter className="ml-1 h-3.5 w-3.5" />
+              {showFilters ? "إخفاء الفلاتر" : "عرض الفلاتر"}
+            </Button>
+          </div>
         </CardHeader>
 
         {showFilters && (

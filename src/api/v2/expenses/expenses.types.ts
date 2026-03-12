@@ -1,44 +1,109 @@
 import { TBranchResponse } from "../branches/branches.types";
 import { TCashbox } from "../cashboxes/cashboxes.types";
 
-export const ExpenseCategories = [
+/** فئة فرعية للمصروف: id يُرسل للـ API، name للعرض */
+export type TExpenseSubcategory = { id: string; name: string };
+
+/** فئة مصروف: id يُرسل للـ API، name للعرض، subcategories القائمة الفرعية */
+export type TExpenseCategoryWithSubs = {
+  id: string;
+  name: string;
+  subcategories: TExpenseSubcategory[];
+};
+
+/** قائمة فئات المصروفات والفئات الفرعية (للإنشاء والتحديث والفلترة) */
+export const EXPENSE_CATEGORIES_WITH_SUBS: TExpenseCategoryWithSubs[] = [
   {
-    id: "rent",
-    name: "Rent",
+    id: "operating",
+    name: "مصاريف التشغيل",
+    subcategories: [
+      { id: "shop_rent", name: "إيجار المحل" },
+      { id: "electricity", name: "كهرباء" },
+      { id: "water", name: "مياه" },
+      { id: "internet", name: "إنترنت" },
+      { id: "maintenance", name: "صيانة" },
+    ],
   },
   {
-    id: "utilities",
-    name: "Utilities (Electricity, Water, Gas)",
+    id: "salaries_wages",
+    name: "رواتب وأجور",
+    subcategories: [
+      { id: "employee_salaries", name: "رواتب الموظفين" },
+      { id: "commissions", name: "عمولات" },
+      { id: "bonuses", name: "مكافآت" },
+      { id: "employee_advances", name: "سلف موظفين" },
+    ],
   },
   {
-    id: "supplies",
-    name: "Supplies & Materials",
-  },
-  {
-    id: "maintenance",
-    name: "Maintenance & Repairs",
-  },
-  {
-    id: "salaries",
-    name: "Salaries & Wages",
+    id: "materials_raw",
+    name: "مواد وخامات",
+    subcategories: [
+      { id: "fabrics", name: "أقمشة" },
+      { id: "threads", name: "خيوط" },
+      { id: "accessories", name: "إكسسوارات" },
+      { id: "zippers_buttons", name: "سوست وأزرار" },
+      { id: "sewing_tools", name: "أدوات خياطة" },
+    ],
   },
   {
     id: "marketing",
-    name: "Marketing & Advertising",
+    name: "مصاريف التسويق",
+    subcategories: [
+      { id: "fb_instagram_ads", name: "إعلانات فيسبوك / انستجرام" },
+      { id: "product_photography", name: "تصوير منتجات" },
+      { id: "designs", name: "تصميمات" },
+      { id: "brochure_printing", name: "طباعة بروشورات" },
+    ],
   },
   {
-    id: "transport",
-    name: "Transportation",
+    id: "daily_operating",
+    name: "مصاريف تشغيل يومية",
+    subcategories: [
+      { id: "transportation", name: "مواصلات" },
+      { id: "hospitality", name: "ضيافة (شاي / قهوة)" },
+      { id: "cleaning_supplies", name: "أدوات نظافة" },
+      { id: "stationery", name: "قرطاسية" },
+    ],
   },
   {
-    id: "cleaning",
-    name: "Cleaning Services",
+    id: "financial",
+    name: "مصاريف مالية",
+    subcategories: [
+      { id: "transfer_fees", name: "رسوم تحويل" },
+      { id: "bank_commissions", name: "عمولات بنكية" },
+      { id: "taxes", name: "ضرائب" },
+      { id: "government_fees", name: "رسوم حكومية" },
+    ],
   },
   {
     id: "other",
-    name: "Other",
+    name: "مصاريف أخرى",
+    subcategories: [{ id: "miscellaneous", name: "أخرى / متنوع" }],
   },
 ];
+
+/** للتوافق مع الشاشات التي تعرض قائمة مسطحة (فئة + فئة فرعية معاً) */
+export const ExpenseCategories = EXPENSE_CATEGORIES_WITH_SUBS.flatMap((cat) =>
+  cat.subcategories.map((sub) => ({
+    id: `${cat.id}:${sub.id}`,
+    name: `${cat.name} – ${sub.name}`,
+  }))
+);
+
+/** الحصول على نص العرض للفئة والفئة الفرعية (من id مخزن) */
+export function getExpenseCategoryDisplay(
+  categoryId: string | null | undefined,
+  subcategoryId?: string | null
+): string {
+  if (!categoryId) return "—";
+  const cat = EXPENSE_CATEGORIES_WITH_SUBS.find((c) => c.id === categoryId);
+  if (!cat) return categoryId;
+  if (subcategoryId) {
+    const sub = cat.subcategories.find((s) => s.id === subcategoryId);
+    if (sub) return `${cat.name} – ${sub.name}`;
+  }
+  return cat.name;
+}
 
 export type TExpense = {
   id: number;
@@ -123,6 +188,7 @@ export type TGetExpensesParams = {
 export type TCreateExpenseRequest = {
   branch_id: number;
   category: string;
+  subcategory?: string | null;
   amount: number;
   expense_date: string;
   vendor: string;

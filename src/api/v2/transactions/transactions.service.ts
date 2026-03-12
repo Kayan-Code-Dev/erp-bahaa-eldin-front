@@ -18,3 +18,16 @@ export const getTransactionsPaymentsExpenses = async (
   }
 };
 
+/** تصدير كشف المعاملات إلى Excel؛ نفس معاملات الفلترة المستخدمة في القائمة. */
+export const exportTransactionsToCSV = async (params?: TTransactionsParams) => {
+  try {
+    const response = await api.get<Blob>("/transactions/export", {
+      params,
+      responseType: "blob",
+    });
+    return { data: response.data, headers: response.headers };
+  } catch (error) {
+    populateError(error, "خطأ فى تصدير كشف المعاملات");
+  }
+};
+

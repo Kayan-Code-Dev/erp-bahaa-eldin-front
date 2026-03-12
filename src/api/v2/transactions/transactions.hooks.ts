@@ -1,5 +1,8 @@
-import { queryOptions } from "@tanstack/react-query";
-import { getTransactionsPaymentsExpenses } from "./transactions.service";
+import { mutationOptions, queryOptions } from "@tanstack/react-query";
+import {
+  exportTransactionsToCSV,
+  getTransactionsPaymentsExpenses,
+} from "./transactions.service";
 import { TTransactionsParams } from "./transactions.types";
 
 export const TRANSACTIONS_KEY = "TRANSACTIONS_KEY";
@@ -9,6 +12,12 @@ export const useGetTransactionsQueryOptions = (params: TTransactionsParams) => {
     queryKey: [TRANSACTIONS_KEY, params],
     queryFn: () => getTransactionsPaymentsExpenses(params),
     staleTime: 1000 * 60 * 5,
+  });
+};
+
+export const useExportTransactionsToCSVMutationOptions = () => {
+  return mutationOptions({
+    mutationFn: (params?: TTransactionsParams) => exportTransactionsToCSV(params),
   });
 };
 

@@ -34,7 +34,7 @@ import {
   useCreateExpenseMutationOptions,
 } from "@/api/v2/expenses/expenses.hooks";
 import {
-  ExpenseCategories,
+  EXPENSE_CATEGORIES_WITH_SUBS,
   TCreateExpenseRequest,
 } from "@/api/v2/expenses/expenses.types";
 import { DatePicker } from "@/components/custom/DatePicker";
@@ -48,6 +48,7 @@ const optionalStringOrNumber = () =>
 const createExpenseSchema = z.object({
   branch_id: stringOrNumber("الفرع مطلوب"),
   category: stringOrNumber("الفئة مطلوبة"),
+  subcategory: stringOrNumber("الفئة الفرعية مطلوبة"),
   amount: stringOrNumber("المبلغ مطلوب"),
   expense_date: stringOrNumber("تاريخ المصروف مطلوب"),
   vendor: stringOrNumber("اسم المورد مطلوب"),
@@ -73,6 +74,7 @@ export function CreateExpenseModal({ open, onOpenChange }: Props) {
     defaultValues: {
       branch_id: "",
       category: "",
+      subcategory: "",
       amount: "",
       expense_date: "",
       vendor: "",
@@ -82,10 +84,16 @@ export function CreateExpenseModal({ open, onOpenChange }: Props) {
     },
   });
 
+  const selectedCategory = EXPENSE_CATEGORIES_WITH_SUBS.find(
+    (c) => c.id === form.watch("category")
+  );
+  const availableSubcategories = selectedCategory?.subcategories ?? [];
+
   const handleSubmit = (values: CreateExpenseFormValues) => {
     const payload: TCreateExpenseRequest = {
       branch_id: Number(values.branch_id),
       category: values.category,
+      subcategory: values.subcategory || null,
       amount: Number(values.amount),
       expense_date: values.expense_date,
       vendor: values.vendor,
@@ -152,7 +160,10 @@ export function CreateExpenseModal({ open, onOpenChange }: Props) {
                     <FormLabel>الفئة</FormLabel>
                     <Select
                       value={field.value}
-                      onValueChange={field.onChange}
+                      onValueChange={(val) => {
+                        field.onChange(val);
+                        form.setValue("subcategory", "");
+                      }}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -160,9 +171,38 @@ export function CreateExpenseModal({ open, onOpenChange }: Props) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {ExpenseCategories.map((c) => (
+                        {EXPENSE_CATEGORIES_WITH_SUBS.map((c) => (
                           <SelectItem key={c.id} value={c.id}>
                             {c.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="subcategory"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>الفئة الفرعية</FormLabel>
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      disabled={!form.watch("category")}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="اختر الفئة الفرعية..." />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {availableSubcategories.map((sub) => (
+                          <SelectItem key={sub.id} value={sub.id}>
+                            {sub.name}
                           </SelectItem>
                         ))}
                       </SelectContent>

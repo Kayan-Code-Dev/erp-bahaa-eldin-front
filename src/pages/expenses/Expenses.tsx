@@ -45,7 +45,8 @@ import {
   useExportExpensesToExcelMutationOptions,
 } from "@/api/v2/expenses/expenses.hooks";
 import {
-  ExpenseCategories,
+  EXPENSE_CATEGORIES_WITH_SUBS,
+  getExpenseCategoryDisplay,
   TExpense,
   TExpenseStatus,
   TGetExpensesParams,
@@ -87,7 +88,7 @@ const STATUS_OPTIONS: { value: TExpenseStatus | "all"; label: string }[] = [
 
 const CATEGORY_OPTIONS = [
   { value: "all", label: "الكل" },
-  ...ExpenseCategories.map((c) => ({ value: c.id, label: c.name })),
+  ...EXPENSE_CATEGORIES_WITH_SUBS.map((c) => ({ value: c.id, label: c.name })),
 ];
 
 const filterSchema = z.object({
@@ -456,11 +457,12 @@ function Expenses() {
                             <FormLabel>الفئة</FormLabel>
                             <Select
                               value={field.value || "all"}
-                              onValueChange={(value) =>
+                              onValueChange={(value) => {
                                 field.onChange(
                                   value === "all" ? undefined : value
-                                )
-                              }
+                                );
+                                form.setValue("subcategory", undefined);
+                              }}
                             >
                               <FormControl>
                                 <SelectTrigger>
@@ -485,13 +487,31 @@ function Expenses() {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>الفئة الفرعية</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="الفئة الفرعية..."
-                                {...field}
-                                value={field.value || ""}
-                              />
-                            </FormControl>
+                            <Select
+                              value={field.value || "all"}
+                              onValueChange={(v) =>
+                                field.onChange(v === "all" ? undefined : v)
+                              }
+                              disabled={
+                                !category || category === "all"
+                              }
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="اختر الفئة الفرعية..." />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="all">الكل</SelectItem>
+                                {(EXPENSE_CATEGORIES_WITH_SUBS.find(
+                                  (c) => c.id === category
+                                )?.subcategories ?? []).map((sub) => (
+                                  <SelectItem key={sub.id} value={sub.id}>
+                                    {sub.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </FormItem>
                         )}
                       />
@@ -707,11 +727,10 @@ function Expenses() {
                           {expense.cashbox?.name || "-"}
                         </TableCell>
                         <TableCell className="text-center">
-                          {
-                            ExpenseCategories.find(
-                              (c) => c.id === expense.category
-                            )?.name
-                          }
+                          {getExpenseCategoryDisplay(
+                            expense.category,
+                            expense.subcategory
+                          )}
                         </TableCell>
                         <TableCell className="text-center">
                           {expense.vendor}

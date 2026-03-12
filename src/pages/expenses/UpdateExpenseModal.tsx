@@ -34,7 +34,7 @@ import {
   useUpdateExpenseMutationOptions,
 } from "@/api/v2/expenses/expenses.hooks";
 import {
-  ExpenseCategories,
+  EXPENSE_CATEGORIES_WITH_SUBS,
   TExpense,
   TUpdateExpenseRequest,
 } from "@/api/v2/expenses/expenses.types";
@@ -43,6 +43,7 @@ import { DatePicker } from "@/components/custom/DatePicker";
 const createExpenseSchema = z.object({
   branch_id: z.string().min(1, { message: "الفرع مطلوب" }),
   category: z.string().min(1, { message: "الفئة مطلوبة" }),
+  subcategory: z.string().optional(),
   amount: z.string().min(1, { message: "المبلغ مطلوب" }),
   expense_date: z.string().min(1, { message: "تاريخ المصروف مطلوب" }),
   vendor: z.string().min(1, { message: "اسم المورد مطلوب" }),
@@ -81,10 +82,16 @@ export function UpdateExpenseModal({
     defaultValues: {},
   });
 
+  const selectedCategory = EXPENSE_CATEGORIES_WITH_SUBS.find(
+    (c) => c.id === form.watch("category")
+  );
+  const availableSubcategories = selectedCategory?.subcategories ?? [];
+
   useEffect(() => {
     if (expense && open) {
       form.reset({
         category: expense.category,
+        subcategory: expense.subcategory ?? "",
         amount: expense.amount.toString(),
         expense_date: expense.expense_date
           ? expense.expense_date.slice(0, 10)
@@ -103,6 +110,7 @@ export function UpdateExpenseModal({
     const payload: TUpdateExpenseRequest = {};
 
     if (values.category) payload.category = values.category;
+    if (values.subcategory !== undefined) payload.subcategory = values.subcategory || null;
     if (values.amount) payload.amount = Number(values.amount);
     if (values.expense_date) payload.expense_date = values.expense_date;
     if (values.vendor) payload.vendor = values.vendor;
@@ -153,7 +161,10 @@ export function UpdateExpenseModal({
                     <FormLabel>الفئة</FormLabel>
                     <Select
                       value={field.value || ""}
-                      onValueChange={field.onChange}
+                      onValueChange={(val) => {
+                        field.onChange(val);
+                        form.setValue("subcategory", "");
+                      }}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -161,9 +172,38 @@ export function UpdateExpenseModal({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {ExpenseCategories.map((c) => (
+                        {EXPENSE_CATEGORIES_WITH_SUBS.map((c) => (
                           <SelectItem key={c.id} value={c.id}>
                             {c.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="subcategory"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>الفئة الفرعية</FormLabel>
+                    <Select
+                      value={field.value || ""}
+                      onValueChange={field.onChange}
+                      disabled={!form.watch("category")}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="اختر الفئة الفرعية..." />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {availableSubcategories.map((sub) => (
+                          <SelectItem key={sub.id} value={sub.id}>
+                            {sub.name}
                           </SelectItem>
                         ))}
                       </SelectContent>

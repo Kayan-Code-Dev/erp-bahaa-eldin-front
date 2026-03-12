@@ -214,9 +214,18 @@ function ChooseClient() {
     productDetails.days_of_rent,
   ]);
 
-  const { data: clothesData, isPending: isClothesPending, refetch } = useQuery(
-    useGetClothesQueryOptions(queryParams)
+  const canFetchClothes = Boolean(
+    entityType &&
+    entityId &&
+    receiveDate &&
+    deliveryDate &&
+    branchDate
   );
+
+  const { data: clothesData, isPending: isClothesPending } = useQuery({
+    ...useGetClothesQueryOptions(queryParams),
+    enabled: canFetchClothes,
+  });
 
   const clientIdNum = selectedClientId ? Number(selectedClientId) : 0;
   const { data: clientData } = useQuery({
@@ -440,6 +449,16 @@ function ChooseClient() {
       die: "ميت",
     };
     return labels[status] || status;
+  };
+
+  /** الحالة المعروضة حسب إمكانية الإيجار للتواريخ المطلوبة (من الـ API) */
+  const getEffectiveDisplayStatus = (cloth: {
+    status?: string;
+    can_rent_for_requested_dates?: boolean;
+  }) => {
+    if (cloth.can_rent_for_requested_dates === true) return "ready_for_rent";
+    if (cloth.can_rent_for_requested_dates === false) return "rented";
+    return cloth.status ?? "rented";
   };
 
   const firstRentProduct = selectedProducts.find((p) => p.type === "rent");
@@ -1033,7 +1052,7 @@ function ChooseClient() {
                         />
                       </div>
                     </div>
-                    {entityType && entityId && deliveryDate && (
+                    {canFetchClothes && (
                       <div className="rounded-xl bg-emerald-50 dark:bg-emerald-950/30 ring-1 ring-emerald-200/60 dark:ring-emerald-800/50 px-4 py-3">
                         <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">✓ جاهز لعرض المنتجات المتاحة</p>
                       </div>
@@ -1444,7 +1463,7 @@ function ChooseClient() {
                     <div>
                       <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">المنتجات المتاحة</h2>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                        {entityType && entityId && deliveryDate
+                        {canFetchClothes
                           ? `إجمالي المنتجات المتاحة: ${clothesData?.total || 0}`
                           : "اختر المكان والتاريخ لعرض المنتجات"}
                       </p>
@@ -1452,11 +1471,11 @@ function ChooseClient() {
                   </div>
 
                   <div className="pt-2">
-                    {!entityType || !entityId || !deliveryDate ? (
+                    {!canFetchClothes ? (
                       <div className="flex flex-col items-center justify-center py-16 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/50">
                         <Calendar className="h-14 w-14 text-slate-300 dark:text-slate-600 mb-4" />
-                        <p className="text-slate-600 dark:text-slate-400 font-medium">يرجى اختيار المكان وتاريخ التسليم أولاً</p>
-                        <p className="text-sm text-slate-500 dark:text-slate-500 mt-1">سيتم عرض المنتجات المتاحة تلقائياً</p>
+                        <p className="text-slate-600 dark:text-slate-400 font-medium">يرجى اختيار الفرع والتواريخ الثلاثة (الاستلام، الاسترجاع، الفرح)</p>
+                        <p className="text-sm text-slate-500 dark:text-slate-500 mt-1">سيتم جلب المنتجات المتاحة تلقائياً بعد إكمال الاختيار</p>
                       </div>
                     ) : isClothesPending ? (
                       <div className="overflow-hidden rounded-xl ring-1 ring-slate-200/60 dark:ring-slate-700/50">
@@ -1534,16 +1553,21 @@ function ChooseClient() {
                                     {cloth.name ?? cloth.code}
                                   </TableCell>
                                   <TableCell>
-                                    <Badge
-                                      variant={getStatusBadgeVariant(cloth.status)}
-                                      className={`text-xs rounded-lg font-medium ${
-                                        cloth.status === "ready_for_rent"
-                                          ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400 border-0"
-                                          : ""
-                                      }`}
-                                    >
-                                      {getStatusLabel(cloth.status)}
-                                    </Badge>
+                                    {(() => {
+                                      const effectiveStatus = getEffectiveDisplayStatus(cloth);
+                                      return (
+                                        <Badge
+                                          variant={getStatusBadgeVariant(effectiveStatus)}
+                                          className={`text-xs rounded-lg font-medium ${
+                                            effectiveStatus === "ready_for_rent"
+                                              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400 border-0"
+                                              : ""
+                                          }`}
+                                        >
+                                          {getStatusLabel(effectiveStatus)}
+                                        </Badge>
+                                      );
+                                    })()}
                                   </TableCell>
                                   <TableCell className="text-slate-600 dark:text-slate-400 text-sm">
                                     {cloth.entity_type === "branch"
@@ -1558,19 +1582,23 @@ function ChooseClient() {
                                   </TableCell>
                                   <TableCell>
                                     <div className="flex justify-center">
-                                      <Button
-                                        variant={isSelected ? "outline" : "default"}
-                                        size="sm"
-                                        onClick={() => handleClothSelect(cloth)}
-                                        disabled={isSelected}
-                                        className={`rounded-lg font-medium ${
-                                          isSelected
-                                            ? "border-emerald-300 text-emerald-700 bg-emerald-50 dark:bg-emerald-950/30 dark:border-emerald-800 dark:text-emerald-400"
-                                            : "bg-[#5170ff] hover:bg-[#4560e6] text-white"
-                                        }`}
-                                      >
-                                        {isSelected ? "مضافة ✓" : "اختيار"}
-                                      </Button>
+                                      {cloth.can_select === true ? (
+                                        <Button
+                                          variant={isSelected ? "outline" : "default"}
+                                          size="sm"
+                                          onClick={() => handleClothSelect(cloth)}
+                                          disabled={isSelected}
+                                          className={`rounded-lg font-medium ${
+                                            isSelected
+                                              ? "border-emerald-300 text-emerald-700 bg-emerald-50 dark:bg-emerald-950/30 dark:border-emerald-800 dark:text-emerald-400"
+                                              : "bg-[#5170ff] hover:bg-[#4560e6] text-white"
+                                          }`}
+                                        >
+                                          {isSelected ? "مضافة ✓" : "اختيار"}
+                                        </Button>
+                                      ) : (
+                                        <span className="text-xs text-slate-400 dark:text-slate-500">—</span>
+                                      )}
                                     </div>
                                   </TableCell>
                                 </TableRow>
@@ -1829,16 +1857,18 @@ function ChooseClient() {
                         </div>
                       </div>
 
-                      {/* Add button */}
-                      <div className="flex justify-center pt-2">
-                        <Button
-                          onClick={handleAddProduct}
-                          className="h-12 px-10 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-lg shadow-emerald-500/25 hover:shadow-xl transition-all active:scale-[0.98]"
-                        >
-                          <Plus className="ml-2 h-5 w-5" />
-                          إضافة المنتج إلى الطلب
-                        </Button>
-                      </div>
+                      {/* Add button — يظهر فقط عندما المنتج قابل للاختيار (can_select === true) */}
+                      {selectedProduct?.can_select === true && (
+                        <div className="flex justify-center pt-2">
+                          <Button
+                            onClick={handleAddProduct}
+                            className="h-12 px-10 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-lg shadow-emerald-500/25 hover:shadow-xl transition-all active:scale-[0.98]"
+                          >
+                            <Plus className="ml-2 h-5 w-5" />
+                            إضافة المنتج إلى الطلب
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </section>

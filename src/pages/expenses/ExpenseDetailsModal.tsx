@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import {
-  ExpenseCategories,
+  getExpenseCategoryDisplay,
   TExpense,
 } from "@/api/v2/expenses/expenses.types";
 import { formatDate } from "@/utils/formatDate";
@@ -105,7 +105,7 @@ export function ExpenseDetailsModal({
                 <div className="modal-detail-row">
                   <span className="modal-detail-label">الفئة</span>
                   <span className="modal-detail-value">
-                    {ExpenseCategories.find((c) => c.id === expense.category)?.name ?? "-"}
+                    {getExpenseCategoryDisplay(expense.category, expense.subcategory)}
                   </span>
                 </div>
                 <div className="modal-detail-row">
