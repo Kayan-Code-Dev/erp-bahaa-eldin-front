@@ -73,6 +73,14 @@ export type TGetClothesRequestParams = {
   category_id?: number;
   subcat_id?: number[];
   status?: TClothesStatus;
+  /** تاريخ توصيل القطعة (استلام) - للفلترة حسب إنشاء الطلب */
+  delivery_date?: string;
+  /** عدد أيام الإيجار - للفلترة حسب إنشاء الطلب */
+  days_of_rent?: number;
+  /** تاريخ الفرح - للفلترة حسب إنشاء الطلب */
+  occasion_datetime?: string;
+  /** موعد إرجاع الزبون للقطعة (استرجاع) - للفلترة حسب إنشاء الطلب */
+  visit_datetime?: string;
 };
 
 export type TClothesAvailableForDateResponse = {

@@ -195,6 +195,12 @@ function ChooseClient() {
     }
     if (debouncedEntityType) params.entity_type = debouncedEntityType;
     if (debouncedEntityId) params.entity_id = Number(debouncedEntityId);
+    // فلترة المنتجات حسب تواريخ وإعدادات إنشاء الطلب
+    if (receiveDate) params.delivery_date = format(receiveDate, "yyyy-MM-dd HH:mm:ss");
+    if (deliveryDate) params.visit_datetime = format(deliveryDate, "yyyy-MM-dd HH:mm:ss");
+    if (branchDate) params.occasion_datetime = format(branchDate, "yyyy-MM-dd HH:mm:ss");
+    const daysNum = productDetails.days_of_rent ? parseInt(productDetails.days_of_rent, 10) : NaN;
+    if (!isNaN(daysNum) && daysNum > 0) params.days_of_rent = daysNum;
     return params;
   }, [
     debouncedProductCodeFilter,
@@ -202,6 +208,10 @@ function ChooseClient() {
     debouncedSubcategoryIds,
     debouncedEntityType,
     debouncedEntityId,
+    receiveDate,
+    deliveryDate,
+    branchDate,
+    productDetails.days_of_rent,
   ]);
 
   const { data: clothesData, isPending: isClothesPending, refetch } = useQuery(
@@ -256,11 +266,6 @@ function ChooseClient() {
     window.scrollTo(0, 0);
   }, []);
 
-  useEffect(() => {
-    if (entityType && entityId && deliveryDate) {
-      refetch();
-    }
-  }, [entityType, entityId, deliveryDate, refetch]);
 
   useEffect(() => {
     try {
