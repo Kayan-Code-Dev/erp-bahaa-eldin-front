@@ -72,7 +72,7 @@ export const API_INDEX_SEARCH_CONFIG: Record<string, SearchConfig> = {
   },
   "/clothes/list": {
     param: "search",
-    placeholder: "ابحث بكود المنتج أو الاسم...",
+    placeholder: "ابحث في الكود، الملاحظات، مقاس الصدر، الخصر، الكم...",
   },
   "/deliveries": {
     param: "search",

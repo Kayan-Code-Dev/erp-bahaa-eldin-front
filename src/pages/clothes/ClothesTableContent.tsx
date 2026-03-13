@@ -4,11 +4,12 @@ import {
 } from "@/api/v2/clothes/clothes.hooks";
 import {
   TClothResponse,
+  TClothesStatus,
   TGetClothesRequestParams,
 } from "@/api/v2/clothes/clothes.types";
+import { BranchesSelect } from "@/components/custom/BranchesSelect";
 import { CategoriesSelect } from "@/components/custom/CategoriesSelect";
 import CustomPagination from "@/components/custom/CustomPagination";
-import { EntitySelect } from "@/components/custom/EntitySelect";
 import { SubcategoriesSelect } from "@/components/custom/SubcategoriesSelect";
 import { ControlledConfirmationModal } from "@/components/custom/ControlledConfirmationModal";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +24,13 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -31,7 +39,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import useDebounce from "@/hooks/useDebounce";
-import { TEntity } from "@/lib/types/entity.types";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { useGetBranchesQueryOptions } from "@/api/v2/branches/branches.hooks";
@@ -39,12 +46,13 @@ import { useGetFactoriesQueryOptions } from "@/api/v2/factories/factories.hooks"
 import { useGetWorkshopsQueryOptions } from "@/api/v2/workshop/workshops.hooks";
 import { Pencil, Trash2, RotateCcw, Filter } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useSearchParams } from "react-router";
+import { useSearchParams, useNavigate } from "react-router";
 import { ClothesTableSkeleton } from "./ClothesTableSkeleton";
 import { EditClothModal } from "./EditClothModal";
 import { toast } from "sonner";
 
 function ClothesTableContent() {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const searchParamsRef = useRef(searchParams);
   searchParamsRef.current = searchParams;
@@ -58,8 +66,8 @@ function ClothesTableContent() {
     null
   );
 
-  // Filter states - initialize from URL params
-  const [codeFilter, setCodeFilter] = useState(() => searchParams.get("search") || searchParams.get("code") || "");
+  // Filter states - initialize from URL params (search من الهيدر والفلاتر)
+  const [idFilter, setIdFilter] = useState(() => searchParams.get("id") || "");
   const [categoryId, setCategoryId] = useState(
     () => searchParams.get("category_id") || ""
   );
@@ -67,42 +75,50 @@ function ClothesTableContent() {
     const subcatParam = searchParams.get("subcat_id");
     return subcatParam ? subcatParam.split(",").filter(Boolean) : [];
   });
-  const [entityType, setEntityType] = useState<TEntity | undefined>(() => {
-    const type = searchParams.get("entity_type");
-    return (type as TEntity) || undefined;
-  });
-  const [entityId, setEntityId] = useState(
-    () => searchParams.get("entity_id") || ""
-  );
+  const [branchId, setBranchId] = useState(() => searchParams.get("branch_id") || searchParams.get("entity_id") || "");
+  const [breastSize, setBreastSize] = useState(() => searchParams.get("breast_size") || "");
+  const [waistSize, setWaistSize] = useState(() => searchParams.get("waist_size") || "");
+  const [sleeveSize, setSleeveSize] = useState(() => searchParams.get("sleeve_size") || "");
+  const [createdFrom, setCreatedFrom] = useState(() => searchParams.get("created_from") || "");
+  const [createdTo, setCreatedTo] = useState(() => searchParams.get("created_to") || "");
+  const [statusFilter, setStatusFilter] = useState<string>(() => searchParams.get("status") || "");
   const [showFilters, setShowFilters] = useState(false);
 
-  // Sync code filter from URL (header uses search param)
-  const urlSearch = searchParams.get("search") || searchParams.get("code") || "";
-  useEffect(() => {
-    setCodeFilter(urlSearch);
-  }, [urlSearch]);
+  // بحث الهيدر والفلاتر: مصدر واحد من URL
+  const headerSearch = searchParams.get("search")?.trim() || "";
 
   // Debounce filter values
-  const debouncedCodeFilter = useDebounce({ value: codeFilter, delay: 500 });
+  const debouncedIdFilter = useDebounce({ value: idFilter.trim(), delay: 400 });
   const debouncedCategoryId = useDebounce({ value: categoryId, delay: 300 });
   const debouncedSubcategoryIds = useDebounce({
     value: subcategoryIds,
     delay: 300,
   });
-  const debouncedEntityType = useDebounce({ value: entityType, delay: 300 });
-  const debouncedEntityId = useDebounce({ value: entityId, delay: 300 });
+  const debouncedBranchId = useDebounce({ value: branchId, delay: 300 });
+  const debouncedBreastSize = useDebounce({ value: breastSize.trim(), delay: 400 });
+  const debouncedWaistSize = useDebounce({ value: waistSize.trim(), delay: 400 });
+  const debouncedSleeveSize = useDebounce({ value: sleeveSize.trim(), delay: 400 });
+  const debouncedCreatedFrom = useDebounce({ value: createdFrom.trim(), delay: 300 });
+  const debouncedCreatedTo = useDebounce({ value: createdTo.trim(), delay: 300 });
+  const debouncedStatusFilter = useDebounce({ value: statusFilter, delay: 300 });
 
-  // Build query params with debounced values
+  // Build query params: search من الهيدر/URL + بقية الفلاتر
   const queryParams: TGetClothesRequestParams = {
     page,
     per_page,
-    ...(debouncedCodeFilter && { name: debouncedCodeFilter }),
+    ...(headerSearch && { search: headerSearch }),
+    ...(debouncedIdFilter && { id: debouncedIdFilter }),
+    ...(debouncedBranchId && { branch_id: Number(debouncedBranchId) }),
+    ...(debouncedBreastSize && { breast_size: debouncedBreastSize }),
+    ...(debouncedWaistSize && { waist_size: debouncedWaistSize }),
+    ...(debouncedSleeveSize && { sleeve_size: debouncedSleeveSize }),
+    ...(debouncedCreatedFrom && { created_from: debouncedCreatedFrom }),
+    ...(debouncedCreatedTo && { created_to: debouncedCreatedTo }),
     ...(debouncedCategoryId && { category_id: Number(debouncedCategoryId) }),
     ...(debouncedSubcategoryIds.length > 0 && {
       subcat_id: debouncedSubcategoryIds.map(Number),
     }),
-    ...(debouncedEntityType && { entity_type: debouncedEntityType }),
-    ...(debouncedEntityId && { entity_id: Number(debouncedEntityId) }),
+    ...(debouncedStatusFilter && { status: debouncedStatusFilter as TClothesStatus }),
   };
 
   const { data, isPending, isError, error } = useQuery(
@@ -155,71 +171,109 @@ function ClothesTableContent() {
     }
   };
 
-  // Reset all filters
+  // Reset all filters (لا يمس search في الهيدر - المستخدم يمسحه من الهيدر)
   const skipNextSyncRef = useRef(false);
   const handleResetFilters = () => {
     skipNextSyncRef.current = true;
-    setCodeFilter("");
+    setIdFilter("");
     setCategoryId("");
     setSubcategoryIds([]);
-    setEntityType(undefined);
-    setEntityId("");
-    setSearchParams({ page: "1" });
+    setBranchId("");
+    setBreastSize("");
+    setWaistSize("");
+    setSleeveSize("");
+    setCreatedFrom("");
+    setCreatedTo("");
+    setStatusFilter("");
+    setSearchParams((prev) => {
+      const next = new URLSearchParams();
+      next.set("page", "1");
+      const s = prev.get("search");
+      if (s) next.set("search", s);
+      return next;
+    });
   };
 
-  // Update URL params when debounced values change (use ref to avoid loop from searchParams dependency)
+  // Update URL params when debounced filter values change (search يبقى من الهيدر)
   useEffect(() => {
     if (skipNextSyncRef.current) {
       skipNextSyncRef.current = false;
       setSearchParams((prev) => {
         const next = new URLSearchParams();
         next.set("page", prev.get("page") || "1");
+        const s = prev.get("search");
+        if (s) next.set("search", s);
         return next;
       });
       return;
     }
     const params = new URLSearchParams(searchParamsRef.current);
-    const prevCode = params.get("search") || params.get("code") || null;
+    const prevSearch = params.get("search") || null;
+    const prevId = params.get("id") || null;
     const prevCategoryId = params.get("category_id") || null;
-    const prevSubcatId =
-      params.get("subcat_id") || null;
-    const prevEntityType = params.get("entity_type") || null;
-    const prevEntityId = params.get("entity_id") || null;
+    const prevSubcatId = params.get("subcat_id") || null;
+    const prevBranchId = params.get("branch_id") || params.get("entity_id") || null;
+    const prevBreast = params.get("breast_size") || null;
+    const prevWaist = params.get("waist_size") || null;
+    const prevSleeve = params.get("sleeve_size") || null;
+    const prevCreatedFrom = params.get("created_from") || null;
+    const prevCreatedTo = params.get("created_to") || null;
+    const prevStatus = params.get("status") || null;
 
-    const newCode = debouncedCodeFilter || null;
+    const newId = debouncedIdFilter || null;
     const newCategoryId = debouncedCategoryId || null;
     const newSubcatId =
       debouncedSubcategoryIds.length > 0
         ? debouncedSubcategoryIds.join(",")
         : null;
-    const newEntityType = debouncedEntityType || null;
-    const newEntityId = debouncedEntityId || null;
+    const newBranchId = debouncedBranchId || null;
+    const newBreast = debouncedBreastSize || null;
+    const newWaist = debouncedWaistSize || null;
+    const newSleeve = debouncedSleeveSize || null;
+    const newCreatedFrom = debouncedCreatedFrom || null;
+    const newCreatedTo = debouncedCreatedTo || null;
+    const newStatus = debouncedStatusFilter || null;
 
     const paramsChanged =
-      prevCode !== newCode ||
+      prevId !== newId ||
       prevCategoryId !== newCategoryId ||
       prevSubcatId !== newSubcatId ||
-      prevEntityType !== newEntityType ||
-      prevEntityId !== newEntityId;
+      prevBranchId !== newBranchId ||
+      prevBreast !== newBreast ||
+      prevWaist !== newWaist ||
+      prevSleeve !== newSleeve ||
+      prevCreatedFrom !== newCreatedFrom ||
+      prevCreatedTo !== newCreatedTo ||
+      prevStatus !== newStatus;
 
     if (!paramsChanged) return;
 
-    const nextParams = new URLSearchParams();
-    if (newCode) nextParams.set("search", newCode);
+    const nextParams = new URLSearchParams(searchParamsRef.current);
+    if (prevSearch) nextParams.set("search", prevSearch);
+    if (newId) nextParams.set("id", newId);
     if (newCategoryId) nextParams.set("category_id", newCategoryId);
     if (newSubcatId) nextParams.set("subcat_id", newSubcatId);
-    if (newEntityType) nextParams.set("entity_type", newEntityType);
-    if (newEntityId) nextParams.set("entity_id", newEntityId);
-    nextParams.set("page", paramsChanged ? "1" : String(page));
+    if (newBranchId) nextParams.set("branch_id", newBranchId);
+    if (newBreast) nextParams.set("breast_size", newBreast);
+    if (newWaist) nextParams.set("waist_size", newWaist);
+    if (newSleeve) nextParams.set("sleeve_size", newSleeve);
+    if (newCreatedFrom) nextParams.set("created_from", newCreatedFrom);
+    if (newCreatedTo) nextParams.set("created_to", newCreatedTo);
+    if (newStatus) nextParams.set("status", newStatus);
+    nextParams.set("page", "1");
     setSearchParams(nextParams);
   }, [
-    debouncedCodeFilter,
+    debouncedIdFilter,
     debouncedCategoryId,
     debouncedSubcategoryIds,
-    debouncedEntityType,
-    debouncedEntityId,
+    debouncedBranchId,
+    debouncedBreastSize,
+    debouncedWaistSize,
+    debouncedSleeveSize,
+    debouncedCreatedFrom,
+    debouncedCreatedTo,
+    debouncedStatusFilter,
     setSearchParams,
-    page,
   ]);
 
   const getStatusBadgeVariant = (status: string) => {
@@ -243,16 +297,26 @@ function ClothesTableContent() {
 
   const getStatusLabel = (status: string) => {
     const labels: Record<string, string> = {
-      ready_for_rent: "جاهز للإيجار",
-      rented: "مؤجر",
+      ready_for_rent: "متوفر",
+      rented: "محجوز",
       damaged: "تالف",
       burned: "محترق",
       scratched: "مخدوش",
-      repairing: "قيد الإصلاح",
+      repairing: "قيد الصيانة",
       die: "ميت",
     };
     return labels[status] || status;
   };
+
+  const STATUS_FILTER_OPTIONS: { value: TClothesStatus; label: string }[] = [
+    { value: "ready_for_rent", label: "متوفر" },
+    { value: "rented", label: "محجوز" },
+    { value: "repairing", label: "قيد الصيانة" },
+    { value: "damaged", label: "تالف" },
+    { value: "burned", label: "محترق" },
+    { value: "scratched", label: "مخدوش" },
+    { value: "die", label: "ميت" },
+  ];
 
   const getMeasurementsDisplay = (cloth: TClothResponse) => {
     if (cloth.measurements) return cloth.measurements;
@@ -283,6 +347,16 @@ function ClothesTableContent() {
     const subcategories = (cloth as { subcategories?: { name?: string }[] }).subcategories;
     if (subcategories?.length) return subcategories.map((s) => s.name ?? "").filter(Boolean).join("، ");
     return "";
+  };
+
+  /** اسم المنتج: الفئة والفئة الفرعية */
+  const getProductName = (cloth: TClothResponse) => {
+    const categoryName = cloth.category_name ?? (cloth as { category?: { name?: string } }).category?.name ?? "";
+    const subDisplay = getSubcategoryDisplay(cloth);
+    if (categoryName && subDisplay) return `${categoryName} (${subDisplay})`;
+    if (categoryName) return categoryName;
+    if (subDisplay) return subDisplay;
+    return "—";
   };
 
   return (
@@ -326,51 +400,122 @@ function ClothesTableContent() {
         <CardContent>
           {/* Filters */}
           {showFilters && (
-            <div className="mb-4 rounded-lg border bg-muted/30 p-4">
-              <h3 className="mb-3 text-sm font-semibold text-foreground">الفلاتر</h3>
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">كود المنتج</label>
-                    <Input
-                      placeholder="ابحث بالكود..."
-                      value={codeFilter}
-                      onChange={(e) => setCodeFilter(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">قسم المنتجات</label>
-                    <CategoriesSelect
-                      value={categoryId}
-                      onChange={(id) => {
-                        setCategoryId(id);
-                        setSubcategoryIds([]);
-                      }}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">أقسام المنتجات الفرعية</label>
-                    <SubcategoriesSelect
-                      multiple
-                      value={subcategoryIds}
-                      onChange={(ids) => setSubcategoryIds(ids)}
-                      category_id={categoryId ? Number(categoryId) : undefined}
-                    />
+            <div className="mb-6 rounded-xl border bg-muted/20 p-5 shadow-sm">
+              <h3 className="text-sm font-semibold text-foreground mb-4">الفلاتر</h3>
+              <div className="space-y-5">
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">تحديد المنتج والموقع</p>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium">ID</label>
+                      <Input
+                        placeholder="1 أو 1,2,3"
+                        value={idFilter}
+                        onChange={(e) => setIdFilter(e.target.value)}
+                        className="h-9"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium">الفرع</label>
+                      <BranchesSelect
+                        value={branchId}
+                        onChange={(id) => setBranchId(id || "")}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium">القسم</label>
+                      <CategoriesSelect
+                        value={categoryId}
+                        onChange={(id) => {
+                          setCategoryId(id);
+                          setSubcategoryIds([]);
+                        }}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium">القسم الفرعي</label>
+                      <SubcategoriesSelect
+                        multiple
+                        value={subcategoryIds}
+                        onChange={(ids) => setSubcategoryIds(ids)}
+                        category_id={categoryId ? Number(categoryId) : undefined}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium">الحالة</label>
+                      <Select
+                        value={statusFilter || "all"}
+                        onValueChange={(v) => setStatusFilter(v === "all" ? "" : v)}
+                      >
+                        <SelectTrigger className="h-9">
+                          <SelectValue placeholder="كل الحالات" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">كل الحالات</SelectItem>
+                          {STATUS_FILTER_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </div>
-                <div className="flex flex-wrap items-end gap-4">
-                  <EntitySelect
-                    mode="standalone"
-                    entityType={entityType}
-                    entityId={entityId}
-                    onEntityTypeChange={(type) => {
-                      setEntityType(type);
-                      setEntityId("");
-                    }}
-                    onEntityIdChange={setEntityId}
-                    entityTypeLabel="نوع المكان"
-                    entityIdLabel="المكان"
-                  />
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">المقاسات</p>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium">مقاس الصدر</label>
+                      <Input
+                        placeholder="بحث جزئي"
+                        value={breastSize}
+                        onChange={(e) => setBreastSize(e.target.value)}
+                        className="h-9"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium">مقاس الخصر</label>
+                      <Input
+                        placeholder="..."
+                        value={waistSize}
+                        onChange={(e) => setWaistSize(e.target.value)}
+                        className="h-9"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium">مقاس الكم</label>
+                      <Input
+                        placeholder="..."
+                        value={sleeveSize}
+                        onChange={(e) => setSleeveSize(e.target.value)}
+                        className="h-9"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">تاريخ الإنشاء</p>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 max-w-md">
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium">من</label>
+                      <Input
+                        type="date"
+                        value={createdFrom}
+                        onChange={(e) => setCreatedFrom(e.target.value)}
+                        className="h-9"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium">إلى</label>
+                      <Input
+                        type="date"
+                        value={createdTo}
+                        onChange={(e) => setCreatedTo(e.target.value)}
+                        className="h-9"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -381,74 +526,93 @@ function ClothesTableContent() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-center">#</TableHead>
+                    <TableHead className="text-center w-14">م</TableHead>
+                    <TableHead className="text-center">اسم المنتج</TableHead>
                     <TableHead className="text-center">الكود</TableHead>
-                    <TableHead className="text-center">المقاسات</TableHead>
+                    <TableHead className="text-center">المقاس</TableHead>
+                    <TableHead className="text-center">الفرع</TableHead>
                     <TableHead className="text-center">الحالة</TableHead>
-                    <TableHead className="text-center">نوع المكان (المكان)</TableHead>
-                    <TableHead className="text-center">قسم المنتجات</TableHead>
-                    <TableHead className="text-center">أقسام فرعية</TableHead>
-                    <TableHead className="text-center">ملاحظات</TableHead>
-                    <TableHead className="text-center">إجراءات</TableHead>
+                    <TableHead className="text-center">السعر</TableHead>
+                    <TableHead className="text-center">الإجراءات</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {isPending && <ClothesTableSkeleton rows={5} />}
                   {data && data.data.length > 0 ? (
-                    data.data.map((cloth: TClothResponse) => (
-                      <TableRow key={cloth.id}>
-                        <TableCell className="text-center">
-                          {cloth.id}
-                        </TableCell>
-                        <TableCell className="text-center font-medium">
-                          {cloth.code}
-                        </TableCell>
-                        <TableCell className="text-center text-muted-foreground">
-                          {getMeasurementsDisplay(cloth)}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Badge variant={getStatusBadgeVariant(cloth.status)}>
-                            {getStatusLabel(cloth.status)}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {getEntityDisplay(cloth)}
-                        </TableCell>
-                        <TableCell className="text-center text-muted-foreground">
-                          {cloth.category_name ?? (cloth as { category?: { name?: string } }).category?.name ?? "-"}
-                        </TableCell>
-                        <TableCell className="text-center text-muted-foreground max-w-[160px] truncate" title={getSubcategoryDisplay(cloth)}>
-                          {getSubcategoryDisplay(cloth) || "-"}
-                        </TableCell>
-                        <TableCell className="text-center max-w-[180px] truncate" title={cloth.notes || undefined}>
-                          {cloth.notes || "-"}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2 justify-center">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              title="تعديل"
-                              onClick={() => handleOpenEdit(cloth)}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="destructive"
-                              size="icon"
-                              title="حذف"
-                              onClick={() => handleOpenDelete(cloth)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
+                    data.data.map((cloth: TClothResponse, index: number) => {
+                      const rawPrice = (cloth as { price?: number | string }).price;
+                      const price = rawPrice != null && rawPrice !== "" ? Number(rawPrice) : null;
+                      const rowNum = (page - 1) * per_page + index + 1;
+                      return (
+                        <TableRow
+                          key={cloth.id}
+                          role="button"
+                          tabIndex={0}
+                          className="cursor-pointer hover:bg-muted/60 transition-colors"
+                          onClick={() => navigate(`/clothes/details/${cloth.id}`)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              navigate(`/clothes/details/${cloth.id}`);
+                            }
+                          }}
+                        >
+                          <TableCell className="text-center text-muted-foreground tabular-nums w-14">
+                            {rowNum}
+                          </TableCell>
+                          <TableCell className="text-center font-medium min-w-[140px]" title={getProductName(cloth)}>
+                            {getProductName(cloth)}
+                          </TableCell>
+                          <TableCell className="text-center font-mono">
+                            {cloth.code}
+                          </TableCell>
+                          <TableCell className="text-center text-muted-foreground">
+                            {getMeasurementsDisplay(cloth)}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            {getEntityDisplay(cloth)}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Badge variant={getStatusBadgeVariant(cloth.status)}>
+                              {getStatusLabel(cloth.status)}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-center tabular-nums">
+                            {price != null ? `${price.toLocaleString("ar-EG")} ج.م` : "—"}
+                          </TableCell>
+                          <TableCell onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center gap-2 justify-center">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                title="تعديل"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleOpenEdit(cloth);
+                                }}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                size="icon"
+                                title="حذف"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleOpenDelete(cloth);
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
                   ) : (
                     <TableRow>
                       <TableCell
-                        colSpan={9}
+                        colSpan={8}
                         className="py-10 text-center text-muted-foreground"
                       >
                         لا توجد منتجات لعرضها.

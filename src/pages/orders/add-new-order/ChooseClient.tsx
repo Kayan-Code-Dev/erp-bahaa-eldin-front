@@ -440,24 +440,24 @@ function ChooseClient() {
 
   const getStatusLabel = (status: string) => {
     const labels: Record<string, string> = {
-      ready_for_rent: "جاهز للإيجار",
-      rented: "مؤجر",
+      ready_for_rent: "متوفر",
+      rented: "محجوز",
       damaged: "تالف",
       burned: "محترق",
       scratched: "مخدوش",
-      repairing: "قيد الإصلاح",
+      repairing: "قيد الصيانة",
       die: "ميت",
     };
     return labels[status] || status;
   };
 
-  /** الحالة المعروضة حسب إمكانية الإيجار للتواريخ المطلوبة (من الـ API) */
+  /** الحالة المعروضة حسب can_select من الـ API: true → متوفر، false → محجوز */
   const getEffectiveDisplayStatus = (cloth: {
     status?: string;
-    can_rent_for_requested_dates?: boolean;
+    can_select?: boolean;
   }) => {
-    if (cloth.can_rent_for_requested_dates === true) return "ready_for_rent";
-    if (cloth.can_rent_for_requested_dates === false) return "rented";
+    if (cloth.can_select === true) return "ready_for_rent";
+    if (cloth.can_select === false) return "rented";
     return cloth.status ?? "rented";
   };
 

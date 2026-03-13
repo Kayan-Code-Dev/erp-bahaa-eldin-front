@@ -52,12 +52,12 @@ import { toEnglishNumerals } from "@/utils/formatDate";
 // ---------------------------------------------------------------------------
 
 const STATUS_OPTIONS = [
-  { value: "ready_for_rent", label: "جاهز للإيجار" },
-  { value: "rented", label: "مؤجر" },
+  { value: "ready_for_rent", label: "متوفر" },
+  { value: "rented", label: "محجوز" },
   { value: "damaged", label: "تالف" },
   { value: "burned", label: "محترق" },
   { value: "scratched", label: "مخدوش" },
-  { value: "repairing", label: "قيد الإصلاح" },
+  { value: "repairing", label: "قيد الصيانة" },
   { value: "die", label: "ميت" },
 ] as const;
 

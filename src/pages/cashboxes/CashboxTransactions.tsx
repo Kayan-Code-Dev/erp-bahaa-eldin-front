@@ -111,7 +111,7 @@ function CashboxTransactions() {
   );
 
   const handleExport = () => {
-    exportTransactionsToCSV(params, {
+    exportTransactionsToCSV(undefined, {
       onSuccess: (result) => {
         if (!result) return;
         const filename =

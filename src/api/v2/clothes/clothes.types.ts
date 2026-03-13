@@ -64,15 +64,35 @@ export type TClothesStatus =
   | "repairing";
 
 export type TGetClothesRequestParams = {
-  entity_type?: TEntity;
-  entity_id?: number;
   page?: number;
   per_page?: number;
+  /** فلترة حسب ID واحد أو عدة IDs مفصولة بفاصلة (مثال: "1" أو "1,2,3") */
+  id?: string;
+  /** فلترة حسب الفرع (اختصار لـ entity_type=branch) */
+  branch_id?: number;
+  /** فلترة حسب المخزن */
+  inventory_id?: number;
+  /** فلترة حسب مقاس الصدر (بحث جزئي) */
+  breast_size?: string;
+  /** فلترة حسب مقاس الخصر */
+  waist_size?: string;
+  /** فلترة حسب مقاس الكم */
+  sleeve_size?: string;
+  /** تاريخ إنشاء من (YYYY-MM-DD) */
+  created_from?: string;
+  /** تاريخ إنشاء إلى (YYYY-MM-DD) */
+  created_to?: string;
+  /** بحث عام في: code, notes, breast_size, waist_size, sleeve_size */
+  search?: string;
+  entity_type?: TEntity;
+  entity_id?: number;
   name?: string;
   code?: string;
   category_id?: number;
   subcat_id?: number[];
   status?: TClothesStatus;
+  /** فلترة حسب المقاس (نص حر أو جزء من measurements) */
+  measurements?: string;
   /** تاريخ توصيل القطعة (استلام) - للفلترة حسب إنشاء الطلب */
   delivery_date?: string;
   /** عدد أيام الإيجار - للفلترة حسب إنشاء الطلب */

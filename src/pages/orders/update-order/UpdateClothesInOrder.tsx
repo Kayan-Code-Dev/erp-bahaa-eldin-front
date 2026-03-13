@@ -734,11 +734,11 @@ function UpdateClothesInOrder() {
                         <TableCell className="text-center">
                           <Badge variant="outline">
                             {cloth.status === "ready_for_rent"
-                              ? "جاهز للإيجار"
+                              ? "متوفر"
                               : cloth.status === "rented"
-                              ? "مؤجر"
+                              ? "محجوز"
                               : cloth.status === "repairing"
-                              ? "قيد الإصلاح"
+                              ? "قيد الصيانة"
                               : cloth.status === "damaged"
                               ? "تالف"
                               : cloth.status === "burned"

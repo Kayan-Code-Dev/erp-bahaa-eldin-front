@@ -116,3 +116,15 @@ export const exportClothesToCSV = async (params?: Record<string, unknown>) => {
     populateError(error, "خطأ فى تصدير المنتجات");
   }
 };
+
+export const importClothes = async (file: File) => {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const { data } = await api.post<unknown>(`/clothes/import`, formData);
+    return data;
+  } catch (error: any) {
+    populateError(error, "خطأ فى استيراد المنتجات");
+  }
+};

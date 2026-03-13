@@ -35,12 +35,12 @@ import { toast } from "sonner";
 import { UploadFileField } from "@/components/custom/UploadFile";
 
 const CLOTH_STATUSES: { value: TClothesStatus; label: string }[] = [
-  { value: "ready_for_rent", label: "جاهز للإيجار" },
+  { value: "ready_for_rent", label: "متوفر" },
   { value: "scratched", label: "خدش" },
   { value: "damaged", label: "تالف" },
   { value: "burned", label: "محترق" },
-  { value: "repairing", label: "قيد الإصلاح" },
-  { value: "rented", label: "مؤجر" },
+  { value: "repairing", label: "قيد الصيانة" },
+  { value: "rented", label: "محجوز" },
   { value: "die", label: "منتهي" },
 ];
 

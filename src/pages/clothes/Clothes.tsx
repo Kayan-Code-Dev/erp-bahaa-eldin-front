@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Download, Plus } from "lucide-react";
+import { Download, Plus, Upload } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import ClothesTableContent from "./ClothesTableContent";
 import { CreateClothModal } from "./CreateClothModal";
+import { ImportClothesModal } from "./ImportClothesModal";
 import { useExportClothesToCSVMutationOptions } from "@/api/v2/clothes/clothes.hooks";
 import {
   parseFilenameFromContentDisposition,
@@ -13,6 +14,7 @@ import {
 
 function Clothes() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   // Export Mutation
   const { mutate: exportClothesToCSV, isPending: isExporting } = useMutation(
@@ -52,7 +54,14 @@ function Clothes() {
             disabled={isExporting}
           >
             <Download className="ml-2 h-4 w-4" />
-            {isExporting ? "جاري التصدير..." : "تصدير إلى Excel"}
+            {isExporting ? "جاري التصدير..." : "تصدير"}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setIsImportModalOpen(true)}
+          >
+            <Upload className="ml-2 h-4 w-4" />
+            استيراد
           </Button>
           <Button onClick={() => setIsCreateModalOpen(true)}>
             <Plus className="ml-2 h-4 w-4" />
@@ -66,6 +75,10 @@ function Clothes() {
       <CreateClothModal
         open={isCreateModalOpen}
         onOpenChange={setIsCreateModalOpen}
+      />
+      <ImportClothesModal
+        open={isImportModalOpen}
+        onOpenChange={setIsImportModalOpen}
       />
     </div>
   );

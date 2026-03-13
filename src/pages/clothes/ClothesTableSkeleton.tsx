@@ -11,8 +11,8 @@ type Props = {
 export function ClothesTableSkeleton({ rows = 5 }: Props) {
   return Array.from({ length: rows }).map((_, index) => (
     <TableRow key={index}>
-      <TableCell>
-        <Skeleton className="h-4 w-8" />
+      <TableCell className="w-14">
+        <Skeleton className="h-4 w-6" />
       </TableCell>
       <TableCell>
         <Skeleton className="h-4 w-24" />

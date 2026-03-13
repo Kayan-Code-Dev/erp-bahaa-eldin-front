@@ -183,9 +183,9 @@ function ChooseClothes() {
 
   const getStatusLabel = (status: string) => {
     const labels: Record<string, string> = {
-      ready_for_rent: "جاهز للإيجار",
-      rented: "مؤجر",
-      repairing: "قيد الإصلاح",
+      ready_for_rent: "متوفر",
+      rented: "محجوز",
+      repairing: "قيد الصيانة",
       damaged: "تالف",
       burned: "محروق",
       scratched: "مخدوش",

@@ -14,7 +14,9 @@ import {
   exportClothesToCSV,
   getClothes,
   getClothesAvialbelByDate,
+  getClothesById,
   getClothethesUnavailableDaysRangesbyIds,
+  importClothes,
   updateClothes,
 } from "./clothes.service";
 import { TEntity } from "@/lib/types/entity.types";
@@ -25,6 +27,15 @@ export const useGetClothesQueryOptions = (params: TGetClothesRequestParams) => {
   return queryOptions({
     queryKey: [CLOTHES_KEY, params],
     queryFn: () => getClothes(params),
+    staleTime: 1000 * 60 * 5,
+  });
+};
+
+export const useGetClothByIdQueryOptions = (id: number) => {
+  return queryOptions({
+    queryKey: [CLOTHES_KEY, "detail", id],
+    queryFn: () => getClothesById(id),
+    enabled: !!id && id > 0,
     staleTime: 1000 * 60 * 5,
   });
 };
@@ -104,5 +115,15 @@ export const useExportClothesToCSVMutationOptions = () => {
   return mutationOptions({
     mutationFn: (params?: Parameters<typeof exportClothesToCSV>[0]) =>
       exportClothesToCSV(params),
+  });
+};
+
+export const useImportClothesMutationOptions = () => {
+  const qClient = useQueryClient();
+  return mutationOptions({
+    mutationFn: importClothes,
+    onSettled: () => {
+      qClient.invalidateQueries({ queryKey: [CLOTHES_KEY] });
+    },
   });
 };

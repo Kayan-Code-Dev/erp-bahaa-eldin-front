@@ -80,6 +80,7 @@ export type TPayment = {
     created_at: string;
     updated_at: string;
     employee_id: number;
+    branch?: { id: number; name: string } | null;
     client: {
       id: number;
       /** Full name field returned by API (preferred when present) */
@@ -126,6 +127,7 @@ export type TGetPaymentsParams = {
   client_id?: number;
   employee_id?: number;
   inventory_id?: number;
+  branch_id?: number;
   date_from?: string;
   date_to?: string;
   amount_min?: number;

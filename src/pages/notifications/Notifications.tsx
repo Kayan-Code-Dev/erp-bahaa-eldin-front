@@ -1,6 +1,6 @@
 import { useState, memo, useMemo, useCallback } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { Bell, CheckCircle2, Trash2 } from 'lucide-react';
+import { Bell, CheckCircle2 } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -23,7 +23,6 @@ import {
   useGetNotificationsQueryOptions,
   useMarkNotificationAsReadMutationOptions,
   useMarkAllNotificationsAsReadMutationOptions,
-  useDeleteNotificationMutationOptions,
 } from '@/api/v2/notifications/notifications.hooks';
 import { Notification } from '@/api/v2/notifications/notifications.types';
 import { formatDistanceToNow } from 'date-fns';
@@ -114,11 +113,9 @@ const getStatusVariant = (status: string): string => {
 const NotificationListItem = memo(function NotificationListItem({
   notification,
   onMarkAsRead,
-  onDelete,
 }: {
   notification: Notification;
   onMarkAsRead: (id: number) => void;
-  onDelete: (id: number) => void;
 }) {
   const navigate = useNavigate();
   const isRead = !!notification.read_at;
@@ -190,11 +187,6 @@ const NotificationListItem = memo(function NotificationListItem({
     onMarkAsRead(notification.id);
   }, [notification.id, onMarkAsRead]);
 
-  const handleDeleteClick = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    onDelete(notification.id);
-  }, [notification.id, onDelete]);
-
   return (
     <div
       dir="rtl"
@@ -233,13 +225,6 @@ const NotificationListItem = memo(function NotificationListItem({
                   ? 'أمر توريد جديد'
                   : 'إشعار'}
             </h4>
-            <button
-              onClick={handleDeleteClick}
-              className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0 p-1 hover:bg-destructive/10 rounded"
-              aria-label="حذف الإشعار"
-            >
-              <Trash2 className="h-3 w-3 text-muted-foreground" />
-            </button>
           </div>
 
           <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
@@ -371,8 +356,6 @@ function Notifications() {
   const markAllAsReadMutation = useMutation(
     useMarkAllNotificationsAsReadMutationOptions()
   );
-  const deleteMutation = useMutation(useDeleteNotificationMutationOptions());
-
   const handleMarkAsRead = (id: number) => {
     markAsReadMutation.mutate(id, {
       onSuccess: () => {
@@ -385,14 +368,6 @@ function Notifications() {
     markAllAsReadMutation.mutate(undefined, {
       onSuccess: () => {
         toast.success('تم تحديد جميع الإشعارات كمقروءة');
-      },
-    });
-  };
-
-  const handleDelete = (id: number) => {
-    deleteMutation.mutate(id, {
-      onSuccess: () => {
-        toast.success('تم حذف الإشعار');
       },
     });
   };
@@ -478,7 +453,6 @@ function Notifications() {
                       key={notification.id}
                       notification={notification}
                       onMarkAsRead={handleMarkAsRead}
-                      onDelete={handleDelete}
                     />
                   ))}
                 </div>
@@ -512,7 +486,6 @@ function Notifications() {
                       key={notification.id}
                       notification={notification}
                       onMarkAsRead={handleMarkAsRead}
-                      onDelete={handleDelete}
                     />
                   ))}
                 </div>

@@ -50,6 +50,7 @@ import {
   downloadBlob,
 } from "@/api/api.utils";
 import CustomPagination from "@/components/custom/CustomPagination";
+import { BranchesSelect } from "@/components/custom/BranchesSelect";
 import { ClientsSelect } from "@/components/custom/ClientsSelect";
 import { EmployeesSelect } from "@/components/custom/EmployeesSelect";
 import { PaymentDetailsModal } from "./PaymentDetailsModal";
@@ -78,6 +79,7 @@ const filterSchema = z.object({
   order_id: z.string().optional(),
   employee_id: z.string().optional(),
   inventory_id: z.string().optional(),
+  branch_id: z.string().optional(),
   date_from: z.string().optional(),
   date_to: z.string().optional(),
   amount_min: z.string().optional(),
@@ -105,6 +107,7 @@ function Payments() {
       order_id: searchParams.get("order_id") || undefined,
       employee_id: searchParams.get("employee_id") || undefined,
       inventory_id: searchParams.get("inventory_id") || undefined,
+      branch_id: searchParams.get("branch_id") || undefined,
       date_from: searchParams.get("date_from") || undefined,
       date_to: searchParams.get("date_to") || undefined,
       amount_min: searchParams.get("amount_min") || undefined,
@@ -166,6 +169,7 @@ function Payments() {
     const clientIdNum = values.client_id?.trim() ? Number(values.client_id) : NaN;
     const employeeIdNum = values.employee_id?.trim() ? Number(values.employee_id) : NaN;
     const inventoryIdNum = values.inventory_id?.trim() ? Number(values.inventory_id) : NaN;
+    const branchIdNum = values.branch_id?.trim() ? Number(values.branch_id) : NaN;
     const amountMinNum = values.amount_min?.trim() ? Number(values.amount_min) : NaN;
     const amountMaxNum = values.amount_max?.trim() ? Number(values.amount_max) : NaN;
     return {
@@ -177,6 +181,7 @@ function Payments() {
       client_id: Number.isFinite(clientIdNum) ? clientIdNum : undefined,
       employee_id: Number.isFinite(employeeIdNum) ? employeeIdNum : undefined,
       inventory_id: Number.isFinite(inventoryIdNum) ? inventoryIdNum : undefined,
+      branch_id: Number.isFinite(branchIdNum) ? branchIdNum : undefined,
       date_from: values.date_from?.trim() || undefined,
       date_to: values.date_to?.trim() || undefined,
       amount_min: Number.isFinite(amountMinNum) ? amountMinNum : undefined,
@@ -209,6 +214,7 @@ function Payments() {
     if (params.order_id != null) next.set("order_id", String(params.order_id));
     if (params.employee_id != null) next.set("employee_id", String(params.employee_id));
     if (params.inventory_id != null) next.set("inventory_id", String(params.inventory_id));
+    if (params.branch_id != null) next.set("branch_id", String(params.branch_id));
     if (params.date_from) next.set("date_from", params.date_from);
     if (params.date_to) next.set("date_to", params.date_to);
     if (params.amount_min != null) next.set("amount_min", String(params.amount_min));
@@ -266,6 +272,7 @@ function Payments() {
       order_id: undefined,
       employee_id: undefined,
       inventory_id: undefined,
+      branch_id: undefined,
       date_from: undefined,
       date_to: undefined,
       amount_min: undefined,
@@ -443,6 +450,23 @@ function Payments() {
                                 ))}
                               </SelectContent>
                             </Select>
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Branch */}
+                      <FormField
+                        control={form.control}
+                        name="branch_id"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>الفرع</FormLabel>
+                            <FormControl>
+                              <BranchesSelect
+                                value={field.value || ""}
+                                onChange={(value) => field.onChange(value || undefined)}
+                              />
+                            </FormControl>
                           </FormItem>
                         )}
                       />
@@ -653,6 +677,7 @@ function Payments() {
                   <TableRow>
                     <TableHead className="text-center">#</TableHead>
                     <TableHead className="text-center">العميل</TableHead>
+                    <TableHead className="text-center">الفرع</TableHead>
                     <TableHead className="text-center">المبلغ</TableHead>
                     <TableHead className="text-center">الحالة</TableHead>
                     <TableHead className="text-center">نوع الدفعة</TableHead>
@@ -666,7 +691,7 @@ function Payments() {
                   {isPending ? (
                     <TableRow>
                       <TableCell
-                        colSpan={8}
+                        colSpan={10}
                         className="py-10 text-center text-muted-foreground"
                       >
                         جاري التحميل...
@@ -682,6 +707,9 @@ function Payments() {
                           {payment.order?.client
                             ? getClientName(payment.order.client)
                             : "-"}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {payment.order?.branch?.name ?? "-"}
                         </TableCell>
                         <TableCell className="text-center font-medium">
                           {payment.amount.toLocaleString()} ج.م
@@ -754,7 +782,7 @@ function Payments() {
                   ) : (
                     <TableRow>
                       <TableCell
-                        colSpan={8}
+                        colSpan={10}
                         className="py-10 text-center text-muted-foreground"
                       >
                         لا توجد مدفوعات لعرضها.
