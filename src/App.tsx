@@ -23,6 +23,9 @@ import { returnsRoutes } from "./routes/returns.routes";
 import { deliveriesRoutes } from "./routes/deliveries.routes";
 
 const LandingPage = lazy(() => import("./pages/landing/LandingPage"));
+const AboutPage = lazy(() => import("./pages/landing/AboutPage"));
+const TermsPage = lazy(() => import("./pages/landing/TermsPage"));
+const PrivacyPage = lazy(() => import("./pages/landing/PrivacyPage"));
 const DashboardPage = lazy(() => import("./pages/dashboard-page/dashboard-page"));
 const Clients = lazy(() => import("./pages/clients/Clients"));
 const Factory = lazy(() => import("./pages/factory/Factory"));
@@ -37,6 +40,9 @@ function App() {
       <Routes>
         {/* Public marketing landing page */}
         <Route path="/" element={<LandingPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
 
         {/* Authenticated application layout */}
         <Route element={<AppLayout />}>
