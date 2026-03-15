@@ -20,7 +20,6 @@ import {
   FileText,
   Tag,
   MapPin,
-  Calendar,
   ShoppingBag,
   ExternalLink,
   Shirt,
@@ -349,7 +348,6 @@ export default function ClothDetails() {
                   value={priceDisplay != null ? `${priceDisplay} ج.م` : "—"}
                   accent={priceDisplay != null}
                 />
-                <StatBox icon={Calendar} label="تاريخ الإنشاء" value={formatDate(cloth.created_at)} />
                 {ordersPending ? (
                   <>
                     {[1, 2, 3, 4, 5].map((i) => (
