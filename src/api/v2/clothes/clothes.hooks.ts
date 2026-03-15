@@ -16,6 +16,7 @@ import {
   getClothesAvialbelByDate,
   getClothesById,
   getClothethesUnavailableDaysRangesbyIds,
+  getClothOrders,
   importClothes,
   updateClothes,
 } from "./clothes.service";
@@ -37,6 +38,15 @@ export const useGetClothByIdQueryOptions = (id: number) => {
     queryFn: () => getClothesById(id),
     enabled: !!id && id > 0,
     staleTime: 1000 * 60 * 5,
+  });
+};
+
+export const useGetClothOrdersQueryOptions = (clothId: number) => {
+  return queryOptions({
+    queryKey: [CLOTHES_KEY, "orders", clothId],
+    queryFn: () => getClothOrders(clothId),
+    enabled: !!clothId && clothId > 0,
+    staleTime: 1000 * 60 * 2,
   });
 };
 

@@ -131,3 +131,61 @@ export type TClothesUnavailableDaysRangesResponse = {
     }[];
   }[];
 };
+
+/** استجابة GET /clothes/{id}/orders — تأجيرات واستخدامات المنتج */
+export type TClothOrderClient = {
+  id: number;
+  name?: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
+  date_of_birth?: string | null;
+  national_id?: string | null;
+  phones?: { phone: string; type?: string }[];
+};
+
+export type TClothOrderPivot = {
+  type: string;
+  price: string;
+  quantity: number;
+  status: string;
+  returnable: boolean;
+};
+
+export type TClothOrderItem = {
+  id: number;
+  client: TClothOrderClient;
+  created_at: string;
+  days_of_rent: number | null;
+  delivery_date: string | null;
+  occasion_datetime: string | null;
+  paid: string;
+  pivot: TClothOrderPivot;
+  remaining: string;
+  return_date: string | null;
+  status: string;
+  total_price: string;
+  visit_datetime: string | null;
+};
+
+export type TClothOrdersMeta = {
+  buy_count: number;
+  rent_count: number;
+  tailoring_count: number;
+  total: number;
+  payment?: {
+    orders_fully_paid: number;
+    orders_with_balance: number;
+    payments_count: number;
+    total_amount: number;
+    total_paid: number;
+    total_remaining: number;
+  };
+};
+
+export type TClothOrdersResponse = {
+  cloth_code: string;
+  cloth_id: number;
+  orders: TClothOrderItem[];
+  total: number;
+  meta?: TClothOrdersMeta;
+};

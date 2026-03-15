@@ -2,13 +2,13 @@ import {
   TClothesUnavailableDaysRangesResponse,
   TClothesAvailableForDateResponse,
   TClothResponse,
+  TClothOrdersResponse,
   TCreateClothesRequest,
   TGetClothesRequestParams,
   TUpdateClothesRequest,
 } from "./clothes.types";
 import { api } from "@/api/api-contants";
 import { populateError } from "@/api/api.utils";
-import { TPaginationResponse } from "@/api/api-common.types";
 import { TEntity } from "@/lib/types/entity.types";
 
 export const getClothes = async (params: TGetClothesRequestParams) => {
@@ -70,6 +70,30 @@ export const getClothesById = async (id: number) => {
   } catch (error: any) {
     populateError(error, "خطأ فى جلب المنتجات");
   }
+};
+
+/** تأجيرات واستخدامات المنتج - GET /clothes/{id}/orders */
+export const getClothOrders = async (clothId: number) => {
+  try {
+    const { data: responseData } = await api.get<
+      TClothOrdersResponse | { data: TClothOrdersResponse }
+    >(`/clothes/${clothId}/orders`);
+    const result =
+      responseData && "data" in responseData && responseData.data
+        ? responseData.data
+        : (responseData as TClothOrdersResponse);
+    return (
+      result ?? {
+        cloth_code: "",
+        cloth_id: clothId,
+        orders: [],
+        total: 0,
+      }
+    );
+  } catch (error: any) {
+    populateError(error, "خطأ فى جلب تأجيرات واستخدامات المنتج");
+  }
+  return { cloth_code: "", cloth_id: clothId, orders: [], total: 0 } as TClothOrdersResponse;
 };
 
 export const getClothesAvialbelByDate = async (

@@ -82,7 +82,7 @@ export function NotificationBell() {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-[380px] sm:w-[420px] p-0"
+        className="w-[400px] sm:w-[440px] min-w-[400px] p-0 overflow-x-visible"
         sideOffset={8}
       >
         <div className="flex flex-col" dir="rtl">

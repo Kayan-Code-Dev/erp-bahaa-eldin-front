@@ -18,14 +18,31 @@ import {
   Ruler,
   Banknote,
   FileText,
-  Calendar,
   Tag,
   MapPin,
+  Calendar,
+  ShoppingBag,
+  ExternalLink,
+  Shirt,
+  Scissors,
+  CreditCard,
 } from "lucide-react";
-import { useGetClothByIdQueryOptions } from "@/api/v2/clothes/clothes.hooks";
+import {
+  useGetClothByIdQueryOptions,
+  useGetClothOrdersQueryOptions,
+} from "@/api/v2/clothes/clothes.hooks";
 import { TClothResponse } from "@/api/v2/clothes/clothes.types";
 import { formatDate } from "@/utils/formatDate";
 import { cn } from "@/lib/utils";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { getOrderTypeLabel, getStatusLabel } from "@/api/v2/orders/order.utils";
 
 function getProductName(cloth: TClothResponse): string {
   const categoryName =
@@ -73,7 +90,7 @@ const STATUS_LABELS: Record<string, string> = {
   die: "ميت",
 };
 
-function getStatusLabel(status: string): string {
+function getClothStatusLabel(status: string): string {
   return STATUS_LABELS[status] ?? status;
 }
 
@@ -193,6 +210,11 @@ export default function ClothDetails() {
     enabled: !!clothId,
   });
 
+  const { data: ordersData, isPending: ordersPending } = useQuery({
+    ...useGetClothOrdersQueryOptions(clothId),
+    enabled: !!clothId && !!cloth,
+  });
+
   if (isError) {
     return (
       <div dir="rtl" className="min-h-[60vh] flex flex-col">
@@ -228,10 +250,9 @@ export default function ClothDetails() {
   }
 
   const rawPrice = cloth ? (cloth as { price?: number | string }).price : null;
-  const price =
-    rawPrice != null && rawPrice !== ""
-      ? Number(rawPrice).toLocaleString("ar-EG")
-      : null;
+  const priceNum =
+    rawPrice != null && rawPrice !== "" ? Number(String(rawPrice).replace(/,/g, "")) : null;
+  const priceDisplay = priceNum != null ? priceNum.toLocaleString("en-US") : null;
 
   return (
     <div dir="rtl" className="space-y-8 pb-4">
@@ -244,8 +265,8 @@ export default function ClothDetails() {
           </Link>
         </Button>
         <span className="text-muted-foreground">/</span>
-        <span className="text-foreground font-medium truncate max-w-[200px] sm:max-w-none">
-          {cloth ? getProductName(cloth) : "تفاصيل المنتج"}
+        <span className="text-foreground font-medium truncate max-w-[200px] sm:max-w-none" title={cloth ? getProductName(cloth) : undefined}>
+          {cloth ? `${cloth.code} - ${getProductName(cloth)}` : "تفاصيل المنتج"}
         </span>
       </nav>
 
@@ -271,7 +292,7 @@ export default function ClothDetails() {
         </Card>
       ) : (
         <>
-          {/* Hero card: صورة رمزية + عنوان + حالة + ملخص سريع */}
+          {/* Hero + إحصائيات في كارد واحد */}
           <Card
             className={cn(
               "rounded-2xl border-2 overflow-hidden shadow-sm",
@@ -282,63 +303,110 @@ export default function ClothDetails() {
               cloth.status === "die" && "border-l-4 border-l-rose-500/60"
             )}
           >
-            <div className="h-24 sm:h-28 bg-gradient-to-b from-muted/60 to-muted/20" />
+            <div className="h-20 sm:h-24 bg-gradient-to-b from-muted/60 to-muted/20" />
             <CardContent className="px-6 sm:px-8 pb-6 sm:pb-8 pt-0">
-              <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 -mt-12 relative">
-                <div className="flex flex-col sm:flex-row sm:items-end gap-4">
-                  <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-background border-2 border-border shadow-lg">
-                    <Package className="h-10 w-10 text-primary" />
+              {/* هيدر المنتج */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 -mt-10 relative">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-background border-2 border-border shadow-md">
+                    <Package className="h-8 w-8 text-primary" />
                   </div>
-                  <div className="space-y-1 pb-0.5">
-                    <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight break-words">
+                  <div className="space-y-1 min-w-0">
+                    <h1 className="text-lg sm:text-xl font-bold text-foreground truncate" title={getProductName(cloth)}>
                       {getProductName(cloth)}
                     </h1>
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-sm text-muted-foreground">
-                      <span className="font-mono font-semibold text-foreground">{cloth.code}</span>
+                    <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                      <span className="font-mono font-medium text-foreground bg-muted/50 px-2 py-0.5 rounded">
+                        {cloth.code}
+                      </span>
                       <span>·</span>
                       <span>#{cloth.id}</span>
                     </div>
                   </div>
                 </div>
-                <div className="flex flex-wrap items-center gap-3">
-                  {price != null && (
-                    <div className="inline-flex items-center gap-1.5 rounded-xl bg-primary/10 px-4 py-2 text-primary font-bold tabular-nums">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                  {priceDisplay != null && (
+                    <div className="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-3 py-1.5 text-primary font-bold tabular-nums text-sm">
                       <Banknote className="h-4 w-4" />
-                      {price} ج.م
+                      {priceDisplay} ج.م
                     </div>
                   )}
                   <Badge
                     variant={getStatusVariant(cloth.status)}
-                    className="text-sm px-4 py-1.5 rounded-full font-medium"
+                    className="text-xs sm:text-sm px-3 py-1 rounded-full font-medium"
                   >
-                    {getStatusLabel(cloth.status)}
+                    {getClothStatusLabel(cloth.status)}
                   </Badge>
                 </div>
               </div>
 
-              {/* شريط إحصائيات سريعة */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
-                <StatBox
-                  icon={MapPin}
-                  label="الفرع"
-                  value={getEntityDisplay(cloth)}
-                />
-                <StatBox
-                  icon={Ruler}
-                  label="المقاسات"
-                  value={getMeasurementsDisplay(cloth)}
-                />
+              {/* كاردات المعلومات والإحصائيات */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 mt-6">
+                <StatBox icon={MapPin} label="الفرع" value={getEntityDisplay(cloth)} />
                 <StatBox
                   icon={Banknote}
                   label="السعر"
-                  value={price != null ? `${price} ج.م` : "—"}
-                  accent={price != null}
+                  value={priceDisplay != null ? `${priceDisplay} ج.م` : "—"}
+                  accent={priceDisplay != null}
                 />
-                <StatBox
-                  icon={Calendar}
-                  label="آخر تحديث"
-                  value={formatDate(cloth.updated_at)}
-                />
+                <StatBox icon={Calendar} label="تاريخ الإنشاء" value={formatDate(cloth.created_at)} />
+                {ordersPending ? (
+                  <>
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <Skeleton key={i} className="h-[72px] rounded-xl" />
+                    ))}
+                  </>
+                ) : (
+                  ordersData?.meta && (
+                    <>
+                      <StatBox
+                        icon={Shirt}
+                        label="إيجار"
+                        value={ordersData.meta.rent_count?.toLocaleString("en-US") ?? "0"}
+                      />
+                      <StatBox
+                        icon={ShoppingBag}
+                        label="شراء"
+                        value={ordersData.meta.buy_count?.toLocaleString("en-US") ?? "0"}
+                      />
+                      <StatBox
+                        icon={Scissors}
+                        label="تفصيل"
+                        value={ordersData.meta.tailoring_count?.toLocaleString("en-US") ?? "0"}
+                      />
+                      {ordersData.meta.payment && (
+                        <>
+                          <StatBox
+                            icon={CreditCard}
+                            label="مدفوع بالكامل"
+                            value={ordersData.meta.payment.orders_fully_paid?.toLocaleString("en-US") ?? "0"}
+                          />
+                          <StatBox
+                            icon={CreditCard}
+                            label="له رصيد"
+                            value={ordersData.meta.payment.orders_with_balance?.toLocaleString("en-US") ?? "0"}
+                          />
+                          <StatBox
+                            icon={Banknote}
+                            label="الإجمالي"
+                            value={`${(ordersData.meta.payment.total_amount ?? 0).toLocaleString("en-US")} ج.م`}
+                            accent
+                          />
+                          <StatBox
+                            icon={Banknote}
+                            label="المدفوع"
+                            value={`${(ordersData.meta.payment.total_paid ?? 0).toLocaleString("en-US")} ج.م`}
+                          />
+                          <StatBox
+                            icon={Banknote}
+                            label="المتبقي"
+                            value={`${(ordersData.meta.payment.total_remaining ?? 0).toLocaleString("en-US")} ج.م`}
+                          />
+                        </>
+                      )}
+                    </>
+                  )
+                )}
               </div>
             </CardContent>
           </Card>
@@ -370,20 +438,18 @@ export default function ClothDetails() {
                 <CardDescription>مقاييس المنتج وقيمته</CardDescription>
               </CardHeader>
               <CardContent className="space-y-0">
-                <DetailRow label="المقاس (عام)" value={getMeasurementsDisplay(cloth)} />
-                {(cloth.breast_size || cloth.waist_size || cloth.sleeve_size) && (
-                  <>
-                    {cloth.breast_size && <DetailRow label="مقاس الصدر" value={cloth.breast_size} />}
-                    {cloth.waist_size && <DetailRow label="مقاس الخصر" value={cloth.waist_size} />}
-                    {cloth.sleeve_size && <DetailRow label="مقاس الكم" value={cloth.sleeve_size} />}
-                  </>
+                <DetailRow label="مقاس الصدر" value={cloth.breast_size?.trim() || "—"} />
+                <DetailRow label="مقاس الخصر" value={cloth.waist_size?.trim() || "—"} />
+                <DetailRow label="مقاس الكم" value={cloth.sleeve_size?.trim() || "—"} />
+                {cloth.measurements?.trim() && (
+                  <DetailRow label="مقاسات إضافية" value={cloth.measurements.trim()} />
                 )}
                 <DetailRow
                   icon={Banknote}
                   label="السعر"
                   value={
-                    price != null ? (
-                      <span className="text-primary font-semibold tabular-nums">{price} ج.م</span>
+                    priceDisplay != null ? (
+                      <span className="text-primary font-semibold tabular-nums">{priceDisplay} ج.م</span>
                     ) : (
                       "—"
                     )
@@ -393,25 +459,151 @@ export default function ClothDetails() {
             </Card>
           </div>
 
-          {/* الملاحظات */}
-          {(cloth.notes?.trim() || cloth.description?.trim()) && (
-            <Card className="rounded-2xl overflow-hidden border-r-4 border-r-primary/20">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-primary" />
-                  الملاحظات والوصف
-                </CardTitle>
-                <CardDescription>تفاصيل إضافية عن المنتج</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="rounded-xl bg-muted/30 p-5 text-sm leading-relaxed whitespace-pre-wrap text-foreground">
-                  {[cloth.notes?.trim(), cloth.description?.trim()]
-                    .filter(Boolean)
-                    .join("\n\n")}
+          {/* الطلبات والملاحظات */}
+          <Card className="rounded-2xl overflow-hidden border-r-4 border-r-primary/20">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <ShoppingBag className="h-4 w-4 text-primary" />
+                تأجيرات واستخدامات المنتج
+              </CardTitle>
+              <CardDescription>
+                الطلبات التي تضمنت هذا المنتج
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* الملاحظات */}
+              {(cloth.notes?.trim() || cloth.description?.trim()) && (
+                <div>
+                  <h4 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
+                    <FileText className="h-3.5 w-3.5" />
+                    الملاحظات والوصف
+                  </h4>
+                  <div className="rounded-xl bg-muted/30 p-5 text-sm leading-relaxed whitespace-pre-wrap text-foreground">
+                    {[cloth.notes?.trim(), cloth.description?.trim()]
+                      .filter(Boolean)
+                      .join("\n\n")}
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              )}
+
+              {/* جدول الطلبات */}
+              <div>
+              {ordersPending ? (
+                <div className="space-y-2">
+                  {[1, 2, 3].map((i) => (
+                    <Skeleton key={i} className="h-12 w-full" />
+                  ))}
+                </div>
+              ) : !ordersData?.orders?.length ? (
+                <div className="rounded-xl bg-muted/30 p-8 text-center">
+                  <ShoppingBag className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
+                  <p className="text-sm text-muted-foreground">
+                    لا توجد تأجيرات أو استخدامات مسجلة لهذا المنتج
+                  </p>
+                </div>
+              ) : (
+                <div className="rounded-xl border overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-right">#</TableHead>
+                        <TableHead className="text-right">العميل</TableHead>
+                        <TableHead className="text-right">المدفوع</TableHead>
+                        <TableHead className="text-right">الباقي</TableHead>
+                        <TableHead className="text-right">مدة الاستئجار</TableHead>
+                        <TableHead className="text-right">تاريخ الاستئجار</TableHead>
+                        <TableHead className="text-right">النوع</TableHead>
+                        <TableHead className="text-right">الحالة</TableHead>
+                        <TableHead className="text-right w-16"></TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {ordersData.orders.map((order) => {
+                        const clientName =
+                          order.client?.name?.trim() ||
+                          [order.client?.first_name, order.client?.last_name]
+                            .filter(Boolean)
+                            .join(" ")
+                            .trim() ||
+                          "—";
+                        const paidNum = parseFloat(order.paid) || 0;
+                        const remainingNum = parseFloat(order.remaining) || 0;
+                        const paidDisplay = paidNum.toLocaleString("en-US", {
+                          minimumFractionDigits: 0,
+                          maximumFractionDigits: 2,
+                        });
+                        const remainingDisplay = remainingNum.toLocaleString("en-US", {
+                          minimumFractionDigits: 0,
+                          maximumFractionDigits: 2,
+                        });
+                        return (
+                          <TableRow key={order.id}>
+                            <TableCell className="font-mono font-medium">
+                              #{order.id}
+                            </TableCell>
+                            <TableCell>{clientName}</TableCell>
+                            <TableCell className="tabular-nums">
+                              {paidDisplay} ج.م
+                            </TableCell>
+                            <TableCell className="tabular-nums">
+                              {remainingDisplay} ج.م
+                            </TableCell>
+                            <TableCell>
+                              {order.days_of_rent != null
+                                ? `${order.days_of_rent} يوم`
+                                : "—"}
+                            </TableCell>
+                            <TableCell className="text-muted-foreground">
+                              {order.delivery_date
+                                ? formatDate(order.delivery_date)
+                                : "—"}
+                            </TableCell>
+                            <TableCell>
+                              {getOrderTypeLabel(
+                                (order.pivot?.type ?? order.status) as "rent" | "buy" | "tailoring" | "mixed" | "unknown"
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                variant="secondary"
+                                className={cn(
+                                  order.status === "paid" &&
+                                    "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+                                  order.status === "partially_paid" &&
+                                    "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
+                                  order.status === "canceled" &&
+                                    "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                                )}
+                              >
+                                {getStatusLabel(order.status)}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Button variant="ghost" size="sm" asChild>
+                                <Link
+                                  to={`/orders/${order.id}`}
+                                  className="gap-1 text-primary hover:text-primary"
+                                >
+                                  <ExternalLink className="h-3.5 w-3.5" />
+                                  عرض
+                                </Link>
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                  {ordersData.total > ordersData.orders.length && (
+                    <div className="px-4 py-2 border-t bg-muted/20 text-sm text-muted-foreground text-center">
+                      عرض {ordersData.orders.length} من {ordersData.total} طلب
+                    </div>
+                  )}
+                </div>
+              )}
+              </div>
+            </CardContent>
+          </Card>
         </>
       )}
     </div>

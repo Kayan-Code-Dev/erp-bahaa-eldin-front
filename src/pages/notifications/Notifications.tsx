@@ -31,6 +31,7 @@ import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
 import { normalizeNotificationActionUrl } from '@/utils/notificationActionUrl';
+import { getOrderTypeLabel } from '@/api/v2/orders/order.utils';
 
 const PER_PAGE = 15;
 
@@ -58,6 +59,10 @@ const getNotificationTypeLabel = (type: string): string => {
     'order': 'الطلب',
     'Payment': 'دفعة',
     'payment': 'دفعة',
+    'Expense': 'مصروف',
+    'expense': 'مصروف',
+    'Return': 'إرجاع',
+    'return': 'إرجاع',
     'system': 'نظام',
     'alert': 'تنبيه',
     'info': 'معلومة',
@@ -70,6 +75,7 @@ const amountMetadataKeys = new Set(['amount', 'order_paid', 'order_remaining', '
 
 function formatMetadataValue(key: string, value: unknown): string {
   if (value === null || value === undefined) return '-';
+  if (key === 'order_type') return getOrderTypeLabel(value as 'rent' | 'buy' | 'tailoring' | 'mixed' | 'unknown');
   if (amountMetadataKeys.has(key)) {
     const n = Number(value);
     if (!Number.isNaN(n)) return `${n.toLocaleString('ar-EG', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ج.م`;
@@ -134,6 +140,11 @@ const NotificationListItem = memo(function NotificationListItem({
     return (metadata.status || metadata.new_status || metadata.newStatus || null) as string | null;
   }, [notification.metadata]);
 
+  const orderType = useMemo(() => {
+    const metadata = notification.metadata as Record<string, any> | undefined;
+    return (metadata?.order_type ?? null) as string | null;
+  }, [notification.metadata]);
+
   const metadataEntries = useMemo(() => {
     if (!notification.metadata) return [];
     return Object.entries(notification.metadata).filter(
@@ -151,6 +162,7 @@ const NotificationListItem = memo(function NotificationListItem({
     amount: 'المبلغ',
     order_paid: 'المدفوع',
     order_remaining: 'المتبقي',
+    order_type: 'النوع',
     payment_id: 'رقم الدفعة',
     reference_id: 'رقم المرجع',
     supplier_id: 'رقم المورد',
@@ -170,7 +182,8 @@ const NotificationListItem = memo(function NotificationListItem({
   }, [notification.type]);
 
   const referenceTypeDisplay = useMemo(() => {
-    return notification.reference_type?.replace(/^App\\Models\\/, '') || '';
+    const rt = notification.reference_type ?? '';
+    return rt.replace(/^App\\Models\\/i, '') || '';
   }, [notification.reference_type]);
 
   const handleClick = useCallback(() => {
@@ -211,7 +224,7 @@ const NotificationListItem = memo(function NotificationListItem({
         </button>
 
         {/* Content */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 overflow-visible">
           <div className="flex items-start justify-between gap-2 mb-1">
             <h4
               className={cn(
@@ -226,6 +239,15 @@ const NotificationListItem = memo(function NotificationListItem({
                   : 'إشعار'}
             </h4>
           </div>
+
+          {orderType && (
+            <div className="mb-2 w-full py-2 px-3 rounded-lg bg-sky-100 dark:bg-sky-950/50 border border-sky-300/60 dark:border-sky-700/50 flex items-center justify-between gap-2">
+              <span className="text-sm font-medium text-sky-700 dark:text-sky-300">النوع</span>
+              <span className="text-sm font-bold text-sky-800 dark:text-sky-200 shrink-0">
+                {getOrderTypeLabel(orderType as 'rent' | 'buy' | 'tailoring' | 'mixed' | 'unknown')}
+              </span>
+            </div>
+          )}
 
           <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
             {notification.message}
@@ -252,18 +274,28 @@ const NotificationListItem = memo(function NotificationListItem({
 
           {/* Reference Info */}
           {(notification.reference_type || notification.reference_id) && (
-            <div className="mb-2 text-xs text-muted-foreground">
+            <div className="mb-2 flex flex-wrap items-center gap-2">
               {isPaymentReference && notification.reference_id ? (
-                <span>دفعة #{notification.reference_id}</span>
+                <div className="py-1.5 px-3 rounded-lg bg-emerald-100 dark:bg-emerald-950/50 border border-emerald-300/60 dark:border-emerald-700/50">
+                  <span className="text-sm font-bold text-emerald-800 dark:text-emerald-200">
+                    دفعة #{notification.reference_id}
+                  </span>
+                </div>
               ) : (
                 <>
                   {referenceTypeDisplay && (
-                    <span className="me-2">
-                      النوع: {getNotificationTypeLabel(referenceTypeDisplay) || referenceTypeDisplay}
-                    </span>
+                    <div className="py-1.5 px-3 rounded-lg bg-violet-100 dark:bg-violet-950/50 border border-violet-300/60 dark:border-violet-700/50">
+                      <span className="text-sm font-bold text-violet-800 dark:text-violet-200">
+                        نوع المرجع: {getNotificationTypeLabel(referenceTypeDisplay) || referenceTypeDisplay}
+                      </span>
+                    </div>
                   )}
                   {notification.reference_id != null && (
-                    <span>الرقم: {notification.reference_id}</span>
+                    <div className="py-1.5 px-3 rounded-lg bg-slate-100 dark:bg-slate-800/50 border border-slate-300/60 dark:border-slate-600/50">
+                      <span className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                        الرقم: {notification.reference_id}
+                      </span>
+                    </div>
                   )}
                 </>
               )}
